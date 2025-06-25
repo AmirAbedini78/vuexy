@@ -1,14 +1,14 @@
 <script setup>
-import { VForm } from 'vuetify/components/VForm'
 import AuthProvider from '@/views/pages/authentication/AuthProvider.vue'
-import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
-import { themeConfig } from '@themeConfig'
 import authV2RegisterIllustrationBorderedDark from '@images/pages/auth-v2-register-illustration-bordered-dark.png'
 import authV2RegisterIllustrationBorderedLight from '@images/pages/auth-v2-register-illustration-bordered-light.png'
 import authV2RegisterIllustrationDark from '@images/pages/auth-v2-register-illustration-dark.png'
 import authV2RegisterIllustrationLight from '@images/pages/auth-v2-register-illustration-light.png'
 import authV2MaskDark from '@images/pages/misc-mask-dark.png'
 import authV2MaskLight from '@images/pages/misc-mask-light.png'
+import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
+import { themeConfig } from '@themeConfig'
+import { VForm } from 'vuetify/components/VForm'
 
 const imageVariant = useGenerateImageVariant(authV2RegisterIllustrationLight, authV2RegisterIllustrationDark, authV2RegisterIllustrationBorderedLight, authV2RegisterIllustrationBorderedDark, true)
 const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
@@ -31,62 +31,35 @@ const isPasswordVisible = ref(false)
 </script>
 
 <template>
-  <RouterLink to="/">
-    <div class="auth-logo d-flex align-center gap-x-3">
-      <VNodeRenderer :nodes="themeConfig.app.logo" />
-      <h1 class="auth-title">
-        {{ themeConfig.app.title }}
-      </h1>
-    </div>
-  </RouterLink>
+  <div class="auth-wrapper d-flex align-center justify-center pa-4">
+    <div class="position-relative my-sm-16">
 
-  <VRow
-    no-gutters
-    class="auth-wrapper bg-surface"
-  >
-    <VCol
-      md="8"
-      class="d-none d-md-flex"
-    >
-      <div class="position-relative bg-background w-100 me-0">
-        <div
-          class="d-flex align-center justify-center w-100 h-100"
-          style="padding-inline: 100px;"
-        >
-          <VImg
-            max-width="500"
-            :src="imageVariant"
-            class="auth-illustration mt-16 mb-2"
-          />
-        </div>
 
-        <img
-          class="auth-footer-mask"
-          :src="authThemeMask"
-          alt="auth-footer-mask"
-          height="280"
-          width="100"
-        >
-      </div>
-    </VCol>
-
-    <VCol
-      cols="12"
-      md="4"
-      class="auth-card-v2 d-flex align-center justify-center"
-      style="background-color: rgb(var(--v-theme-surface));"
-    >
+      <!-- 👉 Auth card -->
       <VCard
-        flat
-        :max-width="500"
-        class="mt-12 mt-sm-0 pa-4"
+        class="auth-card"
+        max-width="400"
+        :class="$vuetify.display.smAndUp ? 'pa-6' : 'pa-0'"
       >
+        <VCardItem class="justify-center">
+          <VCardTitle>
+            <RouterLink to="/">
+              <div class="app-logo">
+                <VNodeRenderer :nodes="themeConfig.app.logo" />
+                <!-- <h1 class="app-logo-title">
+                  {{ themeConfig.app.title }}
+                </h1> -->
+              </div>
+            </RouterLink>
+          </VCardTitle>
+        </VCardItem>
+
         <VCardText>
-          <h4 class="text-h4 mb-1">
-            Adventure starts here 🚀
+          <h4 class="text-h4 mb-1 text-center">
+            Welcome to Explorer Elite!
           </h4>
-          <p class="mb-0">
-            Make your app management easy and fun!
+          <p class="mb-0 text-center">
+            Sign up in your Adventure Management Platform
           </p>
         </VCardText>
 
@@ -99,8 +72,8 @@ const isPasswordVisible = ref(false)
                   v-model="form.username"
                   :rules="[requiredValidator]"
                   autofocus
-                  label="Username"
-                  placeholder="Johndoe"
+                  label="Account Name"
+                  placeholder="Enter your username"
                 />
               </VCol>
 
@@ -111,7 +84,7 @@ const isPasswordVisible = ref(false)
                   :rules="[requiredValidator, emailValidator]"
                   label="Email"
                   type="email"
-                  placeholder="johndoe@email.com"
+                  placeholder="Enter your email"
                 />
               </VCol>
 
@@ -188,8 +161,12 @@ const isPasswordVisible = ref(false)
           </VForm>
         </VCardText>
       </VCard>
-    </VCol>
-  </VRow>
+    </div>
+  </div>
+
+
+
+
 </template>
 
 <style lang="scss">
