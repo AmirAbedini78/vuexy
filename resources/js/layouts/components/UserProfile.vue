@@ -8,23 +8,29 @@ const ability = useAbility()
 const userData = useCookie('userData')
 
 const logout = async () => {
+  try {
+    // Call the logout API endpoint
+    await $api('/auth/logout', {
+      method: 'POST',
+    })
+  } catch (error) {
+    console.error('Logout error:', error)
+  } finally {
+    // Remove "accessToken" from cookie
+    useCookie('accessToken').value = null
 
-  // Remove "accessToken" from cookie
-  useCookie('accessToken').value = null
+    // Remove "userData" from cookie
+    userData.value = null
 
-  // Remove "userData" from cookie
-  userData.value = null
+    // Remove "userAbilities" from cookie
+    useCookie('userAbilityRules').value = null
 
-  // Redirect to login page
-  await router.push('/login')
+    // Reset ability to initial ability
+    ability.update([])
 
-  // ℹ️ We had to remove abilities in then block because if we don't nav menu items mutation is visible while redirecting user to login page
-
-  // Remove "userAbilities" from cookie
-  useCookie('userAbilityRules').value = null
-
-  // Reset ability to initial ability
-  ability.update([])
+    // Redirect to login page
+    await router.push('/login')
+  }
 }
 
 const userProfileList = [

@@ -12,10 +12,12 @@ export const setupGuards = router => {
       return
 
     /**
-         * Check if user is logged in by checking if token & user data exists in local storage
+         * Check if user is logged in by checking if token & user data exists in cookies
          * Feel free to update this logic to suit your needs
          */
-    const isLoggedIn = !!(useCookie('userData').value && useCookie('accessToken').value)
+    const userData = useCookie('userData')
+    const accessToken = useCookie('accessToken')
+    const isLoggedIn = !!(userData.value && accessToken.value)
 
     /*
           If user is logged in and is trying to access login like page, redirect to home
@@ -23,23 +25,34 @@ export const setupGuards = router => {
           (WARN: Don't allow executing further by return statement because next code will check for permissions)
          */
     if (to.meta.unauthenticatedOnly) {
-      if (isLoggedIn)
+      if (isLoggedIn) {
+        console.log('User is logged in, redirecting to dashboard')
         return '/'
-      else
+      }
+      else {
+        console.log('User is not logged in, allowing access to auth page')
         return undefined
+      }
     }
-    if (!canNavigate(to) && to.matched.length) {
-      /* eslint-disable indent */
-            return isLoggedIn
-                ? { name: 'not-authorized' }
-                : {
-                    name: 'login',
-                    query: {
-                        ...to.query,
-                        to: to.fullPath !== '/' ? to.path : undefined,
-                    },
-                }
-            /* eslint-enable indent */
+
+    // If user is not logged in and trying to access protected route, redirect to login
+    if (!isLoggedIn && to.path !== '/login' && to.path !== '/register') {
+      console.log('User is not logged in, redirecting to login')
+      return {
+        name: 'login',
+        query: {
+          ...to.query,
+          to: to.fullPath !== '/' ? to.path : undefined,
+        },
+      }
+    }
+
+    // Only check permissions for logged-in users and routes that have explicit permissions
+    if (isLoggedIn && to.matched.some(route => route.meta?.action && route.meta?.subject)) {
+      if (!canNavigate(to)) {
+        console.log('User does not have permission, redirecting to not-authorized')
+        return { name: 'not-authorized' }
+      }
     }
   })
 }

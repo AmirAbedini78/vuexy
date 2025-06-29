@@ -1,5 +1,6 @@
 <script setup>
 import AuthProvider from '@/views/pages/authentication/AuthProvider.vue'
+import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
 import authV2RegisterIllustrationBorderedDark from '@images/pages/auth-v2-register-illustration-bordered-dark.png'
 import authV2RegisterIllustrationBorderedLight from '@images/pages/auth-v2-register-illustration-bordered-light.png'
 import authV2RegisterIllustrationDark from '@images/pages/auth-v2-register-illustration-dark.png'
@@ -10,7 +11,7 @@ import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
 import { themeConfig } from '@themeConfig'
 import { VForm } from 'vuetify/components/VForm'
 
-const imageVariant = useGenerateImageVariant(authV2RegisterIllustrationLight, authV2RegisterIllustrationDark, authV2RegisterIllustrationBorderedLight, authV2RegisterIllustrationBorderedDark, true)
+const authThemeImg = useGenerateImageVariant(authV2RegisterIllustrationLight, authV2RegisterIllustrationDark, authV2RegisterIllustrationBorderedLight, authV2RegisterIllustrationBorderedDark, true)
 const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
 
 definePage({
@@ -20,22 +21,96 @@ definePage({
   },
 })
 
+const isPasswordVisible = ref(false)
+const isConfirmPasswordVisible = ref(false)
+const route = useRoute()
+const router = useRouter()
+const ability = useAbility()
+
+const errors = ref({
+  name: undefined,
+  email: undefined,
+  password: undefined,
+  password_confirmation: undefined,
+})
+
+const refVForm = ref()
+
 const form = ref({
-  username: '',
+  name: '',
   email: '',
   password: '',
+  password_confirmation: '',
   privacyPolicies: false,
 })
 
-const isPasswordVisible = ref(false)
+const isLoading = ref(false)
+
+// Computed properties for password validation
+const passwordRules = computed(() => [
+  requiredValidator,
+  (value) => value.length >= 8 || 'Password must be at least 8 characters'
+])
+
+const confirmPasswordRules = computed(() => [
+  requiredValidator,
+  (value) => value === form.value.password || 'Passwords do not match'
+])
+
+const register = async () => {
+  isLoading.value = true
+  errors.value = { name: undefined, email: undefined, password: undefined, password_confirmation: undefined }
+  
+  try {
+    const res = await $api('/auth/register', {
+      method: 'POST',
+      body: {
+        name: form.value.name,
+        email: form.value.email,
+        password: form.value.password,
+        password_confirmation: form.value.password_confirmation,
+      },
+    })
+
+    const { access_token, user } = res
+
+    // Don't store user data and token after registration
+    // User should login separately
+    
+    // Show success message and redirect to login
+    await nextTick()
+    router.push({ 
+      name: 'login',
+      query: { 
+        registered: 'true',
+        email: form.value.email 
+      }
+    })
+  } catch (err) {
+    console.error('Registration error:', err)
+    if (err.data && err.data.errors) {
+      errors.value = err.data.errors
+    } else {
+      errors.value = { email: ['An error occurred during registration'] }
+    }
+  } finally {
+    isLoading.value = false
+  }
+}
+
+const onSubmit = () => {
+  refVForm.value?.validate().then(({ valid: isValid }) => {
+    if (isValid && form.value.privacyPolicies)
+      register()
+  })
+}
 </script>
 
 <template>
   <div class="auth-wrapper d-flex align-center justify-center pa-4">
     <div class="position-relative my-sm-16">
 
-
-      <!-- 👉 Auth card -->
+      <!-- 👉 Auth Card -->
       <VCard
         class="auth-card"
         max-width="400"
@@ -46,9 +121,6 @@ const isPasswordVisible = ref(false)
             <RouterLink to="/">
               <div class="app-logo">
                 <VNodeRenderer :nodes="themeConfig.app.logo" />
-                <!-- <h1 class="app-logo-title">
-                  {{ themeConfig.app.title }}
-                </h1> -->
               </div>
             </RouterLink>
           </VCardTitle>
@@ -56,24 +128,29 @@ const isPasswordVisible = ref(false)
 
         <VCardText>
           <h4 class="text-h4 mb-1 text-center">
-            Welcome to Explorer Elite!
+            Adventure starts here 🚀
           </h4>
           <p class="mb-0 text-center">
-            Sign up in your Adventure Management Platform
+            Make your app management easy and fun!
           </p>
         </VCardText>
-
+        
         <VCardText>
-          <VForm @submit.prevent="() => {}">
+          <VForm
+            ref="refVForm"
+            @submit.prevent="onSubmit"
+          >
             <VRow>
               <!-- Username -->
               <VCol cols="12">
                 <AppTextField
-                  v-model="form.username"
-                  :rules="[requiredValidator]"
+                  v-model="form.name"
                   autofocus
-                  label="Account Name"
-                  placeholder="Enter your username"
+                  label="Full Name"
+                  placeholder="John Doe"
+                  :rules="[requiredValidator]"
+                  :error-messages="errors.name"
+                  :disabled="isLoading"
                 />
               </VCol>
 
@@ -81,10 +158,12 @@ const isPasswordVisible = ref(false)
               <VCol cols="12">
                 <AppTextField
                   v-model="form.email"
-                  :rules="[requiredValidator, emailValidator]"
                   label="Email"
                   type="email"
-                  placeholder="Enter your email"
+                  placeholder="johndoe@email.com"
+                  :rules="[requiredValidator, emailValidator]"
+                  :error-messages="errors.email"
+                  :disabled="isLoading"
                 />
               </VCol>
 
@@ -92,55 +171,68 @@ const isPasswordVisible = ref(false)
               <VCol cols="12">
                 <AppTextField
                   v-model="form.password"
-                  :rules="[requiredValidator]"
                   label="Password"
                   placeholder="············"
+                  :rules="passwordRules"
                   :type="isPasswordVisible ? 'text' : 'password'"
-                  autocomplete="password"
+                  autocomplete="new-password"
+                  :error-messages="errors.password"
                   :append-inner-icon="isPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
                   @click:append-inner="isPasswordVisible = !isPasswordVisible"
+                  :disabled="isLoading"
                 />
+              </VCol>
 
-                <div class="d-flex align-center my-6">
-                  <VCheckbox
-                    id="privacy-policy"
-                    v-model="form.privacyPolicies"
-                    inline
-                  />
-                  <VLabel
-                    for="privacy-policy"
-                    style="opacity: 1;"
-                  >
-                    <span class="me-1 text-high-emphasis">I agree to</span>
-                    <a
-                      href="javascript:void(0)"
-                      class="text-primary"
-                    >privacy policy & terms</a>
-                  </VLabel>
-                </div>
+              <!-- confirm password -->
+              <VCol cols="12">
+                <AppTextField
+                  v-model="form.password_confirmation"
+                  label="Confirm Password"
+                  placeholder="············"
+                  :rules="confirmPasswordRules"
+                  :type="isConfirmPasswordVisible ? 'text' : 'password'"
+                  autocomplete="new-password"
+                  :error-messages="errors.password_confirmation"
+                  :append-inner-icon="isConfirmPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
+                  @click:append-inner="isConfirmPasswordVisible = !isConfirmPasswordVisible"
+                  :disabled="isLoading"
+                />
+              </VCol>
 
+              <!-- privacy policies -->
+              <VCol cols="12">
+                <VCheckbox
+                  v-model="form.privacyPolicies"
+                  label="I agree to the privacy policy & terms"
+                  :rules="[v => !!v || 'You must agree to continue!']"
+                  :disabled="isLoading"
+                />
+              </VCol>
+
+              <VCol cols="12">
                 <VBtn
                   block
                   type="submit"
+                  :loading="isLoading"
+                  :disabled="isLoading || !form.privacyPolicies"
                 >
-                  Sign up
+                  {{ isLoading ? 'Creating account...' : 'Sign up' }}
                 </VBtn>
               </VCol>
 
-              <!-- create account -->
+              <!-- login instead -->
               <VCol
                 cols="12"
-                class="text-center text-base"
+                class="text-center"
               >
-                <span class="d-inline-block">Already have an account?</span>
+                <span>Already have an account?</span>
                 <RouterLink
-                  class="text-primary ms-1 d-inline-block"
+                  class="text-primary ms-1"
                   :to="{ name: 'login' }"
                 >
                   Sign in instead
                 </RouterLink>
               </VCol>
-
               <VCol
                 cols="12"
                 class="d-flex align-center"
@@ -163,10 +255,6 @@ const isPasswordVisible = ref(false)
       </VCard>
     </div>
   </div>
-
-
-
-
 </template>
 
 <style lang="scss">

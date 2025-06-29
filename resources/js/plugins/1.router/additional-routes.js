@@ -10,13 +10,21 @@ export const redirects = [
     redirect: to => {
       // TODO: Get type from backend
       const userData = useCookie('userData')
+      const accessToken = useCookie('accessToken')
+      
+      // If user is not logged in, redirect to login
+      if (!userData.value || !accessToken.value) {
+        return { name: 'login', query: to.query }
+      }
+      
       const userRole = userData.value?.role
       if (userRole === 'admin')
         return { name: 'dashboards-crm' }
       if (userRole === 'client')
         return { name: 'access-control' }
       
-      return { name: 'login', query: to.query }
+      // Default dashboard for users without specific role
+      return { name: 'dashboards-crm' }
     },
   },
   {

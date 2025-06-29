@@ -27,6 +27,10 @@ const route = useRoute()
 const router = useRouter()
 const ability = useAbility()
 
+// Check if user just registered
+const isNewlyRegistered = computed(() => route.query.registered === 'true')
+const registeredEmail = computed(() => route.query.email || '')
+
 const errors = ref({
   email: undefined,
   password: undefined,
@@ -35,40 +39,79 @@ const errors = ref({
 const refVForm = ref()
 
 const credentials = ref({
-  email: 'admin@demo.com',
-  password: 'admin',
+  email: registeredEmail.value,
+  password: '',
 })
 
 const rememberMe = ref(false)
+const isLoading = ref(false)
 
 const login = async () => {
+  isLoading.value = true
+  errors.value = { email: undefined, password: undefined }
+  
   try {
+    console.log('Attempting login with:', credentials.value.email)
+    
     const res = await $api('/auth/login', {
       method: 'POST',
       body: {
         email: credentials.value.email,
         password: credentials.value.password,
       },
-      onResponseError({ response }) {
-        errors.value = response._data.errors
+    })
+
+    console.log('Login response:', res)
+    const { access_token, user } = res
+
+    // Store user data and token with proper cookie options
+    const userDataCookie = useCookie('userData', {
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      secure: false, // Set to true in production
+      sameSite: 'lax'
+    })
+    const accessTokenCookie = useCookie('accessToken', {
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      secure: false, // Set to true in production
+      sameSite: 'lax'
+    })
+    
+    userDataCookie.value = user
+    accessTokenCookie.value = access_token
+    
+    console.log('Cookies set:', { userData: userDataCookie.value, accessToken: accessTokenCookie.value })
+    
+    // Set default ability rules for now (you can customize this based on user role)
+    const userAbilityRules = [
+      {
+        action: 'read',
+        subject: 'all',
       },
+    ]
+    
+    const userAbilityRulesCookie = useCookie('userAbilityRules', {
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      secure: false, // Set to true in production
+      sameSite: 'lax'
     })
-
-    const { accessToken, userData, userAbilityRules } = res
-
-    useCookie('userAbilityRules').value = userAbilityRules
+    
+    userAbilityRulesCookie.value = userAbilityRules
     ability.update(userAbilityRules)
-    useCookie('userData').value = userData
-    useCookie('accessToken').value = accessToken
 
-    // Redirect to `to` query if exist or redirect to index route
-
-    // ❗ nextTick is required to wait for DOM updates and later redirect
-    await nextTick(() => {
-      router.replace(route.query.to ? String(route.query.to) : '/')
-    })
+    console.log('About to redirect to dashboard...')
+    // Force redirect to dashboard
+    await nextTick()
+    router.push('/')
+    
   } catch (err) {
-    console.error(err)
+    console.error('Login error:', err)
+    if (err.data && err.data.errors) {
+      errors.value = err.data.errors
+    } else {
+      errors.value = { email: ['An error occurred during login'] }
+    }
+  } finally {
+    isLoading.value = false
   }
 }
 
@@ -111,19 +154,22 @@ const onSubmit = () => {
             Log in to your account and start the adventure
           </p>
         </VCardText>
-        <!-- <VCardText>
+        
+        <!-- Success message for newly registered users -->
+        <VCardText v-if="isNewlyRegistered">
           <VAlert
-            color="primary"
+            type="success"
             variant="tonal"
+            class="mb-4"
           >
-            <p class="text-sm mb-2">
-              Admin Email: <strong>admin@demo.com</strong> / Pass: <strong>admin</strong>
-            </p>
-            <p class="text-sm mb-0">
-              Client Email: <strong>client@demo.com</strong> / Pass: <strong>client</strong>
-            </p>
+            <template #prepend>
+              <VIcon icon="tabler-check-circle" />
+            </template>
+            <VAlertTitle>Registration Successful!</VAlertTitle>
+            Your account has been created successfully. Please log in with your credentials.
           </VAlert>
-        </VCardText> -->
+        </VCardText>
+        
         <VCardText>
           <VForm
             ref="refVForm"
@@ -134,12 +180,13 @@ const onSubmit = () => {
               <VCol cols="12">
                 <AppTextField
                   v-model="credentials.email"
-                  label="Email or Account name"
-                  placeholder="Enter your email or username"
+                  label="Email"
+                  placeholder="Enter your email"
                   type="email"
                   autofocus
                   :rules="[requiredValidator, emailValidator]"
                   :error-messages="errors.email"
+                  :disabled="isLoading"
                 />
               </VCol>
 
@@ -155,12 +202,14 @@ const onSubmit = () => {
                   :error-messages="errors.password"
                   :append-inner-icon="isPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
                   @click:append-inner="isPasswordVisible = !isPasswordVisible"
+                  :disabled="isLoading"
                 />
 
                 <div class="d-flex align-center flex-wrap justify-space-between my-6">
                   <VCheckbox
                     v-model="rememberMe"
                     label="Remember me"
+                    :disabled="isLoading"
                   />
                   <RouterLink
                     class="text-primary ms-2 mb-1"
@@ -173,8 +222,10 @@ const onSubmit = () => {
                 <VBtn
                   block
                   type="submit"
+                  :loading="isLoading"
+                  :disabled="isLoading"
                 >
-                  Login
+                  {{ isLoading ? 'Logging in...' : 'Login' }}
                 </VBtn>
               </VCol>
 

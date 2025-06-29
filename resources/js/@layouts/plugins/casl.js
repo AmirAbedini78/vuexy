@@ -44,7 +44,21 @@ export const canNavigate = to => {
   if (targetRoute?.meta?.action && targetRoute?.meta?.subject)
     return ability.can(targetRoute.meta.action, targetRoute.meta.subject)
 
-  // If no specific permissions, fall back to checking if any parent route allows access
-    
-  return to.matched.some(route => ability.can(route.meta.action, route.meta.subject))
+  // If no specific permissions are defined, allow access
+  // Only check permissions if they are explicitly defined in route meta
+  const hasExplicitPermissions = to.matched.some(route => 
+    route.meta?.action && route.meta?.subject
+  )
+  
+  if (!hasExplicitPermissions) {
+    return true // Allow access if no permissions are defined
+  }
+
+  // If any route has explicit permissions, check them
+  return to.matched.some(route => {
+    if (route.meta?.action && route.meta?.subject) {
+      return ability.can(route.meta.action, route.meta.subject)
+    }
+    return true
+  })
 }
