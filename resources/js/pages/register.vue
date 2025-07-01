@@ -45,6 +45,7 @@ const form = ref({
 })
 
 const isLoading = ref(false)
+const registrationDone = ref(false)
 
 // Computed properties for password validation
 const passwordRules = computed(() => [
@@ -77,15 +78,8 @@ const register = async () => {
     // Don't store user data and token after registration
     // User should login separately
     
-    // Show success message and redirect to login
-    await nextTick()
-    router.push({ 
-      name: 'login',
-      query: { 
-        registered: 'true',
-        email: form.value.email 
-      }
-    })
+    registrationDone.value = true
+    
   } catch (err) {
     console.error('Registration error:', err)
     if (err.data && err.data.errors) {
@@ -136,7 +130,20 @@ const onSubmit = () => {
         </VCardText>
         
         <VCardText>
+          <!-- Alert for successful registration -->
+          <VAlert
+            v-if="registrationDone"
+            type="success"
+            variant="tonal"
+            class="mb-4"
+          >
+            <VAlertTitle>Registration Successful!</VAlertTitle>
+            We have sent an email to <strong>{{ form.email }}</strong> with a link to verify your account.
+            Please check your inbox (and spam folder).
+          </VAlert>
+
           <VForm
+            v-if="!registrationDone"
             ref="refVForm"
             @submit.prevent="onSubmit"
           >

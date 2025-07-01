@@ -29,6 +29,10 @@ const ability = useAbility()
 
 // Check if user just registered
 const isNewlyRegistered = computed(() => route.query.registered === 'true')
+
+// Check if email was just verified
+const emailVerified = computed(() => route.query.verified === 'true')
+
 const registeredEmail = computed(() => route.query.email || '')
 
 const errors = ref({
@@ -107,6 +111,8 @@ const login = async () => {
     console.error('Login error:', err)
     if (err.data && err.data.errors) {
       errors.value = err.data.errors
+    } else if (err.response && err.response.status === 403) {
+      errors.value = { email: [err.data.message] }
     } else {
       errors.value = { email: ['An error occurred during login'] }
     }
@@ -167,6 +173,21 @@ const onSubmit = () => {
             </template>
             <VAlertTitle>Registration Successful!</VAlertTitle>
             Your account has been created successfully. Please log in with your credentials.
+          </VAlert>
+        </VCardText>
+
+        <!-- Success message for email verification -->
+        <VCardText v-if="emailVerified">
+          <VAlert
+            type="success"
+            variant="tonal"
+            class="mb-4"
+          >
+            <template #prepend>
+              <VIcon icon="tabler-check-circle" />
+            </template>
+            <VAlertTitle>Email Verified!</VAlertTitle>
+            Your email has been successfully verified. You can now log in.
           </VAlert>
         </VCardText>
         
