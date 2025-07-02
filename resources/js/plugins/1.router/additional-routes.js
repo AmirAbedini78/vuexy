@@ -76,4 +76,13 @@ export const routes = [
     name: 'apps-ecommerce-dashboard',
     component: () => import('@/pages/dashboards/ecommerce.vue'),
   },
+  {
+    path: '/verify/:token',
+    name: 'verify-email',
+    component: () => import('@/pages/verify-email.vue'),
+    meta: {
+      layout: 'blank',
+      public: true,
+    },
+  },
 ]

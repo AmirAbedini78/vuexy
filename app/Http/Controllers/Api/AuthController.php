@@ -8,6 +8,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Support\Str;
+use PragmaRX\Google2FALaravel\Support\Authenticator;
+use App\Http\Controllers\Api\EmailVerificationController;
 
 class AuthController extends Controller
 {
@@ -27,6 +32,8 @@ class AuthController extends Controller
         ]);
 
         event(new Registered($user));
+        // Send new verification token
+        (new EmailVerificationController)->sendVerificationToken($user);
 
         return response()->json([
             'message' => 'User registered successfully. Please check your email for a verification link.',
@@ -68,5 +75,103 @@ class AuthController extends Controller
         }
 
         return response()->json(['message' => 'Invalid credentials'], 401);
+    }
+
+    /**
+     * Send a password reset link
+     */
+    public function sendResetLinkEmail(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        $status = Password::sendResetLink(
+            $request->only('email')
+        );
+
+        return $status === Password::RESET_LINK_SENT
+            ? response()->json(['message' => __($status)], 200)
+            : response()->json(['errors' => ['email' => [__($status)]]], 422);
+    }
+
+    /**
+     * Reset the password
+     */
+    public function reset(Request $request)
+    {
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|min:8|confirmed',
+        ]);
+
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function ($user, $password) {
+                $user->forceFill([
+                    'password' => Hash::make($password)
+                ])->setRememberToken(Str::random(60));
+
+                $user->save();
+
+                event(new PasswordReset($user));
+            }
+        );
+
+        return $status === Password::PASSWORD_RESET
+            ? response()->json(['message' => __($status)], 200)
+            : response()->json(['errors' => ['email' => [__($status)]]], 422);
+    }
+
+    /**
+     * 2FA: Setup
+     */
+    public function setupTwoFactor(Request $request)
+    {
+        $user = $request->user();
+        $google2fa = app('pragmarx.google2fa');
+        $secret = $google2fa->generateSecretKey();
+        $user->google2fa_secret = $secret;
+        $user->save();
+        $qrCodeUrl = $google2fa->getQRCodeUrl(
+            config('app.name'),
+            $user->email,
+            $secret
+        );
+        return response()->json([
+            'message' => '2FA setup initiated. Scan the QR code with your authenticator app.',
+            'qr_code_url' => $qrCodeUrl,
+            'secret' => $secret,
+        ]);
+    }
+
+    /**
+     * 2FA: Verify
+     */
+    public function verifyTwoFactor(Request $request)
+    {
+        $request->validate(['one_time_password' => 'required']);
+        $user = $request->user();
+        $authenticator = app(Authenticator::class)->boot($request);
+        if ($authenticator->verifyGoogle2FA($user->google2fa_secret, $request->one_time_password)) {
+            $user->save();
+            $token = $user->createToken('auth_token', ['2fa_verified'])->plainTextToken;
+            return response()->json([
+                'message' => '2FA verified successfully',
+                'access_token' => $token,
+                'token_type' => 'Bearer',
+            ]);
+        }
+        return response()->json(['errors' => ['one_time_password' => ['Invalid code']]], 422);
+    }
+
+    /**
+     * 2FA: Disable
+     */
+    public function disableTwoFactor(Request $request)
+    {
+        $user = $request->user();
+        $user->google2fa_secret = null;
+        $user->save();
+        return response()->json(['message' => '2FA disabled successfully']);
     }
 }

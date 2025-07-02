@@ -23,24 +23,21 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         VerifyEmail::createUrlUsing(function ($notifiable) {
-            $frontendUrl = rtrim(Config::get('app.frontend_url', 'http://vuexy.test'), '/');
-            $url = URL::temporarySignedRoute(
+            $frontendUrl = rtrim(config('app.frontend_url'), '/');
+            $signedUrl = URL::temporarySignedRoute(
                 'verification.verify',
-                now()->addMinutes(Config::get('auth.verification.expire', 60)),
+                now()->addMinutes(config('auth.verification.expire', 60)),
                 [
                     'id' => $notifiable->getKey(),
                     'hash' => sha1($notifiable->getEmailForVerification()),
-                ]
+                ],
+                true
             );
-            $parsed = parse_url($url);
+            $parsed = parse_url($signedUrl);
             $path = $parsed['path'];
             $query = isset($parsed['query']) ? '?' . $parsed['query'] : '';
-            $pathParts = explode('/', trim($path, '/'));
-            // Find the id and hash in the path, regardless of any prefix like 'build'
-            $id = $pathParts[count($pathParts) - 2];
-            $hash = $pathParts[count($pathParts) - 1];
-            $verifyPath = "/verify-email/$id/$hash";
-            return $frontendUrl . $verifyPath . $query;
+            $frontendPath = str_replace('/api/email/verify', '/verify-email', $path);
+            return $frontendUrl . $frontendPath . $query;
         });
     }
 }

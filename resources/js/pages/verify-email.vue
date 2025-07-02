@@ -54,7 +54,8 @@
               {{ errorMessage }}
             </VAlert>
             <div class="d-flex align-center justify-center">
-              <span class="me-1">Didn't get the mail? </span><a href="/register">Resend</a>
+              <span class="me-1">Didn't get the mail?</span>
+              <RouterLink :to="{ name: 'register' }">Resend</RouterLink>
             </div>
           </template>
         </VCardText>
@@ -77,15 +78,12 @@ const status = ref('verifying') // verifying, success, error
 const errorMessage = ref('')
 
 onMounted(async () => {
-  const { id, hash } = route.params
-  const query = route.query
-  let url = `/api/email/verify/${id}/${hash}`
-  const params = new URLSearchParams(query).toString()
-  if (params) url += `?${params}`
-
+  const { token } = route.params
+  let url = `/api/verify/${token}`
   try {
     await $fetch(url, { method: 'GET' })
     status.value = 'success'
+    setTimeout(() => router.push({ name: 'login', query: { verified: 'true' } }), 2000)
   } catch (err) {
     status.value = 'error'
     errorMessage.value = err?.data?.message || 'Verification link is invalid or expired.'

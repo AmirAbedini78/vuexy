@@ -7,6 +7,10 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use App\Models\VerificationToken;
+use Illuminate\Support\Str;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Mail;
 
 class EmailVerificationController extends Controller
 {
@@ -18,24 +22,23 @@ class EmailVerificationController extends Controller
      */
     public function verify(EmailVerificationRequest $request)
     {
-        if ($request->user() && $request->user()->hasVerifiedEmail()) {
-            return redirect(config('app.frontend_url') . '/login?verified=true');
-        }
-
-        if ($request->user() && $request->user()->markEmailAsVerified()) {
-            event(new Verified($request->user()));
-        }
-
-        // This is for older laravel versions or if the user is not authenticated on the verification link
         $user = User::find($request->route('id'));
-        if ($user && !$user->hasVerifiedEmail()) {
-            if ($user->markEmailAsVerified()) {
-                event(new Verified($user));
-            }
+
+        if (!$user) {
+            return response()->json(['message' => 'Invalid user ID'], 404);
         }
 
+        if ($user->hasVerifiedEmail()) {
+            return response()->json(['message' => 'Email already verified'], 200);
+        }
 
-        return redirect(config('app.frontend_url') . '/login?verified=true');
+        if (hash_equals((string) $request->route('hash'), sha1($user->getEmailForVerification()))) {
+            $user->markEmailAsVerified();
+            event(new Verified($user));
+            return response()->json(['message' => 'Email verified successfully'], 200);
+        }
+
+        return response()->json(['message' => 'Invalid verification link'], 400);
     }
 
     /**
@@ -53,5 +56,37 @@ class EmailVerificationController extends Controller
         $request->user()->sendEmailVerificationNotification();
 
         return response()->json(['message' => 'A fresh verification link has been sent to your email address.']);
+    }
+
+    /**
+     * Verify user by token
+     */
+    public function verifyByToken($token)
+    {
+        $record = \App\Models\VerificationToken::where('token', $token)->first();
+        \Log::info('Verify token debug', [
+            'token' => $token,
+            'record' => $record,
+            'now' => now(),
+            'expires_at' => $record?->expires_at,
+        ]);
+        if (!$record) {
+            return response()->json(['message' => 'Invalid or expired verification link'], 400);
+        }
+        if ($record->expires_at && $record->expires_at->isPast()) {
+            return response()->json(['message' => 'Invalid or expired verification link'], 400);
+        }
+        $user = $record->user;
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+        if ($user->hasVerifiedEmail()) {
+            $record->delete();
+            return response()->json(['message' => 'Email already verified'], 200);
+        }
+        $user->markEmailAsVerified();
+        event(new \Illuminate\Auth\Events\Verified($user));
+        $record->delete();
+        return response()->json(['message' => 'Email verified successfully'], 200);
     }
 }
