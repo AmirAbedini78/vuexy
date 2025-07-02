@@ -50,7 +50,7 @@ definePage({
           <h4 class="text-h4 mb-1">
             Verify your email ✉️
           </h4>
-          <p class="text-body-1 mb-0">
+          <p class="text-body-1 mb-0 form-header">
             Account activation link sent to your email address: <span class="font-weight-medium text-high-emphasis">hello@example.com</span> Please follow the link inside to continue.
           </p>
 

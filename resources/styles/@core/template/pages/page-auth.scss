@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Karla:wght@400;700&display=swap');
+
 .layout-blank {
   .auth-wrapper {
     min-block-size: 100dvh;
@@ -60,4 +62,71 @@
   letter-spacing: 0.25px;
   line-height: 1.5rem;
   text-transform: capitalize;
+}
+
+// Custom styles for authentication page titles only
+.auth-card h4, .auth-card .text-h4, .auth-title {
+  font-family: 'Anton', sans-serif !important;
+  font-size: 28px !important;
+  color: #2F2B3D !important;
+  text-align: center !important;
+}
+
+// Restore default for labels, fields, placeholders, etc.
+.auth-card label,
+.auth-card input,
+.auth-card textarea,
+.auth-card select,
+.auth-card .v-label,
+.auth-card .v-input__control,
+.auth-card p,
+.auth-card span {
+  font-family: 'Karla', sans-serif !important;
+  color: inherit !important;
+  text-align: inherit !important;
+}
+
+// Button and link styles remain
+.auth-card .v-btn,
+.auth-card .v-btn--variant-elevated,
+.auth-card .v-btn--variant-flat,
+.auth-card .v-btn--variant-tonal,
+.auth-card .v-btn--variant-outlined {
+  background-color: #EC8D22 !important;
+  border-color: #EC8D22 !important;
+  color: #fff !important;
+}
+
+.auth-card a {
+  color: #EC8D22 !important;
+  text-decoration: underline;
+}
+
+// Only change checkbox checkmark color when checked
+.auth-card .v-checkbox input:checked + .v-selection-control__input .v-icon {
+  color: #EC8D22 !important;
+}
+
+// Center and set font-size for form header paragraph above the form
+.auth-card p.form-header {
+  text-align: center !important;
+  font-size: 15px !important;
+}
+
+// Set label font-size, but exclude checkbox labels
+.auth-card label:not(.v-label):not(.v-selection-control__label),
+.auth-card .v-label:not(.v-selection-control__label) {
+  font-size: 20px !important;
+}
+
+// Set checkbox label font-size smaller (default or 15px)
+.auth-card .v-selection-control__label {
+  font-size: 15px !important;
+}
+
+// Set placeholder font-size
+.auth-card input::placeholder,
+.auth-card textarea::placeholder,
+.auth-card select::placeholder {
+  font-size: 16px !important;
 }

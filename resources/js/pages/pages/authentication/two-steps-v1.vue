@@ -62,7 +62,7 @@ const onFinish = () => {
           <h4 class="text-h4 mb-1">
             Two Step Verification 💬
           </h4>
-          <p class="mb-1">
+          <p class="mb-1 form-header">
             We sent a verification code to your mobile. Enter the code from the mobile in the field below.
           </p>
           <h6 class="text-h6">

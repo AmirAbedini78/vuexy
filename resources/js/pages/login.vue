@@ -156,7 +156,7 @@ const onSubmit = () => {
           <h4 class="text-h4 mb-1 text-center">
             Unlock Your Limitless Potential!
           </h4>
-          <p class="mb-0 text-center">
+          <p class="mb-0 text-center form-header">
             Log in to your account and start the adventure
           </p>
         </VCardText>

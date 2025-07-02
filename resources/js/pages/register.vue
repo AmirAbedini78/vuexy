@@ -122,10 +122,10 @@ const onSubmit = () => {
 
         <VCardText>
           <h4 class="text-h4 mb-1 text-center">
-            Adventure starts here 🚀
+          Welcom to Explorer Elite!
           </h4>
-          <p class="mb-0 text-center">
-            Make your app management easy and fun!
+          <p class="mb-0 text-center form-header">
+            Sing up in your Adventure management Platform!
           </p>
         </VCardText>
         

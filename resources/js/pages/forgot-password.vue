@@ -62,7 +62,7 @@ definePage({
           <h4 class="text-h4 mb-1 text-center">
             Forgot Your Passwoard?
           </h4>
-          <p class="mb-0 text-center">
+          <p class="mb-0 text-center form-header">
             Enter your email and we'll send you instructions to
             reset your password       
           </p>

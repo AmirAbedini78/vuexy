@@ -58,7 +58,7 @@ const isConfirmPasswordVisible = ref(false)
           <h4 class="text-h4 mb-1">
             Reset Password 🔒
           </h4>
-          <p class="mb-0">
+          <p class="mb-0 form-header">
             Your new password must be different from previously used passwords
           </p>
         </VCardText>
