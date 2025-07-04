@@ -1,5 +1,4 @@
 <script setup>
-import AuthProvider from '@/views/pages/authentication/AuthProvider.vue'
 import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
 import authV2RegisterIllustrationBorderedDark from '@images/pages/auth-v2-register-illustration-bordered-dark.png'
 import authV2RegisterIllustrationBorderedLight from '@images/pages/auth-v2-register-illustration-bordered-light.png'
@@ -250,12 +249,22 @@ const onSubmit = () => {
               </VCol>
 
               <!-- auth providers -->
-              <VCol
-                cols="12"
-                class="text-center"
-              >
-                <AuthProvider />
-              </VCol>
+              <VCol cols="12" class="text-center">
+  <div class="d-flex justify-center flex-wrap gap-1">
+    <button style="background: none; border: none; padding: 0; margin: 0 4px; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;">
+      <img src="images/svg/4svg/wired-outline-2557-logo-google-hover-pinch.png" width="20" height="20" alt="Google" />
+    </button>
+    <button style="background: none; border: none; padding: 0; margin: 0 4px; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;">
+      <img src="images/svg/4svg/wired-outline-2714-logo-x-hover-pinch.png" width="20" height="20" alt="X" />
+    </button>
+    <button style="background: none; border: none; padding: 0; margin: 0 4px; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;">
+      <img src="images/svg/4svg/wired-outline-2540-logo-facebook-hover-pinch.png" width="20" height="20" alt="Facebook" />
+    </button>
+    <button style="background: none; border: none; padding: 0; margin: 0 4px; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;">
+      <img src="images/svg/4svg/wired-outline-2549-logo-linkedin-hover-pinch.png" width="20" height="20" alt="LinkedIn" />
+    </button>
+  </div>
+</VCol>
             </VRow>
           </VForm>
         </VCardText>
