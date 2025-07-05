@@ -23,18 +23,19 @@ class AuthController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
         ]);
-
+    
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => 'user', // Default role
         ]);
-
+    
         event(new Registered($user));
-        // Send new verification token
-        (new EmailVerificationController)->sendVerificationToken($user);
-
+        
+        // Send verification email
+        $user->sendEmailVerificationNotification();
+    
         return response()->json([
             'message' => 'User registered successfully. Please check your email for a verification link.',
             'user' => $user

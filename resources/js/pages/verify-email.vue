@@ -34,17 +34,26 @@
 
         <VCardText>
           <template v-if="status === 'verifying'">
-            <h4 class="text-h4 mb-1">Verifying your email...</h4>
+            <h4 class="text-h4 mb-1">Verify Your Email</h4>
             <VAlert type="info" variant="tonal" class="mb-4">
-              <VAlertTitle>Verifying...</VAlertTitle>
-              Please wait while we verify your email address.
+              <VAlertTitle>Ready to Verify</VAlertTitle>
+              Please click the button below to verify your email address.
             </VAlert>
+            <VBtn
+              block
+              :loading="isLoading"
+              :disabled="isLoading"
+              @click="verifyEmail"
+            >
+              {{ isLoading ? "Verifying..." : "Verify Email" }}
+            </VBtn>
           </template>
           <template v-else-if="status === 'success'">
             <h4 class="text-h4 mb-1">Email Verified ✉️</h4>
             <VAlert type="success" variant="tonal" class="mb-4">
               <VAlertTitle>Email Verified!</VAlertTitle>
-              Your email has been successfully verified. You can now <RouterLink :to="{ name: 'login' }">log in</RouterLink>.
+              Your email has been successfully verified. You will be redirected
+              to <RouterLink :to="{ name: 'login' }">log in</RouterLink>.
             </VAlert>
           </template>
           <template v-else>
@@ -65,39 +74,51 @@
 </template>
 
 <script setup>
-import authV1BottomShape from '@images/svg/auth-v1-bottom-shape.svg?raw'
-import authV1TopShape from '@images/svg/auth-v1-top-shape.svg?raw'
-import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
-import { themeConfig } from '@themeConfig'
-import { onMounted, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import authV1BottomShape from "@images/svg/auth-v1-bottom-shape.svg?raw";
+import authV1TopShape from "@images/svg/auth-v1-top-shape.svg?raw";
+import { VNodeRenderer } from "@layouts/components/VNodeRenderer";
+import { themeConfig } from "@themeConfig";
+import { ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
-const route = useRoute()
-const router = useRouter()
-const status = ref('verifying') // verifying, success, error
-const errorMessage = ref('')
+const route = useRoute();
+const router = useRouter();
+const status = ref("verifying"); // verifying, success, error
+const errorMessage = ref("");
+const isLoading = ref(false);
 
-onMounted(async () => {
-  const { token } = route.params
-  let url = `/api/verify/${token}`
+const verifyEmail = async () => {
+  isLoading.value = true;
+  const { token } = route.params;
+  const url = `/api/verify/${token}`;
   try {
-    await $fetch(url, { method: 'GET' })
-    status.value = 'success'
-    setTimeout(() => router.push({ name: 'login', query: { verified: 'true' } }), 2000)
+    await $fetch(url, {
+      method: "GET",
+      credentials: "include", // Include cookies for CSRF
+    });
+    status.value = "success";
+    setTimeout(
+      () => router.push({ name: "login", query: { verified: "true" } }),
+      2000
+    );
   } catch (err) {
-    status.value = 'error'
-    errorMessage.value = err?.data?.message || 'Verification link is invalid or expired.'
+    status.value = "error";
+    errorMessage.value =
+      err?.data?.message || "Verification link is invalid or expired.";
+    console.error("Verification error:", err);
+  } finally {
+    isLoading.value = false;
   }
-})
+};
 
 definePage({
   meta: {
-    layout: 'blank',
+    layout: "blank",
     public: true,
   },
-})
+});
 </script>
 
 <style lang="scss">
 @use "@core-scss/template/pages/page-auth";
-</style> 
+</style>

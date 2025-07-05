@@ -58,7 +58,6 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function sendEmailVerificationNotification()
     {
-        // Remove old tokens
         VerificationToken::where('user_id', $this->id)->delete();
         $token = Str::random(64);
         VerificationToken::create([

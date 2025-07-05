@@ -58,35 +58,31 @@ class EmailVerificationController extends Controller
         return response()->json(['message' => 'A fresh verification link has been sent to your email address.']);
     }
 
-    /**
-     * Verify user by token
-     */
-    public function verifyByToken($token)
-    {
-        $record = \App\Models\VerificationToken::where('token', $token)->first();
-        \Log::info('Verify token debug', [
-            'token' => $token,
-            'record' => $record,
-            'now' => now(),
-            'expires_at' => $record?->expires_at,
-        ]);
-        if (!$record) {
-            return response()->json(['message' => 'Invalid or expired verification link'], 400);
-        }
-        if ($record->expires_at && $record->expires_at->isPast()) {
-            return response()->json(['message' => 'Invalid or expired verification link'], 400);
-        }
-        $user = $record->user;
-        if (!$user) {
-            return response()->json(['message' => 'User not found'], 404);
-        }
-        if ($user->hasVerifiedEmail()) {
-            $record->delete();
-            return response()->json(['message' => 'Email already verified'], 200);
-        }
-        $user->markEmailAsVerified();
-        event(new \Illuminate\Auth\Events\Verified($user));
-        $record->delete();
-        return response()->json(['message' => 'Email verified successfully'], 200);
+/**
+ * Verify user by token
+ */
+public function verifyByToken($token)
+{
+    $record = \App\Models\VerificationToken::where('token', $token)->first();
+
+    if (!$record) {
+        return response()->json(['message' => 'Invalid or expired verification link'], 400);
     }
+    if ($record->expires_at && $record->expires_at->isPast()) {
+        $record->delete();
+        return response()->json(['message' => 'Invalid or expired verification link'], 400);
+    }
+    $user = $record->user;
+    if (!$user) {
+        return response()->json(['message' => 'User not found'], 404);
+    }
+    if ($user->hasVerifiedEmail()) {
+        $record->delete();
+        return response()->json(['message' => 'Email already verified'], 200);
+    }
+    $user->markEmailAsVerified();
+    event(new \Illuminate\Auth\Events\Verified($user));
+    $record->delete();
+    return response()->json(['message' => 'Email verified successfully'], 200);
+}
 }
