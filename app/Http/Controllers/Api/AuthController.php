@@ -44,19 +44,25 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
+        \Log::info('Login attempt', [
+            'email' => $request->email,
+            'ip' => $request->ip(),
+            'headers' => $request->headers->all(),
+        ]);
+    
         $request->validate([
             'email' => 'required|email',
             'password' => 'required',
         ]);
-
+    
         $credentials = $request->only('email', 'password');
-
+    
         if (Auth::attempt($credentials)) {
             /** @var \App\Models\User $user */
             $user = Auth::user();
-
+    
             if (!$user->hasVerifiedEmail()) {
-                // Return a specific error for unverified email
+                \Log::warning('Login failed: Email not verified', ['email' => $request->email]);
                 return response()->json([
                     'message' => 'Your email address is not verified.',
                     'errors' => [
@@ -64,9 +70,11 @@ class AuthController extends Controller
                     ]
                 ], 403);
             }
-
+    
             $token = $user->createToken('auth_token')->plainTextToken;
-
+            
+            \Log::info('Login successful', ['user_id' => $user->id]);
+    
             return response()->json([
                 'message' => 'Login successful',
                 'user' => $user,
@@ -74,7 +82,8 @@ class AuthController extends Controller
                 'token_type' => 'Bearer',
             ]);
         }
-
+    
+        \Log::warning('Login failed: Invalid credentials', ['email' => $request->email]);
         return response()->json(['message' => 'Invalid credentials'], 401);
     }
 

@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'paths' => ['api/*', 'sanctum/csrf-cookie', 'verify/*'],
+    'paths' => ['api/*', 'sanctum/csrf-cookie', 'verify/*', 'auth/*'],
     'allowed_methods' => ['*'],
     'allowed_origins' => [env('FRONTEND_URL', 'https://portal.explorerelite.com')],
     'allowed_origins_patterns' => [],
