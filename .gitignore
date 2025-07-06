@@ -20,7 +20,7 @@ yarn-error.log
 /.idea
 /.nova
 /.zed
-
+config/cors.php
 # Logs
 logs
 *.log
