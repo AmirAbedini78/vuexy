@@ -12,9 +12,10 @@ class EmailVerificationController extends Controller
 {
     public function verifyByToken($token)
     {
-        \Log::info('Verifying token', [
+        \Log::info('Received verification request', [
             'token' => $token,
             'current_time' => now()->toDateTimeString(),
+            'request_headers' => request()->headers->all(),
         ]);
 
         $record = VerificationToken::where('token', $token)->first();

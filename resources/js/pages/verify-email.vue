@@ -87,7 +87,7 @@ const verifyEmail = async () => {
   console.log("Attempting to verify token:", token);
   const url = `${import.meta.env.VITE_API_BASE_URL}/verify/${token}`;
   try {
-    const response = await $fetch(url, {
+    const response = await fetch(url, {
       method: "GET",
       credentials: "include",
       headers: {
@@ -95,7 +95,11 @@ const verifyEmail = async () => {
         "X-Requested-With": "XMLHttpRequest",
       },
     });
-    console.log("Verification response:", response);
+    const data = await response.json();
+    console.log("Verification response:", { status: response.status, data });
+    if (!response.ok) {
+      throw new Error(data.message || "Verification failed");
+    }
     status.value = "success";
     setTimeout(
       () => router.push({ name: "login", query: { verified: "true" } }),
@@ -103,13 +107,13 @@ const verifyEmail = async () => {
     );
   } catch (err) {
     console.error("Verification error:", {
-      message: err?.message,
-      status: err?.status,
-      data: err?.data,
+      message: err.message,
+      status: err.status,
+      data: err.data,
     });
     status.value = "error";
     errorMessage.value =
-      err?.data?.message || "The verification link is invalid or has expired.";
+      err.message || "The verification link is invalid or has expired.";
   } finally {
     isLoading.value = false;
   }
