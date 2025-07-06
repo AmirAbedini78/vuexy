@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\VerificationToken;
+use Illuminate\Support\Str;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Support\Facades\URL;
@@ -24,20 +26,20 @@ class AppServiceProvider extends ServiceProvider
     {
         VerifyEmail::createUrlUsing(function ($notifiable) {
             $frontendUrl = rtrim(config('app.frontend_url'), '/');
-            $signedUrl = URL::temporarySignedRoute(
-                'verification.verify',
-                now()->addMinutes(config('auth.verification.expire', 60)),
-                [
-                    'id' => $notifiable->getKey(),
-                    'hash' => sha1($notifiable->getEmailForVerification()),
-                ],
-                true
-            );
-            $parsed = parse_url($signedUrl);
-            $path = $parsed['path'];
-            $query = isset($parsed['query']) ? '?' . $parsed['query'] : '';
-            $frontendPath = str_replace('/api/email/verify', '/verify-email', $path);
-            return $frontendUrl . $frontendPath . $query;
+            VerificationToken::where('user_id', $notifiable->id)->delete();
+            $token = Str::random(64);
+            $expiresAt = now()->addMinutes(config('auth.verification.expire', 1440));
+            VerificationToken::create([
+                'user_id' => $notifiable->id,
+                'token' => $token,
+                'expires_at' => $expiresAt,
+            ]);
+            $url = $frontendUrl . '/verify/' . $token;
+            \Log::info('Verification URL generated', [
+                'url' => $url,
+                'expires_at' => $expiresAt->toDateTimeString(),
+            ]);
+            return $url;
         });
     }
 }

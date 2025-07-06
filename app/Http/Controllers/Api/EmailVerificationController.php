@@ -4,85 +4,74 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Auth\Events\Verified;
-use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use App\Models\VerificationToken;
-use Illuminate\Support\Str;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Mail;
+use Illuminate\Auth\Events\Verified;
+use Illuminate\Http\Request;
 
 class EmailVerificationController extends Controller
 {
-    /**
-     * Mark the authenticated user's email address as verified.
-     *
-     * @param  \Illuminate\Foundation\Auth\EmailVerificationRequest  $request
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function verify(EmailVerificationRequest $request)
+    public function verifyByToken($token)
     {
-        $user = User::find($request->route('id'));
+        \Log::info('Verifying token', [
+            'token' => $token,
+            'current_time' => now()->toDateTimeString(),
+        ]);
 
+        $record = VerificationToken::where('token', $token)->first();
+
+        if (!$record) {
+            \Log::warning('Verification token not found', ['token' => $token]);
+            return response()->json(['message' => 'لینک تأیید نامعتبر است یا یافت نشد'], 400);
+        }
+
+        \Log::info('Token found', [
+            'token' => $token,
+            'expires_at' => $record->expires_at ? $record->expires_at->toDateTimeString() : null,
+            'current_time' => now()->toDateTimeString(),
+        ]);
+
+        if ($record->expires_at && $record->expires_at->isPast()) {
+            \Log::warning('Verification token expired', [
+                'token' => $token,
+                'expires_at' => $record->expires_at->toDateTimeString(),
+                'current_time' => now()->toDateTimeString(),
+            ]);
+            $record->delete();
+            return response()->json(['message' => 'لینک تأیید منقضی شده است'], 400);
+        }
+
+        $user = $record->user;
         if (!$user) {
-            return response()->json(['message' => 'Invalid user ID'], 404);
+            \Log::warning('User not found for token', ['token' => $token]);
+            return response()->json(['message' => 'کاربر یافت نشد'], 404);
         }
 
         if ($user->hasVerifiedEmail()) {
-            return response()->json(['message' => 'Email already verified'], 200);
+            $record->delete();
+            \Log::info('Email already verified', ['user_id' => $user->id]);
+            return response()->json(['message' => 'ایمیل قبلاً تأیید شده است'], 200);
         }
 
-        if (hash_equals((string) $request->route('hash'), sha1($user->getEmailForVerification()))) {
-            $user->markEmailAsVerified();
-            event(new Verified($user));
-            return response()->json(['message' => 'Email verified successfully'], 200);
-        }
+        $user->markEmailAsVerified();
+        event(new Verified($user));
+        $record->delete();
+        \Log::info('Email verified successfully', [
+            'user_id' => $user->id,
+            'email_verified_at' => $user->email_verified_at->toDateTimeString(),
+        ]);
 
-        return response()->json(['message' => 'Invalid verification link'], 400);
+        return response()->json(['message' => 'ایمیل با موفقیت تأیید شد'], 200);
     }
 
-    /**
-     * Resend the email verification notification.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function resend(Request $request)
     {
         if ($request->user()->hasVerifiedEmail()) {
-            return response()->json(['message' => 'Email already verified.'], 400);
+            return response()->json(['message' => 'ایمیل قبلاً تأیید شده است'], 400);
         }
 
         $request->user()->sendEmailVerificationNotification();
+        \Log::info('Verification email resent', ['user_id' => $request->user()->id]);
 
-        return response()->json(['message' => 'A fresh verification link has been sent to your email address.']);
+        return response()->json(['message' => 'لینک تأیید جدید به ایمیل شما ارسال شد']);
     }
-
-/**
- * Verify user by token
- */
-public function verifyByToken($token)
-{
-    $record = \App\Models\VerificationToken::where('token', $token)->first();
-
-    if (!$record) {
-        return response()->json(['message' => 'Invalid or expired verification link'], 400);
-    }
-    if ($record->expires_at && $record->expires_at->isPast()) {
-        $record->delete();
-        return response()->json(['message' => 'Invalid or expired verification link'], 400);
-    }
-    $user = $record->user;
-    if (!$user) {
-        return response()->json(['message' => 'User not found'], 404);
-    }
-    if ($user->hasVerifiedEmail()) {
-        $record->delete();
-        return response()->json(['message' => 'Email already verified'], 200);
-    }
-    $user->markEmailAsVerified();
-    event(new \Illuminate\Auth\Events\Verified($user));
-    $record->delete();
-    return response()->json(['message' => 'Email verified successfully'], 200);
-}
 }

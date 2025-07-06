@@ -1,19 +1,14 @@
 <template>
   <div class="auth-wrapper d-flex align-center justify-center pa-4">
     <div class="position-relative my-sm-16">
-      <!-- 👉 Top shape -->
       <VNodeRenderer
         :nodes="h('div', { innerHTML: authV1TopShape })"
         class="text-primary auth-v1-top-shape d-none d-sm-block"
       />
-
-      <!-- 👉 Bottom shape -->
       <VNodeRenderer
         :nodes="h('div', { innerHTML: authV1BottomShape })"
         class="text-primary auth-v1-bottom-shape d-none d-sm-block"
       />
-
-      <!-- 👉 Auth card -->
       <VCard
         class="auth-card"
         max-width="460"
@@ -31,13 +26,12 @@
             </RouterLink>
           </VCardTitle>
         </VCardItem>
-
         <VCardText>
           <template v-if="status === 'verifying'">
-            <h4 class="text-h4 mb-1">Verify Your Email</h4>
+            <h4 class="text-h4 mb-1">تأیید ایمیل</h4>
             <VAlert type="info" variant="tonal" class="mb-4">
-              <VAlertTitle>Ready to Verify</VAlertTitle>
-              Please click the button below to verify your email address.
+              <VAlertTitle>آماده تأیید</VAlertTitle>
+              لطفاً برای تأیید آدرس ایمیل خود روی دکمه زیر کلیک کنید.
             </VAlert>
             <VBtn
               block
@@ -45,26 +39,27 @@
               :disabled="isLoading"
               @click="verifyEmail"
             >
-              {{ isLoading ? "Verifying..." : "Verify Email" }}
+              {{ isLoading ? "در حال تأیید..." : "تأیید ایمیل" }}
             </VBtn>
           </template>
           <template v-else-if="status === 'success'">
-            <h4 class="text-h4 mb-1">Email Verified ✉️</h4>
+            <h4 class="text-h4 mb-1">ایمیل تأیید شد ✉️</h4>
             <VAlert type="success" variant="tonal" class="mb-4">
-              <VAlertTitle>Email Verified!</VAlertTitle>
-              Your email has been successfully verified. You will be redirected
-              to <RouterLink :to="{ name: 'login' }">log in</RouterLink>.
+              <VAlertTitle>ایمیل تأیید شد!</VAlertTitle>
+              ایمیل شما با موفقیت تأیید شد. به صفحه
+              <RouterLink :to="{ name: 'login' }">ورود</RouterLink> هدایت خواهید
+              شد.
             </VAlert>
           </template>
           <template v-else>
-            <h4 class="text-h4 mb-1">Verification Failed</h4>
+            <h4 class="text-h4 mb-1">تأیید ناموفق</h4>
             <VAlert type="error" variant="tonal" class="mb-4">
-              <VAlertTitle>Verification Failed</VAlertTitle>
+              <VAlertTitle>خطا در تأیید</VAlertTitle>
               {{ errorMessage }}
             </VAlert>
             <div class="d-flex align-center justify-center">
-              <span class="me-1">Didn't get the mail?</span>
-              <RouterLink :to="{ name: 'register' }">Resend</RouterLink>
+              <span class="me-1">ایمیل دریافت نکردید؟</span>
+              <RouterLink :to="{ name: 'register' }">ارسال مجدد</RouterLink>
             </div>
           </template>
         </VCardText>
@@ -83,29 +78,34 @@ import { useRoute, useRouter } from "vue-router";
 
 const route = useRoute();
 const router = useRouter();
-const status = ref("verifying"); // verifying, success, error
+const status = ref("verifying");
 const errorMessage = ref("");
 const isLoading = ref(false);
 
 const verifyEmail = async () => {
   isLoading.value = true;
   const { token } = route.params;
-  const url = `/api/verify/${token}`;
+  console.log("Attempting to verify token:", token);
+  const url = `${import.meta.env.VITE_API_BASE_URL}/verify/${token}`;
   try {
-    await $fetch(url, {
+    const response = await $fetch(url, {
       method: "GET",
-      credentials: "include", // Include cookies for CSRF
+      credentials: "include",
+      headers: {
+        Accept: "application/json",
+      },
     });
+    console.log("Verification response:", response);
     status.value = "success";
     setTimeout(
       () => router.push({ name: "login", query: { verified: "true" } }),
       2000
     );
   } catch (err) {
+    console.error("Verification error:", err);
     status.value = "error";
     errorMessage.value =
-      err?.data?.message || "Verification link is invalid or expired.";
-    console.error("Verification error:", err);
+      err?.data?.message || "لینک تأیید نامعتبر است یا منقضی شده است.";
   } finally {
     isLoading.value = false;
   }
