@@ -21,7 +21,7 @@ class EmailVerificationController extends Controller
 
         if (!$record) {
             \Log::warning('Verification token not found', ['token' => $token]);
-            return response()->json(['message' => 'لینک تأیید نامعتبر است یا یافت نشد'], 400);
+            return response()->json(['message' => 'The verification link is invalid or not found'], 400);
         }
 
         \Log::info('Token found', [
@@ -37,19 +37,19 @@ class EmailVerificationController extends Controller
                 'current_time' => now()->toDateTimeString(),
             ]);
             $record->delete();
-            return response()->json(['message' => 'لینک تأیید منقضی شده است'], 400);
+            return response()->json(['message' => 'The verification link has expired'], 400);
         }
 
         $user = $record->user;
         if (!$user) {
             \Log::warning('User not found for token', ['token' => $token]);
-            return response()->json(['message' => 'کاربر یافت نشد'], 404);
+            return response()->json(['message' => 'User not found'], 404);
         }
 
         if ($user->hasVerifiedEmail()) {
             $record->delete();
             \Log::info('Email already verified', ['user_id' => $user->id]);
-            return response()->json(['message' => 'ایمیل قبلاً تأیید شده است'], 200);
+            return response()->json(['message' => 'Email already verified'], 200);
         }
 
         $user->markEmailAsVerified();
@@ -60,18 +60,18 @@ class EmailVerificationController extends Controller
             'email_verified_at' => $user->email_verified_at->toDateTimeString(),
         ]);
 
-        return response()->json(['message' => 'ایمیل با موفقیت تأیید شد'], 200);
+        return response()->json(['message' => 'Email verified successfully'], 200);
     }
 
     public function resend(Request $request)
     {
         if ($request->user()->hasVerifiedEmail()) {
-            return response()->json(['message' => 'ایمیل قبلاً تأیید شده است'], 400);
+            return response()->json(['message' => 'Email already verified'], 400);
         }
 
         $request->user()->sendEmailVerificationNotification();
         \Log::info('Verification email resent', ['user_id' => $request->user()->id]);
 
-        return response()->json(['message' => 'لینک تأیید جدید به ایمیل شما ارسال شد']);
+        return response()->json(['message' => 'A new verification link has been sent to your email']);
     }
 }

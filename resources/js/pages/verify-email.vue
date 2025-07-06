@@ -28,10 +28,10 @@
         </VCardItem>
         <VCardText>
           <template v-if="status === 'verifying'">
-            <h4 class="text-h4 mb-1">تأیید ایمیل</h4>
+            <h4 class="text-h4 mb-1">Verify Your Email</h4>
             <VAlert type="info" variant="tonal" class="mb-4">
-              <VAlertTitle>آماده تأیید</VAlertTitle>
-              لطفاً برای تأیید آدرس ایمیل خود روی دکمه زیر کلیک کنید.
+              <VAlertTitle>Ready to Verify</VAlertTitle>
+              Please click the button below to verify your email address.
             </VAlert>
             <VBtn
               block
@@ -39,27 +39,26 @@
               :disabled="isLoading"
               @click="verifyEmail"
             >
-              {{ isLoading ? "در حال تأیید..." : "تأیید ایمیل" }}
+              {{ isLoading ? "Verifying..." : "Verify Email" }}
             </VBtn>
           </template>
           <template v-else-if="status === 'success'">
-            <h4 class="text-h4 mb-1">ایمیل تأیید شد ✉️</h4>
+            <h4 class="text-h4 mb-1">Email Verified ✉️</h4>
             <VAlert type="success" variant="tonal" class="mb-4">
-              <VAlertTitle>ایمیل تأیید شد!</VAlertTitle>
-              ایمیل شما با موفقیت تأیید شد. به صفحه
-              <RouterLink :to="{ name: 'login' }">ورود</RouterLink> هدایت خواهید
-              شد.
+              <VAlertTitle>Email Verified!</VAlertTitle>
+              Your email has been successfully verified. You will be redirected
+              to <RouterLink :to="{ name: 'login' }">login</RouterLink>.
             </VAlert>
           </template>
           <template v-else>
-            <h4 class="text-h4 mb-1">تأیید ناموفق</h4>
+            <h4 class="text-h4 mb-1">Verification Failed</h4>
             <VAlert type="error" variant="tonal" class="mb-4">
-              <VAlertTitle>خطا در تأیید</VAlertTitle>
+              <VAlertTitle>Verification Failed</VAlertTitle>
               {{ errorMessage }}
             </VAlert>
             <div class="d-flex align-center justify-center">
-              <span class="me-1">ایمیل دریافت نکردید؟</span>
-              <RouterLink :to="{ name: 'register' }">ارسال مجدد</RouterLink>
+              <span class="me-1">Didn't receive the email?</span>
+              <RouterLink :to="{ name: 'register' }">Resend</RouterLink>
             </div>
           </template>
         </VCardText>
@@ -93,6 +92,7 @@ const verifyEmail = async () => {
       credentials: "include",
       headers: {
         Accept: "application/json",
+        "X-Requested-With": "XMLHttpRequest",
       },
     });
     console.log("Verification response:", response);
@@ -102,10 +102,14 @@ const verifyEmail = async () => {
       2000
     );
   } catch (err) {
-    console.error("Verification error:", err);
+    console.error("Verification error:", {
+      message: err?.message,
+      status: err?.status,
+      data: err?.data,
+    });
     status.value = "error";
     errorMessage.value =
-      err?.data?.message || "لینک تأیید نامعتبر است یا منقضی شده است.";
+      err?.data?.message || "The verification link is invalid or has expired.";
   } finally {
     isLoading.value = false;
   }
