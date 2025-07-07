@@ -230,6 +230,7 @@ const onSubmit = () => {
                     v-model="rememberMe"
                     label="Remember me"
                     :disabled="isLoading"
+                    class="auth-checkbox"
                     style="font-size: 0.875rem"
                   />
                   <RouterLink

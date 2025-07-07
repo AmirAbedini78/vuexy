@@ -189,4 +189,9 @@ export default [
     icon: { icon: 'tabler-square' },
     to: 'pages-dialog-examples',
   },
+  {
+    title: 'Registration',
+    icon: { icon: 'tabler-user-plus' },
+    to: { name: 'registration-activity' },
+  },
 ]

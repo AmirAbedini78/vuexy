@@ -85,4 +85,13 @@ export const routes = [
       public: true,
     },
   },
+  {
+    path: '/registration/activity',
+    name: 'registration-activity',
+    component: () => import('@/views/pages/registration/Activity.vue'),
+    meta: {
+      layout: 'blank',
+      public: true,
+    },
+  },
 ]

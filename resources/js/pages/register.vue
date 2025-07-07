@@ -87,7 +87,7 @@ const register = async () => {
 
     // Don't store user data and token after registration
     // User should login separately
-
+    
     registrationDone.value = true;
   } catch (err) {
     console.error("Registration error:", err);
@@ -133,7 +133,7 @@ const onSubmit = () => {
             Sing up in your Adventure management Platform!
           </p>
         </VCardText>
-
+        
         <VCardText>
           <!-- Alert for successful registration -->
           <VAlert
@@ -225,6 +225,7 @@ const onSubmit = () => {
                   label="I agree to the privacy policy & terms"
                   :rules="[(v) => !!v || 'You must agree to continue!']"
                   :disabled="isLoading"
+                  class="auth-checkbox"
                   style="font-size: 0.875rem"
                 />
               </VCol>

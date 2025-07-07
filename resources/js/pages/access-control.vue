@@ -1,36 +1,51 @@
 <script setup>
+import CustomRadiosWithIcon from "@/@core/components/app-form-elements/CustomRadiosWithIcon.vue";
+import { ref } from "vue";
+
 definePage({
   meta: {
-    action: 'read',
-    subject: 'AclDemo',
+    action: "read",
+    subject: "AclDemo",
   },
-})
+});
+
+const radioContent = [
+  {
+    title: "Register as Individual",
+    desc: "Guides working solo, freelancers or a single person offering experiences",
+    value: "individual",
+    icon: {
+      icon: "tabler-user",
+      size: "32",
+    },
+  },
+  {
+    title: "Register as Company",
+    desc: "Businesses with multiple guides or a registered entity",
+    value: "company",
+    icon: {
+      icon: "tabler-users",
+      size: "32",
+    },
+  },
+];
+const selectedRadio = ref("individual");
 </script>
 
 <template>
-  <VRow>
-    <VCol
-      cols="12"
-      md="6"
-    >
-      <VCard title="Common">
-        <VCardText>No ability is required to view this card</VCardText>
-        <VCardText>
-          This card is visible to both 'user' and 'admin'
-        </VCardText>
-      </VCard>
-    </VCol>
-    <VCol
-      v-if="$can('read', 'all')"
-      cols="12"
-      md="6"
-    >
-      <VCard title="Analytics">
-        <VCardText>User with 'Analytics' subject's 'Read' ability can view this card</VCardText>
-        <VCardText class="text-danger">
-          This card is visible to 'admin' only
-        </VCardText>
-      </VCard>
-    </VCol>
-  </VRow>
+  <div
+    class="d-flex flex-column align-center justify-center"
+    style="min-height: 80vh"
+  >
+    <div class="w-60 d-flex justify-center mb-10">
+      <CustomRadiosWithIcon
+        v-model:selected-radio="selectedRadio"
+        :radio-content="radioContent"
+        :grid-column="{ sm: '6', cols: '12' }"
+      />
+    </div>
+    <div class="d-flex justify-center mt-10 mb-8">
+      <VBtn color="dark" size="large"> Next </VBtn>
+    </div>
+  </div>
 </template>
