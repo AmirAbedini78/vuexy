@@ -1,5 +1,6 @@
 <script setup>
 import CustomRadiosWithIcon from "@/@core/components/app-form-elements/CustomRadiosWithIcon.vue";
+import DemoFormWizardNumberedModernBasic from "@/views/demos/forms/form-wizard/form-wizard-numbered/DemoFormWizardNumberedModernBasic.vue";
 import { ref } from "vue";
 
 definePage({
@@ -30,6 +31,13 @@ const radioContent = [
   },
 ];
 const selectedRadio = ref("individual");
+const showWizard = ref(false);
+
+function handleNext() {
+  if (selectedRadio.value === "individual") {
+    showWizard.value = true;
+  }
+}
 </script>
 
 <template>
@@ -37,15 +45,20 @@ const selectedRadio = ref("individual");
     class="d-flex flex-column align-center justify-center"
     style="min-height: 80vh"
   >
-    <div class="w-60 d-flex justify-center mb-10">
-      <CustomRadiosWithIcon
-        v-model:selected-radio="selectedRadio"
-        :radio-content="radioContent"
-        :grid-column="{ sm: '6', cols: '12' }"
-      />
-    </div>
-    <div class="d-flex justify-center mt-10 mb-8">
-      <VBtn color="dark" size="large"> Next </VBtn>
-    </div>
+    <template v-if="!showWizard">
+      <div class="w-100 d-flex justify-center mb-10">
+        <CustomRadiosWithIcon
+          v-model:selected-radio="selectedRadio"
+          :radio-content="radioContent"
+          :grid-column="{ sm: '6', cols: '12' }"
+        />
+      </div>
+      <div class="d-flex justify-center mt-10 mb-8">
+        <VBtn color="dark" size="large" @click="handleNext"> Next </VBtn>
+      </div>
+    </template>
+    <template v-else>
+      <DemoFormWizardNumberedModernBasic />
+    </template>
   </div>
 </template>

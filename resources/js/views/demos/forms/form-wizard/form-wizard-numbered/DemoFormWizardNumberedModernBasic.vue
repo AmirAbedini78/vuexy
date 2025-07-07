@@ -1,41 +1,44 @@
 <script setup>
+import { ref } from "vue";
+
 const numberedSteps = [
   {
-    title: 'Account Details',
-    subtitle: 'Setup Account Details',
+    title: "Personal Information",
   },
   {
-    title: 'Personal Info',
-    subtitle: 'Add personal info',
+    title: "Account Details",
   },
   {
-    title: 'Social Links',
-    subtitle: 'Add social links',
+    title: "Social Links",
   },
-]
+];
 
-const currentStep = ref(0)
-const isPasswordVisible = ref(false)
-const isCPasswordVisible = ref(false)
+const currentStep = ref(0);
 
 const formData = ref({
-  username: '',
-  email: '',
-  password: '',
-  cPassword: '',
-  firstName: '',
-  lastName: '',
-  country: undefined,
-  language: undefined,
-  twitter: '',
-  facebook: '',
-  googlePlus: '',
-  linkedIn: '',
-})
+  // Step 1 fields
+  fullName: "",
+  nationality: "",
+  address1: "",
+  city: "",
+  state: "",
+  dob: "",
+  languages: [],
+  address2: "",
+  postalCode: "",
+  country: "",
+  // Step 2 & 3 fields (if needed, keep or remove as you wish)
+  firstName: "",
+  lastName: "",
+  twitter: "",
+  facebook: "",
+  googlePlus: "",
+  linkedIn: "",
+});
 
 const onSubmit = () => {
-  console.log(formData.value)
-}
+  console.log(formData.value);
+};
 </script>
 
 <template>
@@ -52,166 +55,124 @@ const onSubmit = () => {
     <VCardText>
       <!-- 👉 stepper content -->
       <VForm>
-        <VWindow
-          v-model="currentStep"
-          class="disable-tab-transition"
-        >
+        <VWindow v-model="currentStep" class="disable-tab-transition">
+          <!-- Step 1: Personal Information -->
           <VWindowItem>
             <VRow>
-              <VCol cols="12">
-                <h6 class="text-h6 font-weight-medium">
-                  Account Details
-                </h6>
-                <p class="mb-0">
-                  Enter your Account Details
-                </p>
-              </VCol>
-              <VCol
-                cols="12"
-                md="6"
-              >
+              <!-- Left column -->
+              <VCol cols="12" md="6">
                 <AppTextField
-                  v-model="formData.username"
-                  placeholder="CarterLeonardo"
-                  label="Username"
+                  v-model="formData.fullName"
+                  label="Full Name"
+                  placeholder="Enter your full name"
+                />
+                <AppTextField
+                  v-model="formData.nationality"
+                  label="Nationality"
+                  placeholder="Enter your nationality"
+                  class="mt-4"
+                />
+                <AppTextField
+                  v-model="formData.address1"
+                  label="Address Line 1"
+                  placeholder="Enter address line 1"
+                  class="mt-4"
+                />
+                <AppTextField
+                  v-model="formData.city"
+                  label="City"
+                  placeholder="Enter your city"
+                  class="mt-4"
+                />
+                <AppTextField
+                  v-model="formData.state"
+                  label="State/Province"
+                  placeholder="Enter state or province"
+                  class="mt-4"
                 />
               </VCol>
-              <VCol
-                cols="12"
-                md="6"
-              >
+              <!-- Right column -->
+              <VCol cols="12" md="6">
                 <AppTextField
-                  v-model="formData.email"
-                  placeholder="carterleonardo@gmail.com"
-                  label="Email"
+                  v-model="formData.dob"
+                  label="Date of Birth"
+                  placeholder="YYYY-MM-DD"
+                  type="date"
                 />
-              </VCol>
-              <VCol
-                cols="12"
-                md="6"
-              >
-                <AppTextField
-                  v-model="formData.password"
-                  label="Password"
-                  placeholder="············"
-                  :type="isPasswordVisible ? 'text' : 'password'"
-                  :append-inner-icon="isPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
-                  @click:append-inner="isPasswordVisible = !isPasswordVisible"
+                <AppSelect
+                  v-model="formData.languages"
+                  label="Languages Spoken"
+                  placeholder="Select languages"
+                  :items="['English', 'French', 'German', 'Spanish', 'Other']"
+                  multiple
+                  class="mt-4"
                 />
-              </VCol>
-              <VCol
-                cols="12"
-                md="6"
-              >
                 <AppTextField
-                  v-model="formData.cPassword"
-                  label="Confirm Password"
-                  placeholder="············"
-                  :type="isCPasswordVisible ? 'text' : 'password'"
-                  :append-inner-icon="isCPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
-                  @click:append-inner="isCPasswordVisible = !isCPasswordVisible"
+                  v-model="formData.address2"
+                  label="Address Line 2"
+                  placeholder="Enter address line 2"
+                  class="mt-4"
+                />
+                <AppTextField
+                  v-model="formData.postalCode"
+                  label="Postal Code"
+                  placeholder="Enter postal code"
+                  class="mt-4"
+                />
+                <AppTextField
+                  v-model="formData.country"
+                  label="Country"
+                  placeholder="Enter your country"
+                  class="mt-4"
                 />
               </VCol>
             </VRow>
           </VWindowItem>
+          <!-- Step 2: (You can customize this as needed) -->
           <VWindowItem>
             <VRow>
-              <VCol cols="12">
-                <h6 class="text-h6 font-weight-medium">
-                  Personal Info
-                </h6>
-                <p class="mb-0">
-                  Setup Information
-                </p>
-              </VCol>
-              <VCol
-                cols="12"
-                md="6"
-              >
+              <!-- Example fields for step 2 -->
+              <VCol cols="12" md="6">
                 <AppTextField
                   v-model="formData.firstName"
                   label="First Name"
                   placeholder="Leonard"
                 />
               </VCol>
-              <VCol
-                cols="12"
-                md="6"
-              >
+              <VCol cols="12" md="6">
                 <AppTextField
                   v-model="formData.lastName"
                   label="Last Name"
                   placeholder="Carter"
                 />
               </VCol>
-              <VCol
-                cols="12"
-                md="6"
-              >
-                <AppSelect
-                  v-model="formData.country"
-                  label="Country"
-                  placeholder="Select Country"
-                  :items="['UK', 'USA', 'Canada', 'Australia', 'Germany']"
-                />
-              </VCol>
-              <VCol
-                cols="12"
-                md="6"
-              >
-                <AppSelect
-                  v-model="formData.language"
-                  label="Language"
-                  placeholder="Select Language"
-                  :items="['English', 'Spanish', 'French', 'Russian', 'German']"
-                />
-              </VCol>
             </VRow>
           </VWindowItem>
+          <!-- Step 3: Social Links -->
           <VWindowItem>
             <VRow>
-              <VCol cols="12">
-                <h6 class="text-h6 font-weight-medium">
-                  Social Links
-                </h6>
-                <p class="mb-0">
-                  Add Social Links
-                </p>
-              </VCol>
-              <VCol
-                cols="12"
-                md="6"
-              >
+              <VCol cols="12" md="6">
                 <AppTextField
                   v-model="formData.twitter"
                   placeholder="https://twitter.com/abc"
                   label="Twitter"
                 />
               </VCol>
-              <VCol
-                cols="12"
-                md="6"
-              >
+              <VCol cols="12" md="6">
                 <AppTextField
                   v-model="formData.facebook"
                   placeholder="https://facebook.com/abc"
                   label="Facebook"
                 />
               </VCol>
-              <VCol
-                cols="12"
-                md="6"
-              >
+              <VCol cols="12" md="6">
                 <AppTextField
                   v-model="formData.googlePlus"
                   placeholder="https://plus.google.com/abc"
                   label="Google+"
                 />
               </VCol>
-              <VCol
-                cols="12"
-                md="6"
-              >
+              <VCol cols="12" md="6">
                 <AppTextField
                   v-model="formData.linkedIn"
                   placeholder="https://linkedin.com/abc"
@@ -221,18 +182,16 @@ const onSubmit = () => {
             </VRow>
           </VWindowItem>
         </VWindow>
-        <div class="d-flex flex-wrap gap-4 justify-sm-space-between justify-center mt-8">
+        <div
+          class="d-flex flex-wrap gap-4 justify-sm-space-between justify-center mt-8"
+        >
           <VBtn
             color="secondary"
             variant="tonal"
             :disabled="currentStep === 0"
             @click="currentStep--"
           >
-            <VIcon
-              icon="tabler-arrow-left"
-              start
-              class="flip-in-rtl"
-            />
+            <VIcon icon="tabler-arrow-left" start class="flip-in-rtl" />
             Previous
           </VBtn>
           <VBtn
@@ -242,16 +201,9 @@ const onSubmit = () => {
           >
             submit
           </VBtn>
-          <VBtn
-            v-else
-            @click="currentStep++"
-          >
+          <VBtn v-else @click="currentStep++">
             Next
-            <VIcon
-              icon="tabler-arrow-right"
-              end
-              class="flip-in-rtl"
-            />
+            <VIcon icon="tabler-arrow-right" end class="flip-in-rtl" />
           </VBtn>
         </div>
       </VForm>
