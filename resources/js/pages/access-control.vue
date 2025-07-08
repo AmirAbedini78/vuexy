@@ -57,12 +57,6 @@ function handleNext() {
       <div class="d-flex justify-center mt-10 mb-8">
         <VBtn color="dark" size="large" @click="handleNext"> Next </VBtn>
       </div>
-      <footer
-        class="text-center w-100 text-medium-emphasis"
-        style="font-size: 15px"
-      >
-        © 2025, Explorer Elite
-      </footer>
     </template>
     <template v-else>
       <DemoFormWizardNumberedModernBasic />
