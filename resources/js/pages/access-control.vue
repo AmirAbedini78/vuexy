@@ -5,6 +5,7 @@ import { ref } from "vue";
 
 definePage({
   meta: {
+    layout: "default", // فقط نوار بالا، سایدبار مخفی می‌شود
     action: "read",
     subject: "AclDemo",
   },
@@ -56,9 +57,27 @@ function handleNext() {
       <div class="d-flex justify-center mt-10 mb-8">
         <VBtn color="dark" size="large" @click="handleNext"> Next </VBtn>
       </div>
+      <footer
+        class="text-center w-100 text-medium-emphasis"
+        style="font-size: 15px"
+      >
+        © 2025, Explorer Elite
+      </footer>
     </template>
     <template v-else>
       <DemoFormWizardNumberedModernBasic />
     </template>
   </div>
 </template>
+
+<style>
+/* مخفی کردن سایدبار فقط در این صفحه */
+.layout-wrapper .vertical-nav-wrapper {
+  display: none !important;
+}
+@media (min-width: 1280px) {
+  .layout-wrapper .layout-content-wrapper {
+    padding-left: 0 !important;
+  }
+}
+</style>
