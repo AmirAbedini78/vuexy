@@ -18,15 +18,15 @@ const initCsrf = async () => {
   }
 }
 
-// Disable MSW in production
-if (import.meta.env.MODE === 'development') {
-  import('./handlers').then(({ handlers }) => {
-    import('msw').then(({ setupWorker }) => {
-      const worker = setupWorker(...handlers)
-      worker.start()
-    })
-  })
-}
+// MSW setup removed to fix development server error
+// if (import.meta.env.MODE === 'development') {
+//   import('./handlers').then(({ handlers }) => {
+//     import('msw').then(({ setupWorker }) => {
+//       const worker = setupWorker(...handlers)
+//       worker.start()
+//     })
+//   })
+// }
 
 // Create vue app
 const app = createApp(App)

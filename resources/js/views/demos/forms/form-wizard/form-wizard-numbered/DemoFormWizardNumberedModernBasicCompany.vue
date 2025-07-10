@@ -18,21 +18,22 @@ const currentStep = ref(0);
 const formData = ref({
   // Step 1 fields - Company Information
   companyName: "",
-  companyType: "",
-  registrationNumber: "",
-  taxId: "",
-  foundedYear: "",
-  employeeCount: "",
-  website: "",
-  industry: "",
-  // Step 2 fields - Business Details
-  companyLogo: null,
-  businessLicense: null,
-  servicesOffered: "",
-  operatingRegions: "",
-  emergencyContactName: "",
+  vatId: "",
+  address1: "",
+  city: "",
+  state: "",
+  contactPerson: "",
+  countryOfRegistration: "",
+  address2: "",
+  postalCode: "",
+  country: "",
+  businessType: "",
+  // Step 2 fields - Business Details (copied from individual wizard)
+  passportImage: null,
+  avatarImage: null,
+  activitySpecialization: "",
   wantToBeListed: "",
-  companyDescription: "",
+  shortBio: "",
   certifications: null,
   // Step 3 fields
   twitter: "",
@@ -46,23 +47,23 @@ const onSubmit = () => {
 };
 
 // Handle image uploads
-const handleCompanyLogoUpload = (event) => {
+const handlePassportImageUpload = (event) => {
   const file = event.target.files[0];
   if (file) {
     const reader = new FileReader();
     reader.onload = (e) => {
-      formData.value.companyLogo = e.target.result;
+      formData.value.passportImage = e.target.result;
     };
     reader.readAsDataURL(file);
   }
 };
 
-const handleBusinessLicenseUpload = (event) => {
+const handleAvatarImageUpload = (event) => {
   const file = event.target.files[0];
   if (file) {
     const reader = new FileReader();
     reader.onload = (e) => {
-      formData.value.businessLicense = e.target.result;
+      formData.value.avatarImage = e.target.result;
     };
     reader.readAsDataURL(file);
   }
@@ -96,79 +97,140 @@ const handleBusinessLicenseUpload = (event) => {
                 </VCol>
                 <!-- Left column -->
                 <VCol cols="12" md="6">
+                  <!-- Company Name -->
                   <AppTextField
                     v-model="formData.companyName"
-                    label="Company Name"
-                    placeholder="Enter your company name"
+                    label="Company Name*"
+                    placeholder="Legal name of your company"
+                    class="mb-4"
                   />
-                  <AppSelect
-                    v-model="formData.companyType"
-                    label="Company Type"
-                    placeholder="Select company type"
-                    :items="[
-                      'Corporation',
-                      'LLC',
-                      'Partnership',
-                      'Sole Proprietorship',
-                      'Non-Profit',
-                      'Other',
-                    ]"
-                    class="mt-4"
-                  />
+
+                  <!-- VAT ID -->
                   <AppTextField
-                    v-model="formData.registrationNumber"
-                    label="Registration Number"
-                    placeholder="Enter business registration number"
-                    class="mt-4"
+                    v-model="formData.vatId"
+                    label="VAT ID"
+                    placeholder="Provide your VAT number for invoicing"
+                    class="mb-6"
                   />
+
+                  <!-- Company Address Section -->
+                  <div class="mb-4">
+                    <h6 class="text-h6 font-weight-medium mb-2">
+                      Company Address*
+                    </h6>
+                    <p class="text-body-2 text-medium-emphasis mb-4">
+                      Provide your company address for invoicing
+                    </p>
+                  </div>
+
+                  <!-- Address Line 1 -->
                   <AppTextField
-                    v-model="formData.taxId"
-                    label="Tax ID"
-                    placeholder="Enter tax identification number"
-                    class="mt-4"
+                    v-model="formData.address1"
+                    label="Address Line 1*"
+                    placeholder="Address Line 1"
+                    class="mb-4"
+                  />
+
+                  <!-- City -->
+                  <AppTextField
+                    v-model="formData.city"
+                    label="City"
+                    placeholder="Munich"
+                    class="mb-4"
+                  />
+
+                  <!-- State / Province -->
+                  <AppTextField
+                    v-model="formData.state"
+                    label="State / Province"
+                    placeholder="Bavaria"
+                    class="mb-4"
+                  />
+
+                  <!-- Contact Person -->
+                  <AppTextField
+                    v-model="formData.contactPerson"
+                    label="Contact Person"
+                    placeholder="Let us know who we can get in touch with"
+                    class="mb-4"
                   />
                 </VCol>
                 <!-- Right column -->
                 <VCol cols="12" md="6">
-                  <AppTextField
-                    v-model="formData.foundedYear"
-                    label="Founded Year"
-                    placeholder="YYYY"
-                    type="number"
-                  />
+                  <!-- Country of Registration (outside address section) -->
                   <AppSelect
-                    v-model="formData.employeeCount"
-                    label="Number of Employees"
-                    placeholder="Select employee count"
+                    v-model="formData.countryOfRegistration"
+                    label="Country of Registration*"
+                    placeholder="Where your company is officially registered"
                     :items="[
-                      '1-10',
-                      '11-50',
-                      '51-100',
-                      '101-500',
-                      '501-1000',
-                      '1000+',
-                    ]"
-                    class="mt-4"
-                  />
-                  <AppTextField
-                    v-model="formData.website"
-                    label="Company Website"
-                    placeholder="https://www.yourcompany.com"
-                    class="mt-4"
-                  />
-                  <AppSelect
-                    v-model="formData.industry"
-                    label="Industry"
-                    placeholder="Select your industry"
-                    :items="[
-                      'Tourism',
-                      'Adventure Sports',
-                      'Travel',
-                      'Hospitality',
-                      'Technology',
+                      'Germany',
+                      'Austria',
+                      'Switzerland',
+                      'Italy',
+                      'France',
+                      'Spain',
+                      'United States',
+                      'Canada',
+                      'Australia',
+                      'New Zealand',
                       'Other',
                     ]"
-                    class="mt-4"
+                    class="mb-6"
+                  />
+
+                  <!-- Address Line 2 -->
+                  <AppTextField
+                    v-model="formData.address2"
+                    label="Address Line 2 (optional)"
+                    placeholder="Address Line 2"
+                    class="mb-4"
+                  />
+
+                  <!-- Postal Code -->
+                  <AppTextField
+                    v-model="formData.postalCode"
+                    label="Postal Code"
+                    placeholder="231465"
+                    class="mb-4"
+                  />
+
+                  <!-- Country -->
+                  <AppSelect
+                    v-model="formData.country"
+                    label="Country*"
+                    placeholder="Germany"
+                    :items="[
+                      'Germany',
+                      'Austria',
+                      'Switzerland',
+                      'Italy',
+                      'France',
+                      'Spain',
+                      'United States',
+                      'Canada',
+                      'Australia',
+                      'New Zealand',
+                      'Other',
+                    ]"
+                    class="mb-4"
+                  />
+
+                  <!-- Business Type -->
+                  <AppSelect
+                    v-model="formData.businessType"
+                    label="Business Type*"
+                    placeholder="e.g. Tour Operator, Activity Center, Gear Rental, etc..."
+                    :items="[
+                      'Tour Operator',
+                      'Activity Center',
+                      'Gear Rental',
+                      'Adventure Guide',
+                      'Travel Agency',
+                      'Outdoor Equipment',
+                      'Training Center',
+                      'Other',
+                    ]"
+                    class="mb-4"
                   />
                 </VCol>
               </VRow>
@@ -182,13 +244,14 @@ const handleBusinessLicenseUpload = (event) => {
                 </VCol>
                 <!-- Left column -->
                 <VCol cols="12" md="6">
-                  <!-- Company Logo -->
+                  <!-- Explorer Passport Image -->
                   <div class="mb-6">
                     <h6 class="text-h6 font-weight-medium mb-2">
-                      Company Logo
+                      Explorer Passport Image
                     </h6>
                     <p class="text-body-2 text-medium-emphasis mb-4">
-                      High quality logo, shown as your company profile image
+                      High quality image, shown as your Explorer Elite passport
+                      profile image
                     </p>
                     <div class="d-flex align-center gap-4">
                       <div
@@ -204,14 +267,14 @@ const handleBusinessLicenseUpload = (event) => {
                         "
                       >
                         <VIcon
-                          v-if="!formData.companyLogo"
-                          icon="tabler-building"
+                          v-if="!formData.passportImage"
+                          icon="tabler-user"
                           size="40"
                           color="grey"
                         />
                         <img
                           v-else
-                          :src="formData.companyLogo"
+                          :src="formData.passportImage"
                           style="width: 100%; height: 100%; object-fit: cover"
                         />
                       </div>
@@ -219,80 +282,51 @@ const handleBusinessLicenseUpload = (event) => {
                         <VBtn
                           variant="outlined"
                           size="small"
-                          @click="$refs.logoInput.click()"
+                          @click="$refs.passportInput.click()"
                         >
-                          Upload Company Logo
+                          Upload Explorer Passport Image
                         </VBtn>
                         <VBtn
-                          v-if="formData.companyLogo"
+                          v-if="formData.passportImage"
                           variant="tonal"
                           size="small"
                           color="error"
-                          @click="formData.companyLogo = null"
+                          @click="formData.passportImage = null"
                         >
                           <VIcon icon="tabler-trash" size="16" />
                         </VBtn>
                       </div>
                     </div>
                     <input
-                      ref="logoInput"
+                      ref="passportInput"
                       type="file"
                       accept="image/*"
                       style="display: none"
-                      @change="handleCompanyLogoUpload"
+                      @change="handlePassportImageUpload"
                     />
                     <p class="text-caption text-medium-emphasis mt-2">
                       Allowed JPG or PNG, Preferred 520*430 px, Max Size 5Mb
                     </p>
                   </div>
 
-                  <!-- Services Offered -->
+                  <!-- Activity Specialization -->
                   <AppSelect
-                    v-model="formData.servicesOffered"
-                    label="Services Offered"
-                    placeholder="Select services your company provides"
+                    v-model="formData.activitySpecialization"
+                    label="Activity Specialization"
+                    placeholder="Activities you can lead (e.g., hiking, diving)"
                     :items="[
-                      'Adventure Tours',
-                      'Guided Hiking',
-                      'Diving Trips',
+                      'Hiking',
+                      'Diving',
                       'Rock Climbing',
-                      'Skiing Tours',
-                      'Cultural Tours',
+                      'Skiing',
+                      'Cycling',
+                      'Kayaking',
                       'Photography Tours',
-                      'Corporate Events',
+                      'Cultural Tours',
+                      'Wildlife Tours',
                       'Other',
                     ]"
                     multiple
-                    class="mb-4"
-                  />
-
-                  <!-- Operating Regions -->
-                  <AppSelect
-                    v-model="formData.operatingRegions"
-                    label="Operating Regions"
-                    placeholder="Select regions where you operate"
-                    :items="[
-                      'Germany',
-                      'Austria',
-                      'Switzerland',
-                      'Italy',
-                      'France',
-                      'Spain',
-                      'United States',
-                      'Canada',
-                      'Australia',
-                      'New Zealand',
-                      'Other',
-                    ]"
-                    multiple
-                    class="mb-4"
-                  />
-
-                  <!-- Emergency Contact Name -->
-                  <AppTextField
-                    v-model="formData.emergencyContactName"
-                    label="Emergency Contact Name"
-                    placeholder="Primary contact for emergencies"
                     class="mb-4"
                   />
 
@@ -317,13 +351,13 @@ const handleBusinessLicenseUpload = (event) => {
                 </VCol>
                 <!-- Right column -->
                 <VCol cols="12" md="6">
-                  <!-- Business License -->
+                  <!-- Avatar Image -->
                   <div class="mb-6">
                     <h6 class="text-h6 font-weight-medium mb-2">
-                      Business License
+                      Avatar Image
                     </h6>
                     <p class="text-body-2 text-medium-emphasis mb-4">
-                      Upload your business license or permit
+                      Shown as your platform profile image
                     </p>
                     <div class="d-flex align-center gap-4">
                       <div
@@ -336,56 +370,62 @@ const handleBusinessLicenseUpload = (event) => {
                           align-items: center;
                           justify-content: center;
                           background-color: #f5f5f5;
+                          border-radius: 50%;
                         "
                       >
                         <VIcon
-                          v-if="!formData.businessLicense"
-                          icon="tabler-file-text"
+                          v-if="!formData.avatarImage"
+                          icon="tabler-user"
                           size="30"
                           color="grey"
                         />
                         <img
                           v-else
-                          :src="formData.businessLicense"
-                          style="width: 100%; height: 100%; object-fit: cover"
+                          :src="formData.avatarImage"
+                          style="
+                            width: 100%;
+                            height: 100%;
+                            object-fit: cover;
+                            border-radius: 50%;
+                          "
                         />
                       </div>
                       <div class="d-flex flex-column gap-2">
                         <VBtn
                           variant="outlined"
                           size="small"
-                          @click="$refs.licenseInput.click()"
+                          @click="$refs.avatarInput.click()"
                         >
-                          Upload Business License
+                          Upload Avatar Image
                         </VBtn>
                         <VBtn
-                          v-if="formData.businessLicense"
+                          v-if="formData.avatarImage"
                           variant="tonal"
                           size="small"
                           color="error"
-                          @click="formData.businessLicense = null"
+                          @click="formData.avatarImage = null"
                         >
                           <VIcon icon="tabler-trash" size="16" />
                         </VBtn>
                       </div>
                     </div>
                     <input
-                      ref="licenseInput"
+                      ref="avatarInput"
                       type="file"
-                      accept="image/*,.pdf"
+                      accept="image/*"
                       style="display: none"
-                      @change="handleBusinessLicenseUpload"
+                      @change="handleAvatarImageUpload"
                     />
                     <p class="text-caption text-medium-emphasis mt-2">
-                      Allowed JPG, PNG or PDF, Max Size 5Mb
+                      Allowed JPG or PNG, Preferred 250*250 px, Max size 3Mb
                     </p>
                   </div>
 
-                  <!-- Company Description -->
+                  <!-- Short Bio -->
                   <AppTextField
-                    v-model="formData.companyDescription"
-                    label="Company Description"
-                    placeholder="Tell us about your company and what you do"
+                    v-model="formData.shortBio"
+                    label="Short Bio"
+                    placeholder="Tell us who you are and what you do in a few sentences"
                     type="textarea"
                     rows="3"
                     class="mb-4"
@@ -394,8 +434,8 @@ const handleBusinessLicenseUpload = (event) => {
                   <!-- Certifications -->
                   <AppTextField
                     v-model="formData.certifications"
-                    label="Business Certifications"
-                    placeholder="Upload relevant business certifications"
+                    label="Certifications/Licenses"
+                    placeholder="Upload relevant guiding or safety certifications (first aid, alpine guide)"
                     type="file"
                     accept=".pdf,.doc,.docx"
                     class="mb-4"

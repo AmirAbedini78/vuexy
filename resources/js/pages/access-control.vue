@@ -53,12 +53,14 @@ function handleNext() {
     style="min-height: 80vh"
   >
     <template v-if="!showWizard">
-      <div class="w-100 d-flex justify-center mb-10">
-        <CustomRadiosWithIcon
-          v-model:selected-radio="selectedRadio"
-          :radio-content="radioContent"
-          :grid-column="{ sm: '6', cols: '12' }"
-        />
+      <div class="d-flex justify-center align-center w-100">
+        <div style="max-width: 600px; gap: 2rem" class="d-flex">
+          <CustomRadiosWithIcon
+            v-model:selected-radio="selectedRadio"
+            :radio-content="radioContent"
+            :grid-column="{ sm: '6', cols: '12' }"
+          />
+        </div>
       </div>
       <div class="d-flex justify-center mt-10 mb-8">
         <VBtn color="dark" size="large" @click="handleNext"> Next </VBtn>

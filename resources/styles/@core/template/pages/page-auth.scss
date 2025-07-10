@@ -130,3 +130,18 @@
 .auth-card select::placeholder {
   font-size: 16px !important;
 }
+
+// Access control page radio button styles
+.v-selection-control__label .text-h6 {
+  font-family: 'Anton', sans-serif !important;
+  font-size: 28px !important;
+  font-weight: 400 !important;
+  color: #2F2B3D !important;
+}
+
+.v-selection-control__label .text-body-2 {
+  font-family: 'Karla', sans-serif !important;
+  font-size: 15px !important;
+  font-weight: 400 !important;
+  color: rgba(var(--v-theme-on-surface), 0.7) !important;
+}
