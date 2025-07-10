@@ -87,19 +87,13 @@ const handleAvatarImageUpload = (event) => {
 
   <div class="d-flex justify-center align-center" style="min-height: 60vh">
     <VCard style="width: 80vw; max-width: 1200px">
-    <VCardText>
-      <!-- 👉 stepper content -->
-      <VForm>
+      <VCardText>
+        <!-- 👉 stepper content -->
+        <VForm>
           <VWindow v-model="currentStep" class="disable-tab-transition">
             <!-- Step 1: Personal Information -->
-          <VWindowItem>
-            <VRow>
-              <VCol cols="12">
-                <h6 class="text-h6 font-weight-medium">
-                    Personal Information
-                </h6>
-                  <p class="mb-0">Enter your personal details</p>
-              </VCol>
+            <VWindowItem>
+              <VRow>
                 <!-- Left column -->
                 <VCol cols="12" md="6">
                   <AppTextField
@@ -125,13 +119,13 @@ const handleAvatarImageUpload = (event) => {
                     placeholder="Enter your city"
                     class="mt-4"
                   />
-                <AppTextField
+                  <AppTextField
                     v-model="formData.state"
                     label="State/Province"
                     placeholder="Enter state or province"
                     class="mt-4"
-                />
-              </VCol>
+                  />
+                </VCol>
                 <!-- Right column -->
                 <VCol cols="12" md="6">
                   <AppTextField
@@ -148,41 +142,37 @@ const handleAvatarImageUpload = (event) => {
                     multiple
                     class="mt-4"
                   />
-                <AppTextField
+                  <AppTextField
                     v-model="formData.address2"
                     label="Address Line 2"
                     placeholder="Enter address line 2"
                     class="mt-4"
                   />
-                <AppTextField
+                  <AppTextField
                     v-model="formData.postalCode"
                     label="Postal Code"
                     placeholder="Enter postal code"
                     class="mt-4"
                   />
-                <AppTextField
+                  <AppTextField
                     v-model="formData.country"
                     label="Country"
                     placeholder="Enter your country"
                     class="mt-4"
-                />
-              </VCol>
-            </VRow>
-          </VWindowItem>
-            <!-- Step 2: Account Details -->
-          <VWindowItem>
-            <VRow>
-              <VCol cols="12">
-                  <h6 class="text-h6 font-weight-medium">Account Details</h6>
-                  <p class="mb-0">Setup your account information</p>
+                  />
                 </VCol>
+              </VRow>
+            </VWindowItem>
+            <!-- Step 2: Account Details -->
+            <VWindowItem>
+              <VRow>
                 <!-- Left column -->
                 <VCol cols="12" md="6">
                   <!-- Explorer Passport Image -->
                   <div class="mb-6">
                     <h6 class="text-h6 font-weight-medium mb-2">
                       Explorer Passport Image
-                </h6>
+                    </h6>
                     <p class="text-body-2 text-medium-emphasis mb-4">
                       High quality image, shown as your Explorer Elite passport
                       profile image
@@ -281,7 +271,7 @@ const handleAvatarImageUpload = (event) => {
                   />
 
                   <!-- Emergency Contact Name -->
-                <AppTextField
+                  <AppTextField
                     v-model="formData.emergencyContactName"
                     label="Emergency Contact Name"
                     placeholder="In case we need to contact someone urgently"
@@ -306,7 +296,7 @@ const handleAvatarImageUpload = (event) => {
                       <VRadio value="unsure" label="Not sure yet" />
                     </VRadioGroup>
                   </div>
-              </VCol>
+                </VCol>
                 <!-- Right column -->
                 <VCol cols="12" md="6">
                   <!-- Avatar Image -->
@@ -400,7 +390,7 @@ const handleAvatarImageUpload = (event) => {
                   />
 
                   <!-- Country/Region of Operation -->
-                <AppSelect
+                  <AppSelect
                     v-model="formData.countryOfOperation"
                     label="Country/Region of Operation"
                     placeholder="Areas you usually operate in (select the main areas of activity)"
@@ -426,74 +416,74 @@ const handleAvatarImageUpload = (event) => {
                     label="Emergency Contact Phone"
                     placeholder="+49 1236 456 789"
                     class="mb-4"
-                />
-              </VCol>
-            </VRow>
-          </VWindowItem>
+                  />
+                </VCol>
+              </VRow>
+            </VWindowItem>
             <!-- Step 3: Social Links -->
-          <VWindowItem>
-            <VRow>
-              <VCol cols="12">
+            <VWindowItem>
+              <VRow>
+                <VCol cols="12">
                   <h6 class="text-h6 font-weight-medium">Social Links</h6>
                   <p class="mb-0">Add Social Links</p>
-              </VCol>
+                </VCol>
                 <VCol cols="12" md="6">
-                <AppTextField
-                  v-model="formData.twitter"
-                  placeholder="https://twitter.com/abc"
-                  label="Twitter"
-                />
-              </VCol>
+                  <AppTextField
+                    v-model="formData.twitter"
+                    placeholder="https://twitter.com/abc"
+                    label="Twitter"
+                  />
+                </VCol>
                 <VCol cols="12" md="6">
-                <AppTextField
-                  v-model="formData.facebook"
-                  placeholder="https://facebook.com/abc"
-                  label="Facebook"
-                />
-              </VCol>
+                  <AppTextField
+                    v-model="formData.facebook"
+                    placeholder="https://facebook.com/abc"
+                    label="Facebook"
+                  />
+                </VCol>
                 <VCol cols="12" md="6">
-                <AppTextField
-                  v-model="formData.googlePlus"
-                  placeholder="https://plus.google.com/abc"
-                  label="Google+"
-                />
-              </VCol>
+                  <AppTextField
+                    v-model="formData.googlePlus"
+                    placeholder="https://plus.google.com/abc"
+                    label="Google+"
+                  />
+                </VCol>
                 <VCol cols="12" md="6">
-                <AppTextField
-                  v-model="formData.linkedIn"
-                  placeholder="https://linkedin.com/abc"
-                  label="LinkedIn"
-                />
-              </VCol>
-            </VRow>
-          </VWindowItem>
-        </VWindow>
+                  <AppTextField
+                    v-model="formData.linkedIn"
+                    placeholder="https://linkedin.com/abc"
+                    label="LinkedIn"
+                  />
+                </VCol>
+              </VRow>
+            </VWindowItem>
+          </VWindow>
           <div
             class="d-flex flex-wrap gap-4 justify-sm-space-between justify-center mt-8"
           >
-          <VBtn
-            color="secondary"
-            variant="tonal"
-            :disabled="currentStep === 0"
-            @click="currentStep--"
-          >
+            <VBtn
+              color="secondary"
+              variant="tonal"
+              :disabled="currentStep === 0"
+              @click="currentStep--"
+            >
               <VIcon icon="tabler-arrow-left" start class="flip-in-rtl" />
-            Previous
-          </VBtn>
-          <VBtn
-            v-if="numberedSteps.length - 1 === currentStep"
-            color="success"
-            @click="onSubmit"
-          >
-            submit
-          </VBtn>
+              Previous
+            </VBtn>
+            <VBtn
+              v-if="numberedSteps.length - 1 === currentStep"
+              color="success"
+              @click="onSubmit"
+            >
+              submit
+            </VBtn>
             <VBtn v-else @click="currentStep++">
               Next
               <VIcon icon="tabler-arrow-right" end class="flip-in-rtl" />
-          </VBtn>
-        </div>
-      </VForm>
-    </VCardText>
-  </VCard>
+            </VBtn>
+          </div>
+        </VForm>
+      </VCardText>
+    </VCard>
   </div>
 </template>

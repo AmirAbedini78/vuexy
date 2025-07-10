@@ -89,12 +89,6 @@ const handleAvatarImageUpload = (event) => {
             <!-- Step 1: Company Information -->
             <VWindowItem>
               <VRow>
-                <VCol cols="12">
-                  <h6 class="text-h6 font-weight-medium">
-                    Company Information
-                  </h6>
-                  <p class="mb-0">Enter your company details</p>
-                </VCol>
                 <!-- Left column -->
                 <VCol cols="12" md="6">
                   <!-- Company Name -->
@@ -238,10 +232,6 @@ const handleAvatarImageUpload = (event) => {
             <!-- Step 2: Business Details -->
             <VWindowItem>
               <VRow>
-                <VCol cols="12">
-                  <h6 class="text-h6 font-weight-medium">Business Details</h6>
-                  <p class="mb-0">Setup your business information</p>
-                </VCol>
                 <!-- Left column -->
                 <VCol cols="12" md="6">
                   <!-- Explorer Passport Image -->

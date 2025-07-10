@@ -54,23 +54,18 @@ function handleNext() {
   >
     <template v-if="!showWizard">
       <div class="d-flex justify-center align-center w-100">
-        <div style="max-width: 600px; gap: 2rem" class="d-flex">
+        <div style="max-width: 600px; gap: 20rem !important" class="d-flex">
           <CustomRadiosWithIcon
             v-model:selected-radio="selectedRadio"
             :radio-content="radioContent"
             :grid-column="{ sm: '6', cols: '12' }"
+            class="access-control-radios"
           />
         </div>
       </div>
       <div class="d-flex justify-center mt-10 mb-8">
         <VBtn color="dark" size="large" @click="handleNext"> Next </VBtn>
       </div>
-      <footer
-        class="text-center w-100 text-medium-emphasis"
-        style="font-size: 15px"
-      >
-        © 2025, Explorer Elite
-      </footer>
     </template>
     <template v-else>
       <DemoFormWizardNumberedModernBasic
@@ -92,5 +87,20 @@ function handleNext() {
   .layout-wrapper .layout-content-wrapper {
     padding-left: 0 !important;
   }
+}
+
+/* Custom styles for access control radio buttons */
+.access-control-radios .custom-radio-icon h6 {
+  font-family: "Anton", sans-serif !important;
+  font-size: 32 !important;
+  font-weight: 400 !important;
+  color: #2f2b3d !important;
+}
+
+.access-control-radios .custom-radio-icon .text-body-2 {
+  font-family: "Karla", sans-serif !important;
+  font-size: 15 !important;
+  font-weight: 400 !important;
+  color: rgba(var(--v-theme-on-surface), 0.7) !important;
 }
 </style>

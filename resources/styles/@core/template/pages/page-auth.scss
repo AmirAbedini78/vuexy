@@ -145,3 +145,18 @@
   font-weight: 400 !important;
   color: rgba(var(--v-theme-on-surface), 0.7) !important;
 }
+
+// Access control page radio button styles - specific for the access control page
+.access-control-radios .custom-radio-icon h6 {
+  font-family: 'Anton', sans-serif !important;
+  font-size: 28px !important;
+  font-weight: 400 !important;
+  color: #2F2B3D !important;
+}
+
+.access-control-radios .custom-radio-icon .text-body-2 {
+  font-family: 'Karla', sans-serif !important;
+  font-size: 15px !important;
+  font-weight: 400 !important;
+  color: rgba(var(--v-theme-on-surface), 0.7) !important;
+}
