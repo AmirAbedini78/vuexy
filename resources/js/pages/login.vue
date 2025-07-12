@@ -141,7 +141,7 @@ const onSubmit = () => {
       <!-- 👉 Auth Card -->
       <VCard
         class="auth-card"
-        max-width="400"
+        max-width="450"
         :class="$vuetify.display.smAndUp ? 'pa-6' : 'pa-0'"
       >
         <VCardItem class="justify-center">
@@ -196,8 +196,8 @@ const onSubmit = () => {
               <VCol cols="12">
                 <AppTextField
                   v-model="credentials.email"
-                  label="Email"
-                  placeholder="Enter your email"
+                  label="Email or Account Name"
+                  placeholder="Enter your email or username"
                   type="email"
                   autofocus
                   :rules="[requiredValidator, emailValidator]"
@@ -231,7 +231,6 @@ const onSubmit = () => {
                     label="Remember me"
                     :disabled="isLoading"
                     class="auth-checkbox"
-                    style="font-size: 0.875rem"
                   />
                   <RouterLink
                     class="text-primary ms-2 mb-1"

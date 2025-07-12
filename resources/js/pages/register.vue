@@ -87,7 +87,7 @@ const register = async () => {
 
     // Don't store user data and token after registration
     // User should login separately
-    
+
     registrationDone.value = true;
   } catch (err) {
     console.error("Registration error:", err);
@@ -114,7 +114,7 @@ const onSubmit = () => {
       <!-- 👉 Auth Card -->
       <VCard
         class="auth-card"
-        max-width="400"
+        max-width="450"
         :class="$vuetify.display.smAndUp ? 'pa-6' : 'pa-0'"
       >
         <VCardItem class="justify-center">
@@ -133,7 +133,7 @@ const onSubmit = () => {
             Sing up in your Adventure management Platform!
           </p>
         </VCardText>
-        
+
         <VCardText>
           <!-- Alert for successful registration -->
           <VAlert
@@ -159,8 +159,8 @@ const onSubmit = () => {
                 <AppTextField
                   v-model="form.name"
                   autofocus
-                  label="Full Name"
-                  placeholder="John Doe"
+                  label="Account Name"
+                  placeholder="Enter your account name"
                   :rules="[requiredValidator]"
                   :error-messages="errors.name"
                   :disabled="isLoading"
@@ -173,7 +173,7 @@ const onSubmit = () => {
                   v-model="form.email"
                   label="Email"
                   type="email"
-                  placeholder="johndoe@email.com"
+                  placeholder="Enter your email"
                   :rules="[requiredValidator, emailValidator]"
                   :error-messages="errors.email"
                   :disabled="isLoading"
@@ -226,7 +226,6 @@ const onSubmit = () => {
                   :rules="[(v) => !!v || 'You must agree to continue!']"
                   :disabled="isLoading"
                   class="auth-checkbox"
-                  style="font-size: 0.875rem"
                 />
               </VCol>
 

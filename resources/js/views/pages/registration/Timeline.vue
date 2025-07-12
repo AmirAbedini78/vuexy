@@ -330,8 +330,7 @@ const sendEmailVerification = async () => {
   emailLoading.value = true;
   emailMessage.value = "";
 
-  // Get user email from userData
-  const userEmail = userData.value?.email;
+  const userEmail = userData.value.email;
   if (!userEmail) {
     emailStatus.value = "error";
     emailMessage.value = "Email address not found. Please contact support.";
@@ -360,6 +359,7 @@ const sendEmailVerification = async () => {
       emailStatus.value = "sent";
       emailMessage.value =
         "Verification email sent successfully! Please check your inbox and click the verification link.";
+      await fetchVerificationStatus(); // وضعیت را به‌روز کن
     } else {
       emailStatus.value = "error";
       emailMessage.value =
@@ -438,10 +438,21 @@ const sendEmailVerification = async () => {
             color="orange"
             class="send-link-btn"
             @click="sendEmailVerification"
+            :loading="emailLoading"
+            :disabled="emailLoading"
           >
             <VIcon left size="20">tabler-mail</VIcon>
             Send Link
           </VBtn>
+          <div
+            v-if="emailMessage"
+            :style="{
+              color: emailStatus === 'error' ? 'red' : 'green',
+              marginTop: '8px',
+            }"
+          >
+            {{ emailMessage }}
+          </div>
         </div>
       </div>
     </div>
