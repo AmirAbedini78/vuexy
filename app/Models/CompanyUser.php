@@ -10,27 +10,37 @@ class CompanyUser extends Model
     use HasFactory;
 
     protected $fillable = [
+        // Step 1: Company Information
         'company_name',
-        'business_type',
-        'industry',
-        'registration_number',
-        'tax_id',
-        'website',
-        'phone',
-        'email',
-        'country',
+        'vat_id',
+        'address1',
         'city',
-        'address',
+        'state',
+        'contact_person',
+        'country_of_registration',
+        'address2',
         'postal_code',
-        'logo',
-        'business_license',
-        'professional_title',
-        'bio',
-        'linkedin',
-        'twitter',
-        'instagram',
-        'facebook',
-        'youtube',
-        'tiktok',
+        'country',
+        'business_type',
+        
+        // Step 2: Business Details
+        'passport_image', // Company Logo
+        'avatar_image', // Business License
+        'activity_specialization',
+        'want_to_be_listed',
+        'short_bio',
+        'certifications',
+        
+        // Step 3: Social Links
+        'company_website',
+        'social_media_links',
+        'social_proof_links',
+        'terms_accepted',
+    ];
+
+    protected $casts = [
+        'social_media_links' => 'array',
+        'social_proof_links' => 'array',
+        'terms_accepted' => 'boolean',
     ];
 } 

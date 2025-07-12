@@ -1,5 +1,9 @@
 <script setup>
+import { companyUserService } from "@/services/api";
 import { ref } from "vue";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
 
 const numberedSteps = [
   {
@@ -14,6 +18,7 @@ const numberedSteps = [
 ];
 
 const currentStep = ref(0);
+const loading = ref(false);
 
 const formData = ref({
   // Step 1 fields - Company Information
@@ -40,32 +45,89 @@ const formData = ref({
   facebook: "",
   linkedIn: "",
   instagram: "",
+  // New Step 3 fields
+  companyWebsite: "",
+  socialProofLinks: [""],
+  socialMediaLinks: [""],
+  termsAccepted: false,
 });
 
-const onSubmit = () => {
-  console.log(formData.value);
+const onSubmit = async () => {
+  loading.value = true;
+
+  try {
+    // Validate required fields
+    if (!formData.value.termsAccepted) {
+      alert("Please accept the terms and conditions");
+      return;
+    }
+
+    const response = await companyUserService.register(formData.value);
+    console.log("Registration successful:", response);
+
+    // Show success message
+    alert("Registration completed successfully!");
+
+    // Redirect to timeline page with company ID
+    router.push({
+      name: "registration-timeline",
+      params: {
+        type: "company",
+        id: response.data.id,
+      },
+    });
+  } catch (error) {
+    console.error("Registration failed:", error);
+    alert("Registration failed: " + (error.message || "Unknown error"));
+  } finally {
+    loading.value = false;
+  }
 };
 
 // Handle image uploads
 const handlePassportImageUpload = (event) => {
   const file = event.target.files[0];
   if (file) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      formData.value.passportImage = e.target.result;
-    };
-    reader.readAsDataURL(file);
+    formData.value.passportImage = file;
   }
 };
 
 const handleAvatarImageUpload = (event) => {
   const file = event.target.files[0];
   if (file) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      formData.value.avatarImage = e.target.result;
-    };
-    reader.readAsDataURL(file);
+    formData.value.avatarImage = file;
+  }
+};
+
+// Handle certifications upload
+const handleCertificationsUpload = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    formData.value.certifications = file;
+  }
+};
+
+// Add new social proof link field
+const addSocialProofLink = () => {
+  formData.value.socialProofLinks.push("");
+};
+
+// Remove social proof link field
+const removeSocialProofLink = (index) => {
+  if (formData.value.socialProofLinks.length > 1) {
+    formData.value.socialProofLinks.splice(index, 1);
+  }
+};
+
+// Add new social media link field
+const addSocialMediaLink = () => {
+  formData.value.socialMediaLinks.push("");
+};
+
+// Remove social media link field
+const removeSocialMediaLink = (index) => {
+  if (formData.value.socialMediaLinks.length > 1) {
+    formData.value.socialMediaLinks.splice(index, 1);
   }
 };
 </script>
@@ -89,6 +151,12 @@ const handleAvatarImageUpload = (event) => {
             <!-- Step 1: Company Information -->
             <VWindowItem>
               <VRow>
+                <VCol cols="12">
+                  <h6 class="text-h6 font-weight-medium">
+                    Company Information
+                  </h6>
+                  <p class="mb-0">Enter your company details</p>
+                </VCol>
                 <!-- Left column -->
                 <VCol cols="12" md="6">
                   <!-- Company Name -->
@@ -192,7 +260,7 @@ const handleAvatarImageUpload = (event) => {
                   <AppSelect
                     v-model="formData.country"
                     label="Country*"
-                    placeholder="Germany"
+                    placeholder="Select your country"
                     :items="[
                       'Germany',
                       'Austria',
@@ -213,15 +281,13 @@ const handleAvatarImageUpload = (event) => {
                   <AppSelect
                     v-model="formData.businessType"
                     label="Business Type*"
-                    placeholder="e.g. Tour Operator, Activity Center, Gear Rental, etc..."
+                    placeholder="Select your business type"
                     :items="[
-                      'Tour Operator',
-                      'Activity Center',
-                      'Gear Rental',
-                      'Adventure Guide',
-                      'Travel Agency',
-                      'Outdoor Equipment',
-                      'Training Center',
+                      'Sole Proprietorship',
+                      'Partnership',
+                      'Limited Liability Company (LLC)',
+                      'Corporation',
+                      'Non-Profit Organization',
                       'Other',
                     ]"
                     class="mb-4"
@@ -232,16 +298,19 @@ const handleAvatarImageUpload = (event) => {
             <!-- Step 2: Business Details -->
             <VWindowItem>
               <VRow>
+                <VCol cols="12">
+                  <h6 class="text-h6 font-weight-medium">Business Details</h6>
+                  <p class="mb-0">Setup your business information</p>
+                </VCol>
                 <!-- Left column -->
                 <VCol cols="12" md="6">
-                  <!-- Explorer Passport Image -->
+                  <!-- Company Logo -->
                   <div class="mb-6">
                     <h6 class="text-h6 font-weight-medium mb-2">
-                      Explorer Passport Image
+                      Company Logo
                     </h6>
                     <p class="text-body-2 text-medium-emphasis mb-4">
-                      High quality image, shown as your Explorer Elite passport
-                      profile image
+                      High quality image, shown as your company logo
                     </p>
                     <div class="d-flex align-center gap-4">
                       <div
@@ -254,11 +323,12 @@ const handleAvatarImageUpload = (event) => {
                           align-items: center;
                           justify-content: center;
                           background-color: #f5f5f5;
+                          border-radius: 8px;
                         "
                       >
                         <VIcon
                           v-if="!formData.passportImage"
-                          icon="tabler-user"
+                          icon="tabler-photo"
                           size="40"
                           color="grey"
                         />
@@ -274,7 +344,7 @@ const handleAvatarImageUpload = (event) => {
                           size="small"
                           @click="$refs.passportInput.click()"
                         >
-                          Upload Explorer Passport Image
+                          Upload Company Logo
                         </VBtn>
                         <VBtn
                           v-if="formData.passportImage"
@@ -303,7 +373,7 @@ const handleAvatarImageUpload = (event) => {
                   <AppSelect
                     v-model="formData.activitySpecialization"
                     label="Activity Specialization"
-                    placeholder="Activities you can lead (e.g., hiking, diving)"
+                    placeholder="Activities your company can lead (e.g., hiking, diving)"
                     :items="[
                       'Hiking',
                       'Diving',
@@ -316,7 +386,6 @@ const handleAvatarImageUpload = (event) => {
                       'Wildlife Tours',
                       'Other',
                     ]"
-                    multiple
                     class="mb-4"
                   />
 
@@ -341,13 +410,13 @@ const handleAvatarImageUpload = (event) => {
                 </VCol>
                 <!-- Right column -->
                 <VCol cols="12" md="6">
-                  <!-- Avatar Image -->
+                  <!-- Business License -->
                   <div class="mb-6">
                     <h6 class="text-h6 font-weight-medium mb-2">
-                      Avatar Image
+                      Business License
                     </h6>
                     <p class="text-body-2 text-medium-emphasis mb-4">
-                      Shown as your platform profile image
+                      Upload your business license or registration document
                     </p>
                     <div class="d-flex align-center gap-4">
                       <div
@@ -360,12 +429,12 @@ const handleAvatarImageUpload = (event) => {
                           align-items: center;
                           justify-content: center;
                           background-color: #f5f5f5;
-                          border-radius: 50%;
+                          border-radius: 8px;
                         "
                       >
                         <VIcon
                           v-if="!formData.avatarImage"
-                          icon="tabler-user"
+                          icon="tabler-file-document"
                           size="30"
                           color="grey"
                         />
@@ -376,7 +445,7 @@ const handleAvatarImageUpload = (event) => {
                             width: 100%;
                             height: 100%;
                             object-fit: cover;
-                            border-radius: 50%;
+                            border-radius: 8px;
                           "
                         />
                       </div>
@@ -386,7 +455,7 @@ const handleAvatarImageUpload = (event) => {
                           size="small"
                           @click="$refs.avatarInput.click()"
                         >
-                          Upload Avatar Image
+                          Upload Business License
                         </VBtn>
                         <VBtn
                           v-if="formData.avatarImage"
@@ -402,20 +471,20 @@ const handleAvatarImageUpload = (event) => {
                     <input
                       ref="avatarInput"
                       type="file"
-                      accept="image/*"
+                      accept="image/*,.pdf"
                       style="display: none"
                       @change="handleAvatarImageUpload"
                     />
                     <p class="text-caption text-medium-emphasis mt-2">
-                      Allowed JPG or PNG, Preferred 250*250 px, Max size 3Mb
+                      Allowed JPG, PNG or PDF, Max size 5Mb
                     </p>
                   </div>
 
                   <!-- Short Bio -->
                   <AppTextField
                     v-model="formData.shortBio"
-                    label="Short Bio"
-                    placeholder="Tell us who you are and what you do in a few sentences"
+                    label="Company Bio"
+                    placeholder="Tell us about your company and what you do in a few sentences"
                     type="textarea"
                     rows="3"
                     class="mb-4"
@@ -425,7 +494,7 @@ const handleAvatarImageUpload = (event) => {
                   <AppTextField
                     v-model="formData.certifications"
                     label="Certifications/Licenses"
-                    placeholder="Upload relevant guiding or safety certifications (first aid, alpine guide)"
+                    placeholder="Upload relevant company certifications or licenses"
                     type="file"
                     accept=".pdf,.doc,.docx"
                     class="mb-4"
@@ -438,35 +507,136 @@ const handleAvatarImageUpload = (event) => {
               <VRow>
                 <VCol cols="12">
                   <h6 class="text-h6 font-weight-medium">Social Links</h6>
-                  <p class="mb-0">Add your company's social media links</p>
+                  <p class="mb-0">
+                    Add your company's social media and proof links
+                  </p>
                 </VCol>
+
+                <!-- Left Column -->
                 <VCol cols="12" md="6">
-                  <AppTextField
-                    v-model="formData.twitter"
-                    placeholder="https://twitter.com/yourcompany"
-                    label="Twitter"
-                  />
+                  <!-- Company Website -->
+                  <div class="mb-6">
+                    <h6 class="text-h6 font-weight-medium mb-2">
+                      Company Website
+                    </h6>
+                    <AppTextField
+                      v-model="formData.companyWebsite"
+                      placeholder="Add company official website"
+                      class="mb-4"
+                    />
+                  </div>
+
+                  <!-- Social Media Links -->
+                  <div class="mb-6">
+                    <h6 class="text-h6 font-weight-medium mb-2">
+                      Social Media Links
+                    </h6>
+
+                    <div
+                      v-for="(link, index) in formData.socialMediaLinks"
+                      :key="index"
+                      class="mb-3"
+                    >
+                      <div class="d-flex gap-2">
+                        <AppTextField
+                          v-model="formData.socialMediaLinks[index]"
+                          placeholder="Add a link to your socials or website that shows your previous work"
+                          class="flex-grow-1"
+                        >
+                          <template #append-inner>
+                            <VBtn
+                              v-if="
+                                index === formData.socialMediaLinks.length - 1
+                              "
+                              variant="text"
+                              size="small"
+                              @click="addSocialMediaLink"
+                              class="px-0"
+                            >
+                              <VIcon icon="tabler-plus" size="20" />
+                            </VBtn>
+                          </template>
+                        </AppTextField>
+                        <VBtn
+                          v-if="formData.socialMediaLinks.length > 1"
+                          variant="tonal"
+                          size="small"
+                          color="error"
+                          @click="removeSocialMediaLink(index)"
+                          class="mt-1"
+                        >
+                          <VIcon icon="tabler-minus" size="16" />
+                        </VBtn>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Terms and Conditions -->
+                  <div class="mb-6">
+                    <div class="d-flex align-start gap-3">
+                      <VCheckbox
+                        v-model="formData.termsAccepted"
+                        class="mt-1"
+                      />
+                      <div class="text-body-2">
+                        By continuing, you agree to our
+                        <a href="#" class="text-primary">Terms of Service</a>,
+                        <a href="#" class="text-primary">Privacy Policy</a>, and
+                        all related
+                        <a href="#" class="text-primary">Policies</a>. Full
+                        details available on our
+                        <a href="#" class="text-primary">Legal Page</a>.
+                      </div>
+                    </div>
+                  </div>
                 </VCol>
+
+                <!-- Right Column -->
                 <VCol cols="12" md="6">
-                  <AppTextField
-                    v-model="formData.facebook"
-                    placeholder="https://facebook.com/yourcompany"
-                    label="Facebook"
-                  />
-                </VCol>
-                <VCol cols="12" md="6">
-                  <AppTextField
-                    v-model="formData.linkedIn"
-                    placeholder="https://linkedin.com/company/yourcompany"
-                    label="LinkedIn"
-                  />
-                </VCol>
-                <VCol cols="12" md="6">
-                  <AppTextField
-                    v-model="formData.instagram"
-                    placeholder="https://instagram.com/yourcompany"
-                    label="Instagram"
-                  />
+                  <!-- Social Proof Links -->
+                  <div class="mb-6">
+                    <h6 class="text-h6 font-weight-medium mb-2">
+                      Social Proof Links
+                    </h6>
+
+                    <div
+                      v-for="(link, index) in formData.socialProofLinks"
+                      :key="index"
+                      class="mb-3"
+                    >
+                      <div class="d-flex gap-2">
+                        <AppTextField
+                          v-model="formData.socialProofLinks[index]"
+                          placeholder="Links to 'reviews', 'social proof', or 'feedbacks' about your activities"
+                          class="flex-grow-1"
+                        >
+                          <template #append-inner>
+                            <VBtn
+                              v-if="
+                                index === formData.socialProofLinks.length - 1
+                              "
+                              variant="text"
+                              size="small"
+                              @click="addSocialProofLink"
+                              class="px-0"
+                            >
+                              <VIcon icon="tabler-plus" size="20" />
+                            </VBtn>
+                          </template>
+                        </AppTextField>
+                        <VBtn
+                          v-if="formData.socialProofLinks.length > 1"
+                          variant="tonal"
+                          size="small"
+                          color="error"
+                          @click="removeSocialProofLink(index)"
+                          class="mt-1"
+                        >
+                          <VIcon icon="tabler-minus" size="16" />
+                        </VBtn>
+                      </div>
+                    </div>
+                  </div>
                 </VCol>
               </VRow>
             </VWindowItem>
@@ -486,9 +656,11 @@ const handleAvatarImageUpload = (event) => {
             <VBtn
               v-if="numberedSteps.length - 1 === currentStep"
               color="success"
+              :loading="loading"
+              :disabled="loading"
               @click="onSubmit"
             >
-              submit
+              {{ loading ? "Submitting..." : "Submit" }}
             </VBtn>
             <VBtn v-else @click="currentStep++">
               Next

@@ -10,28 +10,33 @@ return new class extends Migration
     {
         Schema::create('company_users', function (Blueprint $table) {
             $table->id();
+            // Step 1: Company Information
             $table->string('company_name');
-            $table->string('business_type');
-            $table->string('industry');
-            $table->string('registration_number');
-            $table->string('tax_id');
-            $table->string('website')->nullable();
-            $table->string('phone');
-            $table->string('email')->unique();
-            $table->string('country');
+            $table->string('vat_id')->nullable();
+            $table->string('address1');
             $table->string('city');
-            $table->text('address');
+            $table->string('state');
+            $table->string('contact_person')->nullable();
+            $table->string('country_of_registration');
+            $table->string('address2')->nullable();
             $table->string('postal_code');
-            $table->string('logo')->nullable();
-            $table->string('business_license')->nullable();
-            $table->string('professional_title');
-            $table->text('bio');
-            $table->string('linkedin')->nullable();
-            $table->string('twitter')->nullable();
-            $table->string('instagram')->nullable();
-            $table->string('facebook')->nullable();
-            $table->string('youtube')->nullable();
-            $table->string('tiktok')->nullable();
+            $table->string('country');
+            $table->string('business_type');
+            
+            // Step 2: Business Details
+            $table->string('passport_image')->nullable(); // Company Logo
+            $table->string('avatar_image')->nullable(); // Business License
+            $table->string('activity_specialization');
+            $table->string('want_to_be_listed');
+            $table->text('short_bio');
+            $table->string('certifications')->nullable();
+            
+            // Step 3: Social Links
+            $table->string('company_website')->nullable();
+            $table->json('social_media_links')->nullable();
+            $table->json('social_proof_links')->nullable();
+            $table->boolean('terms_accepted')->default(false);
+            
             $table->timestamps();
         });
     }

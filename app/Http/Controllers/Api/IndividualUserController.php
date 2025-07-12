@@ -13,32 +13,34 @@ class IndividualUserController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'email' => 'required|email|unique:individual_users,email',
-            'phone' => 'required|string|max:20',
-            'date_of_birth' => 'required|date',
+            // Step 1: Personal Information
+            'full_name' => 'required|string|max:255',
             'nationality' => 'required|string|max:255',
-            'country' => 'required|string|max:255',
+            'address1' => 'required|string|max:255',
             'city' => 'required|string|max:255',
-            'address' => 'required|string',
+            'state' => 'required|string|max:255',
+            'dob' => 'nullable|string|max:255', // Changed to nullable
+            'languages' => 'nullable|string', // Changed from array to string (JSON)
+            'address2' => 'nullable|string|max:255',
             'postal_code' => 'required|string|max:20',
-            'profile_image' => 'nullable|file|image|max:2048',
-            'id_document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'professional_title' => 'required|string|max:255',
-            'industry' => 'required|string|max:255',
-            'bio' => 'required|string',
-            'website' => 'nullable|url|max:255',
-            'linkedin' => 'nullable|url|max:255',
-            'twitter' => 'nullable|url|max:255',
-            'instagram' => 'nullable|url|max:255',
-            'facebook' => 'nullable|url|max:255',
-            'youtube' => 'nullable|url|max:255',
-            'tiktok' => 'nullable|url|max:255',
+            'country' => 'required|string|max:255',
+            
+            // Step 2: Account Details
+            'passport_image' => 'nullable|file|mimes:jpg,jpeg,png,gif|max:5120', // Fixed image validation
+            'avatar_image' => 'nullable|file|mimes:jpg,jpeg,png,gif|max:3072', // Fixed image validation
+            'activity_specialization' => 'required|string|max:255',
+            'years_of_experience' => 'required|string|max:255',
             'emergency_contact_name' => 'required|string|max:255',
+            'want_to_be_listed' => 'required|string|in:yes,no,unsure',
+            'short_bio' => 'required|string',
+            'certifications' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
+            'country_of_operation' => 'required|string|max:255',
             'emergency_contact_phone' => 'required|string|max:20',
-            'emergency_contact_relationship' => 'required|string|max:255',
-            'country_region_operation' => 'required|string|max:255',
+            
+            // Step 3: Social Links
+            'social_media_links' => 'nullable|string', // Changed from array to string (JSON)
+            'social_proof_links' => 'nullable|string', // Changed from array to string (JSON)
+            'terms_accepted' => 'required|string|in:1,0', // Changed from boolean to string
         ]);
 
         if ($validator->fails()) {
@@ -53,13 +55,43 @@ class IndividualUserController extends Controller
             $data = $validator->validated();
 
             // Handle file uploads
-            if ($request->hasFile('profile_image')) {
-                $data['profile_image'] = $request->file('profile_image')->store('individual/profiles', 'public');
+            if ($request->hasFile('passport_image') && $request->file('passport_image')->isValid()) {
+                $data['passport_image'] = $request->file('passport_image')->store('individual/passport', 'public');
             }
 
-            if ($request->hasFile('id_document')) {
-                $data['id_document'] = $request->file('id_document')->store('individual/documents', 'public');
+            if ($request->hasFile('avatar_image') && $request->file('avatar_image')->isValid()) {
+                $data['avatar_image'] = $request->file('avatar_image')->store('individual/avatar', 'public');
             }
+
+            if ($request->hasFile('certifications') && $request->file('certifications')->isValid()) {
+                $data['certifications'] = $request->file('certifications')->store('individual/certifications', 'public');
+            }
+
+            // Convert JSON strings to arrays
+            if (isset($data['languages']) && is_string($data['languages'])) {
+                $data['languages'] = json_decode($data['languages'], true) ?: [];
+            }
+
+            if (isset($data['social_media_links']) && is_string($data['social_media_links'])) {
+                $socialMediaLinks = json_decode($data['social_media_links'], true) ?: [];
+                $data['social_media_links'] = array_filter($socialMediaLinks, function($link) {
+                    return !empty($link) && $link !== '';
+                });
+            } else {
+                $data['social_media_links'] = [];
+            }
+
+            if (isset($data['social_proof_links']) && is_string($data['social_proof_links'])) {
+                $socialProofLinks = json_decode($data['social_proof_links'], true) ?: [];
+                $data['social_proof_links'] = array_filter($socialProofLinks, function($link) {
+                    return !empty($link) && $link !== '';
+                });
+            } else {
+                $data['social_proof_links'] = [];
+            }
+
+            // Convert terms_accepted to boolean
+            $data['terms_accepted'] = $data['terms_accepted'] === '1';
 
             $individualUser = IndividualUser::create($data);
 

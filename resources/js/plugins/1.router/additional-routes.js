@@ -94,4 +94,13 @@ export const routes = [
       public: true,
     },
   },
+  {
+    path: '/registration/timeline/:type/:id',
+    name: 'registration-timeline',
+    component: () => import('@/views/pages/registration/Timeline.vue'),
+    meta: {
+      layout: 'blank',
+      public: true,
+    },
+  },
 ]

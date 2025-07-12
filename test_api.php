@@ -1,45 +1,51 @@
 <?php
 
-// Test the registration endpoint
-$url = 'http://vuexy.test/api/auth/register';
-$data = [
-    'name' => 'Test User 5',
-    'email' => 'test5@example.com',
-    'password' => 'password123',
-    'password_confirmation' => 'password123'
-];
+// Simple test to check if routes are working
+echo "Testing API routes...\n";
 
-$options = [
-    'http' => [
-        'header' => "Content-type: application/json\r\n",
-        'method' => 'POST',
-        'content' => json_encode($data)
-    ]
-];
+// Test if we can access the routes
+$baseUrl = 'http://vuexy.test/api';
 
-$context = stream_context_create($options);
-$result = file_get_contents($url, false, $context);
+// Test individual users route
+$individualUrl = $baseUrl . '/individual-users';
+echo "Testing: $individualUrl\n";
 
-echo "Registration Response:\n";
-echo $result . "\n\n";
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $individualUrl);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['test' => 'data']));
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Content-Type: application/json',
+    'Accept: application/json'
+]);
 
-// Test the login endpoint
-$url = 'http://vuexy.test/api/auth/login';
-$data = [
-    'email' => 'test5@example.com',
-    'password' => 'password123'
-];
+$response = curl_exec($ch);
+$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
 
-$options = [
-    'http' => [
-        'header' => "Content-type: application/json\r\n",
-        'method' => 'POST',
-        'content' => json_encode($data)
-    ]
-];
+echo "Individual Users - HTTP Code: $httpCode\n";
+echo "Response: $response\n\n";
 
-$context = stream_context_create($options);
-$result = file_get_contents($url, false, $context);
+// Test company users route
+$companyUrl = $baseUrl . '/company-users';
+echo "Testing: $companyUrl\n";
 
-echo "Login Response:\n";
-echo $result . "\n";
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $companyUrl);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['test' => 'data']));
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Content-Type: application/json',
+    'Accept: application/json'
+]);
+
+$response = curl_exec($ch);
+$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
+
+echo "Company Users - HTTP Code: $httpCode\n";
+echo "Response: $response\n\n";
+
+echo "Test completed.\n";

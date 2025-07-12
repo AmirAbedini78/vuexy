@@ -10,35 +10,41 @@ class IndividualUser extends Model
     use HasFactory;
 
     protected $fillable = [
-        'first_name',
-        'last_name',
-        'email',
-        'phone',
-        'date_of_birth',
+        // Step 1: Personal Information
+        'full_name',
         'nationality',
-        'country',
+        'address1',
         'city',
-        'address',
+        'state',
+        'dob',
+        'languages',
+        'address2',
         'postal_code',
-        'profile_image',
-        'id_document',
-        'professional_title',
-        'industry',
-        'bio',
-        'website',
-        'linkedin',
-        'twitter',
-        'instagram',
-        'facebook',
-        'youtube',
-        'tiktok',
+        'country',
+        
+        // Step 2: Account Details
+        'passport_image',
+        'avatar_image',
+        'activity_specialization',
+        'years_of_experience',
         'emergency_contact_name',
+        'want_to_be_listed',
+        'short_bio',
+        'certifications',
+        'country_of_operation',
         'emergency_contact_phone',
-        'emergency_contact_relationship',
-        'country_region_operation',
+        
+        // Step 3: Social Links
+        'social_media_links',
+        'social_proof_links',
+        'terms_accepted',
     ];
 
     protected $casts = [
-        'date_of_birth' => 'date',
+        'dob' => 'date',
+        'languages' => 'array',
+        'social_media_links' => 'array',
+        'social_proof_links' => 'array',
+        'terms_accepted' => 'boolean',
     ];
 } 
