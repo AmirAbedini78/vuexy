@@ -15,20 +15,22 @@ definePage({
 const radioContent = [
   {
     title: "Register as Individual",
-    desc: "Guides working solo, freelancers or a single person offering experiences",
+    desc: "For guides working solo, freelancers or a single person offering experiences",
     value: "individual",
-    icon: {
-      icon: "tabler-user",
-      size: "32",
+    img: {
+      active: "/images/4svg/wired-outline-21-avatar-hover-jumping.png",
+      inactive: "/images/4svg/wired-outline-21-avatar-hover-jumping-black.png",
     },
   },
   {
     title: "Register as Company",
-    desc: "Businesses with multiple guides or a registered entity",
+    desc: "For businesses with multiple guides or a registered entity",
     value: "company",
-    icon: {
-      icon: "tabler-users",
-      size: "32",
+    img: {
+      active:
+        "/images/4svg/wired-outline-314-three-avatars-icon-calm-hover-nodding.png",
+      inactive:
+        "/images/4svg/wired-outline-314-three-avatars-icon-calm-hover-nodding-black.png",
     },
   },
 ];
@@ -49,12 +51,12 @@ function handleNext() {
 
 <template>
   <div
-    class="d-flex flex-column align-center justify-center"
+    class="d-flex flex-column align-center justify-center access-control-content"
     style="min-height: 80vh"
   >
     <template v-if="!showWizard">
       <div class="d-flex justify-center align-center w-100">
-        <div style="max-width: 600px; gap: 20rem !important" class="d-flex">
+        <div style="max-width: 550px; gap: 20rem !important" class="d-flex">
           <CustomRadiosWithIcon
             v-model:selected-radio="selectedRadio"
             :radio-content="radioContent"
@@ -64,7 +66,14 @@ function handleNext() {
         </div>
       </div>
       <div class="d-flex justify-center mt-10 mb-8">
-        <VBtn color="dark" size="large" @click="handleNext"> Next </VBtn>
+        <VBtn
+          class="access-control-btn"
+          color="dark"
+          size="large"
+          @click="handleNext"
+        >
+          Next
+        </VBtn>
       </div>
     </template>
     <template v-else>
@@ -92,15 +101,37 @@ function handleNext() {
 /* Custom styles for access control radio buttons */
 .access-control-radios .custom-radio-icon h6 {
   font-family: "Anton", sans-serif !important;
-  font-size: 32 !important;
+  font-size: 20px !important;
   font-weight: 400 !important;
-  color: #2f2b3d !important;
+  color: #444151 !important;
 }
 
 .access-control-radios .custom-radio-icon .text-body-2 {
   font-family: "Karla", sans-serif !important;
-  font-size: 15 !important;
+  font-size: 12px !important;
   font-weight: 400 !important;
-  color: rgba(var(--v-theme-on-surface), 0.7) !important;
+  color: #444151;
+}
+
+.access-control-content {
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 2px 16px 0 rgba(44, 44, 44, 0.08);
+  padding: 3rem 2rem 2.5rem 2rem;
+  max-width: 1000px;
+  margin-left: 110px;
+  min-height: 80vh;
+}
+
+.access-control-btn {
+  min-width: 127px;
+  min-height: 38px;
+  font-size: 12px;
+  background: #000000 !important;
+  color: #fff !important;
+  border-radius: 8px;
+  font-weight: 700;
+  box-shadow: 0 2px 8px 0 rgba(44, 44, 44, 0.08);
+  transition: background 0.2s;
 }
 </style>
