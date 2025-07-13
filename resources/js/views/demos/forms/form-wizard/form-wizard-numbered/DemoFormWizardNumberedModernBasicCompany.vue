@@ -133,17 +133,27 @@ const removeSocialMediaLink = (index) => {
 </script>
 
 <template>
-  <!-- Stepper -->
-  <div class="mb-6">
-    <AppStepper
-      v-model:current-step="currentStep"
-      align="start"
-      :items="numberedSteps"
-    />
+  <!-- 👉 Custom Stepper -->
+  <div class="custom-stepper mb-6">
+    <div class="stepper-container">
+      <template v-for="(step, idx) in numberedSteps" :key="idx">
+        <div class="step-item" :class="{ active: idx === currentStep }">
+          <span
+            class="step-circle"
+            :class="{ active: idx === currentStep }"
+          ></span>
+          <span class="step-number">{{
+            (idx + 1).toString().padStart(2, "0")
+          }}</span>
+          <span class="step-label">{{ step.title }}</span>
+        </div>
+        <div v-if="idx < numberedSteps.length - 1" class="step-line"></div>
+      </template>
+    </div>
   </div>
 
   <div class="d-flex justify-center align-center" style="min-height: 60vh">
-    <VCard style="width: 80vw; max-width: 1200px">
+    <VCard style="width: 90vw; max-width: 1200px">
       <VCardText>
         <!-- 👉 stepper content -->
         <VForm>
@@ -151,12 +161,6 @@ const removeSocialMediaLink = (index) => {
             <!-- Step 1: Company Information -->
             <VWindowItem>
               <VRow>
-                <VCol cols="12">
-                  <h6 class="text-h6 font-weight-medium">
-                    Company Information
-                  </h6>
-                  <p class="mb-0">Enter your company details</p>
-                </VCol>
                 <!-- Left column -->
                 <VCol cols="12" md="6">
                   <!-- Company Name -->
@@ -298,10 +302,6 @@ const removeSocialMediaLink = (index) => {
             <!-- Step 2: Business Details -->
             <VWindowItem>
               <VRow>
-                <VCol cols="12">
-                  <h6 class="text-h6 font-weight-medium">Business Details</h6>
-                  <p class="mb-0">Setup your business information</p>
-                </VCol>
                 <!-- Left column -->
                 <VCol cols="12" md="6">
                   <!-- Company Logo -->
@@ -505,13 +505,6 @@ const removeSocialMediaLink = (index) => {
             <!-- Step 3: Social Links -->
             <VWindowItem>
               <VRow>
-                <VCol cols="12">
-                  <h6 class="text-h6 font-weight-medium">Social Links</h6>
-                  <p class="mb-0">
-                    Add your company's social media and proof links
-                  </p>
-                </VCol>
-
                 <!-- Left Column -->
                 <VCol cols="12" md="6">
                   <!-- Company Website -->
@@ -662,7 +655,7 @@ const removeSocialMediaLink = (index) => {
             >
               {{ loading ? "Submitting..." : "Submit" }}
             </VBtn>
-            <VBtn v-else @click="currentStep++">
+            <VBtn v-else class="next-btn-dark" @click="currentStep++">
               Next
               <VIcon icon="tabler-arrow-right" end class="flip-in-rtl" />
             </VBtn>
@@ -672,3 +665,142 @@ const removeSocialMediaLink = (index) => {
     </VCard>
   </div>
 </template>
+
+<style scoped>
+.custom-stepper {
+  width: 100%;
+  margin-bottom: 32px;
+  margin-top: -50px !important;
+  padding-top: 0 !important;
+}
+
+.stepper-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  width: 100%;
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  min-width: max-content;
+  flex-shrink: 0;
+}
+
+.step-circle {
+  width: 20px;
+  height: 20px;
+  border: 3px solid #ec8d22;
+  border-radius: 50%;
+  background: #fff;
+  display: inline-block;
+  position: relative;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.step-item.active .step-circle {
+  background: #ec8d22;
+}
+
+.step-item.active .step-circle::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  background: #fff;
+  border-radius: 50%;
+}
+
+.step-number {
+  font-family: "Anton", sans-serif;
+  font-size: 24px;
+  color: #2f2b3d;
+  font-weight: bold;
+  margin-left: 2px;
+  flex-shrink: 0;
+}
+
+.step-label {
+  font-family: "Karla", sans-serif;
+  font-size: 16px;
+  color: #444151;
+  margin-left: 4px;
+  white-space: nowrap;
+}
+
+.step-line {
+  flex: 1 1 0;
+  min-width: 60px;
+  max-width: 120px;
+  height: 3px;
+  background: #ec8d22;
+  margin: 0 4px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.v-card {
+  max-width: 1000px !important;
+  width: 90vw !important;
+  margin: 0 auto;
+  padding: 48px 48px 32px 48px !important;
+  box-sizing: border-box;
+}
+@media (max-width: 1200px) {
+  .v-card {
+    max-width: 98vw !important;
+    padding: 32px 8vw 24px 8vw !important;
+  }
+}
+@media (max-width: 600px) {
+  .v-card {
+    padding: 16px 4vw 16px 4vw !important;
+  }
+}
+
+.v-label,
+.v-field__label {
+  font-size: 20px !important;
+  font-weight: 700 !important;
+}
+
+.v-input input,
+.v-input textarea,
+.v-select__selection,
+.v-select__selections,
+.v-select__input,
+.v-field__input {
+  font-size: 19px !important;
+  line-height: 1.5 !important;
+}
+
+.v-input input::placeholder,
+.v-input textarea::placeholder,
+.v-field__input::placeholder {
+  font-size: 18px !important;
+  color: #b0b0b0 !important;
+}
+
+.next-btn-dark {
+  background: #111 !important;
+  color: #fff !important;
+  font-size: 18px !important;
+  min-width: 120px;
+  min-height: 44px;
+  border-radius: 8px;
+  font-weight: 700;
+  box-shadow: 0 2px 8px 0 rgba(44, 44, 44, 0.08);
+  transition: background 0.2s;
+}
+.next-btn-dark:hover {
+  background: #222 !important;
+}
+</style>

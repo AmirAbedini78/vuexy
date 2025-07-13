@@ -50,11 +50,11 @@ function handleNext() {
 </script>
 
 <template>
-  <div
-    class="d-flex flex-column align-center justify-center access-control-content"
-    style="min-height: 80vh"
-  >
-    <template v-if="!showWizard">
+  <template v-if="!showWizard">
+    <div
+      class="d-flex flex-column align-center justify-center access-control-content"
+      style="min-height: 80vh"
+    >
       <div class="d-flex justify-center align-center w-100">
         <div style="max-width: 550px; gap: 20rem !important" class="d-flex">
           <CustomRadiosWithIcon
@@ -75,16 +75,18 @@ function handleNext() {
           Next
         </VBtn>
       </div>
-    </template>
-    <template v-else>
+    </div>
+  </template>
+  <template v-else>
+    <div class="wizard-center-container">
       <DemoFormWizardNumberedModernBasic
         v-if="selectedWizardType === 'individual'"
       />
       <DemoFormWizardNumberedModernBasicCompany
         v-else-if="selectedWizardType === 'company'"
       />
-    </template>
-  </div>
+    </div>
+  </template>
 </template>
 
 <style>
@@ -133,5 +135,13 @@ function handleNext() {
   font-weight: 700;
   box-shadow: 0 2px 8px 0 rgba(44, 44, 44, 0.08);
   transition: background 0.2s;
+}
+.wizard-center-container {
+  max-width: 100%;
+  margin: 48px auto 0 auto;
+  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 </style>

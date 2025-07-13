@@ -137,30 +137,34 @@ const removeSocialProofLink = (index) => {
 </script>
 
 <template>
-  <!-- 👉 Stepper -->
-  <div class="mb-6">
-    <AppStepper
-      v-model:current-step="currentStep"
-      align="start"
-      :items="numberedSteps"
-    />
+  <!-- 👉 Custom Stepper -->
+  <div class="custom-stepper mb-6">
+    <div class="stepper-container">
+      <template v-for="(step, idx) in numberedSteps" :key="idx">
+        <div class="step-item" :class="{ active: idx === currentStep }">
+          <span
+            class="step-circle"
+            :class="{ active: idx === currentStep }"
+          ></span>
+          <span class="step-number">{{
+            (idx + 1).toString().padStart(2, "0")
+          }}</span>
+          <span class="step-label">{{ step.title }}</span>
+        </div>
+        <div v-if="idx < numberedSteps.length - 1" class="step-line"></div>
+      </template>
+    </div>
   </div>
 
   <div class="d-flex justify-center align-center" style="min-height: 60vh">
-    <VCard style="width: 80vw; max-width: 1200px">
-    <VCardText>
-      <!-- 👉 stepper content -->
-      <VForm>
+    <VCard style="width: 90vw; max-width: 1200px">
+      <VCardText>
+        <!-- 👉 stepper content -->
+        <VForm>
           <VWindow v-model="currentStep" class="disable-tab-transition">
             <!-- Step 1: Personal Information -->
-          <VWindowItem>
-            <VRow>
-              <VCol cols="12">
-                <h6 class="text-h6 font-weight-medium">
-                    Personal Information
-                </h6>
-                  <p class="mb-0">Enter your personal details</p>
-              </VCol>
+            <VWindowItem>
+              <VRow>
                 <!-- Left column -->
                 <VCol cols="12" md="6">
                   <AppTextField
@@ -186,21 +190,28 @@ const removeSocialProofLink = (index) => {
                     placeholder="Enter your city"
                     class="mt-4"
                   />
-                <AppTextField
+                  <AppTextField
                     v-model="formData.state"
                     label="State/Province"
                     placeholder="Enter state or province"
                     class="mt-4"
-                />
-              </VCol>
+                  />
+                </VCol>
                 <!-- Right column -->
                 <VCol cols="12" md="6">
-                  <AppTextField
-                    v-model="formData.dob"
-                    label="Date of Birth"
-                    placeholder="YYYY-MM-DD"
-                    type="date"
-                  />
+                  <div class="date-picker-wrapper">
+                    <AppDateTimePicker
+                      ref="dobPicker"
+                      v-model="formData.dob"
+                      label="Date of Birth"
+                      placeholder="YYYY-MM-DD"
+                      :config="{ dateFormat: 'Y-m-d', allowInput: true }"
+                    >
+                      <template #label>
+                        Date of Birth <span class="required-star">*</span>
+                      </template>
+                    </AppDateTimePicker>
+                  </div>
                   <AppSelect
                     v-model="formData.languages"
                     label="Languages Spoken"
@@ -209,41 +220,37 @@ const removeSocialProofLink = (index) => {
                     multiple
                     class="mt-4"
                   />
-                <AppTextField
+                  <AppTextField
                     v-model="formData.address2"
                     label="Address Line 2"
                     placeholder="Enter address line 2"
                     class="mt-4"
                   />
-                <AppTextField
+                  <AppTextField
                     v-model="formData.postalCode"
                     label="Postal Code"
                     placeholder="Enter postal code"
                     class="mt-4"
                   />
-                <AppTextField
+                  <AppTextField
                     v-model="formData.country"
                     label="Country"
                     placeholder="Enter your country"
                     class="mt-4"
-                />
-              </VCol>
-            </VRow>
-          </VWindowItem>
-            <!-- Step 2: Account Details -->
-          <VWindowItem>
-            <VRow>
-              <VCol cols="12">
-                  <h6 class="text-h6 font-weight-medium">Account Details</h6>
-                  <p class="mb-0">Setup your account information</p>
+                  />
                 </VCol>
+              </VRow>
+            </VWindowItem>
+            <!-- Step 2: Account Details -->
+            <VWindowItem>
+              <VRow>
                 <!-- Left column -->
                 <VCol cols="12" md="6">
                   <!-- Explorer Passport Image -->
                   <div class="mb-6">
                     <h6 class="text-h6 font-weight-medium mb-2">
                       Explorer Passport Image
-                </h6>
+                    </h6>
                     <p class="text-body-2 text-medium-emphasis mb-4">
                       High quality image, shown as your Explorer Elite passport
                       profile image
@@ -343,7 +350,7 @@ const removeSocialProofLink = (index) => {
                   />
 
                   <!-- Emergency Contact Name -->
-                <AppTextField
+                  <AppTextField
                     v-model="formData.emergencyContactName"
                     label="Emergency Contact Name"
                     placeholder="In case we need to contact someone urgently"
@@ -368,7 +375,7 @@ const removeSocialProofLink = (index) => {
                       <VRadio value="unsure" label="Not sure yet" />
                     </VRadioGroup>
                   </div>
-              </VCol>
+                </VCol>
                 <!-- Right column -->
                 <VCol cols="12" md="6">
                   <!-- Avatar Image -->
@@ -462,7 +469,7 @@ const removeSocialProofLink = (index) => {
                   />
 
                   <!-- Country/Region of Operation -->
-                <AppSelect
+                  <AppSelect
                     v-model="formData.countryOfOperation"
                     label="Country/Region of Operation"
                     placeholder="Areas you usually operate in (select the main areas of activity)"
@@ -488,25 +495,20 @@ const removeSocialProofLink = (index) => {
                     label="Emergency Contact Phone"
                     placeholder="+49 1236 456 789"
                     class="mb-4"
-                />
-              </VCol>
-            </VRow>
-          </VWindowItem>
-            <!-- Step 3: Social Links -->
-          <VWindowItem>
-            <VRow>
-              <VCol cols="12">
-                  <h6 class="text-h6 font-weight-medium">Social Links</h6>
-                  <p class="mb-0">Add your social media and proof links</p>
+                  />
                 </VCol>
-
+              </VRow>
+            </VWindowItem>
+            <!-- Step 3: Social Links -->
+            <VWindowItem>
+              <VRow>
                 <!-- Left Column -->
                 <VCol cols="12" md="6">
                   <!-- Website or Social Media Links -->
                   <div class="mb-6">
                     <h6 class="text-h6 font-weight-medium mb-2">
                       Website or Social Media Links
-                </h6>
+                    </h6>
 
                     <div
                       v-for="(link, index) in formData.socialMediaLinks"
@@ -514,7 +516,7 @@ const removeSocialProofLink = (index) => {
                       class="mb-3"
                     >
                       <div class="d-flex gap-2">
-                <AppTextField
+                        <AppTextField
                           v-model="formData.socialMediaLinks[index]"
                           placeholder="Add a link to your socials or website that shows your previous work"
                           class="flex-grow-1"
@@ -565,7 +567,7 @@ const removeSocialProofLink = (index) => {
                       </div>
                     </div>
                   </div>
-              </VCol>
+                </VCol>
 
                 <!-- Right Column -->
                 <VCol cols="12" md="6">
@@ -581,7 +583,7 @@ const removeSocialProofLink = (index) => {
                       class="mb-3"
                     >
                       <div class="d-flex gap-2">
-                <AppTextField
+                        <AppTextField
                           v-model="formData.socialProofLinks[index]"
                           placeholder="Links to reviews, social proof, or feedbacks about your activities"
                           class="flex-grow-1"
@@ -613,38 +615,364 @@ const removeSocialProofLink = (index) => {
                       </div>
                     </div>
                   </div>
-              </VCol>
-            </VRow>
-          </VWindowItem>
-        </VWindow>
+                </VCol>
+              </VRow>
+            </VWindowItem>
+          </VWindow>
           <div
             class="d-flex flex-wrap gap-4 justify-sm-space-between justify-center mt-8"
           >
-          <VBtn
-            color="secondary"
-            variant="tonal"
-            :disabled="currentStep === 0"
-            @click="currentStep--"
-          >
+            <VBtn
+              color="secondary"
+              variant="tonal"
+              :disabled="currentStep === 0"
+              @click="currentStep--"
+            >
               <VIcon icon="tabler-arrow-left" start class="flip-in-rtl" />
-            Previous
-          </VBtn>
-          <VBtn
-            v-if="numberedSteps.length - 1 === currentStep"
-            color="success"
+              Previous
+            </VBtn>
+            <VBtn
+              v-if="numberedSteps.length - 1 === currentStep"
+              color="success"
               :loading="loading"
               :disabled="loading"
-            @click="onSubmit"
-          >
+              @click="onSubmit"
+            >
               {{ loading ? "Submitting..." : "Submit" }}
-          </VBtn>
-            <VBtn v-else @click="currentStep++">
+            </VBtn>
+            <VBtn v-else class="next-btn-dark" @click="currentStep++">
               Next
               <VIcon icon="tabler-arrow-right" end class="flip-in-rtl" />
-          </VBtn>
-        </div>
-      </VForm>
-    </VCardText>
-  </VCard>
+            </VBtn>
+          </div>
+        </VForm>
+      </VCardText>
+    </VCard>
   </div>
 </template>
+
+<style scoped>
+.custom-stepper {
+  width: 100%;
+  margin-bottom: 32px;
+  margin-top: -50px !important;
+  padding-top: 0 !important;
+}
+
+/* بزرگ کردن لیبل فیلدها حتی برای AppTextField سفارشی */
+.v-label,
+.v-field-label,
+.v-field__label,
+.app-text-field-label,
+.AppTextField label,
+.AppTextField .v-label {
+  font-size: 220px !important;
+  font-weight: 700 !important;
+  line-height: 1.5 !important;
+}
+
+.stepper-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  width: 100%;
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  min-width: max-content;
+  flex-shrink: 0;
+}
+
+.step-circle {
+  width: 20px;
+  height: 20px;
+  border: 3px solid #ec8d22;
+  border-radius: 50%;
+  background: #fff;
+  display: inline-block;
+  position: relative;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.step-item.active .step-circle {
+  background: #ec8d22;
+}
+
+.step-item.active .step-circle::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  background: #fff;
+  border-radius: 50%;
+}
+
+.step-number {
+  font-family: "Anton", sans-serif;
+  font-size: 24px;
+  color: #2f2b3d;
+  font-weight: bold;
+  margin-left: 2px;
+  flex-shrink: 0;
+}
+
+.step-label {
+  font-family: "Karla", sans-serif;
+  font-size: 16px;
+  color: #444151;
+  margin-left: 4px;
+  white-space: nowrap;
+}
+
+.step-line {
+  flex: 1 1 0;
+  min-width: 60px;
+  max-width: 120px;
+  height: 3px;
+  background: #ec8d22;
+  margin: 0 4px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .stepper-container {
+    overflow-x: auto;
+    justify-content: flex-start;
+    padding: 0 16px;
+    /* Custom scrollbar styles */
+    scrollbar-width: thin;
+    scrollbar-color: #ec8d22 #f5f5f5;
+  }
+
+  /* Webkit scrollbar styles for Chrome/Safari */
+  .stepper-container::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .stepper-container::-webkit-scrollbar-track {
+    background: #f5f5f5;
+    border-radius: 3px;
+  }
+
+  .stepper-container::-webkit-scrollbar-thumb {
+    background: #ec8d22;
+    border-radius: 3px;
+    transition: background 0.2s;
+  }
+
+  .stepper-container::-webkit-scrollbar-thumb:hover {
+    background: #d67d1a;
+  }
+
+  .step-item {
+    padding: 4px 6px;
+  }
+  .step-number {
+    font-size: 20px;
+  }
+  .step-label {
+    font-size: 14px;
+  }
+  .step-line {
+    min-width: 40px;
+    max-width: 80px;
+    margin: 0 2px;
+  }
+}
+
+/* Remove custom card and font styles, revert to default */
+.d-flex.justify-center.align-center {
+  min-height: unset !important;
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+.v-card {
+  margin-top: 0 !important;
+}
+
+.v-card .v-label,
+.v-card label.v-label {
+  font-size: 22px !important;
+  font-weight: 700 !important;
+  line-height: 1.5 !important;
+}
+
+/* Move browser date icon to the right for type=date fields */
+:deep(input[type="date"]) {
+  background-image: url("/images/4svg/wired-outline-28-calendar-hover-pinch.png");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 24px 24px;
+  padding-right: 36px !important;
+  padding-left: 8px !important;
+}
+:deep(input[type="date"]::-webkit-calendar-picker-indicator) {
+  opacity: 0;
+  z-index: 2;
+  position: absolute;
+  right: 12px;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+}
+
+.flatpickr-calendar {
+  border-radius: 16px !important;
+  background: #fff !important;
+  box-shadow: 0 4px 24px 0 rgba(44, 44, 44, 0.1) !important;
+  font-family: "Karla", sans-serif !important;
+  border: none !important;
+}
+.flatpickr-months .flatpickr-month {
+  border-radius: 12px !important;
+  background: #fff !important;
+  font-family: "Karla", sans-serif !important;
+  font-size: 18px !important;
+  color: #2f2b3d !important;
+}
+.flatpickr-current-month input.cur-year {
+  font-size: 18px !important;
+  font-family: "Karla", sans-serif !important;
+  color: #2f2b3d !important;
+}
+.flatpickr-weekdays {
+  font-size: 16px !important;
+  color: #444151 !important;
+  font-family: "Karla", sans-serif !important;
+}
+.flatpickr-day {
+  font-size: 16px !important;
+  color: #444151 !important;
+  border-radius: 8px !important;
+  font-family: "Karla", sans-serif !important;
+  transition: background 0.2s;
+}
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange,
+.flatpickr-day.selected.inRange {
+  background: #ec8d22 !important;
+  color: #fff !important;
+  border: none !important;
+}
+.flatpickr-day.today:not(.selected) {
+  border: 1.5px solid #ec8d22 !important;
+  color: #ec8d22 !important;
+  background: #fff !important;
+}
+.flatpickr-day.flatpickr-disabled,
+.flatpickr-day.prevMonthDay,
+.flatpickr-day.nextMonthDay {
+  color: #b0b0b0 !important;
+  background: #fff !important;
+  opacity: 0.6 !important;
+}
+.flatpickr-day:hover:not(.selected):not(.flatpickr-disabled) {
+  background: #f7e3c7 !important;
+  color: #ec8d22 !important;
+}
+.flatpickr-months .flatpickr-prev-month,
+.flatpickr-months .flatpickr-next-month {
+  background: #f2f2f2 !important;
+  border-radius: 50% !important;
+  width: 32px !important;
+  height: 32px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #b0b0b0 !important;
+  margin: 0 4px !important;
+  box-shadow: none !important;
+}
+.flatpickr-months .flatpickr-prev-month:hover,
+.flatpickr-months .flatpickr-next-month:hover {
+  background: #e0e0e0 !important;
+  color: #ec8d22 !important;
+}
+.flatpickr-monthDropdown-months .flatpickr-monthDropdown-month,
+.flatpickr-months .flatpickr-month {
+  border-radius: 8px !important;
+  font-size: 16px !important;
+  color: #444151 !important;
+}
+.flatpickr-monthDropdown-months .flatpickr-monthDropdown-month.selected,
+.flatpickr-monthDropdown-months .flatpickr-monthDropdown-month:hover {
+  background: #ec8d22 !important;
+  color: #fff !important;
+}
+
+.app-picker-field {
+  position: relative;
+}
+.app-picker-field .calendar-icon-png {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  background: url("/images/4svg/wired-outline-28-calendar-hover-pinch.png")
+    no-repeat center center;
+  background-size: 24px 24px;
+  cursor: pointer;
+  z-index: 3;
+  pointer-events: auto;
+}
+.app-picker-field input.flat-picker-custom-style {
+  padding-right: 44px !important;
+}
+
+.date-picker-wrapper {
+  position: relative;
+}
+.date-picker-wrapper .calendar-icon-png {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  background: url("/images/4svg/wired-outline-28-calendar-hover-pinch.png")
+    no-repeat center center;
+  background-size: 24px 24px;
+  cursor: pointer;
+  z-index: 3;
+}
+.date-picker-wrapper input.flat-picker-custom-style {
+  padding-right: 40px !important;
+}
+
+:deep(input.flat-picker-custom-style),
+:deep(input.flatpickr-input) {
+  background: url("/images/4svg/wired-outline-28-calendar-hover-pinch.png")
+    no-repeat right 12px center !important;
+  background-size: 24px 24px !important;
+  padding-right: 44px !important;
+}
+
+.next-btn-dark {
+  background: #111 !important;
+  color: #fff !important;
+  font-size: 12px !important;
+  min-width: 92px;
+  min-height: 38px;
+  border-radius: 8px;
+  font-weight: 700;
+  box-shadow: 0 2px 8px 0 rgba(44, 44, 44, 0.08);
+  transition: background 0.2s;
+}
+.next-btn-dark:hover {
+  background: #222 !important;
+}
+</style>
