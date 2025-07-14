@@ -120,7 +120,7 @@ function handleNext() {
   border-radius: 6px;
   box-shadow: 0 2px 16px 0 rgba(44, 44, 44, 0.08);
   padding: 3rem 2rem 2.5rem 2rem;
-  max-width: 1000px;
+  max-width: 1050px;
   margin-left: 110px;
   min-height: 80vh;
 }

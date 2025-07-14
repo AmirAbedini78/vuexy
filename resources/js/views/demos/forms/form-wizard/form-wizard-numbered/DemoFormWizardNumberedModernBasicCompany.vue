@@ -334,20 +334,20 @@ const removeSocialMediaLink = (index) => {
                       <div
                         class="image-preview"
                         style="
-                          width: 120px;
-                          height: 100px;
-                          border: 2px dashed #ccc;
+                          width: 184px;
+                          height: 239px;
                           display: flex;
                           align-items: center;
                           justify-content: center;
-                          background-color: #f5f5f5;
+                          background-color: rgba(114, 136, 129, 0.26);
                           border-radius: 8px;
+                          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
                         "
                       >
                         <VIcon
                           v-if="!formData.passportImage"
                           icon="tabler-photo"
-                          size="40"
+                          size="24"
                           color="grey"
                         />
                         <img
@@ -356,23 +356,60 @@ const removeSocialMediaLink = (index) => {
                           style="width: 100%; height: 100%; object-fit: cover"
                         />
                       </div>
-                      <div class="d-flex flex-column gap-2">
-                        <VBtn
-                          variant="outlined"
-                          size="small"
-                          @click="$refs.passportInput.click()"
+                      <div
+                        class="d-flex flex-column gap-2"
+                        style="margin-top: 130px; max-width: 260px"
+                      >
+                        <div class="d-flex gap-2 align-center">
+                          <VBtn
+                            variant="flat"
+                            size="small"
+                            style="
+                              background-color: #ec8d22 !important;
+                              color: #fff !important;
+                              font-size: 13px !important;
+                              min-height: 36px;
+                              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+                              border-radius: 6px !important;
+                              max-width: 260px;
+                            "
+                            @click="$refs.passportInput.click()"
+                          >
+                            Upload Company Logo
+                          </VBtn>
+                          <VBtn
+                            v-if="formData.passportImage"
+                            variant="flat"
+                            size="small"
+                            style="
+                              background-color: rgba(
+                                114,
+                                136,
+                                129,
+                                0.26
+                              ) !important;
+                              color: #728881 !important;
+                              min-width: 36px;
+                              min-height: 36px;
+                              max-width: 36px;
+                              border-radius: 6px !important;
+                              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+                            "
+                            @click="formData.passportImage = null"
+                          >
+                            <VIcon
+                              icon="tabler-trash"
+                              size="16"
+                              color="#728881"
+                            />
+                          </VBtn>
+                        </div>
+                        <p
+                          class="text-caption text-medium-emphasis mt-2 mb-0"
+                          style="max-width: 260px; font-size: 11px"
                         >
-                          Upload Company Logo
-                        </VBtn>
-                        <VBtn
-                          v-if="formData.passportImage"
-                          variant="tonal"
-                          size="small"
-                          color="error"
-                          @click="formData.passportImage = null"
-                        >
-                          <VIcon icon="tabler-trash" size="16" />
-                        </VBtn>
+                          Allowed JPG or PNG, Preferred 520*430 px, Max Size 5Mb
+                        </p>
                       </div>
                     </div>
                     <input
@@ -382,9 +419,6 @@ const removeSocialMediaLink = (index) => {
                       style="display: none"
                       @change="handlePassportImageUpload"
                     />
-                    <p class="text-caption text-medium-emphasis mt-2">
-                      Allowed JPG or PNG, Preferred 520*430 px, Max Size 5Mb
-                    </p>
                   </div>
 
                   <!-- Activity Specialization -->
@@ -445,20 +479,20 @@ const removeSocialMediaLink = (index) => {
                       <div
                         class="image-preview"
                         style="
-                          width: 80px;
-                          height: 80px;
-                          border: 2px dashed #ccc;
+                          width: 97px;
+                          height: 95px;
                           display: flex;
                           align-items: center;
                           justify-content: center;
-                          background-color: #f5f5f5;
+                          background-color: rgba(114, 136, 129, 0.26);
                           border-radius: 8px;
+                          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
                         "
                       >
                         <VIcon
                           v-if="!formData.avatarImage"
-                          icon="tabler-file-document"
-                          size="30"
+                          icon="tabler-photo"
+                          size="24"
                           color="grey"
                         />
                         <img
@@ -472,23 +506,60 @@ const removeSocialMediaLink = (index) => {
                           "
                         />
                       </div>
-                      <div class="d-flex flex-column gap-2">
-                        <VBtn
-                          variant="outlined"
-                          size="small"
-                          @click="$refs.avatarInput.click()"
+                      <div
+                        class="d-flex flex-column gap-2"
+                        style="margin-top: 20px"
+                      >
+                        <div class="d-flex gap-2 align-center">
+                          <VBtn
+                            variant="flat"
+                            size="small"
+                            style="
+                              background-color: #ec8d22 !important;
+                              color: #fff !important;
+                              font-size: 13px !important;
+                              min-height: 36px;
+                              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+                              border-radius: 6px !important;
+                              max-width: 200px;
+                            "
+                            @click="$refs.avatarInput.click()"
+                          >
+                            Upload Business License
+                          </VBtn>
+                          <VBtn
+                            v-if="formData.avatarImage"
+                            variant="flat"
+                            size="small"
+                            style="
+                              background-color: rgba(
+                                114,
+                                136,
+                                129,
+                                0.26
+                              ) !important;
+                              color: #728881 !important;
+                              min-width: 36px;
+                              min-height: 36px;
+                              max-width: 36px;
+                              border-radius: 6px !important;
+                              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+                            "
+                            @click="formData.avatarImage = null"
+                          >
+                            <VIcon
+                              icon="tabler-trash"
+                              size="16"
+                              color="#728881"
+                            />
+                          </VBtn>
+                        </div>
+                        <p
+                          class="text-caption text-medium-emphasis mt-2 mb-0"
+                          style="font-size: 11px; max-width: 400px"
                         >
-                          Upload Business License
-                        </VBtn>
-                        <VBtn
-                          v-if="formData.avatarImage"
-                          variant="tonal"
-                          size="small"
-                          color="error"
-                          @click="formData.avatarImage = null"
-                        >
-                          <VIcon icon="tabler-trash" size="16" />
-                        </VBtn>
+                          Allowed JPG, PNG or PDF, Max size 5Mb
+                        </p>
                       </div>
                     </div>
                     <input
@@ -498,9 +569,6 @@ const removeSocialMediaLink = (index) => {
                       style="display: none"
                       @change="handleAvatarImageUpload"
                     />
-                    <p class="text-caption text-medium-emphasis mt-2">
-                      Allowed JPG, PNG or PDF, Max size 5Mb
-                    </p>
                   </div>
 
                   <!-- Short Bio -->
@@ -509,7 +577,7 @@ const removeSocialMediaLink = (index) => {
                     label="Company Bio"
                     placeholder="Tell us about your company and what you do in a few sentences"
                     type="textarea"
-                    rows="3"
+                    rows="5"
                     class="mb-4"
                   />
 
