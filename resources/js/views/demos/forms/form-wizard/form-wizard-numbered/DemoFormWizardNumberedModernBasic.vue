@@ -359,7 +359,12 @@ const removeSocialProofLink = (index) => {
 
                   <!-- Listing Preference -->
                   <div class="mb-4">
-                    <label class="v-label text-body-2 mb-3 d-block"
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
                       >Would you like to get listed with adventures in Explorer
                       Elite?</label
                     >

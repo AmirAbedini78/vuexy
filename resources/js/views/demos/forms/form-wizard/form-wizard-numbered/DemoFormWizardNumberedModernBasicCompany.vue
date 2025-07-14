@@ -224,6 +224,7 @@ const removeSocialMediaLink = (index) => {
                 <!-- Right column -->
                 <VCol cols="12" md="6">
                   <!-- Country of Registration (outside address section) -->
+
                   <AppSelect
                     v-model="formData.countryOfRegistration"
                     label="Country of Registration*"
@@ -243,7 +244,24 @@ const removeSocialMediaLink = (index) => {
                     ]"
                     class="mb-6"
                   />
-
+                  <AppTextField
+                    v-model="formData.postalCode"
+                    placeholder="231465"
+                    class="mb-3"
+                    style="visibility: hidden"
+                  />
+                  <AppTextField
+                    v-model="formData.postalCode"
+                    placeholder="231465"
+                    class="mb-3"
+                    style="visibility: hidden"
+                  />
+                  <AppTextField
+                    v-model="formData.postalCode"
+                    placeholder="231465"
+                    class="mb-2"
+                    style="visibility: hidden"
+                  />
                   <!-- Address Line 2 -->
                   <AppTextField
                     v-model="formData.address2"
@@ -391,7 +409,12 @@ const removeSocialMediaLink = (index) => {
 
                   <!-- Listing Preference -->
                   <div class="mb-4">
-                    <label class="v-label text-body-2 mb-3 d-block"
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
                       >Would you like to get listed with adventures in Explorer
                       Elite?</label
                     >
@@ -748,11 +771,7 @@ const removeSocialMediaLink = (index) => {
 }
 
 .v-card {
-  max-width: 1000px !important;
-  width: 90vw !important;
-  margin: 0 auto;
-  padding: 48px 48px 32px 48px !important;
-  box-sizing: border-box;
+  margin-top: 0 !important;
 }
 @media (max-width: 1200px) {
   .v-card {
@@ -792,9 +811,9 @@ const removeSocialMediaLink = (index) => {
 .next-btn-dark {
   background: #111 !important;
   color: #fff !important;
-  font-size: 18px !important;
-  min-width: 120px;
-  min-height: 44px;
+  font-size: 12px !important;
+  min-width: 92px;
+  min-height: 38px;
   border-radius: 8px;
   font-weight: 700;
   box-shadow: 0 2px 8px 0 rgba(44, 44, 44, 0.08);
