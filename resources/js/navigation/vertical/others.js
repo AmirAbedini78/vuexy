@@ -8,6 +8,13 @@ export default [
     subject: 'AclDemo',
   },
   {
+    title: 'Listing',
+    icon: { icon: 'tabler-list' },
+    to: 'listing',
+    action: 'read',
+    subject: 'Listing',
+  },
+  {
     title: 'Nav Levels',
     icon: { icon: 'tabler-menu-2' },
     children: [

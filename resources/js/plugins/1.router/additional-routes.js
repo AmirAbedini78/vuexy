@@ -103,4 +103,44 @@ export const routes = [
       public: true,
     },
   },
+  {
+    path: '/listing',
+    name: 'listing',
+    component: () => import('@/pages/listing.vue'),
+    meta: {
+      layout: 'default',
+      action: 'read',
+      subject: 'Listing',
+    },
+  },
+  {
+    path: '/listing/single-date',
+    name: 'listing-single-date',
+    component: () => import('@/views/demos/forms/form-wizard/form-wizard-numbered/DemoFormWizardNumberedModernBasicSingleDate.vue'),
+    meta: {
+      layout: 'default',
+      action: 'read',
+      subject: 'Listing',
+    },
+  },
+  {
+    path: '/listing/multi-date',
+    name: 'listing-multi-date',
+    component: () => import('@/views/demos/forms/form-wizard/form-wizard-numbered/DemoFormWizardNumberedModernBasicMultiDate.vue'),
+    meta: {
+      layout: 'default',
+      action: 'read',
+      subject: 'Listing',
+    },
+  },
+  {
+    path: '/listing/open-date',
+    name: 'listing-open-date',
+    component: () => import('@/views/demos/forms/form-wizard/form-wizard-numbered/DemoFormWizardNumberedModernBasicOpenDate.vue'),
+    meta: {
+      layout: 'default',
+      action: 'read',
+      subject: 'Listing',
+    },
+  },
 ]
