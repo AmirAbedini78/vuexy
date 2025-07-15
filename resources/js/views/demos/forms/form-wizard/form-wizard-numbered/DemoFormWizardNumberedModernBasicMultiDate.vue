@@ -21,10 +21,14 @@ const loading = ref(false);
 
 const formData = ref({
   // Step 1 fields
-  title: "",
-  description: "",
-  location: "",
-  category: "",
+  listingTitle: "",
+  listingDescription: "",
+  locations: "",
+  groupLanguage: "",
+  subtitle: "",
+  activitiesIncluded: "",
+  experienceLevel: "",
+  fitnessLevel: "",
   // Step 2 fields
   startDate: "",
   endDate: "",
@@ -89,33 +93,180 @@ const onSubmit = async () => {
             <!-- Step 1: Basic Information -->
             <VWindowItem>
               <VRow>
+                <!-- Left column -->
                 <VCol cols="12" md="6">
+                  <!-- Listing Title -->
                   <AppTextField
-                    v-model="formData.title"
-                    label="Listing Title"
-                    placeholder="Enter your listing title"
+                    v-model="formData.listingTitle"
+                    label="Listing Title*"
+                    placeholder="The main title of Your listing"
                     class="mb-4"
                   />
-                  <AppTextField
-                    v-model="formData.description"
-                    label="Description"
-                    placeholder="Describe your activity"
-                    type="textarea"
-                    rows="4"
+
+                  <!-- Listing Description -->
+                  <div class="mb-4">
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
+                    >
+                      Listing Description <span class="required-star">*</span>
+                    </label>
+                    <VTextarea
+                      v-model="formData.listingDescription"
+                      placeholder="Tell us any further information we should have about your adventure"
+                      rows="5"
+                      class="rich-text-area"
+                    />
+                    <!-- Rich Text Editor Controls -->
+                    <div class="rich-text-controls mt-2">
+                      <div class="d-flex gap-2 align-center">
+                        <VBtn
+                          variant="text"
+                          size="small"
+                          class="text-control-btn"
+                        >
+                          <VIcon icon="tabler-bold" size="16" />
+                        </VBtn>
+                        <VBtn
+                          variant="text"
+                          size="small"
+                          class="text-control-btn"
+                        >
+                          <VIcon icon="tabler-italic" size="16" />
+                        </VBtn>
+                        <VBtn
+                          variant="text"
+                          size="small"
+                          class="text-control-btn"
+                        >
+                          <VIcon icon="tabler-underline" size="16" />
+                        </VBtn>
+                        <VBtn
+                          variant="text"
+                          size="small"
+                          class="text-control-btn"
+                        >
+                          <VIcon icon="tabler-strikethrough" size="16" />
+                        </VBtn>
+                        <VDivider vertical />
+                        <VBtn
+                          variant="text"
+                          size="small"
+                          class="text-control-btn"
+                        >
+                          <VIcon icon="tabler-list" size="16" />
+                        </VBtn>
+                        <VBtn
+                          variant="text"
+                          size="small"
+                          class="text-control-btn"
+                        >
+                          <VIcon icon="tabler-list-numbers" size="16" />
+                        </VBtn>
+                        <VDivider vertical />
+                        <VBtn
+                          variant="text"
+                          size="small"
+                          class="text-control-btn"
+                        >
+                          <VIcon icon="tabler-align-left" size="16" />
+                        </VBtn>
+                        <VBtn
+                          variant="text"
+                          size="small"
+                          class="text-control-btn"
+                        >
+                          <VIcon icon="tabler-align-center" size="16" />
+                        </VBtn>
+                        <VBtn
+                          variant="text"
+                          size="small"
+                          class="text-control-btn"
+                        >
+                          <VIcon icon="tabler-align-right" size="16" />
+                        </VBtn>
+                        <VDivider vertical />
+                        <VBtn
+                          variant="text"
+                          size="small"
+                          class="text-control-btn"
+                        >
+                          <VIcon icon="tabler-link" size="16" />
+                        </VBtn>
+                        <VBtn
+                          variant="text"
+                          size="small"
+                          class="text-control-btn"
+                        >
+                          <VIcon icon="tabler-photo" size="16" />
+                        </VBtn>
+                      </div>
+                    </div>
+                    <p
+                      class="text-caption text-error mt-2 mb-0"
+                      style="font-size: 11px"
+                    >
+                      Note: Please add at least 500 characters.
+                    </p>
+                  </div>
+
+                  <!-- Locations -->
+                  <AppSelect
+                    v-model="formData.locations"
+                    label="Locations*"
+                    placeholder="Were the adventure takes place (country/continent)"
+                    :items="[
+                      'Europe',
+                      'North America',
+                      'South America',
+                      'Asia',
+                      'Africa',
+                      'Australia',
+                      'Antarctica',
+                    ]"
+                    class="mb-4"
+                  />
+
+                  <!-- Group Language -->
+                  <AppSelect
+                    v-model="formData.groupLanguage"
+                    label="Group language"
+                    placeholder="Language(s) the adventure will be conducted in"
+                    :items="[
+                      'English',
+                      'German',
+                      'French',
+                      'Spanish',
+                      'Italian',
+                      'Portuguese',
+                      'Russian',
+                      'Chinese',
+                      'Japanese',
+                      'Arabic',
+                      'Other',
+                    ]"
                     class="mb-4"
                   />
                 </VCol>
+
+                <!-- Right column -->
                 <VCol cols="12" md="6">
+                  <!-- Subtitle -->
                   <AppTextField
-                    v-model="formData.location"
-                    label="Location"
-                    placeholder="Where will this activity take place?"
+                    v-model="formData.subtitle"
+                    label="Subtitle"
+                    placeholder="A tagline for the listing"
                     class="mb-4"
                   />
+
+                  <!-- Activities Included -->
                   <AppSelect
-                    v-model="formData.category"
-                    label="Category"
-                    placeholder="Select activity category"
+                    v-model="formData.activitiesIncluded"
+                    label="Activities included*"
+                    placeholder="Select the activities that are included in your adventure"
                     :items="[
                       'Hiking',
                       'Diving',
@@ -126,10 +277,109 @@ const onSubmit = async () => {
                       'Photography Tours',
                       'Cultural Tours',
                       'Wildlife Tours',
+                      'Cooking Classes',
+                      'Wine Tasting',
+                      'Historical Tours',
+                      'Adventure Sports',
                       'Other',
                     ]"
                     class="mb-4"
                   />
+
+                  <!-- Listing Departures -->
+                  <div class="mb-6">
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
+                    >
+                      Listing departures <span class="required-star">*</span>
+                    </label>
+                    <p
+                      class="text-caption text-medium-emphasis mb-3"
+                      style="font-size: 12px"
+                    >
+                      Add your departures and all related details here
+                    </p>
+                    <VBtn
+                      color="primary"
+                      variant="elevated"
+                      class="add-departure-btn"
+                      style="
+                        background-color: #ec8d22 !important;
+                        color: #fff !important;
+                        border-radius: 8px;
+                        font-weight: 500;
+                      "
+                    >
+                      Add Departure
+                    </VBtn>
+                  </div>
+
+                  <!-- Experience Level and Fitness Level -->
+                  <VRow>
+                    <VCol cols="6">
+                      <div class="mb-4">
+                        <label
+                          class="v-label text-body-2 mb-3 d-block"
+                          style="
+                            font-size: 16px !important;
+                            font-weight: 400 !important;
+                          "
+                        >
+                          Experience Level
+                          <VIcon
+                            icon="tabler-help-circle"
+                            size="16"
+                            class="question-icon"
+                          />
+                        </label>
+                        <VRadioGroup
+                          v-model="formData.experienceLevel"
+                          class="mt-2"
+                        >
+                          <VRadio value="journeys" label="Journeys" />
+                          <VRadio value="discovery" label="Discovery" />
+                          <VRadio value="expedition" label="Expedition" />
+                          <VRadio
+                            value="extreme-expedition"
+                            label="Extreme Expedition"
+                          />
+                          <VRadio value="not-sure" label="Not Sure" />
+                        </VRadioGroup>
+                      </div>
+                    </VCol>
+                    <VCol cols="6">
+                      <div class="mb-4">
+                        <label
+                          class="v-label text-body-2 mb-3 d-block"
+                          style="
+                            font-size: 16px !important;
+                            font-weight: 400 !important;
+                          "
+                        >
+                          Fitness Level
+                          <VIcon
+                            icon="tabler-help-circle"
+                            size="16"
+                            class="question-icon"
+                          />
+                        </label>
+                        <VRadioGroup
+                          v-model="formData.fitnessLevel"
+                          class="mt-2"
+                        >
+                          <VRadio value="easy" label="Easy" />
+                          <VRadio value="moderate" label="Moderate" />
+                          <VRadio value="challenging" label="Challenging" />
+                          <VRadio value="intense" label="Intense" />
+                          <VRadio value="not-sure" label="Not Sure" />
+                        </VRadioGroup>
+                      </div>
+                    </VCol>
+                  </VRow>
                 </VCol>
               </VRow>
             </VWindowItem>
@@ -372,5 +622,140 @@ const onSubmit = async () => {
 }
 .next-btn-dark:hover {
   background: #222 !important;
+}
+
+/* Required star styling */
+.required-star {
+  color: #ff4444;
+  font-weight: bold;
+}
+
+/* Rich text area styling */
+.rich-text-area {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.rich-text-area .v-field__input {
+  padding: 12px;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* Rich text editor controls */
+.rich-text-controls {
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  padding: 8px 12px;
+}
+
+.text-control-btn {
+  min-width: 32px !important;
+  height: 32px !important;
+  border-radius: 4px !important;
+  color: #666 !important;
+}
+
+.text-control-btn:hover {
+  background: #e9ecef !important;
+  color: #333 !important;
+}
+
+/* Question icon styling */
+.question-icon {
+  color: #666;
+  margin-left: 4px;
+  cursor: help;
+}
+
+/* Add departure button styling */
+.add-departure-btn {
+  min-height: 40px;
+  padding: 0 20px;
+  font-size: 14px;
+  text-transform: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.add-departure-btn:hover {
+  background-color: #d67d1a !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Form field styling */
+.v-label,
+.v-field__label {
+  font-size: 20px !important;
+  font-weight: 700 !important;
+}
+
+.v-input input,
+.v-input textarea,
+.v-select__selection,
+.v-select__selections,
+.v-select__input,
+.v-field__input {
+  font-size: 19px !important;
+  line-height: 1.5 !important;
+}
+
+.v-input input::placeholder,
+.v-input textarea::placeholder,
+.v-field__input::placeholder {
+  font-size: 18px !important;
+  color: #b0b0b0 !important;
+}
+
+/* Radio button spacing */
+.v-radio-group .v-radio {
+  margin-bottom: 8px;
+}
+
+.v-radio-group .v-radio:last-child {
+  margin-bottom: 0;
+}
+
+/* Radio button styling */
+.v-radio .v-selection-control__input {
+  color: #ec8d22;
+}
+
+.v-radio .v-selection-control__input .v-icon {
+  color: #ec8d22;
+}
+
+/* Improved form field styling */
+.v-text-field,
+.v-textarea,
+.v-select {
+  border-radius: 8px;
+}
+
+.v-text-field .v-field__outline,
+.v-textarea .v-field__outline,
+.v-select .v-field__outline {
+  border-color: #e0e0e0;
+}
+
+.v-text-field .v-field--focused .v-field__outline,
+.v-textarea .v-field--focused .v-field__outline,
+.v-select .v-field--focused .v-field__outline {
+  border-color: #ec8d22;
+}
+
+/* Select field styling */
+.v-select .v-field__append-inner {
+  color: #666;
+}
+
+/* Divider styling */
+.v-divider--vertical {
+  height: 20px;
+  margin: 0 4px;
+  border-color: #e0e0e0;
 }
 </style>

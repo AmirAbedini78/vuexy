@@ -158,13 +158,13 @@ const removeSocialProofLink = (index) => {
 
   <div class="d-flex justify-center align-center" style="min-height: 60vh">
     <VCard style="width: 90vw; max-width: 1200px">
-      <VCardText>
-        <!-- 👉 stepper content -->
-        <VForm>
+    <VCardText>
+      <!-- 👉 stepper content -->
+      <VForm>
           <VWindow v-model="currentStep" class="disable-tab-transition">
             <!-- Step 1: Personal Information -->
-            <VWindowItem>
-              <VRow>
+          <VWindowItem>
+            <VRow>
                 <!-- Left column -->
                 <VCol cols="12" md="6">
                   <AppTextField
@@ -190,13 +190,13 @@ const removeSocialProofLink = (index) => {
                     placeholder="Enter your city"
                     class="mt-4"
                   />
-                  <AppTextField
+                <AppTextField
                     v-model="formData.state"
                     label="State/Province"
                     placeholder="Enter state or province"
                     class="mt-4"
-                  />
-                </VCol>
+                />
+              </VCol>
                 <!-- Right column -->
                 <VCol cols="12" md="6">
                   <div class="date-picker-wrapper">
@@ -220,37 +220,37 @@ const removeSocialProofLink = (index) => {
                     multiple
                     class="mt-4"
                   />
-                  <AppTextField
+                <AppTextField
                     v-model="formData.address2"
                     label="Address Line 2"
                     placeholder="Enter address line 2"
                     class="mt-4"
                   />
-                  <AppTextField
+                <AppTextField
                     v-model="formData.postalCode"
                     label="Postal Code"
                     placeholder="Enter postal code"
                     class="mt-4"
                   />
-                  <AppTextField
+                <AppTextField
                     v-model="formData.country"
                     label="Country"
                     placeholder="Enter your country"
                     class="mt-4"
-                  />
-                </VCol>
-              </VRow>
-            </VWindowItem>
+                />
+              </VCol>
+            </VRow>
+          </VWindowItem>
             <!-- Step 2: Account Details -->
-            <VWindowItem>
-              <VRow>
+          <VWindowItem>
+            <VRow>
                 <!-- Left column -->
                 <VCol cols="12" md="6">
                   <!-- Explorer Passport Image -->
                   <div class="mb-6">
                     <h6 class="text-h6 font-weight-medium mb-2">
                       Explorer Passport Image
-                    </h6>
+                </h6>
                     <p class="text-body-2 text-medium-emphasis mb-4">
                       High quality image, shown as your Explorer Elite passport
                       profile image
@@ -384,7 +384,7 @@ const removeSocialProofLink = (index) => {
                   />
 
                   <!-- Emergency Contact Name -->
-                  <AppTextField
+                <AppTextField
                     v-model="formData.emergencyContactName"
                     label="Emergency Contact Name"
                     placeholder="In case we need to contact someone urgently"
@@ -414,7 +414,7 @@ const removeSocialProofLink = (index) => {
                       <VRadio value="unsure" label="Not sure yet" />
                     </VRadioGroup>
                   </div>
-                </VCol>
+              </VCol>
                 <!-- Right column -->
                 <VCol cols="12" md="6">
                   <!-- Avatar Image -->
@@ -542,7 +542,7 @@ const removeSocialProofLink = (index) => {
                   />
 
                   <!-- Country/Region of Operation -->
-                  <AppSelect
+                <AppSelect
                     v-model="formData.countryOfOperation"
                     label="Country/Region of Operation"
                     placeholder="Areas you usually operate in (select the main areas of activity)"
@@ -568,20 +568,20 @@ const removeSocialProofLink = (index) => {
                     label="Emergency Contact Phone"
                     placeholder="+49 1236 456 789"
                     class="mb-4"
-                  />
-                </VCol>
-              </VRow>
-            </VWindowItem>
+                />
+              </VCol>
+            </VRow>
+          </VWindowItem>
             <!-- Step 3: Social Links -->
-            <VWindowItem>
-              <VRow>
+          <VWindowItem>
+            <VRow>
                 <!-- Left Column -->
                 <VCol cols="12" md="6">
                   <!-- Website or Social Media Links -->
                   <div class="mb-6">
                     <h6 class="text-h6 font-weight-medium mb-2">
                       Website or Social Media Links
-                    </h6>
+                </h6>
 
                     <div
                       v-for="(link, index) in formData.socialMediaLinks"
@@ -589,7 +589,7 @@ const removeSocialProofLink = (index) => {
                       class="mb-3"
                     >
                       <div class="d-flex gap-2">
-                        <AppTextField
+                <AppTextField
                           v-model="formData.socialMediaLinks[index]"
                           placeholder="Add a link to your socials or website that shows your previous work"
                           class="flex-grow-1"
@@ -640,7 +640,7 @@ const removeSocialProofLink = (index) => {
                       </div>
                     </div>
                   </div>
-                </VCol>
+              </VCol>
 
                 <!-- Right Column -->
                 <VCol cols="12" md="6">
@@ -656,7 +656,7 @@ const removeSocialProofLink = (index) => {
                       class="mb-3"
                     >
                       <div class="d-flex gap-2">
-                        <AppTextField
+                <AppTextField
                           v-model="formData.socialProofLinks[index]"
                           placeholder="Links to reviews, social proof, or feedbacks about your activities"
                           class="flex-grow-1"
@@ -688,39 +688,39 @@ const removeSocialProofLink = (index) => {
                       </div>
                     </div>
                   </div>
-                </VCol>
-              </VRow>
-            </VWindowItem>
-          </VWindow>
+              </VCol>
+            </VRow>
+          </VWindowItem>
+        </VWindow>
           <div
             class="d-flex flex-wrap gap-4 justify-sm-space-between justify-center mt-8"
           >
-            <VBtn
-              color="secondary"
-              variant="tonal"
-              :disabled="currentStep === 0"
-              @click="currentStep--"
-            >
+          <VBtn
+            color="secondary"
+            variant="tonal"
+            :disabled="currentStep === 0"
+            @click="currentStep--"
+          >
               <VIcon icon="tabler-arrow-left" start class="flip-in-rtl" />
-              Previous
-            </VBtn>
-            <VBtn
-              v-if="numberedSteps.length - 1 === currentStep"
-              color="success"
+            Previous
+          </VBtn>
+          <VBtn
+            v-if="numberedSteps.length - 1 === currentStep"
+            color="success"
               :loading="loading"
               :disabled="loading"
-              @click="onSubmit"
-            >
+            @click="onSubmit"
+          >
               {{ loading ? "Submitting..." : "Submit" }}
-            </VBtn>
+          </VBtn>
             <VBtn v-else class="next-btn-dark" @click="currentStep++">
               Next
               <VIcon icon="tabler-arrow-right" end class="flip-in-rtl" />
-            </VBtn>
-          </div>
-        </VForm>
-      </VCardText>
-    </VCard>
+          </VBtn>
+        </div>
+      </VForm>
+    </VCardText>
+  </VCard>
   </div>
 </template>
 

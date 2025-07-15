@@ -21,17 +21,22 @@ const loading = ref(false);
 
 const formData = ref({
   // Step 1 fields
-  title: "",
-  description: "",
-  location: "",
-  category: "",
+  startingDate: "",
+  finishingDate: "",
+  listingTitle: "",
+  listingDescription: "",
+  price: "",
+  minCapacity: "",
+  maxCapacity: "",
+  subtitle: "",
+  experienceLevel: "",
+  fitnessLevel: "",
   // Step 2 fields
   startDate: "",
   endDate: "",
   startTime: "",
   endTime: "",
   // Step 3 fields
-  price: "",
   maxParticipants: "",
   requirements: "",
   termsAccepted: false,
@@ -90,47 +95,193 @@ const onSubmit = async () => {
             <!-- Step 1: Basic Information -->
             <VWindowItem>
               <VRow>
+                <!-- Left column -->
                 <VCol cols="12" md="6">
+                  <!-- Starting Date -->
+                  <div class="date-picker-wrapper mb-4">
+                    <AppDateTimePicker
+                      ref="startingDatePicker"
+                      v-model="formData.startingDate"
+                      label="Starting Date*"
+                      placeholder="Select your listing starting date"
+                      :config="{ dateFormat: 'Y-m-d', allowInput: true }"
+                    />
+                  </div>
+
+                  <!-- Finishing Date -->
+                  <div class="date-picker-wrapper mb-4">
+                    <AppDateTimePicker
+                      ref="finishingDatePicker"
+                      v-model="formData.finishingDate"
+                      label="Finishing Date*"
+                      placeholder="Select your listing finishing date"
+                      :config="{ dateFormat: 'Y-m-d', allowInput: true }"
+                    />
+                  </div>
+
+                  <!-- Listing Title -->
                   <AppTextField
-                    v-model="formData.title"
+                    v-model="formData.listingTitle"
                     label="Listing Title"
-                    placeholder="Enter your listing title"
+                    placeholder="The main title of Your listing"
                     class="mb-4"
                   />
-                  <AppTextField
-                    v-model="formData.description"
-                    label="Description"
-                    placeholder="Describe your activity"
-                    type="textarea"
-                    rows="4"
-                    class="mb-4"
-                  />
+
+                  <!-- Listing Description -->
+                  <div class="mb-4">
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
+                    >
+                      Listing Description
+                    </label>
+                    <VTextarea
+                      v-model="formData.listingDescription"
+                      placeholder="Tell us any further information we should have about your adventure"
+                      rows="5"
+                      class="rich-text-area"
+                    />
+                    <p
+                      class="text-caption text-error mt-2 mb-0"
+                      style="font-size: 11px"
+                    >
+                      Note: Please add at least 500 characters.
+                    </p>
+                  </div>
                 </VCol>
+
+                <!-- Right column -->
                 <VCol cols="12" md="6">
-                  <AppTextField
-                    v-model="formData.location"
-                    label="Location"
-                    placeholder="Where will this activity take place?"
-                    class="mb-4"
+                  <!-- Price -->
+                  <div class="mb-4">
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
+                    >
+                      Price <span class="required-star">*</span>
+                    </label>
+                    <div class="price-input-wrapper">
+                      <VTextField
+                        v-model="formData.price"
+                        placeholder="Add price In Euros"
+                        type="number"
+                        class="price-input"
+                      />
+                      <span class="euro-symbol">€</span>
+                    </div>
+                    <p
+                      class="text-caption text-error mt-2 mb-0"
+                      style="font-size: 11px"
+                    >
+                      Note: This system uses Euro (€) only
+                    </p>
+                  </div>
+
+                  <!-- Departure Capacity -->
+                  <div class="mb-4">
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
+                    >
+                      Departure Capacity <span class="required-star">*</span>
+                    </label>
+                    <div class="d-flex gap-3">
+                      <VTextField
+                        v-model="formData.minCapacity"
+                        placeholder="Min Num"
+                        type="number"
+                        class="capacity-input"
+                        style="max-width: 120px"
+                      />
+                      <VTextField
+                        v-model="formData.maxCapacity"
+                        placeholder="Max Num"
+                        type="number"
+                        class="capacity-input"
+                        style="max-width: 120px"
+                      />
+                    </div>
+                  </div>
+
+                  <!-- Subtitle -->
+                  <VTextField
+                    v-model="formData.subtitle"
+                    label="Subtitle"
+                    placeholder="A tagline for your adventure"
+                    class="mb-6"
                   />
-                  <AppSelect
-                    v-model="formData.category"
-                    label="Category"
-                    placeholder="Select activity category"
-                    :items="[
-                      'Hiking',
-                      'Diving',
-                      'Rock Climbing',
-                      'Skiing',
-                      'Cycling',
-                      'Kayaking',
-                      'Photography Tours',
-                      'Cultural Tours',
-                      'Wildlife Tours',
-                      'Other',
-                    ]"
-                    class="mb-4"
-                  />
+
+                  <!-- Experience Level and Fitness Level -->
+                  <VRow>
+                    <VCol cols="6">
+                      <div class="mb-4">
+                        <label
+                          class="v-label text-body-2 mb-3 d-block"
+                          style="
+                            font-size: 16px !important;
+                            font-weight: 400 !important;
+                          "
+                        >
+                          Experience Level
+                          <VIcon
+                            icon="tabler-help-circle"
+                            size="16"
+                            class="question-icon"
+                          />
+                        </label>
+                        <VRadioGroup
+                          v-model="formData.experienceLevel"
+                          class="mt-2"
+                        >
+                          <VRadio value="journeys" label="Journeys" />
+                          <VRadio value="discovery" label="Discovery" />
+                          <VRadio value="expedition" label="Expedition" />
+                          <VRadio
+                            value="extreme-expedition"
+                            label="Extreme Expedition"
+                          />
+                          <VRadio value="not-sure" label="Not Sure" />
+                        </VRadioGroup>
+                      </div>
+                    </VCol>
+                    <VCol cols="6">
+                      <div class="mb-4">
+                        <label
+                          class="v-label text-body-2 mb-3 d-block"
+                          style="
+                            font-size: 16px !important;
+                            font-weight: 400 !important;
+                          "
+                        >
+                          Fitness Level
+                          <VIcon
+                            icon="tabler-help-circle"
+                            size="16"
+                            class="question-icon"
+                          />
+                        </label>
+                        <VRadioGroup
+                          v-model="formData.fitnessLevel"
+                          class="mt-2"
+                        >
+                          <VRadio value="easy" label="Easy" />
+                          <VRadio value="moderate" label="Moderate" />
+                          <VRadio value="challenging" label="Challenging" />
+                          <VRadio value="intense" label="Intense" />
+                          <VRadio value="not-sure" label="Not Sure" />
+                        </VRadioGroup>
+                      </div>
+                    </VCol>
+                  </VRow>
                 </VCol>
               </VRow>
             </VWindowItem>
@@ -338,5 +489,158 @@ const onSubmit = async () => {
 }
 .next-btn-dark:hover {
   background: #222 !important;
+}
+
+/* Required star styling */
+.required-star {
+  color: #ff4444;
+  font-weight: bold;
+}
+
+/* Date picker styles */
+.date-picker-wrapper {
+  position: relative;
+}
+.date-picker-wrapper .calendar-icon-png {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  background: url("/images/4svg/wired-outline-28-calendar-hover-pinch.png")
+    no-repeat center center;
+  background-size: 24px 24px;
+  cursor: pointer;
+  z-index: 3;
+}
+.date-picker-wrapper input.flat-picker-custom-style {
+  padding-right: 40px !important;
+}
+
+:deep(input.flat-picker-custom-style),
+:deep(input.flatpickr-input) {
+  background: url("/images/4svg/wired-outline-28-calendar-hover-pinch.png")
+    no-repeat right 12px center !important;
+  background-size: 24px 24px !important;
+  padding-right: 44px !important;
+}
+
+/* Form field styles */
+.v-label,
+.v-field__label {
+  font-size: 20px !important;
+  font-weight: 700 !important;
+}
+
+.v-input input,
+.v-input textarea,
+.v-select__selection,
+.v-select__selections,
+.v-select__input,
+.v-field__input {
+  font-size: 19px !important;
+  line-height: 1.5 !important;
+}
+
+.v-input input::placeholder,
+.v-input textarea::placeholder,
+.v-field__input::placeholder {
+  font-size: 18px !important;
+  color: #b0b0b0 !important;
+}
+
+/* Radio button spacing */
+.v-radio-group .v-radio {
+  margin-bottom: 8px;
+}
+
+.v-radio-group .v-radio:last-child {
+  margin-bottom: 0;
+}
+
+/* Price input with Euro symbol */
+.price-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.price-input {
+  flex: 1;
+}
+
+.euro-symbol {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+  font-weight: 500;
+  font-size: 16px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Rich text area styling */
+.rich-text-area {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.rich-text-area .v-field__input {
+  padding: 12px;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* Question icon styling */
+.question-icon {
+  color: #666;
+  margin-left: 4px;
+  cursor: help;
+}
+
+/* Capacity input styling */
+.capacity-input .v-field__input {
+  text-align: center;
+}
+
+/* Improved form field styling */
+.v-text-field,
+.v-textarea {
+  border-radius: 8px;
+}
+
+.v-text-field .v-field__outline,
+.v-textarea .v-field__outline {
+  border-color: #e0e0e0;
+}
+
+.v-text-field .v-field--focused .v-field__outline,
+.v-textarea .v-field--focused .v-field__outline {
+  border-color: #ec8d22;
+}
+
+/* Radio button styling */
+.v-radio .v-selection-control__input {
+  color: #ec8d22;
+}
+
+.v-radio .v-selection-control__input .v-icon {
+  color: #ec8d22;
+}
+
+/* Label styling improvements */
+.v-label {
+  color: #333;
+  font-weight: 500;
+}
+
+/* Placeholder styling */
+.v-field__input::placeholder {
+  color: #999;
+  font-size: 16px;
 }
 </style>
