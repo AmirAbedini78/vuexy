@@ -902,67 +902,6 @@ const onSubmit = async () => {
                   </div>
                 </VCol>
               </VRow>
-
-              <!-- Help Section -->
-              <div class="help-section mt-8">
-                <VRow>
-                  <VCol cols="12" md="8">
-                    <div class="help-content">
-                      <h3 class="help-title">Need some help?</h3>
-                      <p class="help-description">
-                        This is the first step towards your next big adventure,
-                        but you're not in this alone. Along your trip creation
-                        process, we will be right here to help you.
-                      </p>
-                      <div class="help-buttons">
-                        <VBtn
-                          color="dark"
-                          variant="elevated"
-                          class="tutorial-btn"
-                          style="
-                            background-color: #111 !important;
-                            color: #fff !important;
-                            border-radius: 8px;
-                            font-weight: 500;
-                            margin-right: 12px;
-                          "
-                        >
-                          Watch The Tutorial Video
-                        </VBtn>
-                        <VBtn
-                          color="primary"
-                          variant="elevated"
-                          class="support-btn"
-                          style="
-                            background-color: #ec8d22 !important;
-                            color: #fff !important;
-                            border-radius: 8px;
-                            font-weight: 500;
-                          "
-                        >
-                          Contact Support
-                        </VBtn>
-                      </div>
-                    </div>
-                  </VCol>
-                  <VCol cols="12" md="4">
-                    <div class="help-image">
-                      <img
-                        src="/images/help-mountain.jpg"
-                        alt="Mountain Adventure"
-                        class="mountain-image"
-                        style="
-                          width: 100%;
-                          height: 200px;
-                          object-fit: cover;
-                          border-radius: 8px;
-                          border: 2px solid #ec8d22;
-                        "
-                      />
-                    </div>
-                  </VCol>
-                </VRow>
-              </div>
             </VWindowItem>
           </VWindow>
           <div
@@ -984,12 +923,70 @@ const onSubmit = async () => {
               :disabled="loading"
               @click="onSubmit"
             >
-              {{ loading ? "Creating..." : "Create Listing" }}
+              {{ loading ? "Submitting..." : "Submit" }}
             </VBtn>
             <VBtn v-else class="next-btn-dark" @click="currentStep++">
               Next
               <VIcon icon="tabler-arrow-right" end class="flip-in-rtl" />
             </VBtn>
+          </div>
+
+          <!-- Help Section -->
+          <div class="help-section mt-8">
+            <VRow>
+              <VCol cols="12" md="8">
+                <div class="help-content">
+                  <h3 class="help-title">Need some help?</h3>
+                  <p class="help-description">
+                    This is the first step towards your next big adventure, but
+                    you're not in this alone. Along your trip creation process,
+                    we will be right here to help you.
+                  </p>
+                  <div class="help-buttons">
+                    <VBtn
+                      color="dark"
+                      variant="elevated"
+                      class="tutorial-btn"
+                      style="
+                        background-color: #111 !important;
+                        color: #fff !important;
+                        border-radius: 8px;
+                        font-weight: 500;
+                        margin-right: 12px;
+                      "
+                    >
+                      Watch The Tutorial Video
+                    </VBtn>
+                    <VBtn
+                      color="primary"
+                      variant="elevated"
+                      class="support-btn"
+                      style="
+                        background-color: #ec8d22 !important;
+                        color: #fff !important;
+                        border-radius: 8px;
+                        font-weight: 500;
+                      "
+                    >
+                      Contact Support
+                    </VBtn>
+                  </div>
+                </div>
+              </VCol>
+              <VCol cols="12" md="4">
+                <div class="help-video">
+                  <iframe
+                    src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+                    title="Tutorial Video"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen
+                    class="youtube-video"
+                    style="width: 100%; height: 200px; border-radius: 8px"
+                  ></iframe>
+                </div>
+              </VCol>
+            </VRow>
           </div>
         </VForm>
       </VCardText>
@@ -1364,11 +1361,8 @@ const onSubmit = async () => {
 
 /* Help section styling */
 .help-section {
-  background: #f8f9fa;
-  border-radius: 12px;
-  padding: 32px;
+  padding: 32px 0;
   margin-top: 48px;
-  border: 1px solid #e9ecef;
 }
 
 .help-title {
@@ -1429,7 +1423,7 @@ const onSubmit = async () => {
 /* Responsive design for help section */
 @media (max-width: 768px) {
   .help-section {
-    padding: 24px;
+    padding: 24px 0;
     margin-top: 32px;
   }
 
