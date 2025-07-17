@@ -1,9 +1,11 @@
 <?php
 
-$token = 'awvuRvxdCEDrpMKAag12KA70KvimSd9lA1uzcwpBiOnRrEWlfP4icCj4wxlIkA4U';
+echo "Testing final verification with new token...\n\n";
+
+$token = 'huUOMQCgxKJRtDGfGg7VuvEwVUDTAg5MWl70qbZu5YN7VmrZy0Se69nohjGp6R8C';
 $url = "http://localhost:8000/api/verify/{$token}";
 
-echo "Testing API URL: {$url}\n\n";
+echo "Testing: {$url}\n";
 
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $url);
@@ -12,16 +14,16 @@ curl_setopt($ch, CURLOPT_HTTPHEADER, [
     'Accept: application/json',
     'Content-Type: application/json',
 ]);
-curl_setopt($ch, CURLOPT_VERBOSE, true);
 
 $response = curl_exec($ch);
 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-$error = curl_error($ch);
-
 curl_close($ch);
 
-echo "HTTP Status Code: {$httpCode}\n";
+echo "HTTP Code: {$httpCode}\n";
 echo "Response: {$response}\n";
-if ($error) {
-    echo "cURL Error: {$error}\n";
-}
+
+if ($httpCode === 200) {
+    echo "\n🎉 SUCCESS! Email verification is working!\n";
+} else {
+    echo "\n❌ Still having issues...\n";
+} 

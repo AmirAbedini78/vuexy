@@ -38,6 +38,16 @@ const isNewlyRegistered = computed(() => route.query.registered === "true");
 // Check if email was just verified
 const emailVerified = computed(() => route.query.verified === "true");
 
+// Check for session messages
+const sessionMessage = computed(() => {
+  // This will be handled by Laravel's session flash messages
+  return route.query.message || null;
+});
+
+const sessionMessageType = computed(() => {
+  return route.query.type || "success";
+});
+
 const registeredEmail = computed(() => route.query.email || "");
 
 const errors = ref({
@@ -186,6 +196,25 @@ const onSubmit = () => {
             </template>
             <VAlertTitle>Email Verified!</VAlertTitle>
             Your email has been successfully verified. You can now log in.
+          </VAlert>
+        </VCardText>
+
+        <!-- Session message from verification -->
+        <VCardText v-if="sessionMessage">
+          <VAlert :type="sessionMessageType" variant="tonal" class="mb-4">
+            <template #prepend>
+              <VIcon
+                :icon="
+                  sessionMessageType === 'success'
+                    ? 'tabler-check-circle'
+                    : 'tabler-alert-circle'
+                "
+              />
+            </template>
+            <VAlertTitle>{{
+              sessionMessageType === "success" ? "Success!" : "Error!"
+            }}</VAlertTitle>
+            {{ sessionMessage }}
           </VAlert>
         </VCardText>
 

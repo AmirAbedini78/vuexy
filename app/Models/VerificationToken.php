@@ -27,4 +27,18 @@ class VerificationToken extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    // Check if token is expired using proper timezone comparison
+    public function isExpired()
+    {
+        if (!$this->expires_at) {
+            return false;
+        }
+        
+        // Get current time in the same timezone as the expires_at field
+        $now = now()->setTimezone($this->expires_at->timezone);
+        
+        // Compare times in the same timezone
+        return $this->expires_at->lt($now);
+    }
 }

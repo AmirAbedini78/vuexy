@@ -35,10 +35,15 @@ class AuthController extends Controller
         
         // Send verification email
         $user->sendEmailVerificationNotification();
+
+        // Create token for the user
+        $token = $user->createToken('auth_token')->plainTextToken;
     
         return response()->json([
             'message' => 'User registered successfully. Please check your email for a verification link.',
-            'user' => $user
+            'user' => $user,
+            'access_token' => $token,
+            'token_type' => 'Bearer',
         ], 201);
     }
 
@@ -60,16 +65,6 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
             /** @var \App\Models\User $user */
             $user = Auth::user();
-    
-            if (!$user->hasVerifiedEmail()) {
-                \Log::warning('Login failed: Email not verified', ['email' => $request->email]);
-                return response()->json([
-                    'message' => 'Your email address is not verified.',
-                    'errors' => [
-                        'email' => ['Please verify your email address before logging in.']
-                    ]
-                ], 403);
-            }
     
             $token = $user->createToken('auth_token')->plainTextToken;
             

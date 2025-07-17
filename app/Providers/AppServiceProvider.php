@@ -28,7 +28,7 @@ class AppServiceProvider extends ServiceProvider
             $frontendUrl = rtrim(config('app.frontend_url'), '/');
             VerificationToken::where('user_id', $notifiable->id)->delete();
             $token = Str::random(64);
-            $expiresAt = now()->addMinutes(config('auth.verification.expire', 1440));
+            $expiresAt = now()->setTimezone(config('app.timezone'))->addMinutes(config('auth.verification.expire', 1440));
             VerificationToken::create([
                 'user_id' => $notifiable->id,
                 'token' => $token,
@@ -38,6 +38,7 @@ class AppServiceProvider extends ServiceProvider
             \Log::info('Verification URL generated', [
                 'url' => $url,
                 'expires_at' => $expiresAt->toDateTimeString(),
+                'timezone' => config('app.timezone'),
             ]);
             return $url;
         });

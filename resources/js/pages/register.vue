@@ -50,7 +50,6 @@ const form = ref({
 });
 
 const isLoading = ref(false);
-const registrationDone = ref(false);
 
 // Computed properties for password validation
 const passwordRules = computed(() => [
@@ -73,6 +72,8 @@ const register = async () => {
   };
 
   try {
+    console.log("Starting registration for:", form.value.email);
+
     const res = await $api("/auth/register", {
       method: "POST",
       body: {
@@ -83,14 +84,24 @@ const register = async () => {
       },
     });
 
+    console.log("Registration successful:", res);
     const { access_token, user } = res;
 
-    // Don't store user data and token after registration
-    // User should login separately
+    // Store email in localStorage for verify page
+    localStorage.setItem("registeredEmail", form.value.email);
 
-    registrationDone.value = true;
+    console.log("Redirecting to verify-email page...");
+    // Redirect to verify-email page instead of showing success message
+    router.push(`/verify-email?email=${encodeURIComponent(form.value.email)}`);
   } catch (err) {
     console.error("Registration error:", err);
+    console.error("Error details:", {
+      message: err.message,
+      data: err.data,
+      status: err.status,
+      statusText: err.statusText,
+    });
+
     if (err.data && err.data.errors) {
       errors.value = err.data.errors;
     } else {
@@ -135,24 +146,7 @@ const onSubmit = () => {
         </VCardText>
 
         <VCardText>
-          <!-- Alert for successful registration -->
-          <VAlert
-            v-if="registrationDone"
-            type="success"
-            variant="tonal"
-            class="mb-4"
-          >
-            <VAlertTitle>Registration Successful!</VAlertTitle>
-            We have sent an email to <strong>{{ form.email }}</strong> with a
-            link to verify your account. Please check your inbox (and spam
-            folder).
-          </VAlert>
-
-          <VForm
-            v-if="!registrationDone"
-            ref="refVForm"
-            @submit.prevent="onSubmit"
-          >
+          <VForm ref="refVForm" @submit.prevent="onSubmit">
             <VRow>
               <!-- Username -->
               <VCol cols="12">

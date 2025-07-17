@@ -36,7 +36,7 @@ export const setupGuards = router => {
     }
 
     // If user is not logged in and trying to access protected route, redirect to login
-    if (!isLoggedIn && to.path !== '/login' && to.path !== '/register') {
+    if (!isLoggedIn && to.path !== '/login' && to.path !== '/register' && to.path !== '/verify-email') {
       console.log('User is not logged in, redirecting to login')
       return {
         name: 'login',

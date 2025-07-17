@@ -95,7 +95,10 @@ export default defineConfig({
     }),
     svgLoader(),
   ],
-  define: { 'process.env': {} },
+  define: { 
+    'process.env': {},
+    global: 'globalThis',
+  },
   resolve: {
     alias: {
       '@core-scss': fileURLToPath(new URL('./resources/styles/@core', import.meta.url)),

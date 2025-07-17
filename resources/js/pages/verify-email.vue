@@ -1,14 +1,6 @@
 <template>
   <div class="auth-wrapper d-flex align-center justify-center pa-4">
     <div class="position-relative my-sm-16">
-      <VNodeRenderer
-        :nodes="h('div', { innerHTML: authV1TopShape })"
-        class="text-primary auth-v1-top-shape d-none d-sm-block"
-      />
-      <VNodeRenderer
-        :nodes="h('div', { innerHTML: authV1BottomShape })"
-        class="text-primary auth-v1-bottom-shape d-none d-sm-block"
-      />
       <VCard
         class="auth-card"
         max-width="460"
@@ -27,40 +19,30 @@
           </VCardTitle>
         </VCardItem>
         <VCardText>
-          <template v-if="status === 'verifying'">
-            <h4 class="text-h4 mb-1">Verify Your Email</h4>
-            <VAlert type="info" variant="tonal" class="mb-4">
-              <VAlertTitle>Ready to Verify</VAlertTitle>
-              Please click the button below to verify your email address.
-            </VAlert>
+          <h4 class="text-h4 mb-1">Verify your email</h4>
+          <p class="mb-4 text-body-1">
+            Account activation link sent to your email address
+            <strong>{{ userEmail }}</strong
+            >, Please follow the link inside to continue.
+          </p>
+
+          <VBtn block color="primary" @click="skipVerification" class="mb-4">
+            Skip For Now
+          </VBtn>
+
+          <div class="text-center">
+            <span class="text-body-2">Didn't get the email?</span>
             <VBtn
-              block
-              :loading="isLoading"
-              :disabled="isLoading"
-              @click="verifyEmail"
+              variant="text"
+              color="primary"
+              size="small"
+              @click="resendEmail"
+              :loading="isResending"
+              class="ms-1"
             >
-              {{ isLoading ? "Verifying..." : "Verify Email" }}
+              Resend
             </VBtn>
-          </template>
-          <template v-else-if="status === 'success'">
-            <h4 class="text-h4 mb-1">Email Verified ✉️</h4>
-            <VAlert type="success" variant="tonal" class="mb-4">
-              <VAlertTitle>Email Verified!</VAlertTitle>
-              Your email has been successfully verified. You will be redirected
-              to <RouterLink :to="{ name: 'login' }">login</RouterLink>.
-            </VAlert>
-          </template>
-          <template v-else>
-            <h4 class="text-h4 mb-1">Verification Failed</h4>
-            <VAlert type="error" variant="tonal" class="mb-4">
-              <VAlertTitle>Verification Failed</VAlertTitle>
-              {{ errorMessage }}
-            </VAlert>
-            <div class="d-flex align-center justify-center">
-              <span class="me-1">Didn't receive the email?</span>
-              <RouterLink :to="{ name: 'register' }">Resend</RouterLink>
-            </div>
-          </template>
+          </div>
         </VCardText>
       </VCard>
     </div>
@@ -68,56 +50,10 @@
 </template>
 
 <script setup>
-import authV1BottomShape from "@images/svg/auth-v1-bottom-shape.svg?raw";
-import authV1TopShape from "@images/svg/auth-v1-top-shape.svg?raw";
-import { VNodeRenderer } from "@layouts/components/VNodeRenderer";
-import { themeConfig } from "@themeConfig";
 import { ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-const route = useRoute();
-const router = useRouter();
-const status = ref("verifying");
-const errorMessage = ref("");
-const isLoading = ref(false);
-
-const verifyEmail = async () => {
-  isLoading.value = true;
-  const { token } = route.params;
-  console.log("Attempting to verify token:", token);
-  const url = `${import.meta.env.VITE_API_BASE_URL}/verify/${token}`;
-  try {
-    const response = await fetch(url, {
-      method: "GET",
-      credentials: "include",
-      headers: {
-        Accept: "application/json",
-        "X-Requested-With": "XMLHttpRequest",
-      },
-    });
-    const data = await response.json();
-    console.log("Verification response:", { status: response.status, data });
-    if (!response.ok) {
-      throw new Error(data.message || "Verification failed");
-    }
-    status.value = "success";
-    setTimeout(
-      () => router.push({ name: "login", query: { verified: "true" } }),
-      2000
-    );
-  } catch (err) {
-    console.error("Verification error:", {
-      message: err.message,
-      status: err.status,
-      data: err.data,
-    });
-    status.value = "error";
-    errorMessage.value =
-      err.message || "The verification link is invalid or has expired.";
-  } finally {
-    isLoading.value = false;
-  }
-};
+console.log("Verify-email component is loading...");
 
 definePage({
   meta: {
@@ -125,6 +61,61 @@ definePage({
     public: true,
   },
 });
+
+const route = useRoute();
+const router = useRouter();
+const isResending = ref(false);
+
+// Get email from route params or localStorage
+const userEmail = ref(
+  route.query.email || localStorage.getItem("registeredEmail") || "your email"
+);
+
+console.log("User email:", userEmail.value);
+
+const skipVerification = () => {
+  // Clear any stored email
+  localStorage.removeItem("registeredEmail");
+
+  // Redirect to login page
+  router.push({
+    name: "login",
+    query: { registered: "true", email: userEmail.value },
+  });
+};
+
+const resendEmail = async () => {
+  isResending.value = true;
+
+  try {
+    // Call resend verification email API
+    const response = await fetch(
+      `${import.meta.env.VITE_API_BASE_URL}/email/resend-verification`,
+      {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          "X-Requested-With": "XMLHttpRequest",
+        },
+        body: JSON.stringify({
+          email: userEmail.value,
+        }),
+      }
+    );
+
+    if (response.ok) {
+      // Show success message (you can add a toast notification here)
+      console.log("Verification email resent successfully");
+    } else {
+      console.error("Failed to resend verification email");
+    }
+  } catch (error) {
+    console.error("Error resending verification email:", error);
+  } finally {
+    isResending.value = false;
+  }
+};
 </script>
 
 <style lang="scss">

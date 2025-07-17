@@ -77,8 +77,8 @@ export const routes = [
     component: () => import('@/pages/dashboards/ecommerce.vue'),
   },
   {
-    path: '/verify/:token',
-    name: 'verify-email',
+    path: '/verify-email',
+    name: 'verify-email-page',
     component: () => import('@/pages/verify-email.vue'),
     meta: {
       layout: 'blank',

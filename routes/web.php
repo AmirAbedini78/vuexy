@@ -1,7 +1,22 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\EmailVerificationController;
 
-Route::get('{any?}', function () {
+// Test route to check if web routes are working
+Route::get('/web-test', function () {
+    return 'Web route is working!';
+});
+
+// Email verification route
+Route::get('/verify/{token}', [EmailVerificationController::class, 'verifyByToken']);
+
+// Login route (for redirects)
+Route::get('/login', function () {
     return view('application');
-})->where('any', '.*');
+})->name('login');
+
+// Catch-all route for SPA (excluding API routes)
+Route::get('/{any}', function () {
+    return view('application');
+})->where('any', '^(?!api).*$');
