@@ -177,30 +177,19 @@ const onSubmit = () => {
         </VCardText>
 
         <!-- Success message for newly registered users -->
-        <VCardText v-if="isNewlyRegistered">
-          <VAlert type="success" variant="tonal" class="mb-4">
-            <template #prepend>
-              <VIcon icon="tabler-check-circle" />
-            </template>
-            <VAlertTitle>Registration Successful!</VAlertTitle>
-            Your account has been created successfully. Please log in with your
-            credentials.
-          </VAlert>
-        </VCardText>
+        <!-- Removed success message for newly registered users -->
 
         <!-- Success message for email verification -->
-        <VCardText v-if="emailVerified">
-          <VAlert type="success" variant="tonal" class="mb-4">
-            <template #prepend>
-              <VIcon icon="tabler-check-circle" />
-            </template>
-            <VAlertTitle>Email Verified!</VAlertTitle>
-            Your email has been successfully verified. You can now log in.
-          </VAlert>
-        </VCardText>
+        <!-- Removed success message for email verification -->
 
-        <!-- Session message from verification -->
-        <VCardText v-if="sessionMessage">
+        <!-- Session message from password reset -->
+        <VCardText
+          v-if="
+            sessionMessage &&
+            sessionMessageType === 'success' &&
+            sessionMessage.includes('Password reset successfully')
+          "
+        >
           <VAlert :type="sessionMessageType" variant="tonal" class="mb-4">
             <template #prepend>
               <VIcon

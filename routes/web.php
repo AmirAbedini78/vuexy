@@ -11,6 +11,11 @@ Route::get('/web-test', function () {
 // Email verification route
 Route::get('/verify/{token}', [EmailVerificationController::class, 'verifyByToken']);
 
+// Password reset route
+Route::get('/reset-password/{token}', function ($token) {
+    return view('application');
+})->name('password.reset');
+
 // Login route (for redirects)
 Route::get('/login', function () {
     return view('application');

@@ -24,11 +24,20 @@ class ResetPassword extends Notification
 
     public function toMail($notifiable)
     {
+        $data = [
+            'subject' => 'Reset Your Password - ' . config('app.name'),
+            'title' => 'Reset Your Password',
+            'body' => "Hey {$notifiable->name}<br><br>
+                      We received a request to reset your password for your " . config('app.name') . " account. 
+                      To reset your password and continue, please click the button below:",
+            'actionUrl' => $this->url,
+            'actionText' => 'Reset Password',
+            'importantNote' => "This password reset link will expire in " . config('auth.passwords.users.expire') . " minutes. 
+                               If you didn't request a password reset, please ignore this email or contact our support team."
+        ];
+
         return (new MailMessage)
-            ->subject(Lang::get('Reset Password Notification'))
-            ->line(Lang::get('You are receiving this email because we received a password reset request for your account.'))
-            ->action(Lang::get('Reset Password'), $this->url)
-            ->line(Lang::get('This password reset link will expire in :count minutes.', ['count' => config('auth.passwords.users.expire')]))
-            ->line(Lang::get('If you did not request a password reset, no further action is required.'));
+            ->subject($data['subject'])
+            ->view('emails.base-template', $data);
     }
 }

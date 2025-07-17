@@ -87,15 +87,35 @@ class AuthController extends Controller
      */
     public function sendResetLinkEmail(Request $request)
     {
+        \Log::info('Password reset request received', [
+            'email' => $request->email,
+            'ip' => $request->ip(),
+        ]);
+
         $request->validate(['email' => 'required|email']);
 
-        $status = Password::sendResetLink(
-            $request->only('email')
-        );
+        try {
+            $status = Password::sendResetLink(
+                $request->only('email')
+            );
 
-        return $status === Password::RESET_LINK_SENT
-            ? response()->json(['message' => __($status)], 200)
-            : response()->json(['errors' => ['email' => [__($status)]]], 422);
+            \Log::info('Password reset link sent', [
+                'email' => $request->email,
+                'status' => $status,
+            ]);
+
+            return $status === Password::RESET_LINK_SENT
+                ? response()->json(['message' => __($status)], 200)
+                : response()->json(['errors' => ['email' => [__($status)]]], 422);
+        } catch (\Exception $e) {
+            \Log::error('Error sending password reset link', [
+                'email' => $request->email,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json(['errors' => ['email' => ['An error occurred while sending the reset link']]], 500);
+        }
     }
 
     /**
@@ -103,28 +123,54 @@ class AuthController extends Controller
      */
     public function reset(Request $request)
     {
+        \Log::info('Password reset attempt', [
+            'email' => $request->email,
+            'token' => $request->token,
+            'ip' => $request->ip(),
+        ]);
+
         $request->validate([
             'token' => 'required',
             'email' => 'required|email',
             'password' => 'required|min:8|confirmed',
         ]);
 
-        $status = Password::reset(
-            $request->only('email', 'password', 'password_confirmation', 'token'),
-            function ($user, $password) {
-                $user->forceFill([
-                    'password' => Hash::make($password)
-                ])->setRememberToken(Str::random(60));
+        try {
+            $status = Password::reset(
+                $request->only('email', 'password', 'password_confirmation', 'token'),
+                function ($user, $password) {
+                    $user->forceFill([
+                        'password' => Hash::make($password)
+                    ])->setRememberToken(Str::random(60));
 
-                $user->save();
+                    $user->save();
 
-                event(new PasswordReset($user));
-            }
-        );
+                    \Log::info('Password reset successful', [
+                        'user_id' => $user->id,
+                        'email' => $user->email,
+                    ]);
 
-        return $status === Password::PASSWORD_RESET
-            ? response()->json(['message' => __($status)], 200)
-            : response()->json(['errors' => ['email' => [__($status)]]], 422);
+                    event(new PasswordReset($user));
+                }
+            );
+
+            \Log::info('Password reset result', [
+                'email' => $request->email,
+                'status' => $status,
+            ]);
+
+            return $status === Password::PASSWORD_RESET
+                ? response()->json(['message' => __($status)], 200)
+                : response()->json(['errors' => ['email' => [__($status)]]], 422);
+        } catch (\Exception $e) {
+            \Log::error('Error resetting password', [
+                'email' => $request->email,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json(['errors' => ['email' => ['An error occurred while resetting the password']]], 500);
+        }
     }
 
     /**

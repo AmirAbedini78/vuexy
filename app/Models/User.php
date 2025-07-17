@@ -52,7 +52,17 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function sendPasswordResetNotification($token)
     {
-        $url = config('app.frontend_url') . "/reset-password/$token?email=" . urlencode($this->email);
+        \Log::info('Sending password reset notification', [
+            'user_id' => $this->id,
+            'email' => $this->email,
+            'token' => $token,
+        ]);
+        
+        $frontendUrl = rtrim(config('app.frontend_url'), '/');
+        $url = $frontendUrl . "/reset-password/{$token}?email=" . urlencode($this->email);
+        
+        \Log::info('Password reset URL generated', ['url' => $url]);
+        
         $this->notify(new \App\Notifications\ResetPassword($token, $url));
     }
 

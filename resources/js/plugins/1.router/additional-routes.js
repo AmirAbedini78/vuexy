@@ -86,6 +86,15 @@ export const routes = [
     },
   },
   {
+    path: '/reset-password/:token',
+    name: 'reset-password',
+    component: () => import('@/pages/reset-password.vue'),
+    meta: {
+      layout: 'blank',
+      public: true,
+    },
+  },
+  {
     path: '/registration/activity',
     name: 'registration-activity',
     component: () => import('@/views/pages/registration/Activity.vue'),

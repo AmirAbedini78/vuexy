@@ -36,12 +36,20 @@ class VerifyEmail extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
+        $data = [
+            'subject' => 'Verify Your Email Address - ' . config('app.name'),
+            'title' => 'Verify Your Email Address',
+            'body' => "Hey {$notifiable->name}<br><br>
+                      Thank you for starting the registration process with " . config('app.name') . "! 
+                      To verify your email address and continue, please click the button below:",
+            'actionUrl' => $this->link,
+            'actionText' => 'Verify me!',
+            'importantNote' => "This link is valid for 24 hours. If you didn't request this, please ignore this email or contact our support team."
+        ];
+
         return (new MailMessage)
-            ->subject('Verify Your Email Address')
-            ->greeting('Hello!')
-            ->line('Thank you for registering. Please click the button below to verify your email address.')
-            ->action('Verify Email', $this->link)
-            ->line('If you did not create an account, no further action is required.');
+            ->subject($data['subject'])
+            ->view('emails.base-template', $data);
     }
 
     /**
