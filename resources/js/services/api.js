@@ -86,6 +86,8 @@ export const individualUserService = {
   },
 }
 
+
+
 // Company User API Service
 export const companyUserService = {
   async register(formData) {
