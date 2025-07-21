@@ -89,6 +89,9 @@ const register = async () => {
 
     // Store email in localStorage for verify page
     localStorage.setItem("registeredEmail", form.value.email);
+    // Store credentials for auto-login after skip
+    localStorage.setItem("registerEmail", form.value.email);
+    localStorage.setItem("registerPassword", form.value.password);
 
     console.log("Redirecting to verify-email page...");
     // Redirect to verify-email page instead of showing success message

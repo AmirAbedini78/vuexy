@@ -12,6 +12,7 @@ class UserVerification extends Model
     protected $fillable = [
         'user_type',
         'user_id',
+        'email',
         'email_verified',
         'email_token',
         'whatsapp_verified',

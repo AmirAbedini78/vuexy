@@ -77,6 +77,12 @@ class EmailVerificationController extends Controller
         ]);
         \Log::info('=== EMAIL VERIFICATION END (SUCCESS) ===');
 
+        // Check if there's a redirect URL in the query parameters
+        $redirectUrl = request()->query('redirect');
+        if ($redirectUrl) {
+            return redirect($redirectUrl);
+        }
+
         return redirect()->route('login')->withQueryString(['type' => 'success', 'message' => 'Email verified successfully! You can now log in.']);
     }
 

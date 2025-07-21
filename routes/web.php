@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\EmailVerificationController;
+use App\Http\Controllers\Api\UserVerificationController;
 
 // Test route to check if web routes are working
 Route::get('/web-test', function () {
@@ -10,6 +11,9 @@ Route::get('/web-test', function () {
 
 // Email verification route
 Route::get('/verify/{token}', [EmailVerificationController::class, 'verifyByToken']);
+
+// Timeline email verification route
+Route::get('/verification/email/verify/{token}', [UserVerificationController::class, 'verifyEmail']);
 
 // Password reset route
 Route::get('/reset-password/{token}', function ($token) {
@@ -20,6 +24,10 @@ Route::get('/reset-password/{token}', function ($token) {
 Route::get('/login', function () {
     return view('application');
 })->name('login');
+
+// LinkedIn OAuth for timeline verification
+Route::get('/api/verification/{userType}/{userId}/linkedin', [UserVerificationController::class, 'startLinkedinOAuth']);
+Route::get('/linkedin/callback', [UserVerificationController::class, 'linkedinCallback']);
 
 // Catch-all route for SPA (excluding API routes)
 Route::get('/{any}', function () {

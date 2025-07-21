@@ -73,11 +73,36 @@ const userEmail = ref(
 
 console.log("User email:", userEmail.value);
 
-const skipVerification = () => {
-  // Clear any stored email
+const skipVerification = async () => {
+  // Try auto-login if credentials exist
+  const email = localStorage.getItem("registerEmail");
+  const password = localStorage.getItem("registerPassword");
+  if (email && password) {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (res.ok && data.token) {
+        localStorage.setItem("accessToken", data.token);
+        localStorage.setItem("userData", JSON.stringify(data.user));
+        localStorage.removeItem("registerEmail");
+        localStorage.removeItem("registerPassword");
+        localStorage.removeItem("registeredEmail");
+        router.push("/access-control");
+        return;
+      }
+    } catch (e) {
+      // fall through to login
+    }
+  }
+  // fallback: just clear registeredEmail and go to login
   localStorage.removeItem("registeredEmail");
-
-  // Redirect to login page
   router.push({
     name: "login",
     query: { registered: "true", email: userEmail.value },

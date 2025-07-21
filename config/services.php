@@ -35,4 +35,16 @@ return [
         ],
     ],
 
+    'linkedin' => [
+        'client_id' => env('LINKEDIN_CLIENT_ID'),
+        'client_secret' => env('LINKEDIN_CLIENT_SECRET'),
+        'redirect' => env('LINKEDIN_REDIRECT_URI'),
+    ],
+
+    'whatsapp' => [
+        'access_token' => env('WHATSAPP_ACCESS_TOKEN'),
+        'phone_number_id' => env('WHATSAPP_PHONE_NUMBER_ID'),
+        'template_name' => env('WHATSAPP_TEMPLATE_NAME', null),
+    ],
+
 ];

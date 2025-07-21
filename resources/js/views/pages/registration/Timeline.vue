@@ -9,6 +9,9 @@ const error = ref(null);
 const userData = ref({ email: "", whatsapp: "" });
 const timelineSteps = ref([]);
 
+// Get logged-in user data
+const loggedInUser = ref(null);
+
 // Get user type and ID from route
 const userType = route.params.type; // 'individual' or 'company'
 const userId = route.params.id;
@@ -29,7 +32,7 @@ const whatsappCode = ref("");
 const whatsappCodeLoading = ref(false);
 
 // LinkedIn Verification State
-const linkedinStatus = ref("pending"); // 'pending', 'sent', 'verified', 'error'
+const linkedinStatus = ref("pending"); // 'pending', 'verified', 'error'
 const linkedinMessage = ref("");
 const linkedinLoading = ref(false);
 const showLinkedinModal = ref(false);
@@ -68,6 +71,12 @@ const fetchVerificationStatus = async () => {
       // If no verification data exists, set to pending
       emailStatus.value = "pending";
       emailMessage.value = "";
+    }
+
+    // Check if user just came back from email verification
+    if (route.query.verified === "true") {
+      emailStatus.value = "verified";
+      emailMessage.value = "Email verified successfully! Welcome back!";
     }
   } catch (e) {
     console.error("Error fetching verification status:", e);
@@ -162,22 +171,7 @@ const verifyWhatsappCode = async () => {
 };
 
 const connectLinkedin = () => {
-  linkedinLoading.value = true;
-  linkedinMessage.value = "";
-  try {
-    // This is a placeholder for LinkedIn OAuth flow
-    // In a real application, you would redirect the user to a LinkedIn authorization URL
-    // and then handle the callback to verify the code.
-    // For now, we'll simulate a successful connection.
-    linkedinStatus.value = "verified";
-    linkedinMessage.value = "LinkedIn Connected";
-    showLinkedinModal.value = false;
-  } catch (e) {
-    linkedinStatus.value = "error";
-    linkedinMessage.value = "Failed to connect LinkedIn.";
-  } finally {
-    linkedinLoading.value = false;
-  }
+  window.location.href = `/api/verification/${userType}/${userId}/linkedin`;
 };
 
 const verifyLinkedinCode = async () => {
@@ -231,6 +225,16 @@ onMounted(async () => {
     initializeTimeline();
     await fetchVerificationStatus();
     await fetchWhatsappStatus();
+    getLoggedInUser(); // Call the new function here
+
+    // Check LinkedIn verification status from backend or query
+    if (route.query.linkedin === "success") {
+      linkedinStatus.value = "verified";
+      linkedinMessage.value = "LinkedIn verified successfully!";
+    } else if (route.query.linkedin === "error") {
+      linkedinStatus.value = "error";
+      linkedinMessage.value = "LinkedIn verification failed. Please try again.";
+    }
   } catch (err) {
     console.error("Error fetching user data:", err);
     error.value = err.message || "Failed to load user data";
@@ -326,11 +330,24 @@ const getUserDisplayName = () => {
   return userData.value.full_name || userData.value.company_name || "User";
 };
 
+// Get logged-in user data from cookies
+const getLoggedInUser = () => {
+  const userDataCookie = useCookie("userData");
+  if (userDataCookie.value) {
+    loggedInUser.value = userDataCookie.value;
+    // Auto-fill email field with logged-in user's email
+    if (loggedInUser.value.email) {
+      userData.value.email = loggedInUser.value.email;
+    }
+  }
+};
+
 const sendEmailVerification = async () => {
   emailLoading.value = true;
   emailMessage.value = "";
 
-  const userEmail = userData.value.email;
+  // Use logged-in user's email if available, otherwise use userData email
+  const userEmail = loggedInUser.value?.email || userData.value.email;
   if (!userEmail) {
     emailStatus.value = "error";
     emailMessage.value = "Email address not found. Please contact support.";
@@ -351,6 +368,7 @@ const sendEmailVerification = async () => {
       body: JSON.stringify({
         email: userEmail,
         name: getUserDisplayName(),
+        redirect_url: `${window.location.origin}/registration/timeline/${userType}/${userId}?verified=true`,
       }),
     });
 
@@ -359,7 +377,7 @@ const sendEmailVerification = async () => {
       emailStatus.value = "sent";
       emailMessage.value =
         "Verification email sent successfully! Please check your inbox and click the verification link.";
-      await fetchVerificationStatus(); // وضعیت را به‌روز کن
+      await fetchVerificationStatus(); // Update status
     } else {
       emailStatus.value = "error";
       emailMessage.value =
@@ -381,7 +399,7 @@ const sendEmailVerification = async () => {
   <div class="timeline-header">
     <div class="container-header">
       <h1 class="welcome-title">
-        Welcome <span class="account-name">[Account name]</span>
+        Welcome <span class="account-name">{{ getUserDisplayName() }}</span>
       </h1>
       <p class="welcome-desc">
         here is where you can manage all your experience listings and
@@ -433,22 +451,30 @@ const sendEmailVerification = async () => {
             variant="outlined"
             density="compact"
             class="email-input"
+            :disabled="true"
+            :readonly="true"
           />
           <VBtn
             color="orange"
             class="send-link-btn"
             @click="sendEmailVerification"
             :loading="emailLoading"
-            :disabled="emailLoading"
+            :disabled="emailLoading || emailStatus === 'verified'"
           >
             <VIcon left size="20">tabler-mail</VIcon>
-            Send Link
+            {{ emailStatus === "verified" ? "Verified" : "Send Link" }}
           </VBtn>
           <div
             v-if="emailMessage"
             :style="{
-              color: emailStatus === 'error' ? 'red' : 'green',
+              color:
+                emailStatus === 'error'
+                  ? 'red'
+                  : emailStatus === 'verified'
+                  ? 'green'
+                  : 'blue',
               marginTop: '8px',
+              fontWeight: 'bold',
             }"
           >
             {{ emailMessage }}
@@ -517,12 +543,24 @@ const sendEmailVerification = async () => {
         <div class="card-actions">
           <VBtn
             color="primary"
-            class="connect-linkedin-btn"
+            :disabled="linkedinStatus === 'verified'"
             @click="connectLinkedin"
           >
             <VIcon left size="20">tabler-brand-linkedin</VIcon>
-            Connect LinkedIn
+            {{
+              linkedinStatus === "verified" ? "Verified" : "Connect to LinkedIn"
+            }}
           </VBtn>
+          <div
+            v-if="linkedinMessage"
+            :style="{
+              color: linkedinStatus === 'verified' ? 'green' : 'red',
+              marginTop: '8px',
+              fontWeight: 'bold',
+            }"
+          >
+            {{ linkedinMessage }}
+          </div>
         </div>
       </div>
     </div>

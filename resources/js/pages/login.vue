@@ -123,7 +123,7 @@ const login = async () => {
     console.log("About to redirect to dashboard...");
     // Force redirect to dashboard
     await nextTick();
-    router.push("/");
+    router.push("/access-control");
   } catch (err) {
     console.error("Login error:", err);
     if (err.data && err.data.errors) {
