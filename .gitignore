@@ -64,4 +64,4 @@ public/mockServiceWorker.js
 # Env files
 .env*
 !.env.example
-/resources/js/services/api.js
+resources/js/services/api.js
