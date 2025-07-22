@@ -424,17 +424,7 @@ const sendEmailVerification = async () => {
   <!-- Timeline Steps -->
   <div class="timeline">
     <!-- Step 1: Email Verification -->
-    <div class="timeline-row">
-      <div class="timeline-left">
-        <div class="step-checkbox" :class="{ active: true, done: false }">
-          <div class="checkbox-circle">
-            <VIcon v-if="true" icon="tabler-check" size="16" color="white" />
-          </div>
-        </div>
-        <div class="step-number" :class="{ active: true }">01</div>
-        <div class="step-title">Email<br />Verification</div>
-        <div class="vertical-line"></div>
-      </div>
+    <div class="timeline-row reverse">
       <div class="timeline-card">
         <div class="card-title">
           Confirm your email address to start the registration process
@@ -481,20 +471,24 @@ const sendEmailVerification = async () => {
           </div>
         </div>
       </div>
+      <div class="timeline-left step-left-reverse-fixed">
+        <div class="step-info-col">
+          <div class="step-number" :class="{ active: true }">01</div>
+          <div class="step-title">Email<br />Verification</div>
+        </div>
+        <div class="step-line-col">
+          <div class="step-checkbox" :class="{ active: true, done: false }">
+            <div class="checkbox-circle">
+              <VIcon v-if="true" icon="tabler-check" size="16" color="white" />
+            </div>
+          </div>
+          <div class="vertical-line"></div>
+        </div>
+      </div>
     </div>
 
     <!-- Step 2: WhatsApp Verification -->
-    <div class="timeline-row">
-      <div class="timeline-left">
-        <div class="step-checkbox" :class="{ active: false, done: false }">
-          <div class="checkbox-circle">
-            <VIcon v-if="false" icon="tabler-check" size="16" color="white" />
-          </div>
-        </div>
-        <div class="step-number" :class="{ active: false }">02</div>
-        <div class="step-title">WhatsApp<br />Verification</div>
-        <div class="vertical-line"></div>
-      </div>
+    <div class="timeline-row reverse-alt">
       <div class="timeline-card">
         <div class="card-title">
           Verify your WhatsApp number for secure communication
@@ -518,20 +512,24 @@ const sendEmailVerification = async () => {
           </VBtn>
         </div>
       </div>
+      <div class="timeline-left step-left-reverse-alt">
+        <div class="step-line-col-alt">
+          <div class="step-checkbox" :class="{ active: false, done: false }">
+            <div class="checkbox-circle">
+              <VIcon v-if="false" icon="tabler-check" size="16" color="white" />
+            </div>
+          </div>
+          <div class="vertical-line"></div>
+        </div>
+        <div class="step-info-col-alt">
+          <div class="step-number" :class="{ active: false }">02</div>
+          <div class="step-title">WhatsApp<br />Verification</div>
+        </div>
+      </div>
     </div>
 
     <!-- Step 3: LinkedIn Connection -->
-    <div class="timeline-row">
-      <div class="timeline-left">
-        <div class="step-checkbox" :class="{ active: false, done: false }">
-          <div class="checkbox-circle">
-            <VIcon v-if="false" icon="tabler-check" size="16" color="white" />
-          </div>
-        </div>
-        <div class="step-number" :class="{ active: false }">03</div>
-        <div class="step-title">LinkedIn<br />Connection</div>
-        <div class="vertical-line"></div>
-      </div>
+    <div class="timeline-row reverse">
       <div class="timeline-card">
         <div class="card-title">
           Connect your LinkedIn profile to validate your professional identity
@@ -563,20 +561,24 @@ const sendEmailVerification = async () => {
           </div>
         </div>
       </div>
+      <div class="timeline-left step-left-reverse-fixed">
+        <div class="step-info-col">
+          <div class="step-number" :class="{ active: false }">03</div>
+          <div class="step-title">LinkedIn<br />Connection</div>
+        </div>
+        <div class="step-line-col">
+          <div class="step-checkbox" :class="{ active: false, done: false }">
+            <div class="checkbox-circle">
+              <VIcon v-if="false" icon="tabler-check" size="16" color="white" />
+            </div>
+          </div>
+          <div class="vertical-line"></div>
+        </div>
+      </div>
     </div>
 
     <!-- Step 4: Profile Details -->
-    <div class="timeline-row">
-      <div class="timeline-left">
-        <div class="step-checkbox" :class="{ active: false, done: false }">
-          <div class="checkbox-circle">
-            <VIcon v-if="false" icon="tabler-check" size="16" color="white" />
-          </div>
-        </div>
-        <div class="step-number" :class="{ active: false }">04</div>
-        <div class="step-title">Add your<br />profile details</div>
-        <div class="vertical-line"></div>
-      </div>
+    <div class="timeline-row reverse-alt">
       <div class="timeline-card">
         <div class="card-title">
           Fill out your profile details to personalize your account
@@ -601,19 +603,24 @@ const sendEmailVerification = async () => {
           </div>
         </div>
       </div>
+      <div class="timeline-left step-left-reverse-alt">
+        <div class="step-line-col-alt">
+          <div class="step-checkbox" :class="{ active: false, done: false }">
+            <div class="checkbox-circle">
+              <VIcon v-if="false" icon="tabler-check" size="16" color="white" />
+            </div>
+          </div>
+          <div class="vertical-line"></div>
+        </div>
+        <div class="step-info-col-alt">
+          <div class="step-number" :class="{ active: false }">04</div>
+          <div class="step-title">Add your<br />profile details</div>
+        </div>
+      </div>
     </div>
 
     <!-- Step 5: Review & Activation -->
-    <div class="timeline-row">
-      <div class="timeline-left">
-        <div class="step-checkbox" :class="{ active: false, done: false }">
-          <div class="checkbox-circle">
-            <VIcon v-if="false" icon="tabler-check" size="16" color="white" />
-          </div>
-        </div>
-        <div class="step-number" :class="{ active: false }">05</div>
-        <div class="step-title">Review &<br />Activation</div>
-      </div>
+    <div class="timeline-row reverse">
       <div class="timeline-card">
         <div class="card-title">
           Your account is under review and will be activated soon
@@ -628,6 +635,20 @@ const sendEmailVerification = async () => {
             <VIcon size="18" color="#28a745">tabler-check-circle</VIcon>
             Awaiting Approval
           </div>
+        </div>
+      </div>
+      <div class="timeline-left step-left-reverse-fixed">
+        <div class="step-info-col">
+          <div class="step-number" :class="{ active: false }">05</div>
+          <div class="step-title">Review &<br />Activation</div>
+        </div>
+        <div class="step-line-col">
+          <div class="step-checkbox" :class="{ active: false, done: false }">
+            <div class="checkbox-circle">
+              <VIcon v-if="false" icon="tabler-check" size="16" color="white" />
+            </div>
+          </div>
+          <div class="vertical-line"></div>
         </div>
       </div>
     </div>
@@ -936,53 +957,140 @@ const sendEmailVerification = async () => {
   }
 }
 
-.registration-timeline-page {
-  min-height: 100vh;
-  background: #f8f8fb;
-  padding: 0;
+.timeline-row.reverse {
+  flex-direction: row-reverse;
 }
-.timeline-header {
-  padding-top: 48px;
-  padding-bottom: 24px;
-  background: #f8f8fb;
+.timeline-row.reverse .timeline-card {
+  margin-left: 0;
 }
-.container-header {
-  max-width: 700px;
-  margin: 0 auto;
-  text-align: left;
-}
-.welcome-title {
-  font-family: "Anton", Arial, sans-serif;
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #222;
-  margin-bottom: 12px;
-}
-.account-name {
-  color: #ffa726;
-}
-.welcome-desc {
-  font-family: "Karla", Arial, sans-serif;
-  font-size: 1.1rem;
-  color: #444;
-  margin-bottom: 28px;
-  line-height: 1.7;
-}
-.header-btns {
+.timeline-row.reverse .timeline-left {
   display: flex;
-  gap: 16px;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 0;
 }
-.intro-btn {
-  font-weight: 600;
-  border-radius: 8px;
-  border: 2px solid #222;
-  background: #fff;
+.timeline-row.reverse .step-checkbox {
+  margin-bottom: 0;
+  margin-right: 8px;
+  margin-top: 4px;
+}
+.timeline-row.reverse .step-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 12px;
+}
+.timeline-row.reverse .step-number {
+  order: 1;
+  margin-bottom: 2px;
+}
+.timeline-row.reverse .step-title {
+  order: 2;
+  margin-bottom: 0;
+}
+.timeline-row.reverse .vertical-line {
+  order: 3;
+  margin-left: 12px;
+  margin-top: 0;
+}
+.timeline-row.reverse .step-line-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  min-width: 40px;
+  margin-left: -120px;
+}
+.timeline-row.reverse .step-checkbox {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, 0);
+  z-index: 2;
+  margin-bottom: 8px;
+}
+.timeline-row.reverse .vertical-line {
+  width: 3px;
+  height: 120px;
+  background: #ff8c00;
+  border-radius: 2px;
+  margin-top: 32px;
+  position: relative;
+  z-index: 1;
+}
+.timeline-row.reverse .step-info-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-right: 100px;
+  min-width: 60px;
+}
+.timeline-row.reverse-alt {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  margin-bottom: 48px;
+  margin-top: 32px;
+}
+.timeline-row.reverse-alt .timeline-card {
+  margin-right: 0;
+  margin-left: 120px;
+}
+.timeline-row.reverse-alt .step-left-reverse-alt {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  min-width: 400px;
+  margin-left: 0;
+}
+.timeline-row.reverse-alt .step-line-col-alt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  min-width: 40px;
+  margin-left: 0;
+  margin-right: 120px;
+}
+.timeline-row.reverse-alt .step-checkbox {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, 0);
+  z-index: 2;
+  margin-bottom: 8px;
+}
+.timeline-row.reverse-alt .vertical-line {
+  width: 3px;
+  height: 120px;
+  background: #ff8c00;
+  border-radius: 2px;
+  margin-top: 32px;
+  position: relative;
+  z-index: 1;
+}
+.timeline-row.reverse-alt .step-info-col-alt {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-left: 24px;
+  min-width: 60px;
+}
+.timeline-row.reverse-alt .step-number {
+  font-size: 2.6em;
+  font-weight: bold;
   color: #222;
+  font-family: "Anton", Arial, sans-serif;
+  margin-bottom: 4px;
+  line-height: 1;
 }
-.support-btn {
-  font-weight: 600;
-  border-radius: 8px;
-  background: #ffa726;
-  color: #fff;
+.timeline-row.reverse-alt .step-title {
+  font-size: 1.1em;
+  color: #222;
+  text-align: left;
+  font-weight: 500;
+  margin-bottom: 0;
+  line-height: 1.2;
 }
 </style>
