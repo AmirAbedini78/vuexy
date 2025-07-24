@@ -1,5 +1,6 @@
 <script setup>
 import ItineraryAccommodationDialog from "@/components/dialogs/ItineraryAccommodationDialog.vue";
+import SpecialAddonsDialog from "@/components/dialogs/SpecialAddonsDialog.vue";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 
@@ -52,6 +53,7 @@ const formData = ref({
 });
 
 const showItineraryDialog = ref(false);
+const showSpecialAddonsDialog = ref(false);
 
 // Handle certifications upload
 const handleCertificationsUpload = (event) => {
@@ -1007,6 +1009,7 @@ const onSubmit = async () => {
                         border-radius: 8px;
                         font-weight: 500;
                       "
+                      @click="showSpecialAddonsDialog = true"
                     >
                       Add Special Addons
                     </VBtn>
@@ -1106,6 +1109,10 @@ const onSubmit = async () => {
   <ItineraryAccommodationDialog
     v-if="showItineraryDialog"
     @close="showItineraryDialog = false"
+  />
+  <SpecialAddonsDialog
+    v-if="showSpecialAddonsDialog"
+    @close="showSpecialAddonsDialog = false"
   />
 </template>
 
