@@ -1,4 +1,5 @@
 <script setup>
+import ItineraryAccommodationDialog from "@/components/dialogs/ItineraryAccommodationDialog.vue";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 
@@ -45,9 +46,12 @@ const formData = ref({
   // Step 3 fields
   itineraryAccommodation: "",
   personalPolicies: "",
+  personalPoliciesText: "",
   specialAddons: "",
   termsAccepted: false,
 });
+
+const showItineraryDialog = ref(false);
 
 // Handle certifications upload
 const handleCertificationsUpload = (event) => {
@@ -827,6 +831,7 @@ const onSubmit = async () => {
                         border-radius: 8px;
                         font-weight: 500;
                       "
+                      @click="showItineraryDialog = true"
                     >
                       Add Itinerary/Accomodation
                     </VBtn>
@@ -854,15 +859,121 @@ const onSubmit = async () => {
                       v-model="formData.personalPolicies"
                       class="mt-2"
                     >
-                      <VRadio
-                        value="personal"
-                        label="I have my personal policies"
-                      />
-                      <VRadio
-                        value="explorer-elite"
-                        label="I want to use Explorer Elite's policies"
-                      />
+                      <div>
+                        <VRadio
+                          value="personal"
+                          label="I have my own personal policies"
+                        />
+                        <div
+                          v-if="formData.personalPolicies === 'personal'"
+                          class="mt-2 mb-2"
+                        >
+                          <VTextarea
+                            v-model="formData.personalPoliciesText"
+                            placeholder="Add your personal policies"
+                            rows="5"
+                            class="rich-text-area"
+                          />
+                          <div class="rich-text-controls mt-2">
+                            <div class="d-flex gap-2 align-center">
+                              <VBtn
+                                variant="text"
+                                size="small"
+                                class="text-control-btn"
+                                ><VIcon icon="tabler-bold" size="16"
+                              /></VBtn>
+                              <VBtn
+                                variant="text"
+                                size="small"
+                                class="text-control-btn"
+                                ><VIcon icon="tabler-italic" size="16"
+                              /></VBtn>
+                              <VBtn
+                                variant="text"
+                                size="small"
+                                class="text-control-btn"
+                                ><VIcon icon="tabler-underline" size="16"
+                              /></VBtn>
+                              <VBtn
+                                variant="text"
+                                size="small"
+                                class="text-control-btn"
+                                ><VIcon icon="tabler-list" size="16"
+                              /></VBtn>
+                              <VBtn
+                                variant="text"
+                                size="small"
+                                class="text-control-btn"
+                                ><VIcon icon="tabler-list-numbers" size="16"
+                              /></VBtn>
+                              <VBtn
+                                variant="text"
+                                size="small"
+                                class="text-control-btn"
+                                ><VIcon icon="tabler-link" size="16"
+                              /></VBtn>
+                              <VBtn
+                                variant="text"
+                                size="small"
+                                class="text-control-btn"
+                                ><VIcon icon="tabler-photo" size="16"
+                              /></VBtn>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <VRadio
+                          value="explorer-elite"
+                          label="I want to use Explorer Elite's policies"
+                        />
+                        <div
+                          v-if="formData.personalPolicies === 'explorer-elite'"
+                          class="mt-2 mb-2"
+                        >
+                          <a
+                            href="#"
+                            style="
+                              color: #ec8d22;
+                              text-decoration: underline;
+                              font-size: 16px;
+                              margin-left: 32px;
+                              display: inline-block;
+                            "
+                            >Read Explorer Elite Policies</a
+                          >
+                        </div>
+                      </div>
                       <VRadio value="not-sure" label="I'm not sure" />
+                      <div
+                        v-if="formData.personalPolicies === 'not-sure'"
+                        class="mt-3 d-flex gap-3"
+                      >
+                        <VBtn
+                          style="
+                            background: #111;
+                            color: #fff;
+                            font-weight: 600;
+                            min-width: 130px;
+                            min-height: 44px;
+                            font-size: 16px;
+                            border-radius: 8px;
+                          "
+                          >Learn More</VBtn
+                        >
+                        <VBtn
+                          style="
+                            background: #ec8d22;
+                            color: #fff;
+                            font-weight: 600;
+                            min-width: 170px;
+                            min-height: 44px;
+                            font-size: 16px;
+                            border-radius: 8px;
+                          "
+                          >Contact Support</VBtn
+                        >
+                      </div>
                     </VRadioGroup>
                   </div>
                 </VCol>
@@ -992,6 +1103,10 @@ const onSubmit = async () => {
       </VCardText>
     </VCard>
   </div>
+  <ItineraryAccommodationDialog
+    v-if="showItineraryDialog"
+    @close="showItineraryDialog = false"
+  />
 </template>
 
 <style scoped>
