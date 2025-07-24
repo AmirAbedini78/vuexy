@@ -1,91 +1,93 @@
 <template>
-  <div class="itinerary-dialog-wrapper">
-    <div class="itinerary-dialog-header">
-      <span class="itinerary-dialog-title">Itinerary/Accommodations</span>
-      <span class="itinerary-dialog-close" @click="$emit('close')"
-        >&times;</span
-      >
-    </div>
-    <div class="itinerary-dialog-desc">
-      Please fill the form carefully (or something kinder maybe)
-    </div>
-    <div class="itinerary-dialog-content">
-      <div class="itinerary-sidebar">
-        <div
-          v-for="(day, idx) in days"
-          :key="day.id"
-          class="itinerary-sidebar-item"
-          :class="{ active: idx === activeDayIndex }"
-          @click="activeDayIndex = idx"
+  <div class="itinerary-modal-overlay" @click.self="$emit('close')">
+    <div class="itinerary-dialog-wrapper">
+      <div class="itinerary-dialog-header">
+        <span class="itinerary-dialog-title">Itinerary/Accommodations</span>
+        <span class="itinerary-dialog-close" @click="$emit('close')"
+          >&times;</span
         >
-          <div class="itinerary-sidebar-number">
-            {{ (idx + 1).toString().padStart(2, "0") }}
-          </div>
-          <div>
-            <div class="itinerary-sidebar-title">
-              {{ day.title || `Day ${idx + 1} Itinerary Title` }}
-            </div>
-            <div
-              v-if="idx === activeDayIndex"
-              class="itinerary-sidebar-accommodation active"
-            >
-              Day {{ idx + 1 }} Accommodation
-            </div>
-            <div
-              v-if="idx === activeDayIndex"
-              class="itinerary-sidebar-location"
-            >
-              Location would take place here
-            </div>
-          </div>
-        </div>
       </div>
-      <div class="itinerary-main">
-        <div
-          v-for="(day, idx) in days"
-          :key="day.id"
-          v-show="idx === activeDayIndex"
-          class="itinerary-day-form"
-        >
-          <div class="itinerary-day-label">Day {{ idx + 1 }}</div>
-          <div class="itinerary-day-fields">
-            <input
-              v-model="day.title"
-              class="itinerary-input"
-              placeholder="Itinerary Title"
-            />
-            <input
-              v-model="day.accommodation"
-              class="itinerary-input"
-              placeholder="Add accommodation here"
-            />
-            <input
-              v-model="day.description"
-              class="itinerary-input"
-              placeholder="Itinerary Description"
-            />
-            <input
-              v-model="day.location"
-              class="itinerary-input"
-              placeholder="Add exact accommodation location"
-            />
-            <div class="itinerary-link-row">
-              <input
-                v-model="day.link"
-                class="itinerary-input"
-                placeholder="Add your link here"
-              />
-              <button class="itinerary-link-add">+</button>
+      <div class="itinerary-dialog-desc">
+        Please fill the form carefully (or something kinder maybe)
+      </div>
+      <div class="itinerary-dialog-content">
+        <div class="itinerary-sidebar">
+          <div
+            v-for="(day, idx) in days"
+            :key="day.id"
+            class="itinerary-sidebar-item"
+            :class="{ active: idx === activeDayIndex }"
+            @click="activeDayIndex = idx"
+          >
+            <div class="itinerary-sidebar-number">
+              {{ (idx + 1).toString().padStart(2, "0") }}
+            </div>
+            <div>
+              <div class="itinerary-sidebar-title">
+                {{ day.title || `Day ${idx + 1} Itinerary Title` }}
+              </div>
+              <div
+                v-if="idx === activeDayIndex"
+                class="itinerary-sidebar-accommodation active"
+              >
+                Day {{ idx + 1 }} Accommodation
+              </div>
+              <div
+                v-if="idx === activeDayIndex"
+                class="itinerary-sidebar-location"
+              >
+                Location would take place here
+              </div>
             </div>
           </div>
-          <div class="itinerary-changes-saved">
-            <VIcon icon="tabler-check" size="18" style="color: #aaa" /> Changes
-            saved
-          </div>
         </div>
-        <div class="itinerary-actions">
-          <VBtn class="itinerary-done-btn" @click="handleDone">Done</VBtn>
-          <VBtn class="itinerary-add-btn" @click="addDay">Add More Days</VBtn>
+        <div class="itinerary-main">
+          <div
+            v-for="(day, idx) in days"
+            :key="day.id"
+            v-show="idx === activeDayIndex"
+            class="itinerary-day-form"
+          >
+            <div class="itinerary-day-label">Day {{ idx + 1 }}</div>
+            <div class="itinerary-day-fields">
+              <input
+                v-model="day.title"
+                class="itinerary-input"
+                placeholder="Itinerary Title"
+              />
+              <input
+                v-model="day.accommodation"
+                class="itinerary-input"
+                placeholder="Add accommodation here"
+              />
+              <input
+                v-model="day.description"
+                class="itinerary-input"
+                placeholder="Itinerary Description"
+              />
+              <input
+                v-model="day.location"
+                class="itinerary-input"
+                placeholder="Add exact accommodation location"
+              />
+              <div class="itinerary-link-row">
+                <input
+                  v-model="day.link"
+                  class="itinerary-input"
+                  placeholder="Add your link here"
+                />
+                <button class="itinerary-link-add">+</button>
+              </div>
+            </div>
+            <div class="itinerary-changes-saved">
+              <VIcon icon="tabler-check" size="18" style="color: #aaa" />
+              Changes saved
+            </div>
+          </div>
+          <div class="itinerary-actions">
+            <VBtn class="itinerary-done-btn" @click="handleDone">Done</VBtn>
+            <VBtn class="itinerary-add-btn" @click="addDay">Add More Days</VBtn>
+          </div>
         </div>
       </div>
     </div>
@@ -147,6 +149,19 @@ function handleDone() {
 </script>
 
 <style scoped>
+.itinerary-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(44, 44, 44, 0.25);
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+}
 .itinerary-dialog-wrapper {
   background: #fff;
   border-radius: 12px;
