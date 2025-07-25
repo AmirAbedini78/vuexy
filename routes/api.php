@@ -7,6 +7,9 @@ use App\Http\Controllers\Api\EmailVerificationController;
 use App\Http\Controllers\Api\IndividualUserController;
 use App\Http\Controllers\Api\CompanyUserController;
 use App\Http\Middleware\ApiMiddleware;
+use App\Http\Controllers\Api\ListingController;
+use App\Http\Controllers\Api\ItineraryAccommodationController;
+use App\Http\Controllers\Api\SpecialAddonController;
 
 /*
 |--------------------------------------------------------------------------
@@ -49,6 +52,15 @@ Route::middleware([ApiMiddleware::class])->group(function () {
     // Company User routes
     Route::post('/company-users', [CompanyUserController::class, 'store']);
     Route::get('/company-users/{id}', [CompanyUserController::class, 'show']);
+
+    // Listing CRUD
+    Route::apiResource('listings', ListingController::class);
+
+    // ItineraryAccommodation CRUD (nested under listing)
+    Route::apiResource('listings.itineraries', ItineraryAccommodationController::class);
+
+    // SpecialAddon CRUD (nested under listing)
+    Route::apiResource('listings.special-addons', SpecialAddonController::class);
 
     // User Verification API
     Route::prefix('verification')->group(function () {

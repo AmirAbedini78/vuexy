@@ -120,7 +120,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { VBtn, VIcon } from "vuetify/components";
 
 const props = defineProps({
@@ -129,8 +129,12 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  listingId: {
+    type: [String, Number],
+    default: null,
+  },
 });
-const emit = defineEmits(["close", "done"]);
+const emit = defineEmits(["close", "done", "save-itinerary"]);
 
 const days = ref(
   props.initialDays.length
@@ -138,6 +142,7 @@ const days = ref(
     : [
         {
           id: 1,
+          number: 1,
           title: "",
           description: "",
           accommodation: "",
@@ -149,8 +154,10 @@ const days = ref(
 const activeDayIndex = ref(0);
 
 function addDay() {
+  const newDayNumber = days.value.length + 1;
   days.value.push({
     id: Date.now(),
+    number: newDayNumber,
     title: "",
     description: "",
     accommodation: "",
@@ -159,10 +166,59 @@ function addDay() {
   });
   activeDayIndex.value = days.value.length - 1;
 }
-function handleDone() {
-  emit("done", days.value);
-  emit("close");
+
+function removeDay(index) {
+  if (days.value.length > 1) {
+    days.value.splice(index, 1);
+    // Update numbers
+    days.value.forEach((day, idx) => {
+      day.number = idx + 1;
+    });
+    if (activeDayIndex.value >= days.value.length) {
+      activeDayIndex.value = days.value.length - 1;
+    }
+  }
 }
+
+async function handleDone() {
+  try {
+    // Save each day to the API
+    for (const day of days.value) {
+      if (day.title && day.accommodation) {
+        const itineraryData = {
+          listing_id: props.listingId,
+          number: day.number,
+          title: day.title,
+          description: day.description,
+          accommodation: day.accommodation,
+          location: day.location,
+          link: day.link,
+        };
+
+        // Call the parent function directly
+        await emit("save-itinerary", itineraryData);
+      }
+    }
+
+    // Emit done event with the updated days data
+    emit("done", days.value);
+    emit("close");
+  } catch (error) {
+    console.error("Error saving itinerary:", error);
+    alert("Error saving itinerary data");
+  }
+}
+
+// Watch for changes in initialDays prop
+watch(
+  () => props.initialDays,
+  (newDays) => {
+    if (newDays.length > 0) {
+      days.value = JSON.parse(JSON.stringify(newDays));
+    }
+  },
+  { deep: true }
+);
 </script>
 
 <style scoped>

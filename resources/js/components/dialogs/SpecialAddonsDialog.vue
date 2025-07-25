@@ -129,7 +129,9 @@
         </div>
       </div>
       <div class="special-addons-actions">
-        <button class="special-addons-done-btn">Done</button>
+        <button class="special-addons-done-btn" @click="handleDone">
+          Done
+        </button>
         <button class="special-addons-add-btn" @click="addAddon">
           Add More Addons
         </button>
@@ -141,21 +143,46 @@
 <script setup>
 import { ref, watch } from "vue";
 
-const emit = defineEmits(["close"]);
+const props = defineProps({
+  specialAddons: {
+    type: Array,
+    default: () => [],
+  },
+  listingId: {
+    type: [String, Number],
+    default: null,
+  },
+});
+
+const emit = defineEmits([
+  "close",
+  "save-addon",
+  "add-special-addon",
+  "edit-special-addon",
+  "delete-special-addon",
+]);
 
 // آرایه داینامیک Addons
-const addons = ref([
-  {
-    title: "Addon 1 Title",
-    description: "Your addon description would take place here",
-    price: 200,
-  },
-  {
-    title: "Addon 2 Title",
-    description: "",
-    price: 0,
-  },
-]);
+const addons = ref(
+  props.specialAddons.length > 0
+    ? JSON.parse(JSON.stringify(props.specialAddons))
+    : [
+        {
+          id: 1,
+          number: 1,
+          title: "Addon 1 Title",
+          description: "Your addon description would take place here",
+          price: 200,
+        },
+        {
+          id: 2,
+          number: 2,
+          title: "Addon 2 Title",
+          description: "",
+          price: 0,
+        },
+      ]
+);
 
 // اندیس Addon فعال
 const activeAddonIndex = ref(0);
@@ -178,6 +205,17 @@ watch(
   { deep: true }
 );
 
+// Watch for changes in specialAddons prop
+watch(
+  () => props.specialAddons,
+  (newAddons) => {
+    if (newAddons.length > 0) {
+      addons.value = JSON.parse(JSON.stringify(newAddons));
+    }
+  },
+  { deep: true }
+);
+
 // هندل انتخاب Addon
 function selectAddon(idx) {
   activeAddonIndex.value = idx;
@@ -194,12 +232,92 @@ function updateAddonField(field, value) {
 
 // تابع افزودن Addon جدید
 function addAddon() {
+  const newAddonNumber = addons.value.length + 1;
   addons.value.push({
-    title: `Addon ${addons.value.length + 1} Title`,
+    id: Date.now(),
+    number: newAddonNumber,
+    title: `Addon ${newAddonNumber} Title`,
     description: "",
     price: 0,
   });
   activeAddonIndex.value = addons.value.length - 1;
+}
+
+// تابع حذف Addon
+function removeAddon(index) {
+  if (addons.value.length > 1) {
+    const addonToDelete = addons.value[index];
+    addons.value.splice(index, 1);
+    // Update numbers
+    addons.value.forEach((addon, idx) => {
+      addon.number = idx + 1;
+    });
+    if (activeAddonIndex.value >= addons.value.length) {
+      activeAddonIndex.value = addons.value.length - 1;
+    }
+    // Emit delete event
+    if (addonToDelete.id) {
+      emit("delete-special-addon", addonToDelete.id);
+    }
+  }
+}
+
+// تابع ذخیره Addon
+async function saveAddon() {
+  try {
+    const currentAddon = addons.value[activeAddonIndex.value];
+    if (currentAddon.title && currentAddon.price > 0) {
+      const addonData = {
+        listing_id: props.listingId,
+        number: currentAddon.number,
+        title: currentAddon.title,
+        description: currentAddon.description,
+        price: currentAddon.price,
+      };
+
+      if (currentAddon.id && currentAddon.id > 2) {
+        // Update existing addon
+        emit("edit-special-addon", currentAddon.id, addonData);
+      } else {
+        // Create new addon
+        emit("add-special-addon", addonData);
+      }
+    }
+  } catch (error) {
+    console.error("Error saving addon:", error);
+    alert("Error saving addon data");
+  }
+}
+
+// تابع Done
+async function handleDone() {
+  try {
+    // Save all addons
+    for (let i = 0; i < addons.value.length; i++) {
+      const addon = addons.value[i];
+      if (addon.title && addon.price > 0) {
+        const addonData = {
+          listing_id: props.listingId,
+          number: addon.number,
+          title: addon.title,
+          description: addon.description,
+          price: addon.price,
+        };
+
+        if (addon.id && addon.id > 2) {
+          // Update existing addon
+          await emit("edit-special-addon", addon.id, addonData);
+        } else {
+          // Create new addon
+          await emit("add-special-addon", addonData);
+        }
+      }
+    }
+    emit("close");
+  } catch (error) {
+    console.error("Error saving addons:", error);
+    alert("Error saving addon data");
+  }
 }
 </script>
 

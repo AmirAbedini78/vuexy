@@ -8,8 +8,7 @@ import { ref } from "vue";
 definePage({
   meta: {
     layout: "default", // فقط نوار بالا، سایدبار مخفی می‌شود
-    action: "read",
-    subject: "Listing",
+    public: true, // Make this page public for testing
   },
 });
 

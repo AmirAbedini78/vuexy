@@ -1,7 +1,7 @@
 <script setup>
 import ItineraryAccommodationDialog from "@/components/dialogs/ItineraryAccommodationDialog.vue";
 import SpecialAddonsDialog from "@/components/dialogs/SpecialAddonsDialog.vue";
-import { ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
@@ -11,15 +11,53 @@ const numberedSteps = [
     title: "Basic Information",
   },
   {
-    title: "Date & Time",
+    title: "Detailed Information",
   },
   {
-    title: "Pricing & Details",
+    title: "Logistics",
   },
 ];
 
 const currentStep = ref(0);
 const loading = ref(false);
+const listingId = ref(null);
+const itineraries = ref([]);
+const specialAddons = ref([]);
+
+async function fetchItineraries() {
+  if (!listingId.value) return;
+  loading.value = true;
+  try {
+    const res = await fetch(`/api/listings/${listingId.value}/itineraries`);
+    const data = await res.json();
+    itineraries.value = data.data || [];
+  } catch (e) {
+    alert("خطا در دریافت لیست روزها");
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function fetchSpecialAddons() {
+  if (!listingId.value) return;
+  loading.value = true;
+  try {
+    const res = await fetch(`/api/listings/${listingId.value}/special-addons`);
+    const data = await res.json();
+    specialAddons.value = data.data || [];
+  } catch (e) {
+    alert("خطا در دریافت لیست افزونه‌ها");
+  } finally {
+    loading.value = false;
+  }
+}
+
+watch(currentStep, async (val) => {
+  if (val === 2) {
+    await fetchItineraries();
+    await fetchSpecialAddons();
+  }
+});
 
 const formData = ref({
   // Step 1 fields
@@ -99,17 +137,250 @@ const removePromotionalVideo = (index) => {
   }
 };
 
+async function createListing() {
+  loading.value = true;
+  try {
+    // فقط فیلدهای اولیه را ارسال کن
+    const res = await fetch("/api/listings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        user_id: 1, // TODO: مقدار واقعی user_id را جایگزین کن
+        listing_type: "single-date",
+      }),
+    });
+    const data = await res.json();
+    listingId.value = data.id;
+    // مقداردهی اولیه فرم با داده دریافتی (در صورت نیاز)
+  } catch (e) {
+    alert("خطا در ساخت لیستینگ جدید");
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function updateListing() {
+  if (!listingId.value) return;
+  loading.value = true;
+  try {
+    const res = await fetch(`/api/listings/${listingId.value}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...formData.value,
+        listing_type: "single-date",
+      }),
+    });
+    const data = await res.json();
+    // مقداردهی مجدد فرم با داده دریافتی (در صورت نیاز)
+  } catch (e) {
+    alert("خطا در ذخیره لیستینگ");
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function addItinerary(newDay) {
+  if (!listingId.value) return;
+  loading.value = true;
+  try {
+    console.log("Adding itinerary:", newDay);
+    const response = await fetch(
+      `/api/listings/${listingId.value}/itineraries`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newDay),
+      }
+    );
+
+    if (response.ok) {
+      await fetchItineraries();
+      console.log("Itinerary added successfully");
+    } else {
+      console.error("Failed to add itinerary:", response.statusText);
+    }
+  } catch (e) {
+    console.error("Error adding itinerary:", e);
+    alert("خطا در افزودن روز جدید");
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function editItinerary(dayId, updatedDay) {
+  if (!listingId.value) return;
+  loading.value = true;
+  try {
+    console.log("Editing itinerary:", dayId, updatedDay);
+    const response = await fetch(
+      `/api/listings/${listingId.value}/itineraries/${dayId}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedDay),
+      }
+    );
+
+    if (response.ok) {
+      await fetchItineraries();
+      console.log("Itinerary updated successfully");
+    } else {
+      console.error("Failed to update itinerary:", response.statusText);
+    }
+  } catch (e) {
+    console.error("Error editing itinerary:", e);
+    alert("خطا در ویرایش روز");
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function deleteItinerary(dayId) {
+  if (!listingId.value) return;
+  loading.value = true;
+  try {
+    console.log("Deleting itinerary:", dayId);
+    const response = await fetch(
+      `/api/listings/${listingId.value}/itineraries/${dayId}`,
+      {
+        method: "DELETE",
+      }
+    );
+
+    if (response.ok) {
+      await fetchItineraries();
+      console.log("Itinerary deleted successfully");
+    } else {
+      console.error("Failed to delete itinerary:", response.statusText);
+    }
+  } catch (e) {
+    console.error("Error deleting itinerary:", e);
+    alert("خطا در حذف روز");
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function handleItineraryDone(itineraryData) {
+  try {
+    // Refresh itineraries list
+    await fetchItineraries();
+    showItineraryDialog.value = false;
+    console.log("Itinerary data saved successfully:", itineraryData);
+  } catch (error) {
+    console.error("Error handling itinerary done:", error);
+  }
+}
+
+async function addSpecialAddon(newAddon) {
+  if (!listingId.value) return;
+  loading.value = true;
+  try {
+    console.log("Adding special addon:", newAddon);
+    const response = await fetch(
+      `/api/listings/${listingId.value}/special-addons`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newAddon),
+      }
+    );
+
+    if (response.ok) {
+      await fetchSpecialAddons();
+      console.log("Special addon added successfully");
+    } else {
+      console.error("Failed to add special addon:", response.statusText);
+    }
+  } catch (e) {
+    console.error("Error adding special addon:", e);
+    alert("خطا در افزودن افزونه جدید");
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function editSpecialAddon(addonId, updatedAddon) {
+  if (!listingId.value) return;
+  loading.value = true;
+  try {
+    console.log("Editing special addon:", addonId, updatedAddon);
+    const response = await fetch(
+      `/api/listings/${listingId.value}/special-addons/${addonId}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedAddon),
+      }
+    );
+
+    if (response.ok) {
+      await fetchSpecialAddons();
+      console.log("Special addon updated successfully");
+    } else {
+      console.error("Failed to update special addon:", response.statusText);
+    }
+  } catch (e) {
+    console.error("Error editing special addon:", e);
+    alert("خطا در ویرایش افزونه");
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function deleteSpecialAddon(addonId) {
+  if (!listingId.value) return;
+  loading.value = true;
+  try {
+    console.log("Deleting special addon:", addonId);
+    const response = await fetch(
+      `/api/listings/${listingId.value}/special-addons/${addonId}`,
+      {
+        method: "DELETE",
+      }
+    );
+
+    if (response.ok) {
+      await fetchSpecialAddons();
+      console.log("Special addon deleted successfully");
+    } else {
+      console.error("Failed to delete special addon:", response.statusText);
+    }
+  } catch (e) {
+    console.error("Error deleting special addon:", e);
+    alert("خطا در حذف افزونه");
+  } finally {
+    loading.value = false;
+  }
+}
+
+const goToNextStep = async () => {
+  await updateListing();
+  currentStep.value++;
+};
+
+const goToPrevStep = () => {
+  currentStep.value--;
+};
+
+onMounted(async () => {
+  if (!listingId.value) {
+    await createListing();
+  }
+});
+
 const onSubmit = async () => {
   loading.value = true;
 
   try {
-    // Validate required fields
-    if (!formData.value.termsAccepted) {
-      alert("Please accept the terms and conditions");
-      return;
-    }
+    // Remove terms validation - no checkbox exists
+    // if (!formData.value.termsAccepted) {
+    //   alert("Please accept the terms and conditions");
+    //   return;
+    // }
 
-    console.log("Single Date Listing submitted:", formData.value);
+    await updateListing();
     alert("Single Date Listing created successfully!");
 
     // Redirect back to listing page
@@ -837,6 +1108,106 @@ const onSubmit = async () => {
                     >
                       Add Itinerary/Accomodation
                     </VBtn>
+
+                    <!-- Itinerary List Display -->
+                    <div
+                      v-for="itinerary in itineraries"
+                      :key="itinerary.id"
+                      class="itinerary-list-item"
+                      style="
+                        background: #fff;
+                        border: 1px solid #e0e0e0;
+                        border-radius: 12px;
+                        padding: 16px;
+                        margin-top: 12px;
+                        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                      "
+                    >
+                      <div class="d-flex justify-space-between align-center">
+                        <div class="d-flex align-center">
+                          <div
+                            class="itinerary-number"
+                            style="
+                              background: #ec8d22;
+                              color: white;
+                              width: 32px;
+                              height: 32px;
+                              border-radius: 50%;
+                              display: flex;
+                              align-items: center;
+                              justify-content: center;
+                              font-weight: bold;
+                              margin-right: 12px;
+                            "
+                          >
+                            {{
+                              (itinerary.number || 1)
+                                .toString()
+                                .padStart(2, "0")
+                            }}
+                          </div>
+                          <div>
+                            <div
+                              class="itinerary-title"
+                              style="font-weight: 600; color: #333"
+                            >
+                              {{
+                                itinerary.title ||
+                                `Day ${itinerary.number || 1} Itinerary Title`
+                              }}
+                            </div>
+                            <div
+                              class="itinerary-accommodation"
+                              style="
+                                color: #666;
+                                font-size: 14px;
+                                margin-top: 4px;
+                              "
+                            >
+                              <VIcon
+                                icon="tabler-map-pin"
+                                size="16"
+                                style="color: #ec8d22; margin-right: 4px"
+                              />
+                              Day {{ itinerary.number || 1 }} Accommodation
+                            </div>
+                            <div
+                              class="itinerary-location"
+                              style="
+                                color: #999;
+                                font-size: 12px;
+                                margin-top: 2px;
+                              "
+                            >
+                              {{
+                                itinerary.location ||
+                                "Location would take place here"
+                              }}
+                            </div>
+                          </div>
+                        </div>
+                        <div class="itinerary-actions">
+                          <VBtn
+                            icon
+                            size="small"
+                            variant="text"
+                            @click="showItineraryDialog = true"
+                            style="margin-right: 8px"
+                          >
+                            <VIcon icon="tabler-edit" size="18" />
+                          </VBtn>
+                          <VBtn
+                            icon
+                            size="small"
+                            variant="text"
+                            color="error"
+                            @click="deleteItinerary(itinerary.id)"
+                          >
+                            <VIcon icon="tabler-trash" size="18" />
+                          </VBtn>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   <!-- Provider's Personal Policies -->
@@ -1013,6 +1384,112 @@ const onSubmit = async () => {
                     >
                       Add Special Addons
                     </VBtn>
+                    <div
+                      v-for="addon in specialAddons"
+                      :key="addon.id"
+                      class="special-addon-list-item"
+                      style="
+                        background: #fff;
+                        border: 1px solid #e0e0e0;
+                        border-radius: 12px;
+                        padding: 16px;
+                        margin-top: 12px;
+                        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                      "
+                    >
+                      <div class="d-flex justify-space-between align-center">
+                        <div class="d-flex align-center">
+                          <div
+                            class="addon-number"
+                            style="
+                              background: #ec8d22;
+                              color: white;
+                              width: 32px;
+                              height: 32px;
+                              border-radius: 50%;
+                              display: flex;
+                              align-items: center;
+                              justify-content: center;
+                              font-weight: bold;
+                              margin-right: 12px;
+                            "
+                          >
+                            {{
+                              (addon.number || 1).toString().padStart(2, "0")
+                            }}
+                          </div>
+                          <div>
+                            <div
+                              class="addon-title"
+                              style="font-weight: 600; color: #333"
+                            >
+                              {{
+                                addon.title ||
+                                `Addon ${addon.number || 1} Title`
+                              }}
+                              <VIcon
+                                icon="tabler-chevron-down"
+                                size="16"
+                                style="color: #666; margin-left: 8px"
+                              />
+                            </div>
+                            <div
+                              class="addon-description"
+                              style="
+                                color: #666;
+                                font-size: 14px;
+                                margin-top: 4px;
+                              "
+                            >
+                              <VIcon
+                                icon="tabler-star"
+                                size="16"
+                                style="color: #ec8d22; margin-right: 4px"
+                              />
+                              {{
+                                addon.description ||
+                                "Your addon description would take place here"
+                              }}
+                            </div>
+                            <div
+                              class="addon-price"
+                              style="
+                                color: #333;
+                                font-weight: 600;
+                                font-size: 16px;
+                                margin-top: 4px;
+                              "
+                            >
+                              € {{ addon.price || "200.00" }}
+                            </div>
+                          </div>
+                        </div>
+                        <div class="addon-actions">
+                          <VBtn
+                            icon
+                            size="small"
+                            variant="text"
+                            @click="showSpecialAddonsDialog = true"
+                            style="margin-right: 8px"
+                          >
+                            <VIcon icon="tabler-edit" size="18" />
+                          </VBtn>
+                          <VBtn
+                            icon
+                            size="small"
+                            variant="text"
+                            color="error"
+                            @click="deleteSpecialAddon(addon.id)"
+                            style="margin-right: 8px"
+                          >
+                            <VIcon icon="tabler-trash" size="18" />
+                          </VBtn>
+                          <VBtn icon size="small" variant="text">
+                            <VIcon icon="tabler-arrows-move" size="18" />
+                          </VBtn>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </VCol>
               </VRow>
@@ -1025,7 +1502,7 @@ const onSubmit = async () => {
               color="secondary"
               variant="tonal"
               :disabled="currentStep === 0"
-              @click="currentStep--"
+              @click="goToPrevStep"
             >
               <VIcon icon="tabler-arrow-left" start class="flip-in-rtl" />
               Previous
@@ -1039,7 +1516,7 @@ const onSubmit = async () => {
             >
               {{ loading ? "Submitting..." : "Submit" }}
             </VBtn>
-            <VBtn v-else class="next-btn-dark" @click="currentStep++">
+            <VBtn v-else class="next-btn-dark" @click="goToNextStep">
               Next
               <VIcon icon="tabler-arrow-right" end class="flip-in-rtl" />
             </VBtn>
@@ -1108,11 +1585,20 @@ const onSubmit = async () => {
   </div>
   <ItineraryAccommodationDialog
     v-if="showItineraryDialog"
+    :listing-id="listingId"
+    :initial-days="itineraries"
     @close="showItineraryDialog = false"
+    @save-itinerary="addItinerary"
+    @done="handleItineraryDone"
   />
   <SpecialAddonsDialog
     v-if="showSpecialAddonsDialog"
+    :listing-id="listingId"
+    :special-addons="specialAddons"
     @close="showSpecialAddonsDialog = false"
+    @add-special-addon="addSpecialAddon"
+    @edit-special-addon="editSpecialAddon"
+    @delete-special-addon="deleteSpecialAddon"
   />
 </template>
 
