@@ -709,26 +709,139 @@ const sendEmailVerification = async () => {
 /* --- Timeline --- */
 .timeline {
   padding: 20px 0;
+  position: relative;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Create a central timeline line */
+.timeline::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: #ff8c00;
+  transform: translateX(-50%);
+  z-index: 1;
 }
 
 .timeline-row {
   display: flex;
   align-items: flex-start;
-  margin-bottom: 48px;
-  margin-top: 32px;
+  margin-bottom: 60px;
+  position: relative;
+  z-index: 2;
 }
 
-.timeline-left {
+/* Step 1, 3, 5: Right side cards */
+.timeline-row.reverse {
+  justify-content: flex-start;
+}
+
+.timeline-row.reverse .timeline-card {
+  margin-left: 60px;
+  margin-right: 0;
+  flex: 1;
+  max-width: 500px;
+}
+
+.timeline-row.reverse .timeline-left {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   width: 120px;
+}
+
+.timeline-row.reverse .step-info-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.timeline-row.reverse .step-line-col {
   display: flex;
   flex-direction: column;
   align-items: center;
   position: relative;
 }
 
+.timeline-row.reverse .step-checkbox {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+}
+
+.timeline-row.reverse .vertical-line {
+  width: 3px;
+  height: 80px;
+  background: #ff8c00;
+  border-radius: 2px;
+  margin-top: 0;
+}
+
+/* Step 2, 4: Left side cards */
+.timeline-row.reverse-alt {
+  justify-content: flex-end;
+}
+
+.timeline-row.reverse-alt .timeline-card {
+  margin-right: 60px;
+  margin-left: 0;
+  flex: 1;
+  max-width: 500px;
+}
+
+.timeline-row.reverse-alt .timeline-left {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 120px;
+}
+
+.timeline-row.reverse-alt .step-info-col-alt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.timeline-row.reverse-alt .step-line-col-alt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.timeline-row.reverse-alt .step-checkbox {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+}
+
+.timeline-row.reverse-alt .vertical-line {
+  width: 3px;
+  height: 80px;
+  background: #ff8c00;
+  border-radius: 2px;
+  margin-top: 0;
+}
+
 /* --- Step Checkbox --- */
 .step-checkbox {
-  margin-bottom: 8px;
+  margin-bottom: 0;
 }
 
 .checkbox-circle {
@@ -741,6 +854,7 @@ const sendEmailVerification = async () => {
   border: 2px solid #e0e0e0;
   background-color: #fff;
   transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .step-checkbox.active .checkbox-circle {
@@ -774,17 +888,8 @@ const sendEmailVerification = async () => {
   color: #444;
   text-align: center;
   font-weight: 500;
-  margin-bottom: 8px;
+  margin-bottom: 0;
   line-height: 1.2;
-}
-
-/* --- Vertical Line --- */
-.vertical-line {
-  width: 3px;
-  height: 120px;
-  background: #ff8c00;
-  border-radius: 2px;
-  margin-top: 8px;
 }
 
 /* --- Timeline Card --- */
@@ -793,10 +898,7 @@ const sendEmailVerification = async () => {
   border-radius: 10px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   padding: 32px 32px 24px 32px;
-  margin-left: 32px;
   min-width: 380px;
-  max-width: 540px;
-  flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -926,20 +1028,64 @@ const sendEmailVerification = async () => {
 
 /* --- Responsive --- */
 @media (max-width: 900px) {
+  .timeline::before {
+    left: 30px;
+  }
+
   .timeline-row {
     flex-direction: column;
     align-items: stretch;
+    margin-left: 60px;
   }
 
-  .timeline-left {
-    flex-direction: row;
-    width: 100%;
+  .timeline-row.reverse,
+  .timeline-row.reverse-alt {
     justify-content: flex-start;
-    margin-bottom: 12px;
+  }
+
+  .timeline-row.reverse .timeline-left,
+  .timeline-row.reverse-alt .timeline-left {
+    position: relative;
+    left: -60px;
+    transform: none;
+    flex-direction: row;
+    width: auto;
+    margin-bottom: 20px;
+  }
+
+  .timeline-row.reverse .step-info-col,
+  .timeline-row.reverse-alt .step-info-col-alt {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 0;
+    margin-right: 20px;
+  }
+
+  .timeline-row.reverse .step-line-col,
+  .timeline-row.reverse-alt .step-line-col-alt {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .timeline-row.reverse .step-checkbox,
+  .timeline-row.reverse-alt .step-checkbox {
+    position: relative;
+    top: 0;
+    left: 0;
+    transform: none;
+    margin-right: 20px;
+  }
+
+  .timeline-row.reverse .vertical-line,
+  .timeline-row.reverse-alt .vertical-line {
+    width: 80px;
+    height: 3px;
+    margin-top: 0;
   }
 
   .timeline-card {
-    margin-left: 0;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
     min-width: unset;
     max-width: unset;
     width: 100%;
@@ -955,142 +1101,5 @@ const sendEmailVerification = async () => {
     min-width: unset;
     max-width: unset;
   }
-}
-
-.timeline-row.reverse {
-  flex-direction: row-reverse;
-}
-.timeline-row.reverse .timeline-card {
-  margin-left: 0;
-}
-.timeline-row.reverse .timeline-left {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  justify-content: flex-start;
-  gap: 0;
-}
-.timeline-row.reverse .step-checkbox {
-  margin-bottom: 0;
-  margin-right: 8px;
-  margin-top: 4px;
-}
-.timeline-row.reverse .step-info {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-right: 12px;
-}
-.timeline-row.reverse .step-number {
-  order: 1;
-  margin-bottom: 2px;
-}
-.timeline-row.reverse .step-title {
-  order: 2;
-  margin-bottom: 0;
-}
-.timeline-row.reverse .vertical-line {
-  order: 3;
-  margin-left: 12px;
-  margin-top: 0;
-}
-.timeline-row.reverse .step-line-col {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-  min-width: 40px;
-  margin-left: -120px;
-}
-.timeline-row.reverse .step-checkbox {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translate(-50%, 0);
-  z-index: 2;
-  margin-bottom: 8px;
-}
-.timeline-row.reverse .vertical-line {
-  width: 3px;
-  height: 120px;
-  background: #ff8c00;
-  border-radius: 2px;
-  margin-top: 32px;
-  position: relative;
-  z-index: 1;
-}
-.timeline-row.reverse .step-info-col {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  margin-right: 100px;
-  min-width: 60px;
-}
-.timeline-row.reverse-alt {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  margin-bottom: 48px;
-  margin-top: 32px;
-}
-.timeline-row.reverse-alt .timeline-card {
-  margin-right: 0;
-  margin-left: 120px;
-}
-.timeline-row.reverse-alt .step-left-reverse-alt {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  min-width: 400px;
-  margin-left: 0;
-}
-.timeline-row.reverse-alt .step-line-col-alt {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-  min-width: 40px;
-  margin-left: 0;
-  margin-right: 120px;
-}
-.timeline-row.reverse-alt .step-checkbox {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translate(-50%, 0);
-  z-index: 2;
-  margin-bottom: 8px;
-}
-.timeline-row.reverse-alt .vertical-line {
-  width: 3px;
-  height: 120px;
-  background: #ff8c00;
-  border-radius: 2px;
-  margin-top: 32px;
-  position: relative;
-  z-index: 1;
-}
-.timeline-row.reverse-alt .step-info-col-alt {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  margin-left: 24px;
-  min-width: 60px;
-}
-.timeline-row.reverse-alt .step-number {
-  font-size: 2.6em;
-  font-weight: bold;
-  color: #222;
-  font-family: "Anton", Arial, sans-serif;
-  margin-bottom: 4px;
-  line-height: 1;
-}
-.timeline-row.reverse-alt .step-title {
-  font-size: 1.1em;
-  color: #222;
-  text-align: left;
-  font-weight: 500;
-  margin-bottom: 0;
-  line-height: 1.2;
 }
 </style>
