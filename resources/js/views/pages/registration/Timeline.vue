@@ -764,7 +764,7 @@ const sendEmailVerification = async () => {
 
 .timeline-row.reverse .step-checkbox {
   position: absolute;
-  top: 0;
+  top: 8px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 3;
@@ -772,10 +772,10 @@ const sendEmailVerification = async () => {
 
 .timeline-row.reverse .vertical-line {
   width: 3px;
-  height: 60px;
+  height: 170px;
   background: #ff8c00;
   border-radius: 2px;
-  margin-top: 12px;
+  margin-top: 48px;
 }
 
 /* Step 2, 4: Left side cards */
@@ -820,7 +820,7 @@ const sendEmailVerification = async () => {
 
 .timeline-row.reverse-alt .step-checkbox {
   position: absolute;
-  top: 0;
+  top: 8px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 3;
@@ -828,10 +828,10 @@ const sendEmailVerification = async () => {
 
 .timeline-row.reverse-alt .vertical-line {
   width: 3px;
-  height: 60px;
+  height: 170px;
   background: #ff8c00;
   border-radius: 2px;
-  margin-top: 12px;
+  margin-top: 48px;
 }
 
 /* --- Step Checkbox --- */
@@ -840,8 +840,8 @@ const sendEmailVerification = async () => {
 }
 
 .checkbox-circle {
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   display: flex;
   align-items: center;
