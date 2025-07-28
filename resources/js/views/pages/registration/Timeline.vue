@@ -717,7 +717,7 @@ const sendEmailVerification = async () => {
 .timeline-row {
   display: flex;
   align-items: flex-start;
-  margin-bottom: 20px;
+  margin-bottom: 60px;
   position: relative;
   z-index: 2;
 }
