@@ -89,6 +89,12 @@ const handlePassportImageUpload = (event) => {
   const file = event.target.files[0];
   if (file) {
     formData.value.passportImage = file;
+    // Create preview URL
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      formData.value.passportImagePreview = e.target.result;
+    };
+    reader.readAsDataURL(file);
   }
 };
 
@@ -96,6 +102,12 @@ const handleAvatarImageUpload = (event) => {
   const file = event.target.files[0];
   if (file) {
     formData.value.avatarImage = file;
+    // Create preview URL
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      formData.value.avatarImagePreview = e.target.result;
+    };
+    reader.readAsDataURL(file);
   }
 };
 
@@ -352,7 +364,7 @@ const removeSocialMediaLink = (index) => {
                         />
                         <img
                           v-else
-                          :src="formData.passportImage"
+                          :src="formData.passportImagePreview"
                           style="width: 100%; height: 100%; object-fit: cover"
                         />
                       </div>
@@ -395,7 +407,12 @@ const removeSocialMediaLink = (index) => {
                               border-radius: 6px !important;
                               box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
                             "
-                            @click="formData.passportImage = null"
+                            @click="
+                              () => {
+                                formData.passportImage = null;
+                                formData.passportImagePreview = null;
+                              }
+                            "
                           >
                             <VIcon
                               icon="tabler-trash"
@@ -497,7 +514,7 @@ const removeSocialMediaLink = (index) => {
                         />
                         <img
                           v-else
-                          :src="formData.avatarImage"
+                          :src="formData.avatarImagePreview"
                           style="
                             width: 100%;
                             height: 100%;
@@ -545,7 +562,12 @@ const removeSocialMediaLink = (index) => {
                               border-radius: 6px !important;
                               box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
                             "
-                            @click="formData.avatarImage = null"
+                            @click="
+                              () => {
+                                formData.avatarImage = null;
+                                formData.avatarImagePreview = null;
+                              }
+                            "
                           >
                             <VIcon
                               icon="tabler-trash"
