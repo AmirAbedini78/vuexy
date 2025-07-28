@@ -395,7 +395,7 @@ const sendEmailVerification = async () => {
 </script>
 
 <template>
-  <VCard class="registration-timeline-page">
+  <VCard class="registration-timeline-page" elevation="0">
     <!-- Header Section -->
     <div class="timeline-header">
       <div class="container-header">
@@ -784,7 +784,7 @@ const sendEmailVerification = async () => {
 }
 
 .timeline-row.reverse .timeline-card {
-  margin-right: 60px;
+  margin-right: 40px;
   margin-left: 0;
   flex: 1;
   max-width: 500px;
@@ -797,17 +797,17 @@ const sendEmailVerification = async () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 120px;
+  width: 100px;
 }
 
 .timeline-row.reverse .step-info-col {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 16px;
-  margin-right: 60px;
+  margin-bottom: 12px;
+  margin-right: 40px;
   position: absolute;
-  left: -60px;
+  left: -50px;
   top: 0;
 }
 
@@ -827,11 +827,11 @@ const sendEmailVerification = async () => {
 }
 
 .timeline-row.reverse .vertical-line {
-  width: 3px;
-  height: 170px;
+  width: 2px;
+  height: 140px;
   background: #ff8c00;
-  border-radius: 2px;
-  margin-top: 48px;
+  border-radius: 1px;
+  margin-top: 40px;
 }
 
 /* Step 2, 4: Left side cards */
@@ -840,7 +840,7 @@ const sendEmailVerification = async () => {
 }
 
 .timeline-row.reverse-alt .timeline-card {
-  margin-left: 60px;
+  margin-left: 40px;
   margin-right: 0;
   flex: 1;
   max-width: 500px;
@@ -853,17 +853,17 @@ const sendEmailVerification = async () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 120px;
+  width: 100px;
 }
 
 .timeline-row.reverse-alt .step-info-col-alt {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 16px;
-  margin-left: 60px;
+  margin-bottom: 12px;
+  margin-left: 40px;
   position: absolute;
-  right: -60px;
+  right: -50px;
   top: 0;
 }
 
@@ -883,11 +883,11 @@ const sendEmailVerification = async () => {
 }
 
 .timeline-row.reverse-alt .vertical-line {
-  width: 3px;
-  height: 170px;
+  width: 2px;
+  height: 140px;
   background: #ff8c00;
-  border-radius: 2px;
-  margin-top: 48px;
+  border-radius: 1px;
+  margin-top: 40px;
 }
 
 /* --- Step Checkbox --- */
@@ -896,8 +896,8 @@ const sendEmailVerification = async () => {
 }
 
 .checkbox-circle {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -920,12 +920,12 @@ const sendEmailVerification = async () => {
 
 /* --- Step Number --- */
 .step-number {
-  font-size: 2.6em;
+  font-size: 2.2em;
   font-weight: bold;
   color: #666;
   line-height: 1;
   font-family: "Anton", Arial, sans-serif;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
   transition: color 0.3s ease;
 }
 
@@ -935,7 +935,7 @@ const sendEmailVerification = async () => {
 
 /* --- Step Title --- */
 .step-title {
-  font-size: 1.1em;
+  font-size: 1em;
   color: #444;
   text-align: center;
   font-weight: 500;
@@ -943,35 +943,47 @@ const sendEmailVerification = async () => {
   line-height: 1.2;
 }
 
+/* Step 1, 3, 5: Right to left text */
+.timeline-row.reverse .step-title {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Step 2, 4: Left to right text */
+.timeline-row.reverse-alt .step-title {
+  direction: ltr;
+  text-align: left;
+}
+
 /* --- Timeline Card --- */
 .timeline-card {
   background: #fff;
   border-radius: 10px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  padding: 32px 32px 24px 32px;
-  min-width: 380px;
+  padding: 28px 28px 20px 28px;
+  min-width: 360px;
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 
 .card-title {
-  font-size: 1.15em;
+  font-size: 1.1em;
   font-weight: bold;
   color: #444;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .card-desc {
-  font-size: 1em;
+  font-size: 0.95em;
   color: #666;
-  margin-bottom: 18px;
+  margin-bottom: 16px;
 }
 
 .card-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
