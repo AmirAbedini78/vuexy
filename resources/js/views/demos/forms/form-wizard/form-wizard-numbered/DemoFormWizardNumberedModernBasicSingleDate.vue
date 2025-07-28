@@ -1,5 +1,6 @@
 <script setup>
 import ItineraryAccommodationDialog from "@/components/dialogs/ItineraryAccommodationDialog.vue";
+import PackageDialog from "@/components/dialogs/PackageDialog.vue";
 import SpecialAddonsDialog from "@/components/dialogs/SpecialAddonsDialog.vue";
 import { onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
@@ -23,8 +24,10 @@ const loading = ref(false);
 const listingId = ref(null);
 const itineraries = ref([]);
 const specialAddons = ref([]);
+const packages = ref([]);
 const editingAddonIndex = ref(-1); // برای ویرایش addon
 const editingItineraryIndex = ref(-1); // برای ویرایش روز
+const editingPackageIndex = ref(-1); // برای ویرایش package
 const showConfirmation = ref(false); // برای نمایش صفحه تأیید
 const submissionData = ref({
   adventureTitle: "",
@@ -79,6 +82,7 @@ const formData = ref({
   subtitle: "",
   experienceLevel: "",
   fitnessLevel: "",
+  packages: [],
   // Step 2 fields
   activitiesIncluded: "",
   groupLanguage: "",
@@ -100,6 +104,7 @@ const formData = ref({
 
 const showItineraryDialog = ref(false);
 const showSpecialAddonsDialog = ref(false);
+const showPackageDialog = ref(false);
 
 // Handle certifications upload
 const handleCertificationsUpload = (event) => {
@@ -435,6 +440,65 @@ async function handleSpecialAddonDone(addonsData, editingIndex = -1) {
   }
 }
 
+async function handlePackageDone(packagesData, editingIndex = -1) {
+  try {
+    console.log("=== handlePackageDone called ===");
+    console.log("packagesData:", packagesData);
+    console.log("editingIndex:", editingIndex);
+    console.log("Current packages before update:", packages.value);
+    console.log("packagesData length:", packagesData.length);
+
+    if (editingIndex >= 0) {
+      // Editing existing package - replace the specific package
+      console.log("Editing mode - replacing package at index:", editingIndex);
+      packages.value[editingIndex] = packagesData[0];
+      editingPackageIndex.value = -1; // Reset editing index
+    } else {
+      // Adding new packages - only add truly new packages
+      console.log("Adding mode - checking for new packages");
+
+      // If we have existing packages, we need to filter out the ones that already exist
+      if (packages.value.length > 0) {
+        // Find only the new packages that don't exist in the current list
+        const newPackages = packagesData.filter((newPackage) => {
+          // Check if this package already exists by comparing titles
+          return !packages.value.some(
+            (existingPackage) =>
+              existingPackage.title === newPackage.title &&
+              existingPackage.description === newPackage.description &&
+              existingPackage.price === newPackage.price
+          );
+        });
+
+        console.log("New packages found:", newPackages);
+
+        // Only add the new packages
+        if (newPackages.length > 0) {
+          packages.value = [...packages.value, ...newPackages];
+        }
+      } else {
+        // First time adding packages - add all
+        console.log("First time adding packages");
+        packages.value = packagesData;
+      }
+    }
+
+    // Update the numbering for all packages
+    packages.value.forEach((pkg, index) => {
+      pkg.number = index + 1;
+    });
+
+    console.log("Packages after update:", packages.value);
+    console.log("Total packages count:", packages.value.length);
+  } catch (error) {
+    console.error("Error in handlePackageDone:", error);
+    alert("خطا در ذخیره اطلاعات");
+  } finally {
+    // همیشه مدال را ببند
+    showPackageDialog.value = false;
+  }
+}
+
 const goToNextStep = async () => {
   await updateListing();
   currentStep.value++;
@@ -501,6 +565,7 @@ const createNewAdventure = () => {
     subtitle: "",
     experienceLevel: "",
     fitnessLevel: "",
+    packages: [],
     activitiesIncluded: "",
     groupLanguage: "",
     mapsAndRoutes: [""],
@@ -526,6 +591,11 @@ const createNewAdventure = () => {
 
   // Create new listing
   createListing();
+};
+
+const openPackageModal = () => {
+  editingPackageIndex.value = -1; // Reset editing index for new packages
+  showPackageDialog.value = true;
 };
 
 // Drag and drop functionality for reordering addons
@@ -619,6 +689,50 @@ const dropItinerary = (index, event) => {
   event.target.style.opacity = "1";
 };
 
+// Drag and drop functionality for reordering packages
+const draggedPackageIndex = ref(-1);
+
+const dragStartPackage = (index, event) => {
+  draggedPackageIndex.value = index;
+  event.dataTransfer.effectAllowed = "move";
+  event.dataTransfer.setData("text/html", event.target.outerHTML);
+
+  // Add visual feedback
+  event.target.style.opacity = "0.5";
+};
+
+const dropPackage = (index, event) => {
+  event.preventDefault();
+
+  if (draggedPackageIndex.value === -1 || draggedPackageIndex.value === index) {
+    return;
+  }
+
+  // Reorder the packages array
+  const packageList = [...packages.value];
+  const draggedPackage = packageList[draggedPackageIndex.value];
+
+  // Remove the dragged item from its original position
+  packageList.splice(draggedPackageIndex.value, 1);
+
+  // Insert it at the new position
+  packageList.splice(index, 0, draggedPackage);
+
+  // Update the packages array
+  packages.value = packageList;
+
+  // Update the numbering
+  packages.value.forEach((pkg, idx) => {
+    pkg.number = idx + 1;
+  });
+
+  // Reset dragged index
+  draggedPackageIndex.value = -1;
+
+  // Remove visual feedback
+  event.target.style.opacity = "1";
+};
+
 // Edit itinerary item
 function editItineraryItem(index) {
   // Store the index for editing
@@ -633,6 +747,24 @@ function removeItinerary(index) {
     // Update numbers
     itineraries.value.forEach((itinerary, idx) => {
       itinerary.number = idx + 1;
+    });
+  }
+}
+
+// Edit package
+function editPackage(index) {
+  // Store the index for editing
+  editingPackageIndex.value = index;
+  showPackageDialog.value = true;
+}
+
+// Remove package
+function removePackage(index) {
+  if (confirm("Are you sure you want to remove this package?")) {
+    packages.value.splice(index, 1);
+    // Update numbers
+    packages.value.forEach((pkg, idx) => {
+      pkg.number = idx + 1;
     });
   }
 }
@@ -861,8 +993,203 @@ function removeItinerary(index) {
                       v-model="formData.subtitle"
                       label="Subtitle"
                       placeholder="A tagline for your adventure"
-                      class="mb-6"
+                      class="mb-4"
                     />
+
+                    <!-- Listing Packages -->
+                    <div class="mb-6">
+                      <label
+                        class="v-label text-body-2 mb-3 d-block"
+                        style="
+                          font-size: 16px !important;
+                          font-weight: 400 !important;
+                        "
+                      >
+                        Listing Packages <span class="required-star">*</span>
+                      </label>
+                      <p
+                        class="text-caption text-muted mb-3"
+                        style="font-size: 14px; color: #666"
+                      >
+                        Add your Packages and all related details here
+                      </p>
+
+                      <!-- Show button when no items -->
+                      <div
+                        v-if="packages.length === 0"
+                        class="empty-state-container"
+                      >
+                        <VBtn
+                          color="primary"
+                          variant="elevated"
+                          class="add-package-btn"
+                          style="
+                            background-color: #ec8d22 !important;
+                            color: #fff !important;
+                            border-radius: 8px;
+                            font-weight: 500;
+                            font-size: 14px;
+                            padding: 12px 20px;
+                            min-height: 40px;
+                            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+                            text-transform: none;
+                            transition: all 0.2s ease;
+                          "
+                          @click="openPackageModal"
+                        >
+                          Add Package
+                        </VBtn>
+                      </div>
+
+                      <!-- Display Packages List -->
+                      <div
+                        v-if="packages.length > 0"
+                        class="packages-list-container"
+                      >
+                        <!-- Show header with button when items exist -->
+                        <div class="packages-header">
+                          <h3 class="packages-title">Listing Packages</h3>
+                          <VBtn
+                            color="primary"
+                            variant="elevated"
+                            class="add-more-btn"
+                            style="
+                              background-color: #ec8d22 !important;
+                              color: #fff !important;
+                              border-radius: 8px;
+                              font-weight: 500;
+                              font-size: 14px;
+                              padding: 8px 16px;
+                              min-height: 36px;
+                              box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+                            "
+                            @click="openPackageModal"
+                          >
+                            Add More
+                          </VBtn>
+                        </div>
+
+                        <div class="packages-list">
+                          <div
+                            v-for="(pkg, index) in packages"
+                            :key="index"
+                            class="package-list-item"
+                            draggable="true"
+                            @dragstart="dragStartPackage(index, $event)"
+                            @dragover.prevent
+                            @drop="dropPackage(index, $event)"
+                            @dragenter.prevent
+                          >
+                            <div class="package-content">
+                              <div class="package-left">
+                                <div
+                                  class="package-badge"
+                                  style="position: relative"
+                                >
+                                  <span class="badge-number">{{
+                                    (pkg.number || index + 1)
+                                      .toString()
+                                      .padStart(2, "0")
+                                  }}</span>
+                                  <!-- Package icon under number badge -->
+                                  <div
+                                    v-if="index < packages.length - 1"
+                                    style="
+                                      position: absolute;
+                                      left: 50%;
+                                      top: 100%;
+                                      transform: translateX(-50%);
+                                      margin-top: 4px;
+                                      z-index: 2;
+                                    "
+                                  >
+                                    <VIcon
+                                      icon="tabler-package"
+                                      size="16"
+                                      style="color: #ec8d22"
+                                    />
+                                  </div>
+                                  <!-- Vertical dotted line under icon -->
+                                  <div
+                                    v-if="index < packages.length - 1"
+                                    class="vertical-dotted-line"
+                                    style="
+                                      position: absolute;
+                                      left: 50%;
+                                      top: 100%;
+                                      transform: translateX(-50%);
+                                      margin-top: 20px;
+                                      bottom: -16px;
+                                      width: 1px;
+                                      background: repeating-linear-gradient(
+                                        to bottom,
+                                        #666 0,
+                                        #666 2px,
+                                        transparent 2px,
+                                        transparent 4px
+                                      );
+                                    "
+                                  ></div>
+                                </div>
+                                <div class="package-info">
+                                  <div class="package-title-row">
+                                    <span class="package-title">{{
+                                      pkg.title ||
+                                      `Package ${pkg.number || index + 1} Title`
+                                    }}</span>
+                                    <VIcon
+                                      icon="tabler-chevron-down"
+                                      size="16"
+                                      class="chevron-icon"
+                                    />
+                                  </div>
+                                  <div class="package-description">
+                                    <span class="description-text">{{
+                                      pkg.description ||
+                                      "Your package description would take place here"
+                                    }}</span>
+                                  </div>
+                                  <div class="package-price">
+                                    € {{ (pkg.price || 0).toFixed(2) }}
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="package-actions">
+                                <VBtn
+                                  icon
+                                  size="small"
+                                  variant="text"
+                                  @click="editPackage(index)"
+                                  class="action-btn"
+                                >
+                                  <VIcon icon="tabler-edit" size="18" />
+                                </VBtn>
+                                <VBtn
+                                  icon
+                                  size="small"
+                                  variant="text"
+                                  color="error"
+                                  @click="removePackage(index)"
+                                  class="action-btn"
+                                >
+                                  <VIcon icon="tabler-trash" size="18" />
+                                </VBtn>
+                                <VBtn
+                                  icon
+                                  size="small"
+                                  variant="text"
+                                  class="action-btn drag-handle"
+                                  draggable="true"
+                                  @dragstart="dragStartPackage(index, $event)"
+                                >
+                                  <VIcon icon="tabler-arrows-move" size="18" />
+                                </VBtn>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
 
                     <!-- Experience Level and Fitness Level -->
                     <VRow>
@@ -2034,6 +2361,13 @@ function removeItinerary(index) {
     @close="showSpecialAddonsDialog = false"
     @done="handleSpecialAddonDone"
   />
+  <PackageDialog
+    v-model="showPackageDialog"
+    :initial-packages="packages"
+    :editing-index="editingPackageIndex"
+    @close="showPackageDialog = false"
+    @done="handlePackageDone"
+  />
 </template>
 
 <style scoped>
@@ -2437,6 +2771,12 @@ function removeItinerary(index) {
 }
 
 .add-item-btn:hover {
+  background-color: #d67d1a !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.add-package-btn:hover {
   background-color: #d67d1a !important;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
@@ -3007,5 +3347,203 @@ function removeItinerary(index) {
   .add-another-btn {
     width: 100%;
   }
+}
+
+/* Packages List Styling */
+.packages-list-container {
+  margin-top: 16px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.packages-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.packages-title {
+  font-family: "Anton", sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #333333;
+  margin: 0;
+}
+
+.packages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: none;
+}
+
+.package-list-item {
+  background: transparent;
+  border-radius: 0;
+  transition: all 0.2s ease;
+  cursor: grab;
+  border: none;
+  border-bottom: 1px solid #e0e0e0;
+  box-shadow: none;
+  padding: 16px 0;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.package-list-item:last-child {
+  margin-bottom: 0;
+  border-bottom: none;
+}
+
+.package-list-item:hover {
+  background: transparent;
+  transform: none;
+  box-shadow: none;
+}
+
+.package-list-item:active {
+  cursor: grabbing;
+}
+
+.package-list-item.dragging {
+  opacity: 0.5;
+  transform: rotate(2deg);
+}
+
+.package-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 16px;
+}
+
+.package-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+}
+
+.package-badge {
+  width: 32px;
+  height: 32px;
+  background: #ec8d22;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.badge-number {
+  color: white;
+  font-weight: 700;
+  font-size: 12px;
+  font-family: "Anton", sans-serif;
+}
+
+.package-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.package-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.package-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333333;
+  font-family: "Karla", sans-serif;
+}
+
+.chevron-icon {
+  color: #333333;
+}
+
+.package-description {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-bottom: 12px;
+  position: relative;
+}
+
+.description-text {
+  font-size: 14px;
+  color: #666666;
+  line-height: 1.4;
+  font-family: "Karla", sans-serif;
+}
+
+.package-price {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333333;
+  text-align: right;
+  font-family: "Karla", sans-serif;
+}
+
+.package-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 16px;
+}
+
+.package-actions .v-btn {
+  color: #333333 !important;
+}
+
+.package-actions .v-btn:hover {
+  color: #666666 !important;
+}
+
+.package-actions .v-btn--color-error {
+  color: #d32f2f !important;
+}
+
+.package-actions .v-btn--color-error:hover {
+  color: #b71c1c !important;
+}
+
+.action-btn {
+  color: #333333 !important;
+  transition: color 0.2s ease;
+}
+
+.action-btn:hover {
+  color: #666666 !important;
+}
+
+.action-btn.v-btn--color-error {
+  color: #d32f2f !important;
+}
+
+.action-btn.v-btn--color-error:hover {
+  color: #b71c1c !important;
+}
+
+.drag-handle {
+  cursor: grab !important;
+}
+
+.drag-handle:active {
+  cursor: grabbing !important;
+}
+
+.drag-handle:hover {
+  color: #ec8d22 !important;
 }
 </style>
