@@ -395,35 +395,35 @@ const sendEmailVerification = async () => {
 </script>
 
 <template>
-  <VCard class="registration-timeline-page" elevation="0">
-    <!-- Header Section -->
-    <div class="timeline-header">
-      <div class="container-header">
-        <h1 class="welcome-title">
-          Welcome <span class="account-name">{{ getUserDisplayName() }}</span>
-        </h1>
-        <p class="welcome-desc">
-          here is where you can manage all your experience listings and
-          participants, add bookings, connect with businesses and people in
-          adventure industry. to access all the features in this platform, there
-          are a few steps to complete. It will only take about 15 minutes to
-          finish! You can watch the intro video and in case you need help, we
-          are one message away!
-        </p>
-        <div class="header-btns">
-          <VBtn variant="outlined" color="black" class="intro-btn">
-            <VIcon left size="20">tabler-player-play</VIcon>
-            Watch Intro Video
-          </VBtn>
-          <VBtn color="orange" class="support-btn"> Get Support </VBtn>
-        </div>
+  <!-- Header Section - Outside Timeline Context -->
+  <div class="timeline-header">
+    <div class="container-header">
+      <h1 class="welcome-title">
+        Welcome <span class="account-name">{{ getUserDisplayName() }}</span>
+      </h1>
+      <p class="welcome-desc">
+        here is where you can manage all your experience listings and
+        participants, add bookings, connect with businesses and people in
+        adventure industry. to access all the features in this platform, there
+        are a few steps to complete. It will only take about 15 minutes to
+        finish! You can watch the intro video and in case you need help, we are
+        one message away!
+      </p>
+      <div class="header-btns">
+        <VBtn variant="outlined" color="black" class="intro-btn">
+          <VIcon left size="20">tabler-player-play</VIcon>
+          Watch Intro Video
+        </VBtn>
+        <VBtn color="orange" class="support-btn"> Get Support </VBtn>
       </div>
     </div>
+  </div>
 
-    <h2 class="section-title">
-      Complete Following Steps to Verify Your Account
-    </h2>
+  <!-- Timeline Section Title -->
+  <h2 class="section-title">Complete Following Steps to Verify Your Account</h2>
 
+  <!-- Timeline Container -->
+  <VCard class="registration-timeline-page" elevation="0">
     <!-- Timeline Steps -->
     <div class="timeline">
       <!-- Step 1: Email Verification -->
@@ -711,12 +711,14 @@ const sendEmailVerification = async () => {
   padding-top: 48px;
   padding-bottom: 24px;
   background: #f8f8fb;
+  margin-bottom: 0;
 }
 .container-header {
   max-width: 700px;
   margin: 0 auto;
   text-align: left;
   padding: 0 24px;
+  direction: ltr;
 }
 .welcome-title {
   font-family: "Anton", Arial, sans-serif;
@@ -724,6 +726,8 @@ const sendEmailVerification = async () => {
   font-weight: 700;
   color: #222;
   margin-bottom: 12px;
+  direction: ltr;
+  text-align: left;
 }
 .account-name {
   color: #ffa726;
@@ -734,6 +738,8 @@ const sendEmailVerification = async () => {
   color: #444;
   margin-bottom: 28px;
   line-height: 1.7;
+  direction: ltr;
+  text-align: left;
 }
 .header-btns {
   display: flex;
@@ -755,11 +761,13 @@ const sendEmailVerification = async () => {
 
 .section-title {
   text-align: center;
-  font-size: 2em;
+  font-size: 2.2em;
   color: #333;
   margin: 40px 0 40px 0;
   position: relative;
   padding: 0 24px;
+  font-weight: 700;
+  font-family: "Anton", Arial, sans-serif;
 }
 
 /* --- Timeline --- */
