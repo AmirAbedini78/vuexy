@@ -84,10 +84,14 @@ class UserVerificationController extends Controller
         // Check if there's a redirect URL in the query parameters
         $redirectUrl = request()->query('redirect');
         if ($redirectUrl) {
+            // Add verified=true parameter to the redirect URL
+            $separator = strpos($redirectUrl, '?') !== false ? '&' : '?';
+            $redirectUrl .= $separator . 'verified=true';
             return redirect($redirectUrl);
         }
         
-        return response()->json(['success' => true, 'message' => 'Email verified']);
+        // Default redirect to login if no redirect URL provided
+        return redirect(config('app.frontend_url') . '/login?verified=true');
     }
 
     // ارسال کد واتساپ

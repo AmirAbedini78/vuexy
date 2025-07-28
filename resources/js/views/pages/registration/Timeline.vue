@@ -43,6 +43,12 @@ const linkedinCodeLoading = ref(false);
 const profileCompleted = ref(false);
 const reviewStatus = ref("awaiting_approval"); // 'awaiting_approval', 'verified_contact', 'needs_edit', 'incomplete'
 
+// Step 4 Progress State
+const step4Enabled = ref(false);
+const progressPercentage = ref(0);
+const completedVerifications = ref(0);
+const totalVerifications = ref(3); // email, whatsapp, linkedin
+
 // Fetch verification status on mount
 const fetchVerificationStatus = async () => {
   try {
@@ -63,34 +69,7 @@ const fetchVerificationStatus = async () => {
         emailMessage.value = "";
       }
 
-      // Set user email if available
-      if (data.data.email) {
-        email.value = data.data.email;
-      }
-    } else {
-      // If no verification data exists, set to pending
-      emailStatus.value = "pending";
-      emailMessage.value = "";
-    }
-
-    // Check if user just came back from email verification
-    if (route.query.verified === "true") {
-      emailStatus.value = "verified";
-      emailMessage.value = "Email verified successfully! Welcome back!";
-    }
-  } catch (e) {
-    console.error("Error fetching verification status:", e);
-    emailStatus.value = "error";
-    emailMessage.value =
-      "Could not fetch verification status. Please refresh the page.";
-  }
-};
-
-const fetchWhatsappStatus = async () => {
-  try {
-    const res = await fetch(`/api/verification/${userType}/${userId}`);
-    const data = await res.json();
-    if (data.success && data.data) {
+      // Check WhatsApp verification status
       if (data.data.whatsapp_verified) {
         whatsappStatus.value = "verified";
         whatsappMessage.value = "WhatsApp Verified";
@@ -105,10 +84,43 @@ const fetchWhatsappStatus = async () => {
       if (data.data.whatsapp_number) {
         whatsappNumber.value = data.data.whatsapp_number;
       }
+
+      // Check LinkedIn verification status
+      if (data.data.linkedin_verified) {
+        linkedinStatus.value = "verified";
+        linkedinMessage.value = "LinkedIn Connected";
+      } else {
+        linkedinStatus.value = "pending";
+        linkedinMessage.value = "";
+      }
+
+      // Set user email if available
+      if (data.data.email) {
+        email.value = data.data.email;
+      }
+    } else {
+      // If no verification data exists, set to pending
+      emailStatus.value = "pending";
+      emailMessage.value = "";
+      whatsappStatus.value = "pending";
+      whatsappMessage.value = "";
+      linkedinStatus.value = "pending";
+      linkedinMessage.value = "";
     }
+
+    // Check if user just came back from email verification
+    if (route.query.verified === "true") {
+      emailStatus.value = "verified";
+      emailMessage.value = "Email verified successfully! Welcome back!";
+    }
+
+    // Calculate progress after updating all statuses
+    calculateProgress();
   } catch (e) {
-    whatsappStatus.value = "error";
-    whatsappMessage.value = "Could not fetch WhatsApp status.";
+    console.error("Error fetching verification status:", e);
+    emailStatus.value = "error";
+    emailMessage.value =
+      "Could not fetch verification status. Please refresh the page.";
   }
 };
 
@@ -158,6 +170,7 @@ const verifyWhatsappCode = async () => {
       whatsappStatus.value = "verified";
       whatsappMessage.value = "WhatsApp Verified";
       showWhatsappModal.value = false;
+      calculateProgress(); // Calculate progress after successful verification
     } else {
       whatsappStatus.value = "error";
       whatsappMessage.value = data.message || "Invalid code.";
@@ -203,13 +216,61 @@ const verifyLinkedinCode = async () => {
   }
 };
 
-const completeProfile = () => {
-  profileCompleted.value = true;
-  reviewStatus.value = "verified_contact";
+const completeProfile = async () => {
+  try {
+    const res = await fetch(`/api/verification/${userType}/${userId}/profile`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-TOKEN":
+          document
+            .querySelector('meta[name="csrf-token"]')
+            ?.getAttribute("content") || "",
+      },
+      body: JSON.stringify({
+        completed_verifications: completedVerifications.value,
+        total_verifications: totalVerifications.value,
+        progress_percentage: progressPercentage.value,
+      }),
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      profileCompleted.value = true;
+      reviewStatus.value = "verified_contact";
+      // Update step 5 checkbox to show active state
+    } else {
+      console.error("Failed to complete profile:", data.message);
+    }
+  } catch (e) {
+    console.error("Error completing profile:", e);
+  }
+};
+
+// Calculate progress and update step 4 state
+const calculateProgress = () => {
+  let completed = 0;
+
+  if (emailStatus.value === "verified") completed++;
+  if (whatsappStatus.value === "verified") completed++;
+  if (linkedinStatus.value === "verified") completed++;
+
+  completedVerifications.value = completed;
+  progressPercentage.value = Math.round(
+    (completed / totalVerifications.value) * 100
+  );
+
+  // Enable step 4 if at least one verification is completed
+  step4Enabled.value = completed > 0;
 };
 
 onMounted(async () => {
   try {
+    // Initialize step4Enabled to false first
+    step4Enabled.value = false;
+    progressPercentage.value = 0;
+    completedVerifications.value = 0;
+
     // Fetch user data based on type
     if (userType === "individual") {
       const response = await individualUserService.getById(userId);
@@ -223,9 +284,18 @@ onMounted(async () => {
 
     // Initialize timeline steps
     initializeTimeline();
-    await fetchVerificationStatus();
-    await fetchWhatsappStatus();
     getLoggedInUser(); // Call the new function here
+
+    // Fetch all verification statuses
+    await fetchVerificationStatus();
+
+    // Check if user just came back from email verification
+    if (route.query.verified === "true") {
+      emailStatus.value = "verified";
+      emailMessage.value = "Email verified successfully! Welcome back!";
+      // Fetch latest verification status from server
+      await fetchVerificationStatus();
+    }
 
     // Check LinkedIn verification status from backend or query
     if (route.query.linkedin === "success") {
@@ -235,6 +305,9 @@ onMounted(async () => {
       linkedinStatus.value = "error";
       linkedinMessage.value = "LinkedIn verification failed. Please try again.";
     }
+
+    // Calculate initial progress
+    calculateProgress();
   } catch (err) {
     console.error("Error fetching user data:", err);
     error.value = err.message || "Failed to load user data";
@@ -603,7 +676,7 @@ const sendEmailVerification = async () => {
 
       <!-- Step 4: Profile Details -->
       <div class="timeline-row reverse-alt">
-        <div class="timeline-card">
+        <div class="timeline-card" :class="{ 'disabled-card': !step4Enabled }">
           <div class="card-title">
             Fill out your profile details to personalize your account
           </div>
@@ -616,23 +689,30 @@ const sendEmailVerification = async () => {
               color="purple"
               variant="outlined"
               class="complete-profile-btn"
+              :disabled="!step4Enabled"
               @click="completeProfile"
             >
               <VIcon left size="20">tabler-file-text</VIcon>
               Complete Personal Form
             </VBtn>
             <div class="progress-bar-container">
-              <div class="progress-bar" style="width: 0%"></div>
-              <span>0%</span>
+              <div
+                class="progress-bar"
+                :style="{ width: progressPercentage + '%' }"
+              ></div>
+              <span>{{ progressPercentage }}%</span>
+            </div>
+            <div v-if="!step4Enabled" class="step4-disabled-message">
+              Complete at least one verification step above to proceed
             </div>
           </div>
         </div>
         <div class="timeline-left step-left-reverse-alt">
           <div class="step-line-col-alt">
-            <div class="step-checkbox" :class="{ active: false, done: false }">
+            <div class="step-checkbox" :class="{ active: step4Enabled }">
               <div class="checkbox-circle">
                 <VIcon
-                  v-if="false"
+                  v-if="step4Enabled"
                   icon="tabler-check"
                   size="16"
                   color="white"
@@ -642,7 +722,7 @@ const sendEmailVerification = async () => {
             <div class="vertical-line"></div>
           </div>
           <div class="step-info-col-alt">
-            <div class="step-number" :class="{ active: false }">04</div>
+            <div class="step-number" :class="{ active: step4Enabled }">04</div>
             <div class="step-title">Add your<br />profile details</div>
           </div>
         </div>
@@ -668,10 +748,13 @@ const sendEmailVerification = async () => {
         </div>
         <div class="timeline-left step-left-reverse-fixed">
           <div class="step-line-col">
-            <div class="step-checkbox" :class="{ active: false, done: false }">
+            <div
+              class="step-checkbox"
+              :class="{ active: profileCompleted, done: false }"
+            >
               <div class="checkbox-circle">
                 <VIcon
-                  v-if="false"
+                  v-if="profileCompleted"
                   icon="tabler-check"
                   size="16"
                   color="white"
@@ -681,7 +764,9 @@ const sendEmailVerification = async () => {
             <div class="vertical-line"></div>
           </div>
           <div class="step-info-col">
-            <div class="step-number" :class="{ active: false }">05</div>
+            <div class="step-number" :class="{ active: profileCompleted }">
+              05
+            </div>
             <div class="step-title">Review &<br />Activation</div>
           </div>
         </div>
@@ -973,6 +1058,21 @@ const sendEmailVerification = async () => {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.timeline-card.disabled-card {
+  background: #f8f8f8;
+  opacity: 0.7;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.step4-disabled-message {
+  color: #999;
+  font-size: 0.9em;
+  margin-top: 12px;
+  text-align: center;
+  font-style: italic;
 }
 
 .card-title {
