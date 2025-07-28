@@ -9,6 +9,7 @@ export const namespaceConfig = str => `${layoutConfig.app.title}-${str}`
 export const cookieRef = (key, defaultValue) => {
   return useCookie(namespaceConfig(key), { default: () => defaultValue })
 }
+
 export const useLayoutConfigStore = defineStore('layoutConfig', () => {
   const route = useRoute()
 
@@ -18,7 +19,7 @@ export const useLayoutConfigStore = defineStore('layoutConfig', () => {
   // 👉 Navbar Type
   const isNavbarBlurEnabled = cookieRef('isNavbarBlurEnabled', layoutConfig.navbar.navbarBlur)
 
-  // 👉 Vertical Nav Collapsed
+  // 👉 Vertical Nav Collapsed - Using cookie instead of localStorage for better compatibility
   const isVerticalNavCollapsed = cookieRef('isVerticalNavCollapsed', layoutConfig.verticalNav.isVerticalNavCollapsed)
 
   // 👉 App Content Width
@@ -34,6 +35,31 @@ export const useLayoutConfigStore = defineStore('layoutConfig', () => {
         navbarType.value = NavbarType.Sticky
       isVerticalNavCollapsed.value = false
     }
+  })
+
+  // 👉 Watch route changes to preserve sidebar state
+  watch(() => route.path, (newPath, oldPath) => {
+    // Ensure sidebar state is preserved after route change
+    nextTick(() => {
+      // Check if we're navigating to a dashboard page (expand sidebar)
+      const isDashboardPage = newPath.includes('/dashboards/') || newPath === '/'
+      
+      // If navigating to dashboard page, expand sidebar
+      if (isDashboardPage) {
+        isVerticalNavCollapsed.value = false
+        appContentLayoutNav.value = 'vertical'
+      } else {
+        // For all other pages (listing, access-control, etc.), keep sidebar collapsed
+        isVerticalNavCollapsed.value = true
+        appContentLayoutNav.value = 'vertical'
+      }
+      
+      // Force update layout classes to ensure sidebar state is correct
+      if (configStore && typeof configStore.isVerticalNavCollapsed === 'boolean') {
+        // Trigger reactivity update
+        configStore._layoutClasses
+      }
+    })
   })
 
 

@@ -1,18 +1,17 @@
 <script setup>
-import navItems from '@/navigation/vertical'
-import { themeConfig } from '@themeConfig'
+import navItems from "@/navigation/vertical";
 
 // Components
-import Footer from '@/layouts/components/Footer.vue'
-import NavBarNotifications from '@/layouts/components/NavBarNotifications.vue'
-import NavSearchBar from '@/layouts/components/NavSearchBar.vue'
-import NavbarShortcuts from '@/layouts/components/NavbarShortcuts.vue'
-import NavbarThemeSwitcher from '@/layouts/components/NavbarThemeSwitcher.vue'
-import UserProfile from '@/layouts/components/UserProfile.vue'
-import NavBarI18n from '@core/components/I18n.vue'
+import Footer from "@/layouts/components/Footer.vue";
+import NavBarNotifications from "@/layouts/components/NavBarNotifications.vue";
+import NavbarThemeSwitcher from "@/layouts/components/NavbarThemeSwitcher.vue";
+import UserProfile from "@/layouts/components/UserProfile.vue";
 
 // @layouts plugin
-import { VerticalNavLayout } from '@layouts'
+import { VerticalNavLayout } from "@layouts";
+
+// Navigation composable
+const { goToDashboard } = useNavigation();
 </script>
 
 <template>
@@ -25,23 +24,28 @@ import { VerticalNavLayout } from '@layouts'
           class="ms-n3 d-lg-none"
           @click="toggleVerticalOverlayNavActive(true)"
         >
-          <VIcon
-            size="26"
-            icon="tabler-menu-2"
-          />
+          <VIcon size="26" icon="tabler-menu-2" />
         </IconBtn>
 
-        <NavSearchBar class="ms-lg-n3" />
+        <!-- App Logo and Title - Removed as requested -->
+        <!-- <RouterLink to="/" class="app-logo d-flex align-center gap-x-3 me-4">
+          <VNodeRenderer :nodes="themeConfig.app.logo" />
+        </RouterLink> -->
 
         <VSpacer />
 
-        <NavBarI18n
-          v-if="themeConfig.app.i18n.enable && themeConfig.app.i18n.langConfig?.length"
-          :languages="themeConfig.app.i18n.langConfig"
-        />
+        <!-- Theme Switcher (Light/Dark mode) -->
         <NavbarThemeSwitcher />
-        <NavbarShortcuts />
+
+        <!-- Home icon for navigation to dashboard -->
+        <IconBtn class="me-2" @click="goToDashboard" title="Go to Dashboard">
+          <VIcon size="24" icon="tabler-home" />
+        </IconBtn>
+
+        <!-- Notifications -->
         <NavBarNotifications class="me-1" />
+
+        <!-- User Profile -->
         <UserProfile />
       </div>
     </template>
@@ -54,7 +58,7 @@ import { VerticalNavLayout } from '@layouts'
       <Footer />
     </template>
 
-    <!-- 👉 Customizer -->
-    <TheCustomizer />
+    <!-- 👉 Customizer - Removed as requested -->
+    <!-- <TheCustomizer /> -->
   </VerticalNavLayout>
 </template>

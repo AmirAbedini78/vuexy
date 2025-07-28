@@ -1,573 +1,681 @@
 <template>
-  <div class="special-addons-modal-overlay">
-    <div class="special-addons-dialog-wrapper">
-      <div class="special-addons-dialog-header">
-        <span class="special-addons-dialog-title">Special Addons</span>
-        <span class="special-addons-dialog-close" @click="$emit('close')"
-          >&times;</span
-        >
+  <VDialog
+    v-model="isOpen"
+    max-width="1200px"
+    persistent
+    class="special-addons-modal"
+  >
+    <VCard class="special-addons-card">
+      <!-- Header -->
+      <div class="modal-header">
+        <div class="header-content">
+          <div class="header-text">
+            <h1 class="modal-title">Special Addons</h1>
+            <p class="modal-subtitle">
+              Please fill the form carefully (or something kinder maybe)
+            </p>
+          </div>
+          <VBtn icon variant="text" @click="closeDialog" class="close-btn">
+            <VIcon icon="tabler-x" size="24" />
+          </VBtn>
+        </div>
       </div>
-      <div class="special-addons-dialog-desc">
-        Please fill the form carefully (or something kinder maybe)
-      </div>
-      <div class="special-addons-dialog-content">
-        <div class="special-addons-sidebar">
-          <div
-            v-for="(addon, idx) in addons"
-            :key="idx"
-            :class="[
-              'special-addons-sidebar-item',
-              { active: idx === activeAddonIndex },
-            ]"
-            @click="selectAddon(idx)"
-            style="cursor: pointer"
-          >
-            <div class="special-addons-sidebar-row">
-              <div class="special-addons-sidebar-col-number">
-                <div class="special-addons-sidebar-number">
-                  {{ (idx + 1).toString().padStart(2, "0") }}
-                </div>
-                <span class="special-addons-sidebar-star"
-                  ><svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="#ec8d22"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                    <polygon
-                      points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
-                    /></svg
-                ></span>
-                <div
-                  v-if="idx !== addons.length - 1"
-                  class="special-addons-sidebar-dotted-vertical"
-                ></div>
+
+      <div class="modal-content">
+        <!-- Left Sidebar -->
+        <div class="sidebar">
+          <div class="sidebar-content">
+            <div
+              v-for="(addon, index) in localAddons"
+              :key="index"
+              class="sidebar-item"
+              :class="{ active: selectedAddonIndex === index }"
+              @click="selectAddon(index)"
+            >
+              <div class="addon-badge">
+                <span class="badge-number">{{
+                  String(index + 1).padStart(2, "0")
+                }}</span>
               </div>
-              <div class="special-addons-sidebar-col-content">
-                <div class="special-addons-sidebar-title">
-                  {{ addon.title }}
+              <div class="addon-info">
+                <div class="addon-title-row">
+                  <span class="addon-title">{{
+                    addon.title || `Addon ${index + 1} Title`
+                  }}</span>
+                  <VIcon
+                    :icon="
+                      selectedAddonIndex === index
+                        ? 'tabler-chevron-down'
+                        : 'tabler-chevron-right'
+                    "
+                    size="16"
+                    class="chevron"
+                  />
                 </div>
-                <div class="special-addons-sidebar-desc-row">
-                  <span class="special-addons-sidebar-desc">{{
+                <div
+                  v-if="selectedAddonIndex === index"
+                  class="addon-description"
+                >
+                  <VIcon icon="tabler-star" size="16" class="star-icon" />
+                  <span class="description-text">{{
                     addon.description ||
                     "Your addon description would take place here"
                   }}</span>
-                  <span class="special-addons-sidebar-price"
-                    >€ {{ addon.price.toFixed(2) }}</span
-                  >
+                </div>
+                <div v-if="selectedAddonIndex === index" class="addon-price">
+                  € {{ addon.price || "200.00" }}
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <div class="special-addons-main">
-          <div class="special-addons-main-title">
-            Special Addon {{ activeAddonIndex + 1 }}
-          </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
           <div
-            v-if="changesSaved[activeAddonIndex]"
-            style="
-              color: #444;
-              font-size: 0.98rem;
-              margin-bottom: 8px;
-              display: flex;
-              align-items: center;
-              gap: 6px;
-            "
+            v-for="(addon, index) in localAddons"
+            :key="index"
+            class="addon-section"
+            :class="{ active: selectedAddonIndex === index }"
           >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#222"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              style="margin-right: 2px"
-            >
-              <path d="M20 6L9 17l-5-5" />
-            </svg>
-            Changes saved
-          </div>
-          <div class="special-addons-main-form">
-            <div class="special-addons-form-box">
-              <div class="special-addons-form-row">
-                <input
-                  class="special-addons-input"
-                  placeholder="Title"
-                  v-model="addons[activeAddonIndex].title"
-                  @input="updateAddonField('title', $event.target.value)"
-                />
-                <div class="special-addons-price-input-wrapper">
-                  <input
-                    class="special-addons-input"
-                    placeholder="Price"
-                    type="number"
-                    v-model.number="addons[activeAddonIndex].price"
-                    @input="
-                      updateAddonField('price', Number($event.target.value))
-                    "
+            <div class="content-header">
+              <h2 class="content-title">Special Addon {{ index + 1 }}</h2>
+              <div class="status-indicator">
+                <VIcon icon="tabler-check" size="16" class="check-icon" />
+                <span class="status-text">Changes saved</span>
+              </div>
+            </div>
+
+            <div class="form-content">
+              <div class="form-row">
+                <div class="form-field">
+                  <VTextField
+                    v-model="addon.title"
+                    placeholder="Title"
+                    variant="outlined"
+                    density="comfortable"
+                    class="title-input"
+                    hide-details
                   />
-                  <span class="special-addons-euro">€</span>
+                </div>
+                <div class="form-field price-field">
+                  <VTextField
+                    v-model="addon.price"
+                    placeholder="Price"
+                    variant="outlined"
+                    density="comfortable"
+                    type="number"
+                    step="0.01"
+                    class="price-input"
+                    hide-details
+                  />
+                  <div class="currency-symbol">€</div>
                 </div>
               </div>
-              <div class="special-addons-form-row">
-                <input
-                  class="special-addons-input special-addons-desc-input"
+
+              <div class="form-field description-field">
+                <VTextarea
+                  v-model="addon.description"
                   placeholder="Description"
-                  v-model="addons[activeAddonIndex].description"
-                  @input="updateAddonField('description', $event.target.value)"
+                  variant="outlined"
+                  density="comfortable"
+                  rows="4"
+                  class="description-input"
+                  hide-details
                 />
               </div>
             </div>
           </div>
         </div>
       </div>
-      <div class="special-addons-actions">
-        <button class="special-addons-done-btn" @click="handleDone">
+
+      <!-- Footer Actions -->
+      <div class="modal-footer">
+        <VBtn
+          variant="elevated"
+          @click="handleDone"
+          :loading="loading"
+          class="done-btn"
+        >
           Done
-        </button>
-        <button class="special-addons-add-btn" @click="addAddon">
+        </VBtn>
+        <VBtn variant="elevated" @click="addNewAddon" class="add-more-btn">
           Add More Addons
-        </button>
+        </VBtn>
       </div>
-    </div>
-  </div>
+    </VCard>
+  </VDialog>
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 
 const props = defineProps({
+  modelValue: {
+    type: Boolean,
+    default: false,
+  },
   specialAddons: {
     type: Array,
     default: () => [],
   },
-  listingId: {
-    type: [String, Number],
-    default: null,
+  editingIndex: {
+    type: Number,
+    default: -1,
   },
 });
 
-const emit = defineEmits([
-  "close",
-  "save-addon",
-  "add-special-addon",
-  "edit-special-addon",
-  "delete-special-addon",
-]);
+const emit = defineEmits(["update:modelValue", "close", "done"]);
 
-// آرایه داینامیک Addons
-const addons = ref(
-  props.specialAddons.length > 0
-    ? JSON.parse(JSON.stringify(props.specialAddons))
-    : [
-        {
-          id: 1,
-          number: 1,
-          title: "Addon 1 Title",
-          description: "Your addon description would take place here",
-          price: 200,
-        },
-        {
-          id: 2,
-          number: 2,
-          title: "Addon 2 Title",
-          description: "",
-          price: 0,
-        },
-      ]
-);
+const loading = ref(false);
+const selectedAddonIndex = ref(0);
 
-// اندیس Addon فعال
-const activeAddonIndex = ref(0);
+// Local state for addons
+const localAddons = ref([]);
 
-// آرایه وضعیت نمایش پیام ذخیره شدن برای هر Addon
-const changesSaved = ref(addons.value.map(() => false));
+// Computed property for dialog visibility
+const isOpen = computed({
+  get: () => props.modelValue,
+  set: (value) => emit("update:modelValue", value),
+});
 
-// همگام‌سازی changesSaved با تعداد addons
+// Initialize local addons when dialog opens
 watch(
-  addons,
-  (newVal, oldVal) => {
-    if (newVal.length > oldVal.length) {
-      // Addon جدید اضافه شده
-      changesSaved.value.push(false);
-    } else if (newVal.length < oldVal.length) {
-      // Addon حذف شده (در آینده)
-      changesSaved.value.splice(newVal.length);
+  () => props.modelValue,
+  (newValue) => {
+    if (newValue) {
+      // When dialog opens, initialize with existing data or default
+      if (props.specialAddons && props.specialAddons.length > 0) {
+        // If we have existing addons, show them in the modal
+        localAddons.value = JSON.parse(JSON.stringify(props.specialAddons));
+      } else {
+        // First time opening - create one empty addon
+        localAddons.value = [createEmptyAddon()];
+      }
+      selectedAddonIndex.value = 0;
     }
   },
-  { deep: true }
+  { immediate: true }
 );
 
-// Watch for changes in specialAddons prop
+// Watch for editing index changes
 watch(
-  () => props.specialAddons,
-  (newAddons) => {
-    if (newAddons.length > 0) {
-      addons.value = JSON.parse(JSON.stringify(newAddons));
+  () => props.editingIndex,
+  (newIndex) => {
+    if (newIndex >= 0 && props.specialAddons && props.specialAddons[newIndex]) {
+      // If editing, show only the specific addon
+      localAddons.value = [
+        JSON.parse(JSON.stringify(props.specialAddons[newIndex])),
+      ];
+      selectedAddonIndex.value = 0;
+    } else if (newIndex === -1) {
+      // If not editing, show all existing addons or create one empty addon
+      if (props.specialAddons && props.specialAddons.length > 0) {
+        // Show all existing addons
+        localAddons.value = JSON.parse(JSON.stringify(props.specialAddons));
+      } else {
+        // No existing addons, create one empty addon
+        localAddons.value = [createEmptyAddon()];
+      }
+      selectedAddonIndex.value = 0;
     }
-  },
-  { deep: true }
+  }
 );
 
-// هندل انتخاب Addon
-function selectAddon(idx) {
-  activeAddonIndex.value = idx;
-}
-
-// هندل تغییر فیلدهای فرم
-function updateAddonField(field, value) {
-  addons.value[activeAddonIndex.value][field] = value;
-  changesSaved.value[activeAddonIndex.value] = true;
-  setTimeout(() => {
-    changesSaved.value[activeAddonIndex.value] = false;
-  }, 2000);
-}
-
-// تابع افزودن Addon جدید
-function addAddon() {
-  const newAddonNumber = addons.value.length + 1;
-  addons.value.push({
-    id: Date.now(),
-    number: newAddonNumber,
-    title: `Addon ${newAddonNumber} Title`,
+// Create empty addon template
+function createEmptyAddon() {
+  return {
+    title: "",
     description: "",
     price: 0,
-  });
-  activeAddonIndex.value = addons.value.length - 1;
+    number: 1,
+    is_active: true,
+  };
 }
 
-// تابع حذف Addon
-function removeAddon(index) {
-  if (addons.value.length > 1) {
-    const addonToDelete = addons.value[index];
-    addons.value.splice(index, 1);
-    // Update numbers
-    addons.value.forEach((addon, idx) => {
-      addon.number = idx + 1;
+// Select addon
+function selectAddon(index) {
+  selectedAddonIndex.value = index;
+}
+
+// Add new addon
+function addNewAddon() {
+  console.log("addNewAddon called");
+  console.log("localAddons before adding:", localAddons.value);
+
+  const newNumber = localAddons.value.length + 1;
+  const newAddon = {
+    ...createEmptyAddon(),
+    number: newNumber,
+  };
+
+  console.log("New addon to be added:", newAddon);
+
+  localAddons.value.push(newAddon);
+  selectedAddonIndex.value = localAddons.value.length - 1;
+
+  console.log("localAddons after adding:", localAddons.value);
+  console.log("selectedAddonIndex:", selectedAddonIndex.value);
+}
+
+// Close dialog
+function closeDialog() {
+  isOpen.value = false;
+  emit("close");
+}
+
+// Handle Done button
+function handleDone() {
+  try {
+    console.log("handleDone called");
+    console.log("localAddons before filtering:", localAddons.value);
+    console.log("editingIndex:", props.editingIndex);
+
+    // Filter out completely empty addons (no title, no description, no price)
+    const validAddons = localAddons.value.filter((addon) => {
+      const hasTitle = addon.title && addon.title.trim() !== "";
+      const hasDescription =
+        addon.description && addon.description.trim() !== "";
+      const hasPrice = addon.price && addon.price > 0;
+
+      console.log(
+        `Addon ${addon.number}: title="${addon.title}", description="${addon.description}", price="${addon.price}"`
+      );
+      console.log(
+        `Addon ${addon.number}: hasTitle=${hasTitle}, hasDescription=${hasDescription}, hasPrice=${hasPrice}`
+      );
+
+      // Consider an addon valid if it has at least a title
+      return hasTitle;
     });
-    if (activeAddonIndex.value >= addons.value.length) {
-      activeAddonIndex.value = addons.value.length - 1;
-    }
-    // Emit delete event
-    if (addonToDelete.id) {
-      emit("delete-special-addon", addonToDelete.id);
-    }
-  }
-}
 
-// تابع ذخیره Addon
-async function saveAddon() {
-  try {
-    const currentAddon = addons.value[activeAddonIndex.value];
-    if (currentAddon.title && currentAddon.price > 0) {
-      const addonData = {
-        listing_id: props.listingId,
-        number: currentAddon.number,
-        title: currentAddon.title,
-        description: currentAddon.description,
-        price: currentAddon.price,
-      };
+    console.log("validAddons after filtering:", validAddons);
 
-      if (currentAddon.id && currentAddon.id > 2) {
-        // Update existing addon
-        emit("edit-special-addon", currentAddon.id, addonData);
-      } else {
-        // Create new addon
-        emit("add-special-addon", addonData);
-      }
+    if (validAddons.length === 0) {
+      alert("لطفاً حداقل یک افزونه با عنوان وارد کنید");
+      return;
     }
+
+    console.log("Emitting valid addons:", validAddons);
+    console.log("Emitting editingIndex:", props.editingIndex);
+
+    // Emit the data to parent with editing info
+    emit("done", validAddons, props.editingIndex);
+
+    // Close dialog
+    closeDialog();
   } catch (error) {
-    console.error("Error saving addon:", error);
-    alert("Error saving addon data");
-  }
-}
-
-// تابع Done
-async function handleDone() {
-  try {
-    // Save all addons
-    for (let i = 0; i < addons.value.length; i++) {
-      const addon = addons.value[i];
-      if (addon.title && addon.price > 0) {
-        const addonData = {
-          listing_id: props.listingId,
-          number: addon.number,
-          title: addon.title,
-          description: addon.description,
-          price: addon.price,
-        };
-
-        if (addon.id && addon.id > 2) {
-          // Update existing addon
-          await emit("edit-special-addon", addon.id, addonData);
-        } else {
-          // Create new addon
-          await emit("add-special-addon", addonData);
-        }
-      }
-    }
-    emit("close");
-  } catch (error) {
-    console.error("Error saving addons:", error);
-    alert("Error saving addon data");
+    console.error("Error in handleDone:", error);
+    alert("خطا در ذخیره اطلاعات");
   }
 }
 </script>
 
 <style scoped>
-.special-addons-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(44, 44, 44, 0.25);
-  z-index: 3000;
+.special-addons-modal {
+  --orange-color: #ec8d22;
+  --dark-grey: #333333;
+  --light-grey: #666666;
+  --border-color: #e0e0e0;
+  --background-grey: #f5f5f5;
+}
+
+.special-addons-card {
+  border-radius: 12px !important;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Header Styles */
+.modal-header {
+  background: white;
+  padding: 24px 32px;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.header-text {
+  flex: 1;
+}
+
+.modal-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--dark-grey);
+  margin: 0 0 8px 0;
+  font-family: "Anton", sans-serif;
+}
+
+.modal-subtitle {
+  font-size: 16px;
+  color: var(--light-grey);
+  margin: 0;
+  font-weight: 400;
+  font-family: "Karla", sans-serif;
+}
+
+.close-btn {
+  color: var(--dark-grey) !important;
+  margin-left: 16px;
+}
+
+/* Content Layout */
+.modal-content {
+  display: flex;
+  min-height: 500px;
+}
+
+/* Sidebar Styles */
+.sidebar {
+  width: 35%;
+  background: white;
+  padding: 32px 24px;
+}
+
+.sidebar-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.sidebar-item:hover {
+  background: white;
+}
+
+.sidebar-item.active {
+  background: white;
+}
+
+.addon-badge {
+  width: 32px;
+  height: 32px;
+  background: var(--orange-color);
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow-y: auto;
+  flex-shrink: 0;
 }
-.special-addons-dialog-wrapper {
-  background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 2px 24px 0 rgba(44, 44, 44, 0.1);
-  padding: 56px 64px 44px 64px;
-  width: 90vw;
-  max-width: 1700px;
-  min-width: 1000px;
-  min-height: 90vh;
-  margin: 32px auto;
+
+.badge-number {
+  color: white;
+  font-weight: 700;
+  font-size: 12px;
+  font-family: "Anton", sans-serif;
+}
+
+.addon-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.addon-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.addon-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--dark-grey);
+  font-family: "Karla", sans-serif;
+}
+
+.chevron {
+  color: var(--dark-grey);
+}
+
+.addon-description {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-bottom: 12px;
   position: relative;
-  max-height: 95vh;
+}
+
+.star-icon {
+  color: var(--orange-color);
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.description-text {
+  font-size: 14px;
+  color: var(--light-grey);
+  line-height: 1.4;
+  font-family: "Karla", sans-serif;
+}
+
+.addon-description::after {
+  content: "";
+  position: absolute;
+  left: 8px;
+  top: 20px;
+  bottom: -12px;
+  width: 1px;
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--light-grey) 0,
+    var(--light-grey) 2px,
+    transparent 2px,
+    transparent 4px
+  );
+}
+
+.addon-price {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dark-grey);
+  text-align: right;
+  font-family: "Karla", sans-serif;
+}
+
+/* Main Content Styles */
+.main-content {
+  flex: 1;
+  padding: 32px 24px;
+  background: white;
   overflow-y: auto;
 }
-.special-addons-dialog-header {
+
+.addon-section {
+  margin-bottom: 48px;
+  opacity: 0.3;
+  transition: all 0.3s ease;
+}
+
+.addon-section.active {
+  opacity: 1;
+}
+
+.addon-section:last-child {
+  margin-bottom: 0;
+}
+
+.content-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-.special-addons-dialog-title {
-  font-family: "Anton", sans-serif;
-  font-size: 2.3rem;
-  font-weight: 700;
-  color: #222;
-}
-.special-addons-dialog-close {
-  font-size: 2rem;
-  color: #aaa;
-  cursor: pointer;
-  font-weight: 700;
-  transition: color 0.2s;
-}
-.special-addons-dialog-close:hover {
-  color: #ec8d22;
-}
-.special-addons-dialog-desc {
-  font-size: 1.1rem;
-  color: #444;
-  font-family: "Karla", sans-serif;
-  margin-bottom: 24px;
-  margin-top: 4px;
-}
-.special-addons-dialog-content {
-  display: flex;
-  gap: 64px;
-}
-.special-addons-sidebar {
-  min-width: 220px;
-  max-width: 260px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  margin-left: 32px;
-}
-.special-addons-sidebar-item.active {
-  background: #fff;
-  border-radius: 18px;
-  padding: 36px 32px 36px 32px;
   margin-bottom: 24px;
 }
-.special-addons-sidebar-row {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  gap: 18px;
-}
-.special-addons-sidebar-col-number {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 40px;
-  position: relative;
-}
-.special-addons-sidebar-star {
-  margin-top: 12px;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.special-addons-sidebar-dotted-vertical {
-  border-left: 2px dotted #e0e0e0;
-  width: 0;
-  height: 60px;
+
+.content-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--dark-grey);
   margin: 0;
-  position: relative;
-  left: 50%;
-  top: 0;
-  transform: translateX(-50%);
-  z-index: 0;
-}
-.special-addons-sidebar-col-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  margin-left: 16px;
-}
-.special-addons-sidebar-title {
-  font-weight: 700;
-  font-size: 1.13rem;
-  color: #222;
-  font-family: "Karla", sans-serif;
-  margin-bottom: 8px;
-  margin-top: 0;
-}
-.special-addons-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  margin-top: 24px;
-}
-.special-addons-main-title {
   font-family: "Anton", sans-serif;
-  font-size: 2rem;
-  font-weight: 700;
-  color: #222;
-  margin-bottom: 18px;
 }
-.special-addons-main-form {
-  width: 100%;
-  min-width: 420px;
-  max-width: 100%;
-  /* فرم اصلی در گام بعد */
-}
-.special-addons-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 18px;
-  margin-top: 32px;
-}
-.special-addons-done-btn {
-  background: #111;
-  color: #fff;
-  font-weight: 700;
-  min-width: 100px;
-  border-radius: 8px;
-  font-size: 1rem;
-  min-height: 44px;
-  box-shadow: 0 2px 8px 0 rgba(44, 44, 44, 0.08);
-  transition: background 0.2s;
-  border: none;
-}
-.special-addons-done-btn:hover {
-  background: #222;
-}
-.special-addons-add-btn {
-  background: #ec8d22;
-  color: #fff;
-  font-weight: 700;
-  min-width: 140px;
-  border-radius: 8px;
-  font-size: 1rem;
-  min-height: 44px;
-  box-shadow: 0 2px 8px 0 rgba(44, 44, 44, 0.08);
-  transition: background 0.2s;
-  border: none;
-}
-.special-addons-add-btn:hover {
-  background: #d67d1a;
-}
-.special-addons-sidebar-desc-row {
+
+.status-indicator {
   display: flex;
   align-items: center;
-  gap: 18px;
-  margin-top: 8px;
+  gap: 6px;
 }
-.special-addons-sidebar-desc {
-  color: #bbb;
-  font-size: 1.01rem;
+
+.check-icon {
+  color: #4caf50;
+}
+
+.status-text {
+  font-size: 12px;
+  color: var(--light-grey);
   font-family: "Karla", sans-serif;
 }
-.special-addons-sidebar-price {
-  color: #222;
-  font-size: 1.15rem;
-  font-weight: 700;
-  font-family: "Karla", sans-serif;
-  margin-left: 18px;
-}
-.special-addons-form-box {
-  background: #fff;
-  border: 1.5px solid #e0e0e0;
-  border-radius: 12px;
-  padding: 28px 24px 18px 24px;
-  margin-bottom: 18px;
-  min-width: 420px;
-  max-width: 100%;
-  box-shadow: 0 1px 6px 0 rgba(44, 44, 44, 0.04);
-}
-.special-addons-form-row {
+
+.form-content {
   display: flex;
-  gap: 18px;
-  margin-bottom: 16px;
-}
-.special-addons-input {
-  border: 1.5px solid #e0e0e0;
+  flex-direction: column;
+  gap: 16px;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  padding: 10px 14px;
-  font-size: 1.08rem;
-  font-family: "Karla", sans-serif;
-  background: #fff;
-  outline: none;
-  transition: border 0.2s;
-  color: #222;
+  padding: 20px;
+}
+
+.form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.form-field {
   flex: 1;
 }
-.special-addons-input::placeholder {
-  color: #b0b0b0;
-  font-size: 1.08rem;
-  font-family: "Karla", sans-serif;
-}
-.special-addons-input:focus {
-  border-color: #ec8d22;
-}
-.special-addons-price-input-wrapper {
+
+.price-field {
   position: relative;
-  flex: 1;
   display: flex;
   align-items: center;
 }
-.special-addons-euro {
+
+.currency-symbol {
   position: absolute;
-  right: 14px;
+  right: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: #666;
-  font-weight: 500;
-  font-size: 1.15rem;
-  pointer-events: none;
-  z-index: 2;
+  background: white;
+  border: 1px solid var(--border-color);
+  border-left: none;
+  padding: 8px 12px;
+  border-radius: 0 4px 4px 0;
+  color: var(--light-grey);
+  font-size: 14px;
+  font-family: "Karla", sans-serif;
 }
-.special-addons-desc-input {
-  flex: 2;
+
+.price-input :deep(.v-field__input) {
+  padding-right: 50px !important;
+}
+
+.title-input :deep(.v-field),
+.price-input :deep(.v-field),
+.description-input :deep(.v-field) {
+  background: white !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 6px !important;
+}
+
+.title-input :deep(.v-field__outline),
+.price-input :deep(.v-field__outline),
+.description-input :deep(.v-field__outline) {
+  display: none !important;
+}
+
+.title-input :deep(.v-field__input),
+.price-input :deep(.v-field__input),
+.description-input :deep(.v-field__input) {
+  padding: 10px 14px !important;
+  font-size: 16px !important;
+  color: var(--dark-grey) !important;
+  font-family: "Karla", sans-serif !important;
+  line-height: 1.4 !important;
+}
+
+.title-input :deep(.v-field__input)::placeholder,
+.price-input :deep(.v-field__input)::placeholder,
+.description-input :deep(.v-field__input)::placeholder {
+  color: #b0b0b0 !important;
+  font-family: "Karla", sans-serif !important;
+  font-size: 15px !important;
+}
+
+.description-input :deep(.v-field__input) {
+  min-height: 80px !important;
+  max-height: 120px !important;
+}
+
+/* Footer Styles */
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 20px;
+  padding: 24px 32px;
+  background: white;
+  border-top: 1px solid var(--border-color);
+}
+
+.done-btn {
+  background: #000000 !important;
+  color: white !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  font-family: "Karla", sans-serif !important;
+  text-transform: none !important;
+  padding: 10px 24px !important;
+  min-width: 80px !important;
+  height: 40px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15) !important;
+  border: none !important;
+  font-size: 14px !important;
+  letter-spacing: 0.5px !important;
+}
+
+.add-more-btn {
+  background: var(--orange-color) !important;
+  color: white !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  font-family: "Karla", sans-serif !important;
+  text-transform: none !important;
+  padding: 10px 24px !important;
+  min-width: 180px !important;
+  height: 40px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15) !important;
+  border: none !important;
+  font-size: 14px !important;
+  letter-spacing: 0.5px !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .modal-content {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .form-row {
+    flex-direction: column;
+  }
 }
 </style>

@@ -6,11 +6,13 @@ import { ref } from "vue";
 
 definePage({
   meta: {
-    layout: "default", // فقط نوار بالا، سایدبار مخفی می‌شود
+    layout: "default", // Use default layout with navbar
     action: "read",
     subject: "AclDemo",
   },
 });
+
+// Sidebar management is now handled globally by route watcher
 
 const radioContent = [
   {
@@ -90,15 +92,7 @@ function handleNext() {
 </template>
 
 <style>
-/* مخفی کردن سایدبار فقط در این صفحه */
-.layout-wrapper .vertical-nav-wrapper {
-  display: none !important;
-}
-@media (min-width: 1280px) {
-  .layout-wrapper .layout-content-wrapper {
-    padding-left: 0 !important;
-  }
-}
+/* Removed sidebar hiding CSS - sidebar will be managed by layout configuration */
 
 /* Custom styles for access control radio buttons */
 .access-control-radios .custom-radio-icon h6 {
@@ -121,7 +115,7 @@ function handleNext() {
   box-shadow: 0 2px 16px 0 rgba(44, 44, 44, 0.08);
   padding: 3rem 2rem 2.5rem 2rem;
   max-width: 1050px;
-  margin-left: 110px;
+  margin: 0 auto;
   min-height: 80vh;
 }
 

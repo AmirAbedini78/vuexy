@@ -76,6 +76,7 @@ export default defineConfig({
         './resources/js/composables/',
         './resources/js/utils/',
         './resources/js/plugins/*/composables/*',
+        './resources/js/@layouts/composables/',
       ],
       vueTemplate: true,
 

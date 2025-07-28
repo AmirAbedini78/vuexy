@@ -19,6 +19,10 @@ const numberedSteps = [
 const currentStep = ref(0);
 const loading = ref(false);
 
+const showItineraryDialog = ref(false);
+const showSpecialAddonsDialog = ref(false);
+const showPeriodsDialog = ref(false);
+
 const formData = ref({
   // Step 1 fields
   listingTitle: "",
@@ -47,6 +51,13 @@ const formData = ref({
   termsAccepted: false,
   personalPolicies: "not-sure",
 });
+
+const itineraries = ref([]);
+const specialAddons = ref([]);
+const periods = ref([]);
+const editingAddonIndex = ref(-1);
+const editingItineraryIndex = ref(-1);
+const editingPeriodIndex = ref(-1);
 
 // Add new maps and routes field
 const addMapsAndRoutes = () => {
@@ -82,6 +93,80 @@ const removePromotionalVideo = (index) => {
   if (formData.value.promotionalVideo.length > 1) {
     formData.value.promotionalVideo.splice(index, 1);
   }
+};
+
+const openItineraryModal = () => {
+  console.log("openItineraryModal called");
+  console.log("Current showItineraryDialog value:", showItineraryDialog.value);
+  editingItineraryIndex.value = -1; // Reset editing index for new itineraries
+  showItineraryDialog.value = true;
+  console.log("New showItineraryDialog value:", showItineraryDialog.value);
+};
+
+const openPeriodsModal = () => {
+  editingPeriodIndex.value = -1; // Reset editing index for new periods
+  showPeriodsDialog.value = true;
+};
+
+const handlePeriodsDone = async (newPeriods, editingIndex) => {
+  try {
+    console.log("handlePeriodsDone called with:", { newPeriods, editingIndex });
+
+    if (editingIndex >= 0) {
+      // Editing existing period
+      periods.value[editingIndex] = newPeriods[0];
+      editingPeriodIndex.value = -1;
+    } else {
+      // Adding new periods
+      periods.value.push(...newPeriods);
+    }
+
+    // Update the numbering for all periods
+    periods.value.forEach((period, index) => {
+      period.number = index + 1;
+    });
+
+    console.log("Total periods count:", periods.value.length);
+  } catch (error) {
+    console.error("Error in handlePeriodsDone:", error);
+    alert("خطا در ذخیره اطلاعات");
+  } finally {
+    // همیشه مدال را ببند
+    showPeriodsDialog.value = false;
+  }
+};
+
+// Edit period
+const editPeriod = (index) => {
+  editingPeriodIndex.value = index;
+  showPeriodsDialog.value = true;
+};
+
+// Remove period
+const removePeriod = (index) => {
+  if (confirm("آیا مطمئن هستید که می‌خواهید این departure را حذف کنید؟")) {
+    periods.value.splice(index, 1);
+    // Update numbers
+    periods.value.forEach((period, idx) => {
+      period.number = idx + 1;
+    });
+  }
+};
+
+// Drag and drop handlers for periods
+const dragStartPeriod = (index, event) => {
+  event.dataTransfer.setData("text/plain", index);
+  event.dataTransfer.effectAllowed = "move";
+};
+
+const dropPeriod = (index, event) => {
+  event.preventDefault();
+  const draggedIndex = event.dataTransfer.getData("text/plain");
+  const [draggedItem] = periods.value.splice(draggedIndex, 1);
+  periods.value.splice(index, 0, draggedItem);
+  periods.value.forEach((period, idx) => {
+    period.number = idx + 1;
+  });
 };
 
 const onSubmit = async () => {
@@ -347,19 +432,191 @@ const onSubmit = async () => {
                     >
                       Add your departures and all related details here
                     </p>
-                    <VBtn
-                      color="primary"
-                      variant="elevated"
-                      class="add-departure-btn"
-                      style="
-                        background-color: #ec8d22 !important;
-                        color: #fff !important;
-                        border-radius: 8px;
-                        font-weight: 500;
-                      "
+
+                    <!-- Show button when no items -->
+                    <div
+                      v-if="periods.length === 0"
+                      class="empty-state-container"
                     >
-                      Add Departure
-                    </VBtn>
+                      <VBtn
+                        color="primary"
+                        variant="elevated"
+                        class="add-departure-btn"
+                        style="
+                          background-color: #ec8d22 !important;
+                          color: #fff !important;
+                          border-radius: 8px;
+                          font-weight: 500;
+                        "
+                        @click="openPeriodsModal"
+                      >
+                        Add Departure
+                      </VBtn>
+                    </div>
+
+                    <!-- Show header with button when items exist -->
+                    <div v-else class="departures-header">
+                      <h3 class="departures-title">Listing Departures</h3>
+                      <VBtn
+                        color="primary"
+                        variant="elevated"
+                        class="add-more-btn"
+                        style="
+                          background-color: #ec8d22 !important;
+                          color: #fff !important;
+                          border-radius: 8px;
+                          font-weight: 500;
+                          font-size: 14px;
+                          padding: 8px 16px;
+                          min-height: 36px;
+                          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+                        "
+                        @click="openPeriodsModal"
+                      >
+                        Add More
+                      </VBtn>
+                    </div>
+
+                    <!-- Departures List -->
+                    <div
+                      v-if="periods.length > 0"
+                      class="departures-list-container"
+                    >
+                      <div
+                        v-for="(period, index) in periods"
+                        :key="index"
+                        class="departure-list-item"
+                        draggable="true"
+                        @dragstart="dragStartPeriod(index, $event)"
+                        @dragover.prevent
+                        @drop="dropPeriod(index, $event)"
+                        @dragenter.prevent
+                      >
+                        <div class="departure-content">
+                          <div class="departure-left">
+                            <div
+                              class="departure-badge"
+                              style="position: relative"
+                            >
+                              <span class="badge-number">{{
+                                (period.number || index + 1)
+                                  .toString()
+                                  .padStart(2, "0")
+                              }}</span>
+                              <!-- Calendar icon under number badge -->
+                              <div
+                                v-if="index < periods.length - 1"
+                                style="
+                                  position: absolute;
+                                  left: 50%;
+                                  top: 100%;
+                                  transform: translateX(-50%);
+                                  margin-top: 4px;
+                                  z-index: 2;
+                                "
+                              >
+                                <VIcon
+                                  icon="tabler-calendar"
+                                  size="16"
+                                  style="color: #ec8d22"
+                                />
+                              </div>
+                              <!-- Vertical dotted line under icon -->
+                              <div
+                                v-if="index < periods.length - 1"
+                                class="vertical-dotted-line"
+                                style="
+                                  position: absolute;
+                                  left: 50%;
+                                  top: 100%;
+                                  transform: translateX(-50%);
+                                  margin-top: 20px;
+                                  bottom: -16px;
+                                  width: 1px;
+                                  background: repeating-linear-gradient(
+                                    to bottom,
+                                    #666 0,
+                                    #666 2px,
+                                    transparent 2px,
+                                    transparent 4px
+                                  );
+                                "
+                              ></div>
+                            </div>
+                            <div class="departure-info">
+                              <div class="departure-title-row">
+                                <span class="departure-title">{{
+                                  period.title ||
+                                  `Departure ${
+                                    period.number || index + 1
+                                  } title`
+                                }}</span>
+                                <VIcon
+                                  icon="tabler-chevron-down"
+                                  size="16"
+                                  class="chevron-icon"
+                                />
+                              </div>
+                              <div class="departure-details">
+                                <div class="departure-date">
+                                  <VIcon
+                                    icon="tabler-target"
+                                    size="14"
+                                    style="color: #666; margin-right: 4px"
+                                  />
+                                  <span class="date-text">{{
+                                    period.startingDate && period.finishingDate
+                                      ? `${period.startingDate} - ${period.finishingDate}`
+                                      : "Date range not set"
+                                  }}</span>
+                                </div>
+                                <div class="departure-people">
+                                  <span class="people-text">{{
+                                    period.minCapacity && period.maxCapacity
+                                      ? `${period.minCapacity} - ${period.maxCapacity} people`
+                                      : "Capacity not set"
+                                  }}</span>
+                                </div>
+                              </div>
+                              <div class="departure-price">
+                                € {{ (period.price || 0).toFixed(2) }}
+                              </div>
+                            </div>
+                          </div>
+                          <div class="departure-actions">
+                            <VBtn
+                              icon
+                              size="small"
+                              variant="text"
+                              @click="editPeriod(index)"
+                              class="action-btn"
+                            >
+                              <VIcon icon="tabler-edit" size="18" />
+                            </VBtn>
+                            <VBtn
+                              icon
+                              size="small"
+                              variant="text"
+                              color="error"
+                              @click="removePeriod(index)"
+                              class="action-btn"
+                            >
+                              <VIcon icon="tabler-trash" size="18" />
+                            </VBtn>
+                            <VBtn
+                              icon
+                              size="small"
+                              variant="text"
+                              class="action-btn drag-handle"
+                              draggable="true"
+                              @dragstart="dragStartPeriod(index, $event)"
+                            >
+                              <VIcon icon="tabler-arrows-move" size="18" />
+                            </VBtn>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   <!-- Experience Level and Fitness Level -->
@@ -1034,6 +1291,13 @@ const onSubmit = async () => {
       </VCardText>
     </VCard>
   </div>
+
+  <PeriodsDialog
+    v-model="showPeriodsDialog"
+    :periods="periods"
+    :editing-index="editingPeriodIndex"
+    @done="handlePeriodsDone"
+  />
 </template>
 
 <style scoped>
@@ -1435,5 +1699,174 @@ const onSubmit = async () => {
 .v-field__input::placeholder {
   color: #999;
   font-size: 16px;
+}
+
+/* Departures list styling */
+.departures-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.departures-title {
+  font-family: "Karla", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.departures-list-container {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  overflow: hidden;
+}
+
+.departure-list-item {
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s;
+  cursor: move;
+}
+
+.departure-list-item:last-child {
+  border-bottom: none;
+}
+
+.departure-list-item:hover {
+  background-color: #f8f8f8;
+}
+
+.departure-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.departure-left {
+  display: flex;
+  align-items: flex-start;
+  flex: 1;
+}
+
+.departure-badge {
+  background: #ec8d22;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin-right: 12px;
+  font-family: "Anton", sans-serif;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.badge-number {
+  color: white;
+  font-weight: bold;
+}
+
+.departure-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.departure-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.departure-title {
+  font-family: "Karla", sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  flex: 1;
+  margin-right: 8px;
+}
+
+.chevron-icon {
+  color: #666;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.chevron-icon:hover {
+  transform: rotate(180deg);
+}
+
+.departure-details {
+  margin-bottom: 8px;
+}
+
+.departure-date {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.date-text {
+  font-family: "Karla", sans-serif;
+  font-size: 14px;
+  color: #666;
+}
+
+.departure-people {
+  margin-left: 18px;
+}
+
+.people-text {
+  font-family: "Karla", sans-serif;
+  font-size: 14px;
+  color: #666;
+}
+
+.departure-price {
+  font-family: "Karla", sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  text-align: right;
+}
+
+.departure-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 12px;
+}
+
+.action-btn {
+  color: #666 !important;
+  transition: color 0.2s;
+}
+
+.action-btn:hover {
+  color: #333 !important;
+}
+
+.drag-handle {
+  cursor: move;
+}
+
+.drag-handle:hover {
+  color: #ec8d22 !important;
+}
+
+/* Empty state styling */
+.empty-state-container {
+  text-align: center;
+  padding: 24px;
+  background: #f8f8f8;
+  border-radius: 8px;
+  border: 2px dashed #e0e0e0;
 }
 </style>

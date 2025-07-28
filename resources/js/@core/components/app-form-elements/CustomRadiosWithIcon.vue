@@ -50,13 +50,23 @@ const updateSelectedOption = (value) => {
                       : item.img.inactive
                   "
                   alt=""
-                  style="width: 32px; height: 32px; margin-bottom: 8px"
+                  style="
+                    width: 48px;
+                    height: 48px;
+                    margin-bottom: 12px;
+                    object-fit: contain;
+                  "
                 />
                 <img
                   v-else
                   :src="item.img"
                   alt=""
-                  style="width: 32px; height: 32px; margin-bottom: 8px"
+                  style="
+                    width: 48px;
+                    height: 48px;
+                    margin-bottom: 12px;
+                    object-fit: contain;
+                  "
                 />
               </span>
               <VIcon v-else v-bind="item.icon" class="text-high-emphasis" />
@@ -84,9 +94,41 @@ const updateSelectedOption = (value) => {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  padding: 24px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  background: #fff;
+  min-height: 200px;
+  justify-content: center;
+
+  &:hover {
+    border-color: #ec8d22;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  &.active {
+    border-color: #ec8d22;
+    background: linear-gradient(135deg, #fff 0%, #fff8f0 100%);
+    box-shadow: 0 6px 20px rgba(236, 141, 34, 0.15);
+  }
 
   .v-radio {
     margin-block-end: -0.5rem;
+  }
+
+  h6 {
+    font-family: "Karla", sans-serif;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+  }
+
+  p {
+    font-family: "Karla", sans-serif;
+    color: #666;
+    line-height: 1.5;
   }
 }
 </style>
@@ -99,6 +141,33 @@ const updateSelectedOption = (value) => {
     .v-selection-control__wrapper {
       margin-inline-start: 0;
     }
+
+    .v-selection-control__input {
+      color: #ec8d22;
+    }
+
+    .v-selection-control__input .v-icon {
+      color: #ec8d22;
+      font-size: 20px;
+    }
   }
+
+  &.active {
+    .v-radio .v-selection-control__input {
+      color: #ec8d22;
+    }
+
+    .v-radio .v-selection-control__input .v-icon {
+      color: #ec8d22;
+    }
+  }
+}
+
+.radio-card-col {
+  margin-bottom: 16px;
+}
+
+.custom-input-wrapper {
+  width: 100%;
 }
 </style>

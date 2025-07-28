@@ -1,130 +1,192 @@
 <template>
-  <div class="itinerary-modal-overlay" @click.self="$emit('close')">
-    <div class="itinerary-dialog-wrapper">
-      <div class="itinerary-dialog-header">
-        <span class="itinerary-dialog-title">Itinerary/Accommodations</span>
-        <span class="itinerary-dialog-close" @click="$emit('close')"
-          >&times;</span
-        >
-      </div>
-      <div class="itinerary-dialog-desc">
-        Please fill the form carefully (or something kinder maybe)
-      </div>
-      <div class="itinerary-dialog-content">
-        <div class="itinerary-sidebar">
-          <div
-            v-for="(day, idx) in days"
-            :key="day.id"
-            class="itinerary-sidebar-item"
-            :class="{ active: idx === activeDayIndex }"
-            @click="activeDayIndex = idx"
-            :style="
-              idx === activeDayIndex
-                ? 'background: #fff; border-radius: 18px; padding: 36px 32px 36px 32px; margin-bottom: 24px;'
-                : 'background: none; box-shadow: none; border-radius: 0; padding: 0; margin-bottom: 24px;'
-            "
-          >
-            <div class="itinerary-sidebar-row">
-              <div class="itinerary-sidebar-col-number">
-                <div class="itinerary-sidebar-number">
-                  {{ (idx + 1).toString().padStart(2, "0") }}
-                </div>
+  <VDialog v-model="isOpen" max-width="800px" persistent>
+    <VCard>
+      <VCardTitle class="d-flex justify-space-between align-center pa-6">
+        <div>
+          <h2 class="text-h4 font-weight-bold">Itinerary/Accommodations</h2>
+          <p class="text-body-1 text-medium-emphasis mt-2">
+            Please fill the form carefully (or something kinder maybe)
+          </p>
+        </div>
+        <VBtn icon variant="text" @click="closeDialog">
+          <VIcon icon="tabler-x" size="24" />
+        </VBtn>
+      </VCardTitle>
+
+      <VCardText class="pa-6">
+        <div class="d-flex gap-6">
+          <!-- Left Sidebar -->
+          <div class="sidebar" style="min-width: 200px">
+            <div
+              v-for="(day, index) in localDays"
+              :key="index"
+              class="sidebar-item mb-4 pa-4 rounded"
+              :class="{ 'bg-grey-lighten-4': selectedDayIndex === index }"
+              @click="selectDay(index)"
+              style="cursor: pointer"
+            >
+              <div class="d-flex align-center gap-3">
                 <div
-                  v-if="
-                    days.length > 1 &&
-                    idx === activeDayIndex &&
-                    idx < days.length - 1
+                  class="day-badge d-flex align-center justify-center"
+                  style="
+                    background: #ec8d22;
+                    color: white;
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    font-weight: bold;
+                    font-family: 'Anton', sans-serif;
                   "
-                  class="itinerary-sidebar-dotted-vertical"
-                  style="height: 80px"
-                ></div>
-              </div>
-              <div class="itinerary-sidebar-col-content">
-                <div class="itinerary-sidebar-title">
-                  {{ day.title || `Day ${idx + 1} Itinerary Title` }}
-                </div>
-                <div
-                  v-if="idx === activeDayIndex"
-                  class="itinerary-sidebar-accommodation active"
-                  style="display: flex; align-items: center; margin-top: 8px"
                 >
-                  <VIcon
-                    icon="tabler-map-pin"
-                    size="18"
-                    style="color: #ec8d22; margin-right: 6px"
+                  {{ String(index + 1).padStart(2, "0") }}
+                </div>
+                <div>
+                  <div class="font-weight-bold text-body-1">
+                    {{ day.title || `Day ${index + 1} Itinerary Title` }}
+                  </div>
+                  <div
+                    v-if="selectedDayIndex === index"
+                    class="d-flex align-center mt-2"
+                    style="color: #00c853; font-weight: bold"
+                  >
+                    <VIcon
+                      icon="tabler-map-pin"
+                      size="16"
+                      style="color: #ec8d22; margin-right: 4px"
+                    />
+                    Day {{ index + 1 }} Accommodation
+                  </div>
+                  <div
+                    v-if="selectedDayIndex === index"
+                    class="text-caption mt-1"
+                    style="color: #bbb"
+                  >
+                    {{ day.location || "Location would take place here" }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Content -->
+          <div class="main-content flex-grow-1">
+            <div
+              v-for="(day, index) in localDays"
+              :key="index"
+              v-show="selectedDayIndex === index"
+            >
+              <div class="d-flex justify-space-between align-center mb-4">
+                <h3 class="text-h5 font-weight-bold">Day {{ index + 1 }}</h3>
+                <div class="d-flex align-center" style="color: #4caf50">
+                  <VIcon icon="tabler-check" size="16" />
+                  <span class="ml-1">Changes saved</span>
+                </div>
+              </div>
+
+              <div class="d-flex gap-4">
+                <div class="flex-grow-1">
+                  <VTextField
+                    v-model="day.title"
+                    placeholder="Itinerary Title"
+                    variant="outlined"
+                    density="comfortable"
+                    class="mb-4"
+                    hide-details
                   />
-                  Day {{ idx + 1 }} Accommodation
+                  <VTextarea
+                    v-model="day.description"
+                    placeholder="Itinerary Description"
+                    variant="outlined"
+                    density="comfortable"
+                    rows="4"
+                    class="mb-4"
+                    hide-details
+                  />
+                  <div class="d-flex gap-2">
+                    <VTextField
+                      v-model="day.link"
+                      placeholder="Add your link here"
+                      variant="outlined"
+                      density="comfortable"
+                      class="flex-grow-1"
+                      hide-details
+                    />
+                    <VBtn
+                      icon
+                      variant="elevated"
+                      color="primary"
+                      @click="addLink"
+                    >
+                      <VIcon icon="tabler-plus" size="20" />
+                    </VBtn>
+                  </div>
                 </div>
-                <div
-                  v-if="idx === activeDayIndex"
-                  class="itinerary-sidebar-location"
-                  style="margin-top: 2px"
-                >
-                  Location would take place here
+                <div class="flex-grow-1">
+                  <VTextField
+                    v-model="day.accommodation"
+                    placeholder="Add accommodation here"
+                    variant="outlined"
+                    density="comfortable"
+                    class="mb-4"
+                    hide-details
+                  />
+                  <VTextarea
+                    v-model="day.location"
+                    placeholder="Add exact accommodation location"
+                    variant="outlined"
+                    density="comfortable"
+                    rows="4"
+                    hide-details
+                  />
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <div class="itinerary-main">
-          <div
-            v-for="(day, idx) in days"
-            :key="day.id"
-            v-show="idx === activeDayIndex"
-            class="itinerary-day-form"
-          >
-            <div class="itinerary-day-label">Day {{ idx + 1 }}</div>
-            <div class="itinerary-day-fields">
-              <input
-                v-model="day.title"
-                class="itinerary-input"
-                placeholder="Itinerary Title"
-              />
-              <input
-                v-model="day.accommodation"
-                class="itinerary-input"
-                placeholder="Add accommodation here"
-              />
-              <input
-                v-model="day.description"
-                class="itinerary-input"
-                placeholder="Itinerary Description"
-              />
-              <input
-                v-model="day.location"
-                class="itinerary-input"
-                placeholder="Add exact accommodation location"
-              />
-              <div class="itinerary-link-row">
-                <input
-                  v-model="day.link"
-                  class="itinerary-input"
-                  placeholder="Add your link here"
-                />
-                <button class="itinerary-link-add">+</button>
-              </div>
-            </div>
-            <div class="itinerary-changes-saved">
-              <VIcon icon="tabler-check" size="18" style="color: #aaa" />
-              Changes saved
-            </div>
-          </div>
-          <div class="itinerary-actions">
-            <VBtn class="itinerary-done-btn" @click="handleDone">Done</VBtn>
-            <VBtn class="itinerary-add-btn" @click="addDay">Add More Days</VBtn>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+      </VCardText>
+
+      <VCardActions class="pa-6 pt-0">
+        <VSpacer />
+        <VBtn
+          variant="elevated"
+          @click="handleDone"
+          :loading="loading"
+          style="background: #111; color: white"
+        >
+          Done
+        </VBtn>
+        <VBtn
+          variant="elevated"
+          @click="addNewDay"
+          style="background: #ec8d22; color: white"
+        >
+          Add More Days
+        </VBtn>
+      </VCardActions>
+    </VCard>
+  </VDialog>
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
-import { VBtn, VIcon } from "vuetify/components";
+import { computed, ref, watch } from "vue";
+import {
+  VBtn,
+  VCard,
+  VCardActions,
+  VCardText,
+  VCardTitle,
+  VDialog,
+  VIcon,
+  VSpacer,
+  VTextField,
+  VTextarea,
+} from "vuetify/components";
 
 const props = defineProps({
-  modelValue: Boolean,
+  modelValue: {
+    type: Boolean,
+    default: false,
+  },
   initialDays: {
     type: Array,
     default: () => [],
@@ -133,29 +195,96 @@ const props = defineProps({
     type: [String, Number],
     default: null,
   },
+  editingIndex: {
+    type: Number,
+    default: -1,
+  },
 });
-const emit = defineEmits(["close", "done", "save-itinerary"]);
 
-const days = ref(
-  props.initialDays.length
-    ? JSON.parse(JSON.stringify(props.initialDays))
-    : [
-        {
-          id: 1,
-          number: 1,
-          title: "",
-          description: "",
-          accommodation: "",
-          location: "",
-          link: "",
-        },
-      ]
+const emit = defineEmits(["update:modelValue", "close", "done"]);
+
+const loading = ref(false);
+const selectedDayIndex = ref(0);
+
+// Local state for days
+const localDays = ref([]);
+
+// Computed property for dialog visibility
+const isOpen = computed({
+  get: () => props.modelValue,
+  set: (value) => emit("update:modelValue", value),
+});
+
+// Initialize local days when dialog opens
+watch(
+  () => props.modelValue,
+  (newValue) => {
+    console.log("Itinerary modal modelValue changed:", newValue);
+    if (newValue) {
+      console.log("Opening itinerary modal");
+      // When dialog opens, initialize with existing data or default
+      if (props.initialDays && props.initialDays.length > 0) {
+        // If we have existing days, show them in the modal
+        localDays.value = JSON.parse(JSON.stringify(props.initialDays));
+        console.log("Using existing days:", localDays.value);
+      } else {
+        // First time opening - create one empty day
+        localDays.value = [createEmptyDay()];
+        console.log("Creating empty day:", localDays.value);
+      }
+      selectedDayIndex.value = 0;
+    }
+  },
+  { immediate: true }
 );
-const activeDayIndex = ref(0);
 
-function addDay() {
-  const newDayNumber = days.value.length + 1;
-  days.value.push({
+// Watch for editing index changes
+watch(
+  () => props.editingIndex,
+  (newIndex) => {
+    if (newIndex >= 0 && props.initialDays && props.initialDays[newIndex]) {
+      // If editing, show only the specific itinerary
+      localDays.value = [
+        JSON.parse(JSON.stringify(props.initialDays[newIndex])),
+      ];
+      selectedDayIndex.value = 0;
+    } else if (newIndex === -1) {
+      // If not editing, show all existing itineraries or create one empty itinerary
+      if (props.initialDays && props.initialDays.length > 0) {
+        // Show all existing itineraries
+        localDays.value = JSON.parse(JSON.stringify(props.initialDays));
+      } else {
+        // No existing itineraries, create one empty itinerary
+        localDays.value = [createEmptyDay()];
+      }
+      selectedDayIndex.value = 0;
+    }
+  }
+);
+
+function createEmptyDay() {
+  return {
+    id: Date.now(),
+    number: 1,
+    title: "",
+    description: "",
+    accommodation: "",
+    location: "",
+    link: "",
+  };
+}
+
+function closeDialog() {
+  emit("close");
+}
+
+function selectDay(index) {
+  selectedDayIndex.value = index;
+}
+
+function addNewDay() {
+  const newDayNumber = localDays.value.length + 1;
+  localDays.value.push({
     id: Date.now(),
     number: newDayNumber,
     title: "",
@@ -164,309 +293,76 @@ function addDay() {
     location: "",
     link: "",
   });
-  activeDayIndex.value = days.value.length - 1;
+  selectedDayIndex.value = localDays.value.length - 1;
 }
 
 function removeDay(index) {
-  if (days.value.length > 1) {
-    days.value.splice(index, 1);
+  if (localDays.value.length > 1) {
+    localDays.value.splice(index, 1);
     // Update numbers
-    days.value.forEach((day, idx) => {
+    localDays.value.forEach((day, idx) => {
       day.number = idx + 1;
     });
-    if (activeDayIndex.value >= days.value.length) {
-      activeDayIndex.value = days.value.length - 1;
+    if (selectedDayIndex.value >= localDays.value.length) {
+      selectedDayIndex.value = localDays.value.length - 1;
     }
   }
+}
+
+function addLink() {
+  const day = localDays.value[selectedDayIndex.value];
+  if (!day.link) {
+    day.link = "";
+  }
+  day.link += " "; // Add a space to allow adding more links
 }
 
 async function handleDone() {
   try {
-    // Save each day to the API
-    for (const day of days.value) {
-      if (day.title && day.accommodation) {
-        const itineraryData = {
-          listing_id: props.listingId,
-          number: day.number,
-          title: day.title,
-          description: day.description,
-          accommodation: day.accommodation,
-          location: day.location,
-          link: day.link,
-        };
+    loading.value = true;
+    console.log("handleDone called");
+    console.log("localDays before filtering:", localDays.value);
+    console.log("editingIndex:", props.editingIndex);
 
-        // Call the parent function directly
-        await emit("save-itinerary", itineraryData);
-      }
+    // Filter out completely empty itineraries (no title, no description, no accommodation)
+    const validItineraries = localDays.value.filter((day) => {
+      const hasTitle = day.title && day.title.trim() !== "";
+      const hasDescription = day.description && day.description.trim() !== "";
+      const hasAccommodation =
+        day.accommodation && day.accommodation.trim() !== "";
+
+      console.log(
+        `Day ${day.number}: title="${day.title}", description="${day.description}", accommodation="${day.accommodation}"`
+      );
+      console.log(
+        `Day ${day.number}: hasTitle=${hasTitle}, hasDescription=${hasDescription}, hasAccommodation=${hasAccommodation}`
+      );
+
+      // Consider an itinerary valid if it has at least a title
+      return hasTitle;
+    });
+
+    console.log("validItineraries after filtering:", validItineraries);
+
+    if (validItineraries.length === 0) {
+      alert("لطفاً حداقل یک روز با عنوان وارد کنید");
+      loading.value = false;
+      return;
     }
 
-    // Emit done event with the updated days data
-    emit("done", days.value);
+    console.log("Emitting valid itineraries:", validItineraries);
+    console.log("Emitting editingIndex:", props.editingIndex);
+
+    // Emit the data to parent with editing info
+    emit("done", validItineraries, props.editingIndex);
+
+    // Close dialog
     emit("close");
   } catch (error) {
     console.error("Error saving itinerary:", error);
     alert("Error saving itinerary data");
+  } finally {
+    loading.value = false;
   }
 }
-
-// Watch for changes in initialDays prop
-watch(
-  () => props.initialDays,
-  (newDays) => {
-    if (newDays.length > 0) {
-      days.value = JSON.parse(JSON.stringify(newDays));
-    }
-  },
-  { deep: true }
-);
 </script>
-
-<style scoped>
-.itinerary-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(44, 44, 44, 0.25);
-  z-index: 3000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow-y: auto;
-}
-.itinerary-dialog-wrapper {
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 2px 24px 0 rgba(44, 44, 44, 0.1);
-  padding: 56px 64px 44px 64px;
-  width: 90vw;
-  max-width: 1700px;
-  min-width: 1000px;
-  min-height: 90vh;
-  margin: 32px auto;
-  position: relative;
-  max-height: 95vh;
-  overflow-y: auto;
-}
-.itinerary-dialog-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.itinerary-dialog-title {
-  font-family: "Anton", sans-serif;
-  font-size: 2rem;
-  font-weight: 700;
-  color: #222;
-}
-.itinerary-dialog-close {
-  font-size: 2rem;
-  color: #aaa;
-  cursor: pointer;
-  font-weight: 700;
-  transition: color 0.2s;
-}
-.itinerary-dialog-close:hover {
-  color: #ec8d22;
-}
-.itinerary-dialog-desc {
-  font-size: 1.1rem;
-  color: #444;
-  font-family: "Karla", sans-serif;
-  margin-bottom: 24px;
-  margin-top: 4px;
-}
-.itinerary-dialog-content {
-  display: flex;
-  gap: 64px;
-}
-.itinerary-sidebar {
-  min-width: 180px;
-  max-width: 200px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-left: 32px;
-}
-.itinerary-sidebar-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 18px;
-  cursor: pointer;
-  padding: 18px 0 18px 0;
-  border-radius: 12px;
-  transition: background 0.2s;
-}
-.itinerary-sidebar-item.active {
-  background: #f8f8f8;
-}
-.itinerary-sidebar-number {
-  background: #ec8d22;
-  color: #fff;
-  font-weight: 700;
-  font-size: 1.18rem;
-  font-family: "Anton", sans-serif;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 0;
-  box-shadow: 0 2px 8px 0 rgba(236, 141, 34, 0.18);
-  position: absolute;
-  left: 24px;
-  top: 20px;
-}
-.itinerary-sidebar-title {
-  font-weight: 700;
-  font-size: 1.13rem;
-  color: #222;
-  font-family: "Karla", sans-serif;
-  margin-bottom: 8px;
-  margin-left: 12px;
-  margin-top: 0;
-}
-.itinerary-sidebar-accommodation.active {
-  color: #00c853;
-  font-size: 1.05rem;
-  font-weight: 700;
-  font-family: "Karla", sans-serif;
-  margin-bottom: 0px;
-  margin-left: 12px;
-  margin-top: 12px;
-}
-.itinerary-sidebar-location {
-  color: #bbb;
-  font-size: 0.98rem;
-  font-family: "Karla", sans-serif;
-  margin-bottom: 0px;
-  margin-left: 12px;
-  margin-top: 4px;
-}
-.itinerary-sidebar-dotted-vertical {
-  border-left: 2px dotted #e0e0e0;
-  width: 0;
-  height: 100px;
-  margin: 0;
-  position: absolute;
-  left: 50%;
-  top: 40px;
-  transform: translateX(-50%);
-  z-index: 0;
-}
-.itinerary-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-}
-.itinerary-day-form {
-  background: #fafafa;
-  border-radius: 10px;
-  padding: 18px 18px 12px 18px;
-  margin-bottom: 18px;
-  border: 1px solid #eee;
-  position: relative;
-}
-.itinerary-day-label {
-  font-family: "Anton", sans-serif;
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #222;
-  margin-bottom: 10px;
-}
-.itinerary-day-fields {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px 16px;
-}
-.itinerary-input {
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 10px 12px;
-  font-size: 1rem;
-  font-family: "Karla", sans-serif;
-  background: #fff;
-  outline: none;
-  transition: border 0.2s;
-}
-.itinerary-input:focus {
-  border-color: #ec8d22;
-}
-.itinerary-link-row {
-  grid-column: 1 / span 2;
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  margin-top: 4px;
-}
-.itinerary-link-add {
-  background: #ec8d22;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  font-size: 1.3rem;
-  width: 36px;
-  height: 36px;
-  cursor: pointer;
-  font-weight: 700;
-  transition: background 0.2s;
-}
-.itinerary-link-add:hover {
-  background: #d67d1a;
-}
-.itinerary-changes-saved {
-  position: absolute;
-  top: 10px;
-  right: 18px;
-  color: #888;
-  font-size: 0.95rem;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-.itinerary-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 16px;
-  margin-top: 12px;
-}
-.itinerary-done-btn {
-  background: #111 !important;
-  color: #fff !important;
-  font-weight: 700;
-  min-width: 100px;
-  border-radius: 8px;
-  font-size: 1rem;
-}
-.itinerary-add-btn {
-  background: #ec8d22 !important;
-  color: #fff !important;
-  font-weight: 700;
-  min-width: 140px;
-  border-radius: 8px;
-  font-size: 1rem;
-}
-.itinerary-sidebar-row {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  gap: 18px;
-}
-.itinerary-sidebar-col-number {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 48px;
-  position: relative;
-}
-.itinerary-sidebar-col-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  margin-left: 56px;
-}
-</style>
