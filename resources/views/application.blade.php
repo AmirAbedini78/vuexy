@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <link rel="icon" href="{{ asset('favicon-32x32.png') }}" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Explorer Elite - Adventure Awaits</title>
+  <title>Explorer Elite - Adventure Portal</title>
   <link rel="stylesheet" type="text/css" href="{{ asset('loader.css') }}" />
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
