@@ -395,264 +395,299 @@ const sendEmailVerification = async () => {
 </script>
 
 <template>
-  <!-- Header Section -->
-  <div class="timeline-header">
-    <div class="container-header">
-      <h1 class="welcome-title">
-        Welcome <span class="account-name">{{ getUserDisplayName() }}</span>
-      </h1>
-      <p class="welcome-desc">
-        here is where you can manage all your experience listings and
-        participants, add bookings, connect with businesses and people in
-        adventure industry. to access all the features in this platform, there
-        are a few steps to complete. It will only take about 15 minutes to
-        finish! You can watch the intro video and in case you need help, we are
-        one message away!
-      </p>
-      <div class="header-btns">
-        <VBtn variant="outlined" color="black" class="intro-btn">
-          <VIcon left size="20">tabler-player-play</VIcon>
-          Watch Intro Video
-        </VBtn>
-        <VBtn color="orange" class="support-btn"> Get Support </VBtn>
-      </div>
-    </div>
-  </div>
-
-  <h2 class="section-title">Complete Following Steps to Verify Your Account</h2>
-
-  <!-- Timeline Steps -->
-  <div class="timeline">
-    <!-- Step 1: Email Verification -->
-    <div class="timeline-row reverse">
-      <div class="timeline-card">
-        <div class="card-title">
-          Confirm your email address to start the registration process
-        </div>
-        <div class="card-desc">
-          Enter your email to receive a verification link. Click the link to
-          confirm your Email.
-        </div>
-        <div class="card-actions">
-          <VTextField
-            v-model="userData.email"
-            label="Email"
-            placeholder="Sam@email.com"
-            variant="outlined"
-            density="compact"
-            class="email-input"
-            :disabled="true"
-            :readonly="true"
-          />
-          <VBtn
-            color="orange"
-            class="send-link-btn"
-            @click="sendEmailVerification"
-            :loading="emailLoading"
-            :disabled="emailLoading || emailStatus === 'verified'"
-          >
-            <VIcon left size="20">tabler-mail</VIcon>
-            {{ emailStatus === "verified" ? "Verified" : "Send Link" }}
+  <VCard class="registration-timeline-page">
+    <!-- Header Section -->
+    <div class="timeline-header">
+      <div class="container-header">
+        <h1 class="welcome-title">
+          Welcome <span class="account-name">{{ getUserDisplayName() }}</span>
+        </h1>
+        <p class="welcome-desc">
+          here is where you can manage all your experience listings and
+          participants, add bookings, connect with businesses and people in
+          adventure industry. to access all the features in this platform, there
+          are a few steps to complete. It will only take about 15 minutes to
+          finish! You can watch the intro video and in case you need help, we
+          are one message away!
+        </p>
+        <div class="header-btns">
+          <VBtn variant="outlined" color="black" class="intro-btn">
+            <VIcon left size="20">tabler-player-play</VIcon>
+            Watch Intro Video
           </VBtn>
-          <div
-            v-if="emailMessage"
-            :style="{
-              color:
-                emailStatus === 'error'
-                  ? 'red'
-                  : emailStatus === 'verified'
-                  ? 'green'
-                  : 'blue',
-              marginTop: '8px',
-              fontWeight: 'bold',
-            }"
-          >
-            {{ emailMessage }}
-          </div>
-        </div>
-      </div>
-      <div class="timeline-left step-left-reverse-fixed">
-        <div class="step-line-col">
-          <div class="step-checkbox" :class="{ active: true, done: false }">
-            <div class="checkbox-circle">
-              <VIcon v-if="true" icon="tabler-check" size="16" color="white" />
-            </div>
-          </div>
-          <div class="vertical-line"></div>
-        </div>
-        <div class="step-info-col">
-          <div class="step-number" :class="{ active: true }">01</div>
-          <div class="step-title">Email<br />Verification</div>
+          <VBtn color="orange" class="support-btn"> Get Support </VBtn>
         </div>
       </div>
     </div>
 
-    <!-- Step 2: WhatsApp Verification -->
-    <div class="timeline-row reverse-alt">
-      <div class="timeline-card">
-        <div class="card-title">
-          Verify your WhatsApp number for secure communication
-        </div>
-        <div class="card-desc">
-          Provide your WhatsApp number to receive a verification code. Enter the
-          code to confirm your number.
-        </div>
-        <div class="card-actions">
-          <VTextField
-            v-model="userData.whatsapp"
-            label="Your WhatsApp Number"
-            placeholder="09xxxxxxxxx"
-            variant="outlined"
-            density="compact"
-            class="whatsapp-input"
-          />
-          <VBtn color="success" class="send-code-btn" @click="sendWhatsappCode">
-            <VIcon left size="20">tabler-brand-whatsapp</VIcon>
-            Send Code
-          </VBtn>
-        </div>
-      </div>
-      <div class="timeline-left step-left-reverse-alt">
-        <div class="step-line-col-alt">
-          <div class="step-checkbox" :class="{ active: false, done: false }">
-            <div class="checkbox-circle">
-              <VIcon v-if="false" icon="tabler-check" size="16" color="white" />
-            </div>
-          </div>
-          <div class="vertical-line"></div>
-        </div>
-        <div class="step-info-col-alt">
-          <div class="step-number" :class="{ active: false }">02</div>
-          <div class="step-title">WhatsApp<br />Verification</div>
-        </div>
-      </div>
-    </div>
+    <h2 class="section-title">
+      Complete Following Steps to Verify Your Account
+    </h2>
 
-    <!-- Step 3: LinkedIn Connection -->
-    <div class="timeline-row reverse">
-      <div class="timeline-card">
-        <div class="card-title">
-          Connect your LinkedIn profile to validate your professional identity
-        </div>
-        <div class="card-desc">
-          Log in to LinkedIn to link your profile. This ensures your
-          professional credentials are verified.
-        </div>
-        <div class="card-actions">
-          <VBtn
-            color="primary"
-            :disabled="linkedinStatus === 'verified'"
-            @click="connectLinkedin"
-          >
-            <VIcon left size="20">tabler-brand-linkedin</VIcon>
-            {{
-              linkedinStatus === "verified" ? "Verified" : "Connect to LinkedIn"
-            }}
-          </VBtn>
-          <div
-            v-if="linkedinMessage"
-            :style="{
-              color: linkedinStatus === 'verified' ? 'green' : 'red',
-              marginTop: '8px',
-              fontWeight: 'bold',
-            }"
-          >
-            {{ linkedinMessage }}
+    <!-- Timeline Steps -->
+    <div class="timeline">
+      <!-- Step 1: Email Verification -->
+      <div class="timeline-row reverse">
+        <div class="timeline-card">
+          <div class="card-title">
+            Confirm your email address to start the registration process
           </div>
-        </div>
-      </div>
-      <div class="timeline-left step-left-reverse-fixed">
-        <div class="step-line-col">
-          <div class="step-checkbox" :class="{ active: false, done: false }">
-            <div class="checkbox-circle">
-              <VIcon v-if="false" icon="tabler-check" size="16" color="white" />
+          <div class="card-desc">
+            Enter your email to receive a verification link. Click the link to
+            confirm your Email.
+          </div>
+          <div class="card-actions">
+            <VTextField
+              v-model="userData.email"
+              label="Email"
+              placeholder="Sam@email.com"
+              variant="outlined"
+              density="compact"
+              class="email-input"
+              :disabled="true"
+              :readonly="true"
+            />
+            <VBtn
+              color="orange"
+              class="send-link-btn"
+              @click="sendEmailVerification"
+              :loading="emailLoading"
+              :disabled="emailLoading || emailStatus === 'verified'"
+            >
+              <VIcon left size="20">tabler-mail</VIcon>
+              {{ emailStatus === "verified" ? "Verified" : "Send Link" }}
+            </VBtn>
+            <div
+              v-if="emailMessage"
+              :style="{
+                color:
+                  emailStatus === 'error'
+                    ? 'red'
+                    : emailStatus === 'verified'
+                    ? 'green'
+                    : 'blue',
+                marginTop: '8px',
+                fontWeight: 'bold',
+              }"
+            >
+              {{ emailMessage }}
             </div>
           </div>
-          <div class="vertical-line"></div>
         </div>
-        <div class="step-info-col">
-          <div class="step-number" :class="{ active: false }">03</div>
-          <div class="step-title">LinkedIn<br />Connection</div>
+        <div class="timeline-left step-left-reverse-fixed">
+          <div class="step-line-col">
+            <div class="step-checkbox" :class="{ active: true, done: false }">
+              <div class="checkbox-circle">
+                <VIcon
+                  v-if="true"
+                  icon="tabler-check"
+                  size="16"
+                  color="white"
+                />
+              </div>
+            </div>
+            <div class="vertical-line"></div>
+          </div>
+          <div class="step-info-col">
+            <div class="step-number" :class="{ active: true }">01</div>
+            <div class="step-title">Email<br />Verification</div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Step 4: Profile Details -->
-    <div class="timeline-row reverse-alt">
-      <div class="timeline-card">
-        <div class="card-title">
-          Fill out your profile details to personalize your account
-        </div>
-        <div class="card-desc">
-          Provide your personal and professional information. Complete all
-          required fields to finalize your profile.
-        </div>
-        <div class="card-actions">
-          <VBtn
-            color="purple"
-            variant="outlined"
-            class="complete-profile-btn"
-            @click="completeProfile"
-          >
-            <VIcon left size="20">tabler-file-text</VIcon>
-            Complete Personal Form
-          </VBtn>
-          <div class="progress-bar-container">
-            <div class="progress-bar" style="width: 0%"></div>
-            <span>0%</span>
+      <!-- Step 2: WhatsApp Verification -->
+      <div class="timeline-row reverse-alt">
+        <div class="timeline-card">
+          <div class="card-title">
+            Verify your WhatsApp number for secure communication
+          </div>
+          <div class="card-desc">
+            Provide your WhatsApp number to receive a verification code. Enter
+            the code to confirm your number.
+          </div>
+          <div class="card-actions">
+            <VTextField
+              v-model="userData.whatsapp"
+              label="Your WhatsApp Number"
+              placeholder="09xxxxxxxxx"
+              variant="outlined"
+              density="compact"
+              class="whatsapp-input"
+            />
+            <VBtn
+              color="success"
+              class="send-code-btn"
+              @click="sendWhatsappCode"
+            >
+              <VIcon left size="20">tabler-brand-whatsapp</VIcon>
+              Send Code
+            </VBtn>
           </div>
         </div>
-      </div>
-      <div class="timeline-left step-left-reverse-alt">
-        <div class="step-line-col-alt">
-          <div class="step-checkbox" :class="{ active: false, done: false }">
-            <div class="checkbox-circle">
-              <VIcon v-if="false" icon="tabler-check" size="16" color="white" />
+        <div class="timeline-left step-left-reverse-alt">
+          <div class="step-line-col-alt">
+            <div class="step-checkbox" :class="{ active: false, done: false }">
+              <div class="checkbox-circle">
+                <VIcon
+                  v-if="false"
+                  icon="tabler-check"
+                  size="16"
+                  color="white"
+                />
+              </div>
             </div>
+            <div class="vertical-line"></div>
           </div>
-          <div class="vertical-line"></div>
-        </div>
-        <div class="step-info-col-alt">
-          <div class="step-number" :class="{ active: false }">04</div>
-          <div class="step-title">Add your<br />profile details</div>
+          <div class="step-info-col-alt">
+            <div class="step-number" :class="{ active: false }">02</div>
+            <div class="step-title">WhatsApp<br />Verification</div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Step 5: Review & Activation -->
-    <div class="timeline-row reverse">
-      <div class="timeline-card">
-        <div class="card-title">
-          Your account is under review and will be activated soon
+      <!-- Step 3: LinkedIn Connection -->
+      <div class="timeline-row reverse">
+        <div class="timeline-card">
+          <div class="card-title">
+            Connect your LinkedIn profile to validate your professional identity
+          </div>
+          <div class="card-desc">
+            Log in to LinkedIn to link your profile. This ensures your
+            professional credentials are verified.
+          </div>
+          <div class="card-actions">
+            <VBtn
+              color="primary"
+              :disabled="linkedinStatus === 'verified'"
+              @click="connectLinkedin"
+            >
+              <VIcon left size="20">tabler-brand-linkedin</VIcon>
+              {{
+                linkedinStatus === "verified"
+                  ? "Verified"
+                  : "Connect to LinkedIn"
+              }}
+            </VBtn>
+            <div
+              v-if="linkedinMessage"
+              :style="{
+                color: linkedinStatus === 'verified' ? 'green' : 'red',
+                marginTop: '8px',
+                fontWeight: 'bold',
+              }"
+            >
+              {{ linkedinMessage }}
+            </div>
+          </div>
         </div>
-        <div class="card-desc">
-          Our admins will review your submission. You'll be notified once your
-          account is activated.
-        </div>
-        <div class="current-status">
-          <h5>Current Status</h5>
-          <div class="status-badge status-awaiting-approval">
-            <VIcon size="18" color="#28a745">tabler-check-circle</VIcon>
-            Awaiting Approval
+        <div class="timeline-left step-left-reverse-fixed">
+          <div class="step-line-col">
+            <div class="step-checkbox" :class="{ active: false, done: false }">
+              <div class="checkbox-circle">
+                <VIcon
+                  v-if="false"
+                  icon="tabler-check"
+                  size="16"
+                  color="white"
+                />
+              </div>
+            </div>
+            <div class="vertical-line"></div>
+          </div>
+          <div class="step-info-col">
+            <div class="step-number" :class="{ active: false }">03</div>
+            <div class="step-title">LinkedIn<br />Connection</div>
           </div>
         </div>
       </div>
-      <div class="timeline-left step-left-reverse-fixed">
-        <div class="step-line-col">
-          <div class="step-checkbox" :class="{ active: false, done: false }">
-            <div class="checkbox-circle">
-              <VIcon v-if="false" icon="tabler-check" size="16" color="white" />
+
+      <!-- Step 4: Profile Details -->
+      <div class="timeline-row reverse-alt">
+        <div class="timeline-card">
+          <div class="card-title">
+            Fill out your profile details to personalize your account
+          </div>
+          <div class="card-desc">
+            Provide your personal and professional information. Complete all
+            required fields to finalize your profile.
+          </div>
+          <div class="card-actions">
+            <VBtn
+              color="purple"
+              variant="outlined"
+              class="complete-profile-btn"
+              @click="completeProfile"
+            >
+              <VIcon left size="20">tabler-file-text</VIcon>
+              Complete Personal Form
+            </VBtn>
+            <div class="progress-bar-container">
+              <div class="progress-bar" style="width: 0%"></div>
+              <span>0%</span>
             </div>
           </div>
-          <div class="vertical-line"></div>
         </div>
-        <div class="step-info-col">
-          <div class="step-number" :class="{ active: false }">05</div>
-          <div class="step-title">Review &<br />Activation</div>
+        <div class="timeline-left step-left-reverse-alt">
+          <div class="step-line-col-alt">
+            <div class="step-checkbox" :class="{ active: false, done: false }">
+              <div class="checkbox-circle">
+                <VIcon
+                  v-if="false"
+                  icon="tabler-check"
+                  size="16"
+                  color="white"
+                />
+              </div>
+            </div>
+            <div class="vertical-line"></div>
+          </div>
+          <div class="step-info-col-alt">
+            <div class="step-number" :class="{ active: false }">04</div>
+            <div class="step-title">Add your<br />profile details</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 5: Review & Activation -->
+      <div class="timeline-row reverse">
+        <div class="timeline-card">
+          <div class="card-title">
+            Your account is under review and will be activated soon
+          </div>
+          <div class="card-desc">
+            Our admins will review your submission. You'll be notified once your
+            account is activated.
+          </div>
+          <div class="current-status">
+            <h5>Current Status</h5>
+            <div class="status-badge status-awaiting-approval">
+              <VIcon size="18" color="#28a745">tabler-check-circle</VIcon>
+              Awaiting Approval
+            </div>
+          </div>
+        </div>
+        <div class="timeline-left step-left-reverse-fixed">
+          <div class="step-line-col">
+            <div class="step-checkbox" :class="{ active: false, done: false }">
+              <div class="checkbox-circle">
+                <VIcon
+                  v-if="false"
+                  icon="tabler-check"
+                  size="16"
+                  color="white"
+                />
+              </div>
+            </div>
+            <div class="vertical-line"></div>
+          </div>
+          <div class="step-info-col">
+            <div class="step-number" :class="{ active: false }">05</div>
+            <div class="step-title">Review &<br />Activation</div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  </VCard>
 </template>
 
 <style scoped>
@@ -666,9 +701,11 @@ const sendEmailVerification = async () => {
 }
 
 .registration-timeline-page {
-  min-height: 100vh;
   background: #f8f8fb;
   padding: 0;
+  margin: 20px;
+  border-radius: 12px;
+  overflow: hidden;
 }
 .timeline-header {
   padding-top: 48px;
@@ -679,6 +716,7 @@ const sendEmailVerification = async () => {
   max-width: 700px;
   margin: 0 auto;
   text-align: left;
+  padding: 0 24px;
 }
 .welcome-title {
   font-family: "Anton", Arial, sans-serif;
@@ -719,13 +757,14 @@ const sendEmailVerification = async () => {
   text-align: center;
   font-size: 2em;
   color: #333;
-  margin: 60px 0 40px 0;
+  margin: 40px 0 40px 0;
   position: relative;
+  padding: 0 24px;
 }
 
 /* --- Timeline --- */
 .timeline {
-  padding: 20px 0;
+  padding: 20px 24px 40px 24px;
   position: relative;
   max-width: 1200px;
   margin: 0 auto;

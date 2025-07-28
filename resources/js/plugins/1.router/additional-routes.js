@@ -108,7 +108,7 @@ export const routes = [
     name: 'registration-timeline',
     component: () => import('@/views/pages/registration/Timeline.vue'),
     meta: {
-      layout: 'blank',
+      layout: 'default',
       public: true,
     },
   },
