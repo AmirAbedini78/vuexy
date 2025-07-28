@@ -472,10 +472,6 @@ const sendEmailVerification = async () => {
         </div>
       </div>
       <div class="timeline-left step-left-reverse-fixed">
-        <div class="step-info-col">
-          <div class="step-number" :class="{ active: true }">01</div>
-          <div class="step-title">Email<br />Verification</div>
-        </div>
         <div class="step-line-col">
           <div class="step-checkbox" :class="{ active: true, done: false }">
             <div class="checkbox-circle">
@@ -483,6 +479,10 @@ const sendEmailVerification = async () => {
             </div>
           </div>
           <div class="vertical-line"></div>
+        </div>
+        <div class="step-info-col">
+          <div class="step-number" :class="{ active: true }">01</div>
+          <div class="step-title">Email<br />Verification</div>
         </div>
       </div>
     </div>
@@ -562,10 +562,6 @@ const sendEmailVerification = async () => {
         </div>
       </div>
       <div class="timeline-left step-left-reverse-fixed">
-        <div class="step-info-col">
-          <div class="step-number" :class="{ active: false }">03</div>
-          <div class="step-title">LinkedIn<br />Connection</div>
-        </div>
         <div class="step-line-col">
           <div class="step-checkbox" :class="{ active: false, done: false }">
             <div class="checkbox-circle">
@@ -573,6 +569,10 @@ const sendEmailVerification = async () => {
             </div>
           </div>
           <div class="vertical-line"></div>
+        </div>
+        <div class="step-info-col">
+          <div class="step-number" :class="{ active: false }">03</div>
+          <div class="step-title">LinkedIn<br />Connection</div>
         </div>
       </div>
     </div>
@@ -638,10 +638,6 @@ const sendEmailVerification = async () => {
         </div>
       </div>
       <div class="timeline-left step-left-reverse-fixed">
-        <div class="step-info-col">
-          <div class="step-number" :class="{ active: false }">05</div>
-          <div class="step-title">Review &<br />Activation</div>
-        </div>
         <div class="step-line-col">
           <div class="step-checkbox" :class="{ active: false, done: false }">
             <div class="checkbox-circle">
@@ -649,6 +645,10 @@ const sendEmailVerification = async () => {
             </div>
           </div>
           <div class="vertical-line"></div>
+        </div>
+        <div class="step-info-col">
+          <div class="step-number" :class="{ active: false }">05</div>
+          <div class="step-title">Review &<br />Activation</div>
         </div>
       </div>
     </div>
@@ -714,35 +714,22 @@ const sendEmailVerification = async () => {
   margin: 0 auto;
 }
 
-/* Create a central timeline line */
-.timeline::before {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  background: #ff8c00;
-  transform: translateX(-50%);
-  z-index: 1;
-}
-
 .timeline-row {
   display: flex;
   align-items: flex-start;
-  margin-bottom: 60px;
+  margin-bottom: 20px;
   position: relative;
   z-index: 2;
 }
 
 /* Step 1, 3, 5: Right side cards */
 .timeline-row.reverse {
-  justify-content: flex-start;
+  justify-content: flex-end;
 }
 
 .timeline-row.reverse .timeline-card {
-  margin-left: 60px;
-  margin-right: 0;
+  margin-right: 60px;
+  margin-left: 0;
   flex: 1;
   max-width: 500px;
 }
@@ -762,6 +749,10 @@ const sendEmailVerification = async () => {
   flex-direction: column;
   align-items: center;
   margin-bottom: 16px;
+  margin-right: 60px;
+  position: absolute;
+  left: -60px;
+  top: 0;
 }
 
 .timeline-row.reverse .step-line-col {
@@ -773,7 +764,7 @@ const sendEmailVerification = async () => {
 
 .timeline-row.reverse .step-checkbox {
   position: absolute;
-  top: -12px;
+  top: 0;
   left: 50%;
   transform: translateX(-50%);
   z-index: 3;
@@ -781,20 +772,20 @@ const sendEmailVerification = async () => {
 
 .timeline-row.reverse .vertical-line {
   width: 3px;
-  height: 80px;
+  height: 60px;
   background: #ff8c00;
   border-radius: 2px;
-  margin-top: 0;
+  margin-top: 12px;
 }
 
 /* Step 2, 4: Left side cards */
 .timeline-row.reverse-alt {
-  justify-content: flex-end;
+  justify-content: flex-start;
 }
 
 .timeline-row.reverse-alt .timeline-card {
-  margin-right: 60px;
-  margin-left: 0;
+  margin-left: 60px;
+  margin-right: 0;
   flex: 1;
   max-width: 500px;
 }
@@ -814,6 +805,10 @@ const sendEmailVerification = async () => {
   flex-direction: column;
   align-items: center;
   margin-bottom: 16px;
+  margin-left: 60px;
+  position: absolute;
+  right: -60px;
+  top: 0;
 }
 
 .timeline-row.reverse-alt .step-line-col-alt {
@@ -825,7 +820,7 @@ const sendEmailVerification = async () => {
 
 .timeline-row.reverse-alt .step-checkbox {
   position: absolute;
-  top: -12px;
+  top: 0;
   left: 50%;
   transform: translateX(-50%);
   z-index: 3;
@@ -833,10 +828,10 @@ const sendEmailVerification = async () => {
 
 .timeline-row.reverse-alt .vertical-line {
   width: 3px;
-  height: 80px;
+  height: 60px;
   background: #ff8c00;
   border-radius: 2px;
-  margin-top: 0;
+  margin-top: 12px;
 }
 
 /* --- Step Checkbox --- */
