@@ -665,37 +665,54 @@ const sendEmailVerification = async () => {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-.welcome-section {
+.registration-timeline-page {
+  min-height: 100vh;
+  background: #f8f8fb;
+  padding: 0;
+}
+.timeline-header {
+  padding-top: 48px;
+  padding-bottom: 24px;
+  background: #f8f8fb;
+}
+.container-header {
+  max-width: 700px;
+  margin: 0 auto;
   text-align: left;
-  margin-bottom: 40px;
-  padding: 20px;
-  border-bottom: 1px solid #eee;
 }
-
-.welcome-section h1 {
-  font-size: 2.5em;
-  color: #333;
-  margin-bottom: 15px;
-}
-
-.account-name {
-  color: #ff8c00;
+.welcome-title {
   font-family: "Anton", Arial, sans-serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 12px;
 }
-
-.welcome-section p {
-  font-size: 1.1em;
-  line-height: 1.6;
-  color: #666;
-  margin-bottom: 25px;
+.account-name {
+  color: #ffa726;
 }
-
-.welcome-actions .btn {
-  padding: 12px 25px;
-  border-radius: 6px;
-  font-size: 1em;
-  cursor: pointer;
-  margin-right: 15px;
+.welcome-desc {
+  font-family: "Karla", Arial, sans-serif;
+  font-size: 1.1rem;
+  color: #444;
+  margin-bottom: 28px;
+  line-height: 1.7;
+}
+.header-btns {
+  display: flex;
+  gap: 16px;
+}
+.intro-btn {
+  font-weight: 600;
+  border-radius: 8px;
+  border: 2px solid #222;
+  background: #fff;
+  color: #222;
+}
+.support-btn {
+  font-weight: 600;
+  border-radius: 8px;
+  background: #ffa726;
+  color: #fff;
 }
 
 .section-title {
