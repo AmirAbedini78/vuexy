@@ -35,9 +35,6 @@ const whatsappCodeLoading = ref(false);
 const linkedinStatus = ref("pending"); // 'pending', 'verified', 'error'
 const linkedinMessage = ref("");
 const linkedinLoading = ref(false);
-const showLinkedinModal = ref(false);
-const linkedinCode = ref("");
-const linkedinCodeLoading = ref(false);
 
 // Profile Completion State
 const profileCompleted = ref(false);
@@ -153,6 +150,10 @@ const sendWhatsappCode = async () => {
   }
 };
 
+const connectLinkedin = () => {
+  window.location.href = `/api/verification/${userType}/${userId}/linkedin`;
+};
+
 const verifyWhatsappCode = async () => {
   whatsappCodeLoading.value = true;
   whatsappMessage.value = "";
@@ -180,39 +181,6 @@ const verifyWhatsappCode = async () => {
     whatsappMessage.value = "Failed to verify code.";
   } finally {
     whatsappCodeLoading.value = false;
-  }
-};
-
-const connectLinkedin = () => {
-  window.location.href = `/api/verification/${userType}/${userId}/linkedin`;
-};
-
-const verifyLinkedinCode = async () => {
-  linkedinCodeLoading.value = true;
-  linkedinMessage.value = "";
-  try {
-    const res = await fetch(
-      `/api/verification/${userType}/${userId}/linkedin/verify`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: linkedinCode.value }),
-      }
-    );
-    const data = await res.json();
-    if (data.success) {
-      linkedinStatus.value = "verified";
-      linkedinMessage.value = "LinkedIn Connected";
-      showLinkedinModal.value = false;
-    } else {
-      linkedinStatus.value = "error";
-      linkedinMessage.value = data.message || "Invalid code.";
-    }
-  } catch (e) {
-    linkedinStatus.value = "error";
-    linkedinMessage.value = "Failed to verify code.";
-  } finally {
-    linkedinCodeLoading.value = false;
   }
 };
 

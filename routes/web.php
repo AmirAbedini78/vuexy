@@ -25,8 +25,7 @@ Route::get('/login', function () {
     return view('application');
 })->name('login');
 
-// LinkedIn OAuth for timeline verification
-Route::get('/api/verification/{userType}/{userId}/linkedin', [UserVerificationController::class, 'startLinkedinOAuth']);
+// LinkedIn OAuth callback route (this should remain in web routes for OAuth redirects)
 Route::get('/linkedin/callback', [UserVerificationController::class, 'linkedinCallback']);
 
 // Catch-all route for SPA (excluding API routes)

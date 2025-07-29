@@ -69,7 +69,9 @@ Route::middleware([ApiMiddleware::class])->group(function () {
         Route::post('/email/verify/{token}', [\App\Http\Controllers\Api\UserVerificationController::class, 'verifyEmail']);
         Route::post('/{userType}/{userId}/whatsapp', [\App\Http\Controllers\Api\UserVerificationController::class, 'sendWhatsappCode']);
         Route::post('/{userType}/{userId}/whatsapp/verify', [\App\Http\Controllers\Api\UserVerificationController::class, 'verifyWhatsappCode']);
+        Route::get('/{userType}/{userId}/linkedin', [\App\Http\Controllers\Api\UserVerificationController::class, 'startLinkedinOAuth']);
         Route::post('/{userType}/{userId}/linkedin', [\App\Http\Controllers\Api\UserVerificationController::class, 'connectLinkedin']);
+        Route::post('/{userType}/{userId}/linkedin/verify', [\App\Http\Controllers\Api\UserVerificationController::class, 'verifyLinkedinCode']);
         Route::post('/{userType}/{userId}/profile', [\App\Http\Controllers\Api\UserVerificationController::class, 'completeProfile']);
     });
 

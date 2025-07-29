@@ -198,55 +198,174 @@ class UserVerificationController extends Controller
     // شروع OAuth لینکدین
     public function startLinkedinOAuth(Request $request, $userType, $userId)
     {
-        $clientId = config('services.linkedin.client_id');
-        $redirectUri = urlencode(config('services.linkedin.redirect'));
-        $state = Str::random(32);
-        session([
-            'linkedin_oauth_state' => $state,
-            'linkedin_user_type' => $userType,
-            'linkedin_user_id' => $userId
-        ]);
-        $scope = 'r_liteprofile r_emailaddress';
+        try {
+            $clientId = config('services.linkedin.client_id');
+            $redirectUri = config('services.linkedin.redirect');
+            
+            if (!$clientId || !$redirectUri) {
+                Log::error('LinkedIn OAuth configuration missing', [
+                    'client_id' => $clientId ? 'set' : 'missing',
+                    'redirect_uri' => $redirectUri ? 'set' : 'missing'
+                ]);
+                return redirect('/registration/timeline/' . $userType . '/' . $userId . '?linkedin=error');
+            }
+            
+            $state = Str::random(32);
+            session([
+                'linkedin_oauth_state' => $state,
+                'linkedin_user_type' => $userType,
+                'linkedin_user_id' => $userId
+            ]);
+            $scope = 'r_liteprofile r_emailaddress';
 
-        $url = "https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id={$clientId}&redirect_uri={$redirectUri}&state={$state}&scope={$scope}";
-        return redirect($url);
+            $url = "https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id={$clientId}&redirect_uri=" . urlencode($redirectUri) . "&state={$state}&scope={$scope}";
+            
+            Log::info('Starting LinkedIn OAuth', [
+                'user_type' => $userType,
+                'user_id' => $userId,
+                'state' => $state,
+                'redirect_uri' => $redirectUri
+            ]);
+            
+            return redirect($url);
+        } catch (\Exception $e) {
+            Log::error('LinkedIn OAuth start error', [
+                'error' => $e->getMessage(),
+                'user_type' => $userType,
+                'user_id' => $userId
+            ]);
+            return redirect('/registration/timeline/' . $userType . '/' . $userId . '?linkedin=error');
+        }
     }
 
     // Callback لینکدین
     public function linkedinCallback(Request $request)
     {
-        $state = $request->get('state');
-        $code = $request->get('code');
-        if ($state !== session('linkedin_oauth_state')) {
+        try {
+            $state = $request->get('state');
+            $code = $request->get('code');
+            $error = $request->get('error');
+            
+            Log::info('LinkedIn callback received', [
+                'state' => $state,
+                'has_code' => !empty($code),
+                'error' => $error,
+                'session_state' => session('linkedin_oauth_state'),
+                'session_user_type' => session('linkedin_user_type'),
+                'session_user_id' => session('linkedin_user_id')
+            ]);
+            
+            if ($error) {
+                Log::error('LinkedIn OAuth error', ['error' => $error]);
+                return redirect('/registration/timeline/' . session('linkedin_user_type') . '/' . session('linkedin_user_id') . '?linkedin=error');
+            }
+            
+            if ($state !== session('linkedin_oauth_state')) {
+                Log::error('LinkedIn OAuth state mismatch', [
+                    'received_state' => $state,
+                    'session_state' => session('linkedin_oauth_state')
+                ]);
+                return redirect('/registration/timeline/' . session('linkedin_user_type') . '/' . session('linkedin_user_id') . '?linkedin=error');
+            }
+
+            if (!$code) {
+                Log::error('LinkedIn OAuth no code received');
+                return redirect('/registration/timeline/' . session('linkedin_user_type') . '/' . session('linkedin_user_id') . '?linkedin=error');
+            }
+
+            $clientId = config('services.linkedin.client_id');
+            $clientSecret = config('services.linkedin.client_secret');
+            $redirectUri = config('services.linkedin.redirect');
+            
+            $response = Http::asForm()->post('https://www.linkedin.com/oauth/v2/accessToken', [
+                'grant_type' => 'authorization_code',
+                'code' => $code,
+                'redirect_uri' => $redirectUri,
+                'client_id' => $clientId,
+                'client_secret' => $clientSecret,
+            ]);
+            
+            if ($response->failed()) {
+                Log::error('LinkedIn access token request failed', [
+                    'status' => $response->status(),
+                    'body' => $response->body()
+                ]);
+                return redirect('/registration/timeline/' . session('linkedin_user_type') . '/' . session('linkedin_user_id') . '?linkedin=error');
+            }
+            
+            $tokenData = $response->json();
+            $accessToken = $tokenData['access_token'] ?? null;
+            
+            if (!$accessToken) {
+                Log::error('LinkedIn access token not received', ['response' => $tokenData]);
+                return redirect('/registration/timeline/' . session('linkedin_user_type') . '/' . session('linkedin_user_id') . '?linkedin=error');
+            }
+
+            $profileResponse = Http::withToken($accessToken)->get('https://api.linkedin.com/v2/me');
+            
+            if ($profileResponse->failed()) {
+                Log::error('LinkedIn profile request failed', [
+                    'status' => $profileResponse->status(),
+                    'body' => $profileResponse->body()
+                ]);
+                return redirect('/registration/timeline/' . session('linkedin_user_type') . '/' . session('linkedin_user_id') . '?linkedin=error');
+            }
+            
+            $profile = $profileResponse->json();
+            $linkedinId = $profile['id'] ?? null;
+
+            if (!$linkedinId) {
+                Log::error('LinkedIn profile ID not found', ['profile' => $profile]);
+                return redirect('/registration/timeline/' . session('linkedin_user_type') . '/' . session('linkedin_user_id') . '?linkedin=error');
+            }
+
+            $verification = \App\Models\UserVerification::where('user_type', session('linkedin_user_type'))
+                ->where('user_id', session('linkedin_user_id'))->first();
+                
+            if ($verification) {
+                $verification->linkedin_verified = true;
+                $verification->linkedin_id = $linkedinId;
+                $verification->save();
+                
+                Log::info('LinkedIn verification successful', [
+                    'user_type' => session('linkedin_user_type'),
+                    'user_id' => session('linkedin_user_id'),
+                    'linkedin_id' => $linkedinId
+                ]);
+            } else {
+                Log::error('LinkedIn verification record not found', [
+                    'user_type' => session('linkedin_user_type'),
+                    'user_id' => session('linkedin_user_id')
+                ]);
+            }
+
+            return redirect('/registration/timeline/' . session('linkedin_user_type') . '/' . session('linkedin_user_id') . '?linkedin=success');
+        } catch (\Exception $e) {
+            Log::error('LinkedIn callback error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return redirect('/registration/timeline/' . session('linkedin_user_type') . '/' . session('linkedin_user_id') . '?linkedin=error');
         }
+    }
 
-        $clientId = config('services.linkedin.client_id');
-        $clientSecret = config('services.linkedin.client_secret');
-        $redirectUri = config('services.linkedin.redirect');
-        $response = Http::asForm()->post('https://www.linkedin.com/oauth/v2/accessToken', [
-            'grant_type' => 'authorization_code',
-            'code' => $code,
-            'redirect_uri' => $redirectUri,
-            'client_id' => $clientId,
-            'client_secret' => $clientSecret,
-        ]);
-        $accessToken = $response->json()['access_token'] ?? null;
-        if (!$accessToken) {
-            return redirect('/registration/timeline/' . session('linkedin_user_type') . '/' . session('linkedin_user_id') . '?linkedin=error');
+    // تایید کد لینکدین (برای استفاده در صورت نیاز)
+    public function verifyLinkedinCode(Request $request, $userType, $userId)
+    {
+        $verification = UserVerification::where('user_type', $userType)
+            ->where('user_id', $userId)
+            ->first();
+        
+        if (!$verification) {
+            return response()->json(['success' => false, 'message' => 'Verification not found'], 404);
         }
 
-        $profile = Http::withToken($accessToken)->get('https://api.linkedin.com/v2/me')->json();
-        $linkedinId = $profile['id'] ?? null;
-
-        $verification = \App\Models\UserVerification::where('user_type', session('linkedin_user_type'))
-            ->where('user_id', session('linkedin_user_id'))->first();
-        if ($verification && $linkedinId) {
-            $verification->linkedin_verified = true;
-            $verification->linkedin_id = $linkedinId;
-            $verification->save();
+        // Since LinkedIn OAuth is handled through redirect flow, this method is mainly for API consistency
+        // The actual verification happens in linkedinCallback method
+        if ($verification->linkedin_verified) {
+            return response()->json(['success' => true, 'message' => 'LinkedIn already verified']);
         }
 
-        return redirect('/registration/timeline/' . session('linkedin_user_type') . '/' . session('linkedin_user_id') . '?linkedin=success');
+        return response()->json(['success' => false, 'message' => 'LinkedIn verification required through OAuth flow']);
     }
 } 
