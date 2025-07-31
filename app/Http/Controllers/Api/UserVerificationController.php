@@ -100,74 +100,135 @@ class UserVerificationController extends Controller
         $request->validate([
             'whatsapp_number' => 'required|string',
         ]);
-        $verification = \App\Models\UserVerification::firstOrCreate([
-            'user_type' => $userType,
-            'user_id' => $userId,
-        ]);
-        $code = rand(100000, 999999);
-        $verification->whatsapp_number = $request->input('whatsapp_number');
-        $verification->whatsapp_code = $code;
-        $verification->whatsapp_verified = false;
-        $verification->save();
 
-        // ارسال پیام با WhatsApp Cloud API
-        $accessToken = config('services.whatsapp.access_token');
-        $phoneNumberId = config('services.whatsapp.phone_number_id');
-        $to = $verification->whatsapp_number;
-
-        // شماره باید با کد کشور و بدون + باشد (مثلاً: 98912xxxxxxx)
-        $response = \Illuminate\Support\Facades\Http::withToken($accessToken)
-            ->post("https://graph.facebook.com/v18.0/{$phoneNumberId}/messages", [
-                "messaging_product" => "whatsapp",
-                "to" => $to,
-                "type" => "text",
-                "text" => [
-                    "body" => "کد تایید شما در Explorer Elite: {$code}"
-                ]
+        try {
+            $verification = \App\Models\UserVerification::firstOrCreate([
+                'user_type' => $userType,
+                'user_id' => $userId,
             ]);
 
-        // اگر می‌خواهید از template واتس‌اپ استفاده کنید (اختیاری):
-        // $templateName = config('services.whatsapp.template_name');
-        // $response = \Illuminate\Support\Facades\Http::withToken($accessToken)
-        //     ->post("https://graph.facebook.com/v18.0/{$phoneNumberId}/messages", [
-        //         "messaging_product" => "whatsapp",
-        //         "to" => $to,
-        //         "type" => "template",
-        //         "template" => [
-        //             "name" => $templateName,
-        //             "language" => ["code" => "fa"],
-        //             "components" => [
-        //                 [
-        //                     "type" => "body",
-        //                     "parameters" => [
-        //                         ["type" => "text", "text" => $code]
-        //                     ]
-        //                 ]
-        //             ]
-        //         ]
-        //     ]);
+            $code = rand(100000, 999999);
+            $whatsappNumber = $request->input('whatsapp_number');
+            
+            // Clean phone number (remove + and spaces)
+            $whatsappNumber = preg_replace('/[^0-9]/', '', $whatsappNumber);
+            
+            $verification->whatsapp_number = $whatsappNumber;
+            $verification->whatsapp_code = $code;
+            $verification->whatsapp_verified = false;
+            $verification->save();
 
-        if ($response->failed()) {
-            \Log::error('WhatsApp API error', ['response' => $response->body()]);
-            return response()->json(['success' => false, 'message' => 'Failed to send WhatsApp code.'], 500);
+            // ارسال پیام با WhatsApp Cloud API
+            $accessToken = config('services.whatsapp.access_token');
+            $phoneNumberId = config('services.whatsapp.phone_number_id');
+
+            if (!$accessToken || !$phoneNumberId) {
+                Log::error('WhatsApp configuration missing', [
+                    'access_token' => $accessToken ? 'set' : 'missing',
+                    'phone_number_id' => $phoneNumberId ? 'set' : 'missing'
+                ]);
+                return response()->json(['success' => false, 'message' => 'WhatsApp service not configured'], 500);
+            }
+
+            Log::info('Sending WhatsApp code', [
+                'user_type' => $userType,
+                'user_id' => $userId,
+                'number' => $whatsappNumber,
+                'code' => $code
+            ]);
+
+            // شماره باید با کد کشور و بدون + باشد (مثلاً: 98912xxxxxxx)
+            $response = Http::withToken($accessToken)
+                ->post("https://graph.facebook.com/v18.0/{$phoneNumberId}/messages", [
+                    "messaging_product" => "whatsapp",
+                    "to" => $whatsappNumber,
+                    "type" => "text",
+                    "text" => [
+                        "body" => "کد تایید شما در Explorer Elite: {$code}"
+                    ]
+                ]);
+
+            if ($response->failed()) {
+                Log::error('WhatsApp API error', [
+                    'status' => $response->status(),
+                    'response' => $response->body(),
+                    'number' => $whatsappNumber
+                ]);
+                return response()->json(['success' => false, 'message' => 'Failed to send WhatsApp code. Please check your number.'], 500);
+            }
+
+            Log::info('WhatsApp code sent successfully', [
+                'user_type' => $userType,
+                'user_id' => $userId,
+                'number' => $whatsappNumber
+            ]);
+
+            return response()->json(['success' => true, 'message' => 'WhatsApp code sent successfully']);
+
+        } catch (\Exception $e) {
+            Log::error('WhatsApp verification error', [
+                'error' => $e->getMessage(),
+                'user_type' => $userType,
+                'user_id' => $userId
+            ]);
+            return response()->json(['success' => false, 'message' => 'An error occurred while sending WhatsApp code'], 500);
         }
-
-        return response()->json(['success' => true, 'message' => 'WhatsApp code sent']);
     }
 
     // تایید کد واتساپ
     public function verifyWhatsappCode(Request $request, $userType, $userId)
     {
-        $verification = UserVerification::where('user_type', $userType)
-            ->where('user_id', $userId)
-            ->first();
-        if (!$verification || $verification->whatsapp_code !== $request->input('code')) {
-            return response()->json(['success' => false, 'message' => 'Invalid code'], 400);
+        $request->validate([
+            'code' => 'required|string|size:6',
+        ]);
+
+        try {
+            $verification = UserVerification::where('user_type', $userType)
+                ->where('user_id', $userId)
+                ->first();
+
+            if (!$verification) {
+                return response()->json(['success' => false, 'message' => 'Verification not found'], 404);
+            }
+
+            if (!$verification->whatsapp_code) {
+                return response()->json(['success' => false, 'message' => 'No verification code found. Please request a new code.'], 400);
+            }
+
+            if ($verification->whatsapp_verified) {
+                return response()->json(['success' => true, 'message' => 'WhatsApp already verified']);
+            }
+
+            if ($verification->whatsapp_code !== $request->input('code')) {
+                Log::warning('Invalid WhatsApp code attempt', [
+                    'user_type' => $userType,
+                    'user_id' => $userId,
+                    'provided_code' => $request->input('code'),
+                    'expected_code' => $verification->whatsapp_code
+                ]);
+                return response()->json(['success' => false, 'message' => 'Invalid verification code'], 400);
+            }
+
+            $verification->whatsapp_verified = true;
+            $verification->whatsapp_code = null; // Clear the code after successful verification
+            $verification->save();
+
+            Log::info('WhatsApp verification successful', [
+                'user_type' => $userType,
+                'user_id' => $userId,
+                'number' => $verification->whatsapp_number
+            ]);
+
+            return response()->json(['success' => true, 'message' => 'WhatsApp verified successfully']);
+
+        } catch (\Exception $e) {
+            Log::error('WhatsApp verification error', [
+                'error' => $e->getMessage(),
+                'user_type' => $userType,
+                'user_id' => $userId
+            ]);
+            return response()->json(['success' => false, 'message' => 'An error occurred while verifying WhatsApp code'], 500);
         }
-        $verification->whatsapp_verified = true;
-        $verification->whatsapp_code = null;
-        $verification->save();
-        return response()->json(['success' => true, 'message' => 'WhatsApp verified']);
     }
 
     // اتصال لینکدین (OAuth callback)
@@ -186,13 +247,51 @@ class UserVerificationController extends Controller
     // تکمیل پروفایل
     public function completeProfile(Request $request, $userType, $userId)
     {
-        $verification = UserVerification::firstOrCreate([
-            'user_type' => $userType,
-            'user_id' => $userId,
-        ]);
-        $verification->profile_completed = true;
-        $verification->save();
-        return response()->json(['success' => true, 'message' => 'Profile completed']);
+        try {
+            $verification = UserVerification::firstOrCreate([
+                'user_type' => $userType,
+                'user_id' => $userId,
+            ]);
+
+            // Check if at least one verification is completed
+            $hasVerification = $verification->email_verified || 
+                              $verification->whatsapp_verified || 
+                              $verification->linkedin_verified;
+
+            if (!$hasVerification) {
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Please complete at least one verification step before proceeding.'
+                ], 400);
+            }
+
+            $verification->profile_completed = true;
+            $verification->save();
+
+            Log::info('Profile completed successfully', [
+                'user_type' => $userType,
+                'user_id' => $userId,
+                'email_verified' => $verification->email_verified,
+                'whatsapp_verified' => $verification->whatsapp_verified,
+                'linkedin_verified' => $verification->linkedin_verified
+            ]);
+
+            return response()->json([
+                'success' => true, 
+                'message' => 'Profile completed successfully. You can now access the dashboard.'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Profile completion error', [
+                'error' => $e->getMessage(),
+                'user_type' => $userType,
+                'user_id' => $userId
+            ]);
+            return response()->json([
+                'success' => false, 
+                'message' => 'An error occurred while completing profile'
+            ], 500);
+        }
     }
 
     // شروع OAuth لینکدین
@@ -211,20 +310,34 @@ class UserVerificationController extends Controller
             }
             
             $state = Str::random(32);
+            
+            // Ensure session is started and store data
+            if (!session()->isStarted()) {
+                session()->start();
+            }
+            
             session([
                 'linkedin_oauth_state' => $state,
                 'linkedin_user_type' => $userType,
                 'linkedin_user_id' => $userId
             ]);
-            $scope = 'r_liteprofile r_emailaddress';
-
-            $url = "https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id={$clientId}&redirect_uri=" . urlencode($redirectUri) . "&state={$state}&scope={$scope}";
             
-            Log::info('Starting LinkedIn OAuth', [
+            // Force session save
+            session()->save();
+            
+            // Use OpenID Connect with openid scope
+            $scopes = config('services.linkedin.scopes', 'openid');
+            $url = "https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id={$clientId}&redirect_uri=" . urlencode($redirectUri) . "&state={$state}&scope=" . urlencode($scopes);
+            
+            Log::info('Starting LinkedIn OAuth (OpenID Connect)', [
                 'user_type' => $userType,
                 'user_id' => $userId,
                 'state' => $state,
-                'redirect_uri' => $redirectUri
+                'redirect_uri' => $redirectUri,
+                'scopes' => $scopes,
+                'url' => $url,
+                'session_id' => session()->getId(),
+                'session_state_stored' => session('linkedin_oauth_state')
             ]);
             
             return redirect($url);
@@ -242,6 +355,11 @@ class UserVerificationController extends Controller
     public function linkedinCallback(Request $request)
     {
         try {
+            // Ensure session is started
+            if (!session()->isStarted()) {
+                session()->start();
+            }
+            
             $state = $request->get('state');
             $code = $request->get('code');
             $error = $request->get('error');
@@ -252,12 +370,23 @@ class UserVerificationController extends Controller
                 'error' => $error,
                 'session_state' => session('linkedin_oauth_state'),
                 'session_user_type' => session('linkedin_user_type'),
-                'session_user_id' => session('linkedin_user_id')
+                'session_user_id' => session('linkedin_user_id'),
+                'session_id' => session()->getId()
             ]);
             
             if ($error) {
                 Log::error('LinkedIn OAuth error', ['error' => $error]);
                 return redirect('/registration/timeline/' . session('linkedin_user_type') . '/' . session('linkedin_user_id') . '?linkedin=error');
+            }
+            
+            // Check if session data exists
+            if (!session('linkedin_oauth_state') || !session('linkedin_user_type') || !session('linkedin_user_id')) {
+                Log::error('LinkedIn OAuth session data missing', [
+                    'session_state' => session('linkedin_oauth_state'),
+                    'session_user_type' => session('linkedin_user_type'),
+                    'session_user_id' => session('linkedin_user_id')
+                ]);
+                return redirect('/registration/timeline/individual/1?linkedin=error');
             }
             
             if ($state !== session('linkedin_oauth_state')) {
@@ -277,6 +406,7 @@ class UserVerificationController extends Controller
             $clientSecret = config('services.linkedin.client_secret');
             $redirectUri = config('services.linkedin.redirect');
             
+            // Get access token
             $response = Http::asForm()->post('https://www.linkedin.com/oauth/v2/accessToken', [
                 'grant_type' => 'authorization_code',
                 'code' => $code,
@@ -301,21 +431,32 @@ class UserVerificationController extends Controller
                 return redirect('/registration/timeline/' . session('linkedin_user_type') . '/' . session('linkedin_user_id') . '?linkedin=error');
             }
 
-            $profileResponse = Http::withToken($accessToken)->get('https://api.linkedin.com/v2/me');
+            // Get user info from OpenID Connect userinfo endpoint
+            $profileResponse = Http::withToken($accessToken)->get('https://api.linkedin.com/v2/userinfo');
             
             if ($profileResponse->failed()) {
-                Log::error('LinkedIn profile request failed', [
+                Log::error('LinkedIn userinfo request failed', [
                     'status' => $profileResponse->status(),
-                    'body' => $profileResponse->body()
+                    'body' => $profileResponse->body(),
+                    'headers' => $profileResponse->headers()
                 ]);
-                return redirect('/registration/timeline/' . session('linkedin_user_type') . '/' . session('linkedin_user_id') . '?linkedin=error');
+                
+                // Try alternative endpoint if userinfo fails
+                $profileResponse = Http::withToken($accessToken)->get('https://api.linkedin.com/v2/me');
+                if ($profileResponse->failed()) {
+                    Log::error('LinkedIn profile request also failed', [
+                        'status' => $profileResponse->status(),
+                        'body' => $profileResponse->body()
+                    ]);
+                    return redirect('/registration/timeline/' . session('linkedin_user_type') . '/' . session('linkedin_user_id') . '?linkedin=error');
+                }
             }
             
             $profile = $profileResponse->json();
-            $linkedinId = $profile['id'] ?? null;
+            $linkedinId = $profile['sub'] ?? $profile['id'] ?? null; // Try both OpenID Connect and regular OAuth
 
             if (!$linkedinId) {
-                Log::error('LinkedIn profile ID not found', ['profile' => $profile]);
+                Log::error('LinkedIn user ID not found', ['profile' => $profile]);
                 return redirect('/registration/timeline/' . session('linkedin_user_type') . '/' . session('linkedin_user_id') . '?linkedin=error');
             }
 
@@ -327,10 +468,11 @@ class UserVerificationController extends Controller
                 $verification->linkedin_id = $linkedinId;
                 $verification->save();
                 
-                Log::info('LinkedIn verification successful', [
+                Log::info('LinkedIn verification successful (OpenID Connect)', [
                     'user_type' => session('linkedin_user_type'),
                     'user_id' => session('linkedin_user_id'),
-                    'linkedin_id' => $linkedinId
+                    'linkedin_id' => $linkedinId,
+                    'profile' => $profile
                 ]);
             } else {
                 Log::error('LinkedIn verification record not found', [
@@ -339,13 +481,20 @@ class UserVerificationController extends Controller
                 ]);
             }
 
-            return redirect('/registration/timeline/' . session('linkedin_user_type') . '/' . session('linkedin_user_id') . '?linkedin=success');
+            // Store user data before clearing session
+            $userType = session('linkedin_user_type');
+            $userId = session('linkedin_user_id');
+
+            // Clear session data after successful verification
+            session()->forget(['linkedin_oauth_state', 'linkedin_user_type', 'linkedin_user_id']);
+
+            return redirect("/registration/timeline/{$userType}/{$userId}?linkedin=success");
         } catch (\Exception $e) {
             Log::error('LinkedIn callback error', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect('/registration/timeline/' . session('linkedin_user_type') . '/' . session('linkedin_user_id') . '?linkedin=error');
+            return redirect('/registration/timeline/individual/1?linkedin=error');
         }
     }
 

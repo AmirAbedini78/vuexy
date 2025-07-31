@@ -94,7 +94,13 @@ const skipVerification = async () => {
         localStorage.removeItem("registerEmail");
         localStorage.removeItem("registerPassword");
         localStorage.removeItem("registeredEmail");
-        router.push("/access-control");
+
+        // Always redirect to timeline after email verification
+        router.push(
+          `/registration/timeline/${data.user.role || "individual"}/${
+            data.user.id
+          }`
+        );
         return;
       }
     } catch (e) {

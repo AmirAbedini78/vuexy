@@ -151,7 +151,11 @@ const sendWhatsappCode = async () => {
 };
 
 const connectLinkedin = () => {
+  // Use real LinkedIn OAuth
   window.location.href = `/api/verification/${userType}/${userId}/linkedin`;
+
+  // Mock OAuth (commented out - use only for testing)
+  // window.location.href = `/mock-linkedin/${userType}/${userId}`;
 };
 
 const verifyWhatsappCode = async () => {
@@ -206,7 +210,14 @@ const completeProfile = async () => {
     if (data.success) {
       profileCompleted.value = true;
       reviewStatus.value = "verified_contact";
-      // Update step 5 checkbox to show active state
+
+      // Show success message
+      alert("Profile completed successfully! Redirecting to dashboard...");
+
+      // Redirect to access-control after successful completion
+      setTimeout(() => {
+        window.location.href = "/access-control";
+      }, 2000);
     } else {
       console.error("Failed to complete profile:", data.message);
     }
@@ -239,6 +250,9 @@ onMounted(async () => {
     progressPercentage.value = 0;
     completedVerifications.value = 0;
 
+    // Get logged-in user data first
+    getLoggedInUser();
+
     // Fetch user data based on type
     if (userType === "individual") {
       const response = await individualUserService.getById(userId);
@@ -252,7 +266,6 @@ onMounted(async () => {
 
     // Initialize timeline steps
     initializeTimeline();
-    getLoggedInUser(); // Call the new function here
 
     // Fetch all verification statuses
     await fetchVerificationStatus();
@@ -272,6 +285,12 @@ onMounted(async () => {
     } else if (route.query.linkedin === "error") {
       linkedinStatus.value = "error";
       linkedinMessage.value = "LinkedIn verification failed. Please try again.";
+    }
+
+    // Auto-send email verification if not already verified and user has email
+    if (emailStatus.value === "pending" && loggedInUser.value?.email) {
+      console.log("Auto-sending email verification...");
+      await sendEmailVerification();
     }
 
     // Calculate initial progress
@@ -487,6 +506,12 @@ const sendEmailVerification = async () => {
               class="email-input"
               :disabled="true"
               :readonly="true"
+              :hint="
+                loggedInUser?.email
+                  ? 'Your login email'
+                  : 'Email will be auto-filled'
+              "
+              persistent-hint
             />
             <VBtn
               color="orange"
