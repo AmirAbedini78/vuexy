@@ -97,9 +97,9 @@ const skipVerification = async () => {
 
         // Always redirect to timeline after email verification
         router.push(
-          `/registration/timeline/${data.user.role || "individual"}/${
-            data.user.id
-          }`
+          `/registration/timeline/${
+            data.user.role === "user" ? "individual" : data.user.role
+          }/${data.user.id}`
         );
         return;
       }

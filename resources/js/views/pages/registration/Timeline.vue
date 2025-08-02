@@ -57,7 +57,7 @@ const fetchVerificationStatus = async () => {
       if (data.data.email_verified) {
         emailStatus.value = "verified";
         emailMessage.value = "Email verified successfully!";
-      } else if (data.data.email_token || data.data.email_sent) {
+      } else if (data.data.email_token === "pending") {
         emailStatus.value = "sent";
         emailMessage.value =
           "Verification email sent. Please check your inbox and click the verification link.";
@@ -241,6 +241,17 @@ const calculateProgress = () => {
 
   // Enable step 4 if at least one verification is completed
   step4Enabled.value = completed > 0;
+
+  // Debug logging for progress calculation
+  console.log("Progress calculation:", {
+    emailStatus: emailStatus.value,
+    whatsappStatus: whatsappStatus.value,
+    linkedinStatus: linkedinStatus.value,
+    completed: completed,
+    total: totalVerifications.value,
+    percentage: progressPercentage.value,
+    step4Enabled: step4Enabled.value,
+  });
 };
 
 onMounted(async () => {
@@ -267,15 +278,17 @@ onMounted(async () => {
     // Initialize timeline steps
     initializeTimeline();
 
+    // Check if user just came back from email verification BEFORE fetching status
+    const isEmailVerified = route.query.verified === "true";
+
     // Fetch all verification statuses
     await fetchVerificationStatus();
 
-    // Check if user just came back from email verification
-    if (route.query.verified === "true") {
+    // If user just came back from email verification, ensure email status is set correctly
+    if (isEmailVerified) {
       emailStatus.value = "verified";
       emailMessage.value = "Email verified successfully! Welcome back!";
-      // Fetch latest verification status from server
-      await fetchVerificationStatus();
+      console.log("Email verification detected from URL parameter");
     }
 
     // Check LinkedIn verification status from backend or query
@@ -293,8 +306,18 @@ onMounted(async () => {
       await sendEmailVerification();
     }
 
-    // Calculate initial progress
+    // Calculate initial progress - this should now properly enable step 4
     calculateProgress();
+
+    // Debug logging
+    console.log("Verification statuses:", {
+      email: emailStatus.value,
+      whatsapp: whatsappStatus.value,
+      linkedin: linkedinStatus.value,
+      step4Enabled: step4Enabled.value,
+      completedVerifications: completedVerifications.value,
+      progressPercentage: progressPercentage.value,
+    });
   } catch (err) {
     console.error("Error fetching user data:", err);
     error.value = err.message || "Failed to load user data";

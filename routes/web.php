@@ -12,9 +12,6 @@ Route::get('/web-test', function () {
 // Email verification route
 Route::get('/verify/{token}', [EmailVerificationController::class, 'verifyByToken']);
 
-// Timeline email verification route
-Route::get('/verification/email/verify/{token}', [UserVerificationController::class, 'verifyEmail']);
-
 // Password reset route
 Route::get('/reset-password/{token}', function ($token) {
     return view('application');
@@ -31,6 +28,21 @@ Route::get('/linkedin/callback', [UserVerificationController::class, 'linkedinCa
 
 // Mock LinkedIn OAuth for testing (temporary)
 Route::get('/mock-linkedin/{userType}/{userId}', function($userType, $userId) {
+    // Simulate successful LinkedIn verification
+    $verification = \App\Models\UserVerification::firstOrCreate([
+        'user_type' => $userType,
+        'user_id' => $userId,
+    ]);
+    
+    $verification->linkedin_verified = true;
+    $verification->linkedin_id = 'mock_linkedin_id_' . time();
+    $verification->save();
+    
+    return redirect("/registration/timeline/{$userType}/{$userId}?linkedin=success");
+});
+
+// Test route for LinkedIn OAuth
+Route::get('/test-linkedin/{userType}/{userId}', function ($userType, $userId) {
     // Simulate successful LinkedIn verification
     $verification = \App\Models\UserVerification::firstOrCreate([
         'user_type' => $userType,

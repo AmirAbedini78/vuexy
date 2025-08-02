@@ -123,9 +123,15 @@ const login = async () => {
     console.log("About to redirect to timeline...");
     // Always redirect to timeline after login
     await nextTick();
-    router.push(
-      `/registration/timeline/${user.role || "individual"}/${user.id}`
-    );
+
+    // Map user role to timeline user type
+    let userType = user.role;
+    if (user.role === "user") {
+      // Default to 'individual' for regular users
+      userType = "individual";
+    }
+
+    router.push(`/registration/timeline/${userType}/${user.id}`);
   } catch (err) {
     console.error("Login error:", err);
     if (err.data && err.data.errors) {

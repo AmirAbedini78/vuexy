@@ -80,6 +80,13 @@ class EmailVerificationController extends Controller
         // Check if there's a redirect URL in the query parameters
         $redirectUrl = request()->query('redirect');
         if ($redirectUrl) {
+            // Check if this is a timeline redirect
+            if (strpos($redirectUrl, '/registration/timeline/') !== false) {
+                // Add verified=true parameter to the timeline redirect URL
+                $separator = strpos($redirectUrl, '?') !== false ? '&' : '?';
+                $redirectUrl .= $separator . 'verified=true';
+                \Log::info('Redirecting to timeline with verified parameter', ['redirect_url' => $redirectUrl]);
+            }
             return redirect($redirectUrl);
         }
 
