@@ -351,7 +351,7 @@ async function handleDone() {
     console.log("validItineraries after filtering:", validItineraries);
 
     if (validItineraries.length === 0) {
-      alert("لطفاً حداقل یک روز با عنوان وارد کنید");
+      alert("Please add at least one day with a title");
       loading.value = false;
       return;
     }

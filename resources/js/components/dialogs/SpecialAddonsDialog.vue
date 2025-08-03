@@ -297,7 +297,7 @@ function handleDone() {
     console.log("validAddons after filtering:", validAddons);
 
     if (validAddons.length === 0) {
-      alert("لطفاً حداقل یک افزونه با عنوان وارد کنید");
+      alert("Please add at least one addon with a title");
       return;
     }
 
@@ -311,7 +311,7 @@ function handleDone() {
     closeDialog();
   } catch (error) {
     console.error("Error in handleDone:", error);
-    alert("خطا در ذخیره اطلاعات");
+    alert("Error saving data");
   }
 }
 

@@ -9,11 +9,9 @@
     <VCard>
       <VCardTitle class="d-flex justify-space-between align-center pa-6">
         <div>
-          <h2 class="text-h4 font-weight-bold">
-            Add your {{ itemTermPlural }} details
-          </h2>
+          <h2 class="text-h4 font-weight-bold">Add your Periods details</h2>
           <p class="text-body-1 text-medium-emphasis mt-2">
-            On your Listing Page each {{ itemTerm }} Date/Price will be Bookable
+            On your Listing Page each Departure Date/Price will be Bookable
             Separately
           </p>
         </div>
@@ -53,7 +51,7 @@
                 <div class="flex-grow-1">
                   <div class="d-flex align-center justify-space-between">
                     <div class="font-weight-bold text-body-1">
-                      {{ period.title || `${itemTerm} ${index + 1} title` }}
+                      {{ period.title || `Period ${index + 1} title` }}
                     </div>
                     <VIcon
                       :icon="
@@ -126,7 +124,7 @@
             >
               <div class="d-flex justify-space-between align-center mb-6">
                 <h3 class="text-h5 font-weight-bold">
-                  {{ itemTerm }} {{ String(index + 1).padStart(2, "0") }}
+                  Period {{ String(index + 1).padStart(2, "0") }}
                 </h3>
                 <div class="d-flex align-center" style="color: #4caf50">
                   <VIcon icon="tabler-check" size="16" />
@@ -139,11 +137,11 @@
                 <VCol cols="12">
                   <div class="mb-4">
                     <label class="v-label text-body-2 mb-3 d-block">
-                      {{ itemTerm }} Title
+                      Period Title
                     </label>
                     <VTextField
                       v-model="period.title"
-                      :placeholder="`${itemTerm} Title`"
+                      placeholder="Period Title"
                       variant="outlined"
                       density="compact"
                     />
@@ -185,7 +183,7 @@
                   <!-- Departure Capacity -->
                   <div class="mb-4">
                     <label class="v-label text-body-2 mb-3 d-block">
-                      {{ itemTerm }} Capacity
+                      Period Capacity
                     </label>
                     <div class="d-flex gap-3">
                       <VTextField
@@ -242,13 +240,13 @@
                   <div class="mb-4">
                     <VCheckbox
                       v-model="sameCapacityForAll"
-                      :label="`Same Capacity for all ${itemTermPluralLower}`"
+                      label="Same Capacity for all Periods"
                       class="mb-2"
                       @click.stop
                     />
                     <VCheckbox
                       v-model="samePriceForAll"
-                      :label="`Same price for every ${itemTermLower}`"
+                      label="Same price for every Periods"
                       @click.stop
                     />
                   </div>
@@ -262,7 +260,7 @@
               >
                 <div class="d-flex justify-space-between align-center mb-4">
                   <h4 class="text-h6 font-weight-bold" style="color: #999">
-                    {{ itemTerm }} 02
+                    Period 02
                   </h4>
                 </div>
 
@@ -274,11 +272,11 @@
                         class="v-label text-body-2 mb-3 d-block"
                         style="color: #999"
                       >
-                        {{ itemTerm }} Title
+                        Period Title
                       </label>
                       <VTextField
                         v-model="localPeriods[1].title"
-                        :placeholder="`${itemTerm} Title`"
+                        placeholder="Period Title"
                         variant="outlined"
                         density="compact"
                         disabled
@@ -328,7 +326,7 @@
                         class="v-label text-body-2 mb-3 d-block"
                         style="color: #999"
                       >
-                        {{ itemTerm }} Capacity
+                        Period Capacity
                       </label>
                       <div class="d-flex gap-3">
                         <VTextField
@@ -416,7 +414,7 @@
             min-width: 140px;
           "
         >
-          Add More {{ itemTermPlural }}
+          Add More Periods
         </VBtn>
       </VCardActions>
     </VCard>
