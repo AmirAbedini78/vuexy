@@ -2,8 +2,10 @@
   <VDialog
     v-model="isOpen"
     max-width="1200px"
-    persistent
     class="special-addons-modal"
+    @click:outside="closeDialog"
+    @keydown.esc="closeDialog"
+    @update:model-value="handleModelValueUpdate"
   >
     <VCard class="special-addons-card">
       <!-- Header -->
@@ -100,11 +102,12 @@
                 </div>
                 <div class="form-field price-field">
                   <VTextField
-                    v-model="addon.price"
+                    v-model.number="addon.price"
                     placeholder="Price"
                     variant="outlined"
                     density="comfortable"
                     type="number"
+                    min="0"
                     step="0.01"
                     class="price-input"
                     hide-details
@@ -133,7 +136,7 @@
       <div class="modal-footer">
         <VBtn
           variant="elevated"
-          @click="handleDone"
+          @click.stop="handleDone"
           :loading="loading"
           class="done-btn"
         >
@@ -176,7 +179,9 @@ const localAddons = ref([]);
 // Computed property for dialog visibility
 const isOpen = computed({
   get: () => props.modelValue,
-  set: (value) => emit("update:modelValue", value),
+  set: (value) => {
+    emit("update:modelValue", value);
+  },
 });
 
 // Initialize local addons when dialog opens
@@ -260,7 +265,7 @@ function addNewAddon() {
 
 // Close dialog
 function closeDialog() {
-  isOpen.value = false;
+  emit("update:modelValue", false);
   emit("close");
 }
 
@@ -308,6 +313,15 @@ function handleDone() {
     console.error("Error in handleDone:", error);
     alert("خطا در ذخیره اطلاعات");
   }
+}
+
+// Handle modelValue update to prevent immediate re-opening
+function handleModelValueUpdate(newValue) {
+  if (!newValue) {
+    // Modal is closing
+    emit("close");
+  }
+  emit("update:modelValue", newValue);
 }
 </script>
 

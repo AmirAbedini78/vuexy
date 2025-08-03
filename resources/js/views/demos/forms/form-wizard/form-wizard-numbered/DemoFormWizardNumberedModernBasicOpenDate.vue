@@ -177,6 +177,9 @@ const createNewAdventure = () => {
 
 // Handle itinerary completion
 const handleItineraryDone = (itineraryData, editingIndex = -1) => {
+  // Immediately close the modal
+  showItineraryDialog.value = false;
+
   try {
     if (editingIndex >= 0) {
       // Editing existing itinerary
@@ -203,7 +206,7 @@ const handleItineraryDone = (itineraryData, editingIndex = -1) => {
       }
     }
 
-    // Update the numbering for all itineraries
+    // Update numbering
     itineraries.value.forEach((itinerary, index) => {
       itinerary.number = index + 1;
     });
@@ -211,12 +214,21 @@ const handleItineraryDone = (itineraryData, editingIndex = -1) => {
     console.error("Error in handleItineraryDone:", error);
     alert("خطا در ذخیره اطلاعات");
   } finally {
+    // Ensure modal is closed
     showItineraryDialog.value = false;
+
+    // Additional safety measure - force close after a short delay
+    setTimeout(() => {
+      showItineraryDialog.value = false;
+    }, 200);
   }
 };
 
 // Handle special addon completion
 const handleSpecialAddonDone = async (addons, editingIndex) => {
+  // Immediately close the modal
+  showSpecialAddonsDialog.value = false;
+
   try {
     console.log("handleSpecialAddonDone called with:", {
       addons,
@@ -231,17 +243,30 @@ const handleSpecialAddonDone = async (addons, editingIndex) => {
       specialAddons.value.push(...addons);
     }
 
+    // Update numbering
+    specialAddons.value.forEach((addon, index) => {
+      addon.number = index + 1;
+    });
+
     console.log("Total addons count:", specialAddons.value.length);
   } catch (error) {
     console.error("Error in handleSpecialAddonDone:", error);
     alert("خطا در ذخیره اطلاعات");
   } finally {
-    // همیشه مدال را ببند
+    // Ensure modal is closed
     showSpecialAddonsDialog.value = false;
+
+    // Additional safety measure - force close after a short delay
+    setTimeout(() => {
+      showSpecialAddonsDialog.value = false;
+    }, 200);
   }
 };
 
 const handlePeriodsDone = async (newPeriods, editingIndex) => {
+  // Close the modal immediately
+  showPeriodsDialog.value = false;
+
   try {
     console.log("handlePeriodsDone called with:", { newPeriods, editingIndex });
 
@@ -263,9 +288,6 @@ const handlePeriodsDone = async (newPeriods, editingIndex) => {
   } catch (error) {
     console.error("Error in handlePeriodsDone:", error);
     alert("خطا در ذخیره اطلاعات");
-  } finally {
-    // همیشه مدال را ببند
-    showPeriodsDialog.value = false;
   }
 };
 
@@ -1915,6 +1937,7 @@ const dropPeriod = (index, event) => {
     v-model="showPeriodsDialog"
     :periods="periods"
     :editing-index="editingPeriodIndex"
+    @close="showPeriodsDialog = false"
     @done="handlePeriodsDone"
   />
 </template>
@@ -2373,5 +2396,207 @@ const dropPeriod = (index, event) => {
   background: #f8f8f8;
   border-radius: 8px;
   border: 2px dashed #e0e0e0;
+}
+
+/* Section styling */
+.section-title {
+  font-family: "Karla", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.section-description {
+  font-family: "Karla", sans-serif;
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 16px;
+}
+
+/* Itinerary styling */
+.itinerary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.itinerary-title {
+  font-family: "Karla", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.itinerary-list-container {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  overflow: hidden;
+}
+
+.itinerary-list-item {
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s;
+  cursor: move;
+}
+
+.itinerary-list-item:last-child {
+  border-bottom: none;
+}
+
+.itinerary-list-item:hover {
+  background-color: #f8f8f8;
+}
+
+.itinerary-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Special Addons styling */
+.special-addons-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.special-addons-title {
+  font-family: "Karla", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.special-addons-list {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  overflow: hidden;
+}
+
+.special-addon-item {
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s;
+  cursor: move;
+}
+
+.special-addon-item:last-child {
+  border-bottom: none;
+}
+
+.special-addon-item:hover {
+  background-color: #f8f8f8;
+}
+
+.addon-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.addon-left {
+  display: flex;
+  align-items: flex-start;
+  flex: 1;
+}
+
+.addon-badge {
+  background: #ec8d22;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin-right: 12px;
+  font-family: "Anton", sans-serif;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.addon-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.addon-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.addon-title {
+  font-family: "Karla", sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  flex: 1;
+  margin-right: 8px;
+}
+
+.addon-description {
+  margin-bottom: 8px;
+}
+
+.description-text {
+  font-family: "Karla", sans-serif;
+  font-size: 14px;
+  color: #666;
+}
+
+.addon-price {
+  font-family: "Karla", sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  text-align: right;
+}
+
+.addon-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 12px;
+}
+
+/* Add item button styling */
+.add-item-btn {
+  min-height: 40px;
+  padding: 0 20px;
+  font-size: 14px;
+  text-transform: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.add-item-btn:hover {
+  background-color: #d67d1a !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Add more button styling */
+.add-more-btn {
+  min-height: 36px;
+  padding: 0 16px;
+  font-size: 14px;
+  text-transform: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.add-more-btn:hover {
+  background-color: #d67d1a !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 </style>

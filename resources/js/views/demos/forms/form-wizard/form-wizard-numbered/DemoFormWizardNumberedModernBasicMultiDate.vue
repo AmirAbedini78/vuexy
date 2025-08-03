@@ -58,6 +58,7 @@ const periods = ref([]);
 const editingAddonIndex = ref(-1);
 const editingItineraryIndex = ref(-1);
 const editingPeriodIndex = ref(-1);
+const listingId = ref(null); // For ItineraryAccommodationDialog
 
 // Add new maps and routes field
 const addMapsAndRoutes = () => {
@@ -103,12 +104,20 @@ const openItineraryModal = () => {
   console.log("New showItineraryDialog value:", showItineraryDialog.value);
 };
 
+const openSpecialAddonsModal = () => {
+  editingAddonIndex.value = -1; // Reset editing index for new addons
+  showSpecialAddonsDialog.value = true;
+};
+
 const openPeriodsModal = () => {
   editingPeriodIndex.value = -1; // Reset editing index for new periods
   showPeriodsDialog.value = true;
 };
 
 const handlePeriodsDone = async (newPeriods, editingIndex) => {
+  // Close the modal immediately
+  showPeriodsDialog.value = false;
+
   try {
     console.log("handlePeriodsDone called with:", { newPeriods, editingIndex });
 
@@ -130,9 +139,85 @@ const handlePeriodsDone = async (newPeriods, editingIndex) => {
   } catch (error) {
     console.error("Error in handlePeriodsDone:", error);
     alert("خطا در ذخیره اطلاعات");
-  } finally {
-    // همیشه مدال را ببند
-    showPeriodsDialog.value = false;
+  }
+};
+
+// Handle itinerary completion
+const handleItineraryDone = (itineraryData, editingIndex = -1) => {
+  try {
+    if (editingIndex >= 0) {
+      // Editing existing itinerary
+      itineraries.value[editingIndex] = itineraryData[0];
+      editingItineraryIndex.value = -1;
+    } else {
+      // Adding new itineraries
+      if (itineraries.value.length > 0) {
+        const newItineraries = itineraryData.filter((newItinerary) => {
+          return !itineraries.value.some(
+            (existingItinerary) =>
+              existingItinerary.title === newItinerary.title &&
+              existingItinerary.description === newItinerary.description &&
+              existingItinerary.accommodation === newItinerary.accommodation &&
+              existingItinerary.location === newItinerary.location
+          );
+        });
+
+        if (newItineraries.length > 0) {
+          itineraries.value = [...itineraries.value, ...newItineraries];
+        }
+      } else {
+        itineraries.value = itineraryData;
+      }
+    }
+
+    // Update numbering
+    itineraries.value.forEach((itinerary, index) => {
+      itinerary.number = index + 1;
+    });
+
+    showItineraryDialog.value = false;
+  } catch (error) {
+    console.error("Error in handleItineraryDone:", error);
+    alert("خطا در ذخیره اطلاعات");
+  }
+};
+
+// Handle special addon completion
+const handleSpecialAddonDone = (addonData, editingIndex = -1) => {
+  try {
+    if (editingIndex >= 0) {
+      // Editing existing addon
+      specialAddons.value[editingIndex] = addonData[0];
+      editingAddonIndex.value = -1;
+    } else {
+      // Adding new addons
+      if (specialAddons.value.length > 0) {
+        const newAddons = addonData.filter((newAddon) => {
+          return !specialAddons.value.some(
+            (existingAddon) =>
+              existingAddon.title === newAddon.title &&
+              existingAddon.description === newAddon.description &&
+              existingAddon.price === newAddon.price
+          );
+        });
+
+        if (newAddons.length > 0) {
+          specialAddons.value = [...specialAddons.value, ...newAddons];
+        }
+      } else {
+        specialAddons.value = addonData;
+      }
+    }
+
+    // Update numbering
+    specialAddons.value.forEach((addon, index) => {
+      addon.number = index + 1;
+    });
+
+    showSpecialAddonsDialog.value = false;
+  } catch (error) {
+    console.error("Error in handleSpecialAddonDone:", error);
+    alert("خطا در ذخیره اطلاعات");
   }
 };
 
@@ -153,6 +238,40 @@ const removePeriod = (index) => {
   }
 };
 
+// Edit itinerary item
+const editItineraryItem = (index) => {
+  editingItineraryIndex.value = index;
+  showItineraryDialog.value = true;
+};
+
+// Remove itinerary
+const removeItinerary = (index) => {
+  if (confirm("آیا مطمئن هستید که می‌خواهید این روز را حذف کنید؟")) {
+    itineraries.value.splice(index, 1);
+    // Update numbers
+    itineraries.value.forEach((itinerary, idx) => {
+      itinerary.number = idx + 1;
+    });
+  }
+};
+
+// Edit special addon
+const editSpecialAddon = (index) => {
+  editingAddonIndex.value = index;
+  showSpecialAddonsDialog.value = true;
+};
+
+// Remove special addon
+const removeSpecialAddon = (index) => {
+  if (confirm("آیا مطمئن هستید که می‌خواهید این افزونه را حذف کنید؟")) {
+    specialAddons.value.splice(index, 1);
+    // Update numbers
+    specialAddons.value.forEach((addon, idx) => {
+      addon.number = idx + 1;
+    });
+  }
+};
+
 // Drag and drop handlers for periods
 const dragStartPeriod = (index, event) => {
   event.dataTransfer.setData("text/plain", index);
@@ -166,6 +285,38 @@ const dropPeriod = (index, event) => {
   periods.value.splice(index, 0, draggedItem);
   periods.value.forEach((period, idx) => {
     period.number = idx + 1;
+  });
+};
+
+// Drag and drop handlers for itineraries
+const dragStartItinerary = (index, event) => {
+  event.dataTransfer.setData("text/plain", index);
+  event.dataTransfer.effectAllowed = "move";
+};
+
+const dropItinerary = (index, event) => {
+  event.preventDefault();
+  const draggedIndex = event.dataTransfer.getData("text/plain");
+  const [draggedItem] = itineraries.value.splice(draggedIndex, 1);
+  itineraries.value.splice(index, 0, draggedItem);
+  itineraries.value.forEach((itinerary, idx) => {
+    itinerary.number = idx + 1;
+  });
+};
+
+// Drag and drop handlers for special addons
+const dragStartSpecialAddon = (index, event) => {
+  event.dataTransfer.setData("text/plain", index);
+  event.dataTransfer.effectAllowed = "move";
+};
+
+const dropSpecialAddon = (index, event) => {
+  event.preventDefault();
+  const draggedIndex = event.dataTransfer.getData("text/plain");
+  const [draggedItem] = specialAddons.value.splice(draggedIndex, 1);
+  specialAddons.value.splice(index, 0, draggedItem);
+  specialAddons.value.forEach((addon, idx) => {
+    addon.number = idx + 1;
   });
 };
 
@@ -1099,36 +1250,217 @@ const onSubmit = async () => {
                 <VCol cols="12" md="6">
                   <!-- Itinerary/Accommodation Day by Day -->
                   <div class="mb-6">
-                    <label
-                      class="v-label text-body-2 mb-3 d-block"
-                      style="
-                        font-size: 16px !important;
-                        font-weight: 400 !important;
-                      "
-                    >
-                      Itinerary/Accommodation Day by Day
-                      <span class="required-star">*</span>
-                    </label>
-                    <p
-                      class="text-caption text-medium-emphasis mb-3"
-                      style="font-size: 12px"
-                    >
+                    <h3 class="section-title">
+                      Itinerary/Accommodation Day by Day*
+                    </h3>
+                    <p class="section-description">
                       Add your Itinerary/Accommodations and all related details
                       here
                     </p>
-                    <VBtn
-                      color="primary"
-                      variant="elevated"
-                      class="add-itinerary-btn"
-                      style="
-                        background-color: #ec8d22 !important;
-                        color: #fff !important;
-                        border-radius: 8px;
-                        font-weight: 500;
-                      "
+
+                    <!-- Show button when no items -->
+                    <div
+                      v-if="itineraries.length === 0"
+                      class="empty-state-container"
                     >
-                      Add Itinerary/Accomodation
-                    </VBtn>
+                      <VBtn
+                        color="primary"
+                        variant="elevated"
+                        class="add-item-btn"
+                        @click="openItineraryModal"
+                      >
+                        Add Itinerary/Accomodation
+                      </VBtn>
+                    </div>
+
+                    <!-- Show header with button when items exist -->
+                    <div v-else class="itinerary-header">
+                      <h3 class="itinerary-title">Itinerary/Accommodations</h3>
+                      <VBtn
+                        color="primary"
+                        variant="elevated"
+                        class="add-more-btn"
+                        style="
+                          background-color: #ec8d22 !important;
+                          color: #fff !important;
+                          border-radius: 8px;
+                          font-weight: 500;
+                          font-size: 14px;
+                          padding: 8px 16px;
+                          min-height: 36px;
+                          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+                        "
+                        @click="openItineraryModal"
+                      >
+                        Add More
+                      </VBtn>
+                    </div>
+
+                    <div
+                      v-if="itineraries.length > 0"
+                      class="itinerary-list-container"
+                    >
+                      <div
+                        v-for="(itinerary, index) in itineraries"
+                        :key="itinerary.id"
+                        class="itinerary-list-item"
+                        style="
+                          background: transparent;
+                          border: none;
+                          border-radius: 0;
+                          padding: 16px 0;
+                          margin-top: 0;
+                          box-shadow: none;
+                          position: relative;
+                        "
+                        draggable="true"
+                        @dragstart="dragStartItinerary(index, $event)"
+                        @dragover.prevent
+                        @drop="dropItinerary(index, $event)"
+                        @dragenter.prevent
+                      >
+                        <div class="d-flex justify-space-between align-center">
+                          <div class="d-flex align-center">
+                            <div
+                              class="itinerary-number"
+                              style="
+                                background: #ec8d22;
+                                color: white;
+                                width: 32px;
+                                height: 32px;
+                                border-radius: 6px;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                font-weight: bold;
+                                margin-right: 12px;
+                                font-family: 'Anton', sans-serif;
+                                font-size: 12px;
+                                position: relative;
+                              "
+                            >
+                              {{
+                                (itinerary.number || 1)
+                                  .toString()
+                                  .padStart(2, "0")
+                              }}
+                              <!-- Location icon under number badge -->
+                              <div
+                                v-if="index < itineraries.length - 1"
+                                style="
+                                  position: absolute;
+                                  left: 50%;
+                                  top: 100%;
+                                  transform: translateX(-50%);
+                                  margin-top: 4px;
+                                  z-index: 2;
+                                "
+                              >
+                                <VIcon
+                                  icon="tabler-map-pin"
+                                  size="16"
+                                  style="color: #ec8d22"
+                                />
+                              </div>
+                              <!-- Vertical dotted line under icon -->
+                              <div
+                                v-if="index < itineraries.length - 1"
+                                class="vertical-dotted-line"
+                                style="
+                                  position: absolute;
+                                  left: 50%;
+                                  top: 100%;
+                                  transform: translateX(-50%);
+                                  margin-top: 20px;
+                                  bottom: -16px;
+                                  width: 1px;
+                                  background: repeating-linear-gradient(
+                                    to bottom,
+                                    #666 0,
+                                    #666 2px,
+                                    transparent 2px,
+                                    transparent 4px
+                                  );
+                                "
+                              ></div>
+                            </div>
+                            <div>
+                              <div
+                                class="itinerary-title"
+                                style="
+                                  font-weight: 600;
+                                  color: #333;
+                                  font-family: 'Karla', sans-serif;
+                                  font-size: 16px;
+                                "
+                              >
+                                {{
+                                  itinerary.title ||
+                                  `Day ${itinerary.number || 1} Itinerary Title`
+                                }}
+                              </div>
+                              <div
+                                class="itinerary-accommodation"
+                                style="
+                                  color: #666;
+                                  font-size: 14px;
+                                  margin-top: 4px;
+                                  font-family: 'Karla', sans-serif;
+                                "
+                              >
+                                Day {{ itinerary.number || 1 }} Accommodation
+                              </div>
+                              <div
+                                class="itinerary-location"
+                                style="
+                                  color: #999;
+                                  font-size: 12px;
+                                  margin-top: 2px;
+                                  font-family: 'Karla', sans-serif;
+                                "
+                              >
+                                {{
+                                  itinerary.location ||
+                                  "Location would take place here"
+                                }}
+                              </div>
+                            </div>
+                          </div>
+                          <div class="itinerary-actions">
+                            <VBtn
+                              icon
+                              size="small"
+                              variant="text"
+                              @click="editItineraryItem(index)"
+                              style="margin-right: 8px; color: #666"
+                            >
+                              <VIcon icon="tabler-edit" size="18" />
+                            </VBtn>
+                            <VBtn
+                              icon
+                              size="small"
+                              variant="text"
+                              color="error"
+                              @click="removeItinerary(index)"
+                              style="margin-right: 8px; color: #666"
+                            >
+                              <VIcon icon="tabler-trash" size="18" />
+                            </VBtn>
+                            <VBtn
+                              icon
+                              size="small"
+                              variant="text"
+                              style="color: #333"
+                              class="drag-handle"
+                              draggable="true"
+                              @dragstart="dragStartItinerary(index, $event)"
+                            >
+                              <VIcon icon="tabler-arrows-move" size="18" />
+                            </VBtn>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   <!-- Provider's Personal Policies -->
@@ -1170,34 +1502,168 @@ const onSubmit = async () => {
                 <VCol cols="12" md="6">
                   <!-- Special Addons -->
                   <div class="mb-6">
-                    <label
-                      class="v-label text-body-2 mb-3 d-block"
-                      style="
-                        font-size: 16px !important;
-                        font-weight: 400 !important;
-                      "
-                    >
-                      Special Addons
-                    </label>
-                    <p
-                      class="text-caption text-medium-emphasis mb-3"
-                      style="font-size: 12px"
-                    >
+                    <h3 class="section-title">Special Addons</h3>
+                    <p class="section-description">
                       Add your Special addons and all related details here
                     </p>
-                    <VBtn
-                      color="primary"
-                      variant="elevated"
-                      class="add-addons-btn"
-                      style="
-                        background-color: #ec8d22 !important;
-                        color: #fff !important;
-                        border-radius: 8px;
-                        font-weight: 500;
-                      "
+
+                    <!-- Show button when no items -->
+                    <div
+                      v-if="specialAddons.length === 0"
+                      class="empty-state-container"
                     >
-                      Add Special Addons
-                    </VBtn>
+                      <VBtn
+                        color="primary"
+                        variant="elevated"
+                        class="add-item-btn"
+                        @click="openSpecialAddonsModal"
+                      >
+                        Add Special Addons
+                      </VBtn>
+                    </div>
+
+                    <!-- Show header with button when items exist -->
+                    <div v-else class="special-addons-header">
+                      <h3 class="special-addons-title">Special Addons</h3>
+                      <VBtn
+                        color="primary"
+                        variant="elevated"
+                        class="add-more-btn"
+                        style="
+                          background-color: #ec8d22 !important;
+                          color: #fff !important;
+                          border-radius: 8px;
+                          font-weight: 500;
+                          font-size: 14px;
+                          padding: 8px 16px;
+                          min-height: 36px;
+                          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+                        "
+                        @click="openSpecialAddonsModal"
+                      >
+                        Add More
+                      </VBtn>
+                    </div>
+
+                    <div
+                      v-if="specialAddons.length > 0"
+                      class="special-addons-list"
+                    >
+                      <div
+                        v-for="(addon, index) in specialAddons"
+                        :key="index"
+                        class="special-addon-item"
+                        draggable="true"
+                        @dragstart="dragStartSpecialAddon(index, $event)"
+                        @dragover.prevent
+                        @drop="dropSpecialAddon(index, $event)"
+                        @dragenter.prevent
+                      >
+                        <div class="addon-content">
+                          <div class="addon-left">
+                            <div class="addon-badge" style="position: relative">
+                              <span class="badge-number">{{
+                                (addon.number || index + 1)
+                                  .toString()
+                                  .padStart(2, "0")
+                              }}</span>
+                              <!-- Star icon under number badge -->
+                              <div
+                                v-if="index < specialAddons.length - 1"
+                                style="
+                                  position: absolute;
+                                  left: 50%;
+                                  top: 100%;
+                                  transform: translateX(-50%);
+                                  margin-top: 4px;
+                                  z-index: 2;
+                                "
+                              >
+                                <VIcon
+                                  icon="tabler-star"
+                                  size="16"
+                                  style="color: #ec8d22"
+                                />
+                              </div>
+                              <!-- Vertical dotted line under icon -->
+                              <div
+                                v-if="index < specialAddons.length - 1"
+                                class="vertical-dotted-line"
+                                style="
+                                  position: absolute;
+                                  left: 50%;
+                                  top: 100%;
+                                  transform: translateX(-50%);
+                                  margin-top: 20px;
+                                  bottom: -16px;
+                                  width: 1px;
+                                  background: repeating-linear-gradient(
+                                    to bottom,
+                                    #666 0,
+                                    #666 2px,
+                                    transparent 2px,
+                                    transparent 4px
+                                  );
+                                "
+                              ></div>
+                            </div>
+                            <div class="addon-info">
+                              <div class="addon-title-row">
+                                <span class="addon-title">{{
+                                  addon.title ||
+                                  `Addon ${addon.number || index + 1} Title`
+                                }}</span>
+                                <VIcon
+                                  icon="tabler-chevron-down"
+                                  size="16"
+                                  class="chevron-icon"
+                                />
+                              </div>
+                              <div class="addon-description">
+                                <span class="description-text">{{
+                                  addon.description ||
+                                  "Your addon description would take place here"
+                                }}</span>
+                              </div>
+                              <div class="addon-price">
+                                € {{ (addon.price || 0).toFixed(2) }}
+                              </div>
+                            </div>
+                          </div>
+                          <div class="addon-actions">
+                            <VBtn
+                              icon
+                              size="small"
+                              variant="text"
+                              @click="editSpecialAddon(index)"
+                              class="action-btn"
+                            >
+                              <VIcon icon="tabler-edit" size="18" />
+                            </VBtn>
+                            <VBtn
+                              icon
+                              size="small"
+                              variant="text"
+                              color="error"
+                              @click="removeSpecialAddon(index)"
+                              class="action-btn"
+                            >
+                              <VIcon icon="tabler-trash" size="18" />
+                            </VBtn>
+                            <VBtn
+                              icon
+                              size="small"
+                              variant="text"
+                              class="action-btn drag-handle"
+                              draggable="true"
+                              @dragstart="dragStartSpecialAddon(index, $event)"
+                            >
+                              <VIcon icon="tabler-arrows-move" size="18" />
+                            </VBtn>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </VCol>
               </VRow>
@@ -1296,7 +1762,26 @@ const onSubmit = async () => {
     v-model="showPeriodsDialog"
     :periods="periods"
     :editing-index="editingPeriodIndex"
+    :use-period-terminology="false"
+    @close="showPeriodsDialog = false"
     @done="handlePeriodsDone"
+  />
+
+  <ItineraryAccommodationDialog
+    v-model="showItineraryDialog"
+    :listing-id="listingId"
+    :initial-days="itineraries"
+    :editing-index="editingItineraryIndex"
+    @close="showItineraryDialog = false"
+    @done="handleItineraryDone"
+  />
+
+  <SpecialAddonsDialog
+    v-model="showSpecialAddonsDialog"
+    :special-addons="specialAddons"
+    :editing-index="editingAddonIndex"
+    @close="showSpecialAddonsDialog = false"
+    @done="handleSpecialAddonDone"
   />
 </template>
 
@@ -1868,5 +2353,207 @@ const onSubmit = async () => {
   background: #f8f8f8;
   border-radius: 8px;
   border: 2px dashed #e0e0e0;
+}
+
+/* Section styling */
+.section-title {
+  font-family: "Karla", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.section-description {
+  font-family: "Karla", sans-serif;
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 16px;
+}
+
+/* Itinerary styling */
+.itinerary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.itinerary-title {
+  font-family: "Karla", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.itinerary-list-container {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  overflow: hidden;
+}
+
+.itinerary-list-item {
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s;
+  cursor: move;
+}
+
+.itinerary-list-item:last-child {
+  border-bottom: none;
+}
+
+.itinerary-list-item:hover {
+  background-color: #f8f8f8;
+}
+
+.itinerary-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Special Addons styling */
+.special-addons-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.special-addons-title {
+  font-family: "Karla", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.special-addons-list {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  overflow: hidden;
+}
+
+.special-addon-item {
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s;
+  cursor: move;
+}
+
+.special-addon-item:last-child {
+  border-bottom: none;
+}
+
+.special-addon-item:hover {
+  background-color: #f8f8f8;
+}
+
+.addon-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.addon-left {
+  display: flex;
+  align-items: flex-start;
+  flex: 1;
+}
+
+.addon-badge {
+  background: #ec8d22;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin-right: 12px;
+  font-family: "Anton", sans-serif;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.addon-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.addon-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.addon-title {
+  font-family: "Karla", sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  flex: 1;
+  margin-right: 8px;
+}
+
+.addon-description {
+  margin-bottom: 8px;
+}
+
+.description-text {
+  font-family: "Karla", sans-serif;
+  font-size: 14px;
+  color: #666;
+}
+
+.addon-price {
+  font-family: "Karla", sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  text-align: right;
+}
+
+.addon-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 12px;
+}
+
+/* Add item button styling */
+.add-item-btn {
+  min-height: 40px;
+  padding: 0 20px;
+  font-size: 14px;
+  text-transform: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.add-item-btn:hover {
+  background-color: #d67d1a !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Add more button styling */
+.add-more-btn {
+  min-height: 36px;
+  padding: 0 16px;
+  font-size: 14px;
+  text-transform: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.add-more-btn:hover {
+  background-color: #d67d1a !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 </style>

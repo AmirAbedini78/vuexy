@@ -1,11 +1,19 @@
 <template>
-  <VDialog v-model="isOpen" max-width="1200px" persistent>
+  <VDialog
+    v-model="isOpen"
+    max-width="1200px"
+    @click:outside="closeDialog"
+    @keydown.esc="closeDialog"
+    @update:model-value="handleModelValueUpdate"
+  >
     <VCard>
       <VCardTitle class="d-flex justify-space-between align-center pa-6">
         <div>
-          <h2 class="text-h4 font-weight-bold">Add your Departures details</h2>
+          <h2 class="text-h4 font-weight-bold">
+            Add your {{ itemTermPlural }} details
+          </h2>
           <p class="text-body-1 text-medium-emphasis mt-2">
-            On your Listing Page each Departure Date/Price will be Bookable
+            On your Listing Page each {{ itemTerm }} Date/Price will be Bookable
             Separately
           </p>
         </div>
@@ -45,7 +53,7 @@
                 <div class="flex-grow-1">
                   <div class="d-flex align-center justify-space-between">
                     <div class="font-weight-bold text-body-1">
-                      {{ period.title || `Departure ${index + 1} title` }}
+                      {{ period.title || `${itemTerm} ${index + 1} title` }}
                     </div>
                     <VIcon
                       :icon="
@@ -118,13 +126,30 @@
             >
               <div class="d-flex justify-space-between align-center mb-6">
                 <h3 class="text-h5 font-weight-bold">
-                  Departure {{ String(index + 1).padStart(2, "0") }}
+                  {{ itemTerm }} {{ String(index + 1).padStart(2, "0") }}
                 </h3>
                 <div class="d-flex align-center" style="color: #4caf50">
                   <VIcon icon="tabler-check" size="16" />
                   <span class="ml-1">Changes saved</span>
                 </div>
               </div>
+
+              <!-- Period Title -->
+              <VRow>
+                <VCol cols="12">
+                  <div class="mb-4">
+                    <label class="v-label text-body-2 mb-3 d-block">
+                      {{ itemTerm }} Title
+                    </label>
+                    <VTextField
+                      v-model="period.title"
+                      :placeholder="`${itemTerm} Title`"
+                      variant="outlined"
+                      density="compact"
+                    />
+                  </div>
+                </VCol>
+              </VRow>
 
               <VRow>
                 <VCol cols="12" md="6">
@@ -160,20 +185,24 @@
                   <!-- Departure Capacity -->
                   <div class="mb-4">
                     <label class="v-label text-body-2 mb-3 d-block">
-                      Departure Capacity
+                      {{ itemTerm }} Capacity
                     </label>
                     <div class="d-flex gap-3">
                       <VTextField
-                        v-model="period.minCapacity"
+                        v-model.number="period.minCapacity"
                         placeholder="Min Num"
                         type="number"
+                        min="1"
+                        step="1"
                         class="capacity-input"
                         style="max-width: 120px"
                       />
                       <VTextField
-                        v-model="period.maxCapacity"
+                        v-model.number="period.maxCapacity"
                         placeholder="Max Num"
                         type="number"
+                        min="1"
+                        step="1"
                         class="capacity-input"
                         style="max-width: 120px"
                       />
@@ -189,9 +218,11 @@
                     <div class="price-input-wrapper">
                       <span class="euro-symbol-left">€</span>
                       <VTextField
-                        v-model="period.price"
+                        v-model.number="period.price"
                         placeholder="Price"
                         type="number"
+                        min="0"
+                        step="0.01"
                         class="price-input"
                       />
                     </div>
@@ -211,27 +242,51 @@
                   <div class="mb-4">
                     <VCheckbox
                       v-model="sameCapacityForAll"
-                      label="Same Capacity for all departures"
+                      :label="`Same Capacity for all ${itemTermPluralLower}`"
                       class="mb-2"
+                      @click.stop
                     />
                     <VCheckbox
                       v-model="samePriceForAll"
-                      label="Same price for every departure"
+                      :label="`Same price for every ${itemTermLower}`"
+                      @click.stop
                     />
                   </div>
                 </VCol>
               </VRow>
 
-              <!-- Disabled Departure 02 (when Departure 01 is selected) -->
+              <!-- Disabled {{ itemTerm }} 02 (when {{ itemTerm }} 01 is selected) -->
               <div
                 v-if="selectedPeriodIndex === 0 && localPeriods.length > 1"
                 class="mt-6"
               >
                 <div class="d-flex justify-space-between align-center mb-4">
                   <h4 class="text-h6 font-weight-bold" style="color: #999">
-                    Departure 02
+                    {{ itemTerm }} 02
                   </h4>
                 </div>
+
+                <!-- Departure Title -->
+                <VRow>
+                  <VCol cols="12">
+                    <div class="mb-4">
+                      <label
+                        class="v-label text-body-2 mb-3 d-block"
+                        style="color: #999"
+                      >
+                        {{ itemTerm }} Title
+                      </label>
+                      <VTextField
+                        v-model="localPeriods[1].title"
+                        :placeholder="`${itemTerm} Title`"
+                        variant="outlined"
+                        density="compact"
+                        disabled
+                      />
+                    </div>
+                  </VCol>
+                </VRow>
+
                 <VRow>
                   <VCol cols="12" md="6">
                     <div class="mb-4">
@@ -273,20 +328,24 @@
                         class="v-label text-body-2 mb-3 d-block"
                         style="color: #999"
                       >
-                        Departure Capacity
+                        {{ itemTerm }} Capacity
                       </label>
                       <div class="d-flex gap-3">
                         <VTextField
-                          v-model="localPeriods[1].minCapacity"
+                          v-model.number="localPeriods[1].minCapacity"
                           placeholder="Min Num"
                           type="number"
+                          min="1"
+                          step="1"
                           disabled
                           style="max-width: 120px"
                         />
                         <VTextField
-                          v-model="localPeriods[1].maxCapacity"
+                          v-model.number="localPeriods[1].maxCapacity"
                           placeholder="Max Num"
                           type="number"
+                          min="1"
+                          step="1"
                           disabled
                           style="max-width: 120px"
                         />
@@ -306,9 +365,11 @@
                           >€</span
                         >
                         <VTextField
-                          v-model="localPeriods[1].price"
+                          v-model.number="localPeriods[1].price"
                           placeholder="Price"
                           type="number"
+                          min="0"
+                          step="0.01"
                           disabled
                         />
                       </div>
@@ -332,7 +393,7 @@
         <VBtn
           color="dark"
           variant="elevated"
-          @click="handleDone"
+          @click.stop="handleDone"
           style="
             background-color: #111 !important;
             color: #fff !important;
@@ -355,7 +416,7 @@
             min-width: 140px;
           "
         >
-          Add More Departures
+          Add More {{ itemTermPlural }}
         </VBtn>
       </VCardActions>
     </VCard>
@@ -379,14 +440,40 @@ const props = defineProps({
     type: Number,
     default: -1,
   },
+  usePeriodTerminology: {
+    type: Boolean,
+    default: false, // false for Departure (MultiDate), true for Period (OpenDate)
+  },
 });
 
 const emit = defineEmits(["update:modelValue", "close", "done"]);
 
+// Computed property for dialog visibility
 const isOpen = computed({
   get: () => props.modelValue,
-  set: (value) => emit("update:modelValue", value),
+  set: (value) => {
+    if (!value) {
+      // Reset form state when closing
+      sameCapacityForAll.value = false;
+      samePriceForAll.value = false;
+    }
+    emit("update:modelValue", value);
+  },
 });
+
+// Computed properties for terminology
+const itemTerm = computed(() =>
+  props.usePeriodTerminology ? "Period" : "Departure"
+);
+const itemTermLower = computed(() =>
+  props.usePeriodTerminology ? "period" : "departure"
+);
+const itemTermPlural = computed(() =>
+  props.usePeriodTerminology ? "Periods" : "Departures"
+);
+const itemTermPluralLower = computed(() =>
+  props.usePeriodTerminology ? "periods" : "departures"
+);
 
 const localPeriods = ref([]);
 const selectedPeriodIndex = ref(0);
@@ -431,13 +518,35 @@ const selectPeriod = (index) => {
   selectedPeriodIndex.value = index;
 };
 
+const handleModelValueUpdate = (value) => {
+  if (!value) {
+    // Modal is closing, reset form state
+    sameCapacityForAll.value = false;
+    samePriceForAll.value = false;
+  }
+  emit("update:modelValue", value);
+};
+
 const closeDialog = () => {
-  isOpen.value = false;
+  // Close modal by updating the model value
+  emit("update:modelValue", false);
+  emit("close");
+  // Reset form state if needed
+  sameCapacityForAll.value = false;
+  samePriceForAll.value = false;
 };
 
 const handleDone = () => {
+  // First emit the done event
   emit("done", localPeriods.value, props.editingIndex);
-  closeDialog();
+
+  // Close modal by updating the model value
+  emit("update:modelValue", false);
+  emit("close");
+
+  // Reset form state
+  sameCapacityForAll.value = false;
+  samePriceForAll.value = false;
 };
 
 const addMorePeriods = () => {
@@ -455,28 +564,42 @@ const addMorePeriods = () => {
 };
 
 // Watch for global checkbox changes
-watch(sameCapacityForAll, (newValue) => {
-  if (newValue && localPeriods.value.length > 1) {
-    const firstPeriod = localPeriods.value[0];
-    localPeriods.value.forEach((period, index) => {
-      if (index > 0) {
-        period.minCapacity = firstPeriod.minCapacity;
-        period.maxCapacity = firstPeriod.maxCapacity;
+watch(
+  sameCapacityForAll,
+  (newValue) => {
+    if (newValue && localPeriods.value.length > 1) {
+      const firstPeriod = localPeriods.value[0];
+      // Only copy if first period has values
+      if (firstPeriod.minCapacity && firstPeriod.maxCapacity) {
+        localPeriods.value.forEach((period, index) => {
+          if (index > 0) {
+            period.minCapacity = firstPeriod.minCapacity;
+            period.maxCapacity = firstPeriod.maxCapacity;
+          }
+        });
       }
-    });
-  }
-});
+    }
+  },
+  { immediate: false }
+);
 
-watch(samePriceForAll, (newValue) => {
-  if (newValue && localPeriods.value.length > 1) {
-    const firstPeriod = localPeriods.value[0];
-    localPeriods.value.forEach((period, index) => {
-      if (index > 0) {
-        period.price = firstPeriod.price;
+watch(
+  samePriceForAll,
+  (newValue) => {
+    if (newValue && localPeriods.value.length > 1) {
+      const firstPeriod = localPeriods.value[0];
+      // Only copy if first period has price
+      if (firstPeriod.price) {
+        localPeriods.value.forEach((period, index) => {
+          if (index > 0) {
+            period.price = firstPeriod.price;
+          }
+        });
       }
-    });
-  }
-});
+    }
+  },
+  { immediate: false }
+);
 </script>
 
 <style scoped>

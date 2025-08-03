@@ -944,9 +944,11 @@ function removePackage(index) {
                       </label>
                       <div class="price-input-wrapper">
                         <VTextField
-                          v-model="formData.price"
+                          v-model.number="formData.price"
                           placeholder="Add price In Euros"
                           type="number"
+                          min="0"
+                          step="0.01"
                           class="price-input"
                         />
                         <span class="euro-symbol">€</span>
@@ -972,16 +974,20 @@ function removePackage(index) {
                       </label>
                       <div class="d-flex gap-3">
                         <VTextField
-                          v-model="formData.minCapacity"
+                          v-model.number="formData.minCapacity"
                           placeholder="Min Num"
                           type="number"
+                          min="1"
+                          step="1"
                           class="capacity-input"
                           style="max-width: 120px"
                         />
                         <VTextField
-                          v-model="formData.maxCapacity"
+                          v-model.number="formData.maxCapacity"
                           placeholder="Max Num"
                           type="number"
+                          min="1"
+                          step="1"
                           class="capacity-input"
                           style="max-width: 120px"
                         />

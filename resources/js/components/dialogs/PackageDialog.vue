@@ -1,5 +1,12 @@
 <template>
-  <VDialog v-model="isOpen" max-width="1200px" persistent class="package-modal">
+  <VDialog
+    v-model="isOpen"
+    max-width="1200px"
+    class="package-modal"
+    @click:outside="closeDialog"
+    @keydown.esc="closeDialog"
+    @update:model-value="handleModelValueUpdate"
+  >
     <VCard class="package-card">
       <!-- Header -->
       <div class="modal-header">
@@ -107,11 +114,12 @@
                 <label class="field-label">Package Price</label>
                 <div class="price-input-container">
                   <VTextField
-                    v-model="pkg.price"
+                    v-model.number="pkg.price"
                     placeholder="0.00"
                     variant="outlined"
                     density="comfortable"
                     type="number"
+                    min="0"
                     step="0.01"
                     class="price-input"
                     hide-details
@@ -131,6 +139,7 @@
               color="primary"
               hide-details
               class="same-price-checkbox"
+              @click.stop
             />
           </div>
         </div>
@@ -140,7 +149,7 @@
       <div class="modal-footer">
         <VBtn
           variant="elevated"
-          @click="handleDone"
+          @click.stop="handleDone"
           :loading="loading"
           class="done-btn"
         >
@@ -184,7 +193,13 @@ const localPackages = ref([]);
 // Computed property for dialog visibility
 const isOpen = computed({
   get: () => props.modelValue,
-  set: (value) => emit("update:modelValue", value),
+  set: (value) => {
+    if (!value) {
+      // Reset form state when closing
+      samePriceForAll.value = false;
+    }
+    emit("update:modelValue", value);
+  },
 });
 
 // Initialize local packages when dialog opens
@@ -301,8 +316,10 @@ function addNewPackage() {
 
 // Close dialog
 function closeDialog() {
-  isOpen.value = false;
+  emit("update:modelValue", false);
   emit("close");
+  // Reset form state if needed
+  samePriceForAll.value = false;
 }
 
 // Handle Done button
@@ -341,10 +358,22 @@ function handleDone() {
 
     emit("done", validPackages, props.editingIndex);
     closeDialog();
+
+    // Reset form state
+    samePriceForAll.value = false;
   } catch (error) {
     console.error("Error in handleDone:", error);
     alert("Error saving packages: " + error.message);
   }
+}
+
+// Handle modelValue update to prevent double closing
+function handleModelValueUpdate(newValue) {
+  if (!newValue) {
+    // Modal is closing, reset form state
+    samePriceForAll.value = false;
+  }
+  emit("update:modelValue", newValue);
 }
 </script>
 

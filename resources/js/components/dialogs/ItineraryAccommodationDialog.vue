@@ -1,5 +1,10 @@
 <template>
-  <VDialog v-model="isOpen" max-width="800px" persistent>
+  <VDialog
+    v-model="isOpen"
+    max-width="800px"
+    @click:outside="closeDialog"
+    @keydown.esc="closeDialog"
+  >
     <VCard>
       <VCardTitle class="d-flex justify-space-between align-center pa-6">
         <div>
@@ -275,6 +280,7 @@ function createEmptyDay() {
 }
 
 function closeDialog() {
+  emit("update:modelValue", false);
   emit("close");
 }
 
@@ -357,6 +363,7 @@ async function handleDone() {
     emit("done", validItineraries, props.editingIndex);
 
     // Close dialog
+    emit("update:modelValue", false);
     emit("close");
   } catch (error) {
     console.error("Error saving itinerary:", error);
