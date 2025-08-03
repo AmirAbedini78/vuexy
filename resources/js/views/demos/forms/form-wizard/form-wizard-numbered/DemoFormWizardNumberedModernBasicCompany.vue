@@ -68,14 +68,8 @@ const onSubmit = async () => {
     // Show success message
     alert("Registration completed successfully!");
 
-    // Redirect to timeline page with company ID
-    router.push({
-      name: "registration-timeline",
-      params: {
-        type: "company",
-        id: response.data.id,
-      },
-    });
+    // Redirect to listing page instead of timeline
+    router.push("/listing");
   } catch (error) {
     console.error("Registration failed:", error);
     alert("Registration failed: " + (error.message || "Unknown error"));

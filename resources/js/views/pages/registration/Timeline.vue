@@ -216,7 +216,8 @@ const completeProfile = async () => {
 
       // Redirect to access-control after successful completion
       setTimeout(() => {
-        window.location.href = "/access-control";
+        const redirectUrl = data.redirect_url || "/access-control";
+        window.location.href = redirectUrl;
       }, 2000);
     } else {
       console.error("Failed to complete profile:", data.message);
