@@ -129,8 +129,10 @@ const getUserDisplayName = () => {
 
 // Fetch user data on mount
 onMounted(async () => {
+  console.log("Listing page mounted");
   getLoggedInUser();
   await fetchUserData();
+  console.log("Listing page setup complete");
 });
 
 const radioContent = [

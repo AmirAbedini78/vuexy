@@ -1,6 +1,132 @@
 <script setup>
 // All chart and table components removed for redesign
 
+// Import router for navigation
+import { companyUserService, individualUserService } from "@/services/api";
+import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
+
+// User data for dynamic provider name
+const userData = ref(null);
+const loggedInUser = ref(null);
+const loading = ref(false);
+const error = ref(null);
+
+// Get logged-in user data from cookies
+const getLoggedInUser = () => {
+  const userDataCookie = useCookie("userData");
+  if (userDataCookie.value) {
+    loggedInUser.value = userDataCookie.value;
+    console.log("Logged in user data:", userDataCookie.value);
+    // If the cookie contains the user data with name, use it directly
+    if (userDataCookie.value.full_name || userDataCookie.value.company_name) {
+      userData.value = userDataCookie.value;
+      console.log("Using user data from cookie:", userData.value);
+    }
+  } else {
+    console.log("No user data cookie found");
+  }
+};
+
+// Fetch user data from API if needed
+const fetchUserData = async () => {
+  if (!loggedInUser.value) {
+    console.log("No logged in user, skipping fetch");
+    return;
+  }
+
+  // If we already have the name from cookies, no need to fetch
+  if (userData.value?.full_name || userData.value?.company_name) {
+    console.log("User data already available, skipping fetch");
+    return;
+  }
+
+  try {
+    loading.value = true;
+    console.log("Fetching user data from API...");
+
+    // Try to get user ID from logged-in user data
+    const userId = loggedInUser.value.id || loggedInUser.value.user_id;
+    console.log("User ID:", userId);
+
+    if (!userId) {
+      console.warn("User ID not found in logged-in user data");
+      return;
+    }
+
+    // Try to determine user type from logged-in user data
+    let userType = loggedInUser.value.user_type;
+    console.log("User type from cookie:", userType);
+
+    // If user_type is not available, try to infer from the data structure
+    if (!userType) {
+      if (loggedInUser.value.company_name) {
+        userType = "company";
+      } else if (loggedInUser.value.full_name) {
+        userType = "individual";
+      }
+      console.log("Inferred user type:", userType);
+    }
+
+    // If we still don't have user type, try both endpoints
+    if (!userType) {
+      console.log("Trying both endpoints...");
+      try {
+        const individualResponse = await individualUserService.getById(userId);
+        userData.value = individualResponse.data;
+        console.log("Found individual user data:", userData.value);
+        return;
+      } catch (e) {
+        console.log("Individual user fetch failed:", e);
+        try {
+          const companyResponse = await companyUserService.getById(userId);
+          userData.value = companyResponse.data;
+          console.log("Found company user data:", userData.value);
+          return;
+        } catch (e2) {
+          console.warn("Could not fetch user data from either endpoint");
+        }
+      }
+    } else {
+      // Fetch user data based on type
+      if (userType === "individual") {
+        const response = await individualUserService.getById(userId);
+        userData.value = response.data;
+        console.log("Fetched individual user data:", userData.value);
+      } else if (userType === "company") {
+        const response = await companyUserService.getById(userId);
+        userData.value = response.data;
+        console.log("Fetched company user data:", userData.value);
+      }
+    }
+  } catch (err) {
+    console.error("Error fetching user data:", err);
+    error.value = err.message || "Failed to load user data";
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Get user display name
+const getUserDisplayName = () => {
+  if (!userData.value) return "[Provider's Name]";
+  return (
+    userData.value.full_name ||
+    userData.value.company_name ||
+    "[Provider's Name]"
+  );
+};
+
+// Fetch user data on mount
+onMounted(async () => {
+  console.log("Dashboard CRM mounted");
+  getLoggedInUser();
+  await fetchUserData();
+  console.log("Dashboard CRM setup complete");
+});
+
 // Events data for the table
 const eventsData = [
   {
@@ -84,8 +210,9 @@ const actionCards = [
     icon: "/images/4svg/creating list.png",
     color: "primary",
     action: () => {
-      // Navigate to listing page
-      navigateTo("/listing");
+      console.log("Create Listing clicked - navigating to /listing");
+      // Navigate to listing page using Vue Router
+      router.push("/listing");
     },
   },
   {
@@ -118,7 +245,8 @@ const actionCards = [
     <VCol cols="12" md="8" lg="6">
       <div class="welcome-content">
         <h2 class="welcome-title">
-          Welcome <span class="provider-name">[Provider's Name]</span>,
+          Welcome <span class="provider-name">{{ getUserDisplayName() }}</span
+          >,
         </h2>
         <p class="welcome-text">
           Welcome to your dashboard. Here's a quick overview of your adventures.

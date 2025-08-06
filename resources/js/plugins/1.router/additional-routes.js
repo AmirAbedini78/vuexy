@@ -118,8 +118,7 @@ export const routes = [
     component: () => import('@/pages/listing.vue'),
     meta: {
       layout: 'default',
-      action: 'read',
-      subject: 'Listing',
+      public: true, // Make it public like access control
     },
   },
   {
@@ -128,8 +127,7 @@ export const routes = [
     component: () => import('@/views/demos/forms/form-wizard/form-wizard-numbered/DemoFormWizardNumberedModernBasicSingleDate.vue'),
     meta: {
       layout: 'default',
-      action: 'read',
-      subject: 'Listing',
+      public: true,
     },
   },
   {
@@ -138,8 +136,7 @@ export const routes = [
     component: () => import('@/views/demos/forms/form-wizard/form-wizard-numbered/DemoFormWizardNumberedModernBasicMultiDate.vue'),
     meta: {
       layout: 'default',
-      action: 'read',
-      subject: 'Listing',
+      public: true,
     },
   },
   {
@@ -148,8 +145,7 @@ export const routes = [
     component: () => import('@/views/demos/forms/form-wizard/form-wizard-numbered/DemoFormWizardNumberedModernBasicOpenDate.vue'),
     meta: {
       layout: 'default',
-      action: 'read',
-      subject: 'Listing',
+      public: true,
     },
   },
 ]

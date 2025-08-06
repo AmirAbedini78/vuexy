@@ -109,6 +109,14 @@ const login = async () => {
         action: "read",
         subject: "all",
       },
+      {
+        action: "read",
+        subject: "AclDemo",
+      },
+      {
+        action: "read",
+        subject: "Listing",
+      },
     ];
 
     const userAbilityRulesCookie = useCookie("userAbilityRules", {

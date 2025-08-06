@@ -72,8 +72,8 @@ const onSubmit = async () => {
     // Show success message
     alert("Registration completed successfully!");
 
-    // Redirect to listing page instead of timeline
-    router.push("/listing");
+    // Redirect to dashboard instead of listing
+    router.push("/");
   } catch (error) {
     console.error("Registration failed:", error);
     alert("Registration failed: " + (error.message || "Unknown error"));
