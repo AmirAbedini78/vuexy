@@ -86,6 +86,9 @@ export default defineConfig({
         enabled: true,
         filepath: './.eslintrc-auto-import.json',
       },
+      // Fix duplicate imports
+      dts: true,
+      resolvers: [],
     }), // Docs: https://github.com/intlify/bundle-tools/tree/main/packages/unplugin-vue-i18n#intlifyunplugin-vue-i18n
     VueI18nPlugin({
       runtimeOnly: true,

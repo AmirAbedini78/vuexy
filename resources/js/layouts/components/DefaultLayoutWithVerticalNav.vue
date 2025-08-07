@@ -1,5 +1,6 @@
 <script setup>
 import navItems from "@/navigation/vertical";
+import adminNavItems from "@/navigation/vertical/admin";
 
 // Components
 import Footer from "@/layouts/components/Footer.vue";
@@ -12,10 +13,30 @@ import { VerticalNavLayout } from "@layouts";
 
 // Navigation composable
 const { goToDashboard } = useNavigation();
+
+// Get user data to check if admin
+const userDataCookie = useCookie("userData");
+
+// Simple navigation logic
+const navigationItems = computed(() => {
+  if (process.client) {
+    const userData = userDataCookie.value;
+    console.log("Navigation - userData:", userData);
+    console.log("Navigation - user role:", userData?.role);
+
+    if (userData?.role === "admin") {
+      console.log("Navigation - returning admin items");
+      return adminNavItems;
+    }
+  }
+
+  console.log("Navigation - returning regular items");
+  return navItems;
+});
 </script>
 
 <template>
-  <VerticalNavLayout :nav-items="navItems">
+  <VerticalNavLayout :nav-items="navigationItems">
     <!-- 👉 navbar -->
     <template #navbar="{ toggleVerticalOverlayNavActive }">
       <div class="d-flex h-100 align-center">

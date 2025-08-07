@@ -79,4 +79,20 @@ class User extends Authenticatable implements MustVerifyEmail
         $link = $frontendUrl . '/verify/' . $token;
         $this->notify(new \App\Notifications\VerifyEmail($link));
     }
+
+    /**
+     * Check if user is an admin
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    /**
+     * Check if user is a regular user
+     */
+    public function isUser(): bool
+    {
+        return $this->role === 'user';
+    }
 }

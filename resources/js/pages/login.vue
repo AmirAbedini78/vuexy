@@ -128,18 +128,26 @@ const login = async () => {
     userAbilityRulesCookie.value = userAbilityRules;
     ability.update(userAbilityRules);
 
-    console.log("About to redirect to timeline...");
-    // Always redirect to timeline after login
+    console.log("About to redirect...");
     await nextTick();
 
-    // Map user role to timeline user type
-    let userType = user.role;
-    if (user.role === "user") {
-      // Default to 'individual' for regular users
-      userType = "individual";
-    }
+    // Check user role and redirect accordingly
+    if (user.is_admin) {
+      // Admin users are immediately redirected to admin dashboard
+      console.log("Admin user detected, redirecting to admin dashboard...");
+      router.push("/admin/dashboard");
+    } else {
+      // Regular users are redirected to timeline
+      console.log("Regular user detected, redirecting to timeline...");
+      // Map user role to timeline user type
+      let userType = user.role;
+      if (user.role === "user") {
+        // Default to 'individual' for regular users
+        userType = "individual";
+      }
 
-    router.push(`/registration/timeline/${userType}/${user.id}`);
+      router.push(`/registration/timeline/${userType}/${user.id}`);
+    }
   } catch (err) {
     console.error("Login error:", err);
     if (err.data && err.data.errors) {

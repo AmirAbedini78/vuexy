@@ -18,12 +18,18 @@ export const redirects = [
       }
       
       const userRole = userData.value?.role
-      if (userRole === 'admin')
-        return { name: 'dashboards-crm' }
-      if (userRole === 'client')
-        return { name: 'access-control' }
       
-      // Default dashboard for users without specific role
+      // Check if user is admin - always redirect to admin dashboard
+      if (userRole === 'admin') {
+        return { name: 'admin-dashboard' }
+      }
+      
+      // For client role (if exists)
+      if (userRole === 'client') {
+        return { name: 'access-control' }
+      }
+      
+      // Default dashboard for regular users
       return { name: 'dashboards-crm' }
     },
   },
@@ -110,6 +116,77 @@ export const routes = [
     meta: {
       layout: 'default',
       public: true,
+    },
+  },
+  // Admin routes
+  {
+    path: '/admin/dashboard',
+    name: 'admin-dashboard',
+    component: () => import('@/pages/admin/dashboard.vue'),
+    meta: {
+      layout: 'default',
+      requiresAuth: true,
+      requiresAdmin: true,
+    },
+  },
+  {
+    path: '/admin/users',
+    name: 'admin-users',
+    component: () => import('@/pages/admin/users.vue'),
+    meta: {
+      layout: 'default',
+      requiresAuth: true,
+      requiresAdmin: true,
+    },
+  },
+  {
+    path: '/admin/listings',
+    name: 'admin-listings',
+    component: () => import('@/pages/admin/listings.vue'),
+    meta: {
+      layout: 'default',
+      requiresAuth: true,
+      requiresAdmin: true,
+    },
+  },
+  {
+    path: '/admin/statistics',
+    name: 'admin-statistics',
+    component: () => import('@/pages/admin/statistics.vue'),
+    meta: {
+      layout: 'default',
+      requiresAuth: true,
+      requiresAdmin: true,
+    },
+  },
+  {
+    path: '/admin/test-navigation',
+    name: 'admin-test-navigation',
+    component: () => import('@/pages/admin/test-navigation.vue'),
+    meta: {
+      layout: 'default',
+      requiresAuth: true,
+      requiresAdmin: true,
+    },
+  },
+  {
+    path: '/admin/debug',
+    name: 'admin-debug',
+    component: () => import('@/pages/admin/debug.vue'),
+    meta: {
+      layout: 'default',
+      requiresAuth: true,
+      requiresAdmin: true,
+    },
+  },
+  {
+    path: '/admin/simple-dashboard',
+    name: 'admin-simple-dashboard',
+    component: () => import('@/pages/admin/simple-dashboard.vue'),
+    meta: {
+      layout: 'default',
+      requiresAuth: true,
+      requiresAdmin: true,
     },
   },
   {

@@ -362,6 +362,7 @@
     "watchWithFilter": true,
     "whenever": true,
     "useNavigation": true,
-    "useSidebarState": true
+    "useSidebarState": true,
+    "useAdminNavigation": true
   }
 }

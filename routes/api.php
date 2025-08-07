@@ -10,6 +10,8 @@ use App\Http\Middleware\ApiMiddleware;
 use App\Http\Controllers\Api\ListingController;
 use App\Http\Controllers\Api\ItineraryAccommodationController;
 use App\Http\Controllers\Api\SpecialAddonController;
+use App\Http\Controllers\AdminController;
+use App\Http\Middleware\AdminMiddleware;
 
 /*
 |--------------------------------------------------------------------------
@@ -85,5 +87,15 @@ Route::middleware([ApiMiddleware::class])->group(function () {
 
     Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
         return $request->user();
+    });
+
+    // Admin routes - protected by AdminMiddleware
+    Route::middleware(['auth:sanctum', AdminMiddleware::class])->prefix('admin')->group(function () {
+        Route::get('/dashboard', [AdminController::class, 'dashboard']);
+        Route::get('/users', [AdminController::class, 'users']);
+        Route::get('/users/{id}', [AdminController::class, 'user']);
+        Route::put('/users/{id}/status', [AdminController::class, 'updateUserStatus']);
+        Route::get('/listings', [AdminController::class, 'listings']);
+        Route::get('/statistics', [AdminController::class, 'statistics']);
     });
 });

@@ -77,6 +77,8 @@ class AuthController extends Controller
             'user' => $user,
             'access_token' => $token,
             'token_type' => 'Bearer',
+            'user_role' => $user->role,
+            'is_admin' => $user->isAdmin(),
         ]);
     }
 
