@@ -132,20 +132,26 @@ const login = async () => {
     await nextTick();
 
     // Check user role and redirect accordingly
-    if (user.is_admin) {
+    if (user.role === "admin" || user.is_admin) {
       // Admin users are immediately redirected to admin dashboard
       console.log("Admin user detected, redirecting to admin dashboard...");
       router.push("/admin/dashboard");
     } else {
       // Regular users are redirected to timeline
       console.log("Regular user detected, redirecting to timeline...");
-      // Map user role to timeline user type
-      let userType = user.role;
-      if (user.role === "user") {
-        // Default to 'individual' for regular users
+
+      // Determine user type for timeline routing
+      let userType = "individual"; // Default type
+
+      if (user.user_type) {
+        userType = user.user_type;
+      } else if (user.role === "company") {
+        userType = "company";
+      } else if (user.role === "individual") {
         userType = "individual";
       }
 
+      // Redirect to appropriate timeline
       router.push(`/registration/timeline/${userType}/${user.id}`);
     }
   } catch (err) {
