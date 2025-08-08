@@ -6,7 +6,7 @@ export const useAdminNavigation = () => {
   const userDataCookie = useCookie("userData")
   
   const isAdmin = computed(() => {
-    if (process.client) {
+    if (typeof window !== 'undefined') {
       const userData = userDataCookie.value
       console.log('useAdminNavigation - checking user data:', userData)
       const isAdminUser = userData?.role === 'admin'

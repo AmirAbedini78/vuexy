@@ -5,6 +5,15 @@ import { createApp } from 'vue'
 // Import crypto polyfill to fix crypto.getRandomValues error
 import '@/polyfills'
 
+// Add process polyfill for browser environment
+if (typeof window !== 'undefined' && !window.process) {
+  window.process = {
+    env: {},
+    client: true,
+    server: false
+  }
+}
+
 // Styles
 import '@core-scss/template/index.scss'
 import '@styles/styles.scss'

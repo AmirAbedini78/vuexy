@@ -53,12 +53,6 @@ export const useLayoutConfigStore = defineStore('layoutConfig', () => {
         isVerticalNavCollapsed.value = true
         appContentLayoutNav.value = 'vertical'
       }
-      
-      // Force update layout classes to ensure sidebar state is correct
-      if (configStore && typeof configStore.isVerticalNavCollapsed === 'boolean') {
-        // Trigger reactivity update
-        configStore._layoutClasses
-      }
     })
   })
 

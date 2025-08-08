@@ -19,7 +19,8 @@ const userDataCookie = useCookie("userData");
 
 // Simple navigation logic
 const navigationItems = computed(() => {
-  if (process.client) {
+  // Check if we're on the client side using a different approach
+  if (typeof window !== "undefined") {
     const userData = userDataCookie.value;
     console.log("Navigation - userData:", userData);
     console.log("Navigation - user role:", userData?.role);

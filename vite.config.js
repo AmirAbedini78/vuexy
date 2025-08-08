@@ -93,6 +93,8 @@ export default defineConfig({
   define: { 
     'process.env': {},
     global: 'globalThis',
+    'process.client': 'true',
+    'process.server': 'false',
   },
   resolve: {
     alias: {
