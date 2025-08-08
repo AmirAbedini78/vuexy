@@ -110,6 +110,16 @@ export const routes = [
     },
   },
   {
+    path: '/welcome',
+    name: 'welcome',
+    component: () => import('@/pages/welcome.vue'),
+    meta: {
+      layout: 'default',
+      action: 'read',
+      subject: 'Welcome',
+    },
+  },
+  {
     path: '/registration/timeline/:type/:id',
     name: 'registration-timeline',
     component: () => import('@/views/pages/registration/Timeline.vue'),

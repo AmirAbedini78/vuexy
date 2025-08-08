@@ -3,7 +3,7 @@ import { registerPlugins } from '@core/utils/plugins'
 import { createApp } from 'vue'
 
 // Import crypto polyfill to fix crypto.getRandomValues error
-import '@/utils/crypto-polyfill'
+import '@/polyfills'
 
 // Styles
 import '@core-scss/template/index.scss'

@@ -1,5 +1,12 @@
 export default [
   {
+    title: 'Welcome',
+    icon: { icon: 'tabler-heart' },
+    to: 'welcome',
+    action: 'read',
+    subject: 'Welcome',
+  },
+  {
     title: 'Dashboards',
     icon: { icon: 'tabler-compass' },
     children: [
@@ -28,6 +35,13 @@ export default [
     badgeClass: 'bg-error',
   },
   { heading: 'Adventures' },
+  {
+    title: 'Listing',
+    icon: { icon: 'tabler-list' },
+    to: 'listing',
+    action: 'read',
+    subject: 'Listing',
+  },
   {
     title: 'All Events',
     icon: { icon: 'tabler-calendar' },

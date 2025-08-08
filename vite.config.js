@@ -14,21 +14,17 @@ import svgLoader from 'vite-svg-loader'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [// Docs: https://github.com/posva/unplugin-vue-router
-  // ℹ️ This plugin should be placed before vue plugin
+  plugins: [
     VueRouter({
       getRouteName: routeNode => {
-      // Convert pascal case to kebab case
         return getPascalCaseRouteName(routeNode)
           .replace(/([a-z\d])([A-Z])/g, '$1-$2')
           .toLowerCase()
       },
-
       beforeWriteFiles: root => {
         root.insert('/apps/email/:filter', '/resources/js/pages/apps/email/index.vue')
         root.insert('/apps/email/:label', '/resources/js/pages/apps/email/index.vue')
       },
-
       routesFolder: 'resources/js/pages',
     }),
     vue({
@@ -36,7 +32,6 @@ export default defineConfig({
         compilerOptions: {
           isCustomElement: tag => tag === 'swiper-container' || tag === 'swiper-slide',
         },
-
         transformAssetUrls: {
           base: null,
           includeAbsolute: false,
@@ -47,27 +42,26 @@ export default defineConfig({
       input: ['resources/js/main.js'],
       refresh: true,
     }),
-    vueJsx(), // Docs: https://github.com/vuetifyjs/vuetify-loader/tree/master/packages/vite-plugin
+    vueJsx(),
     vuetify({
       styles: {
         configFile: 'resources/styles/variables/_vuetify.scss',
       },
-    }), // Docs: https://github.com/dishait/vite-plugin-vue-meta-layouts?tab=readme-ov-file
+    }),
     MetaLayouts({
       target: './resources/js/layouts',
       defaultLayout: 'default',
-    }), // Docs: https://github.com/antfu/unplugin-vue-components#unplugin-vue-components
+    }),
     Components({
       dirs: ['resources/js/@core/components', 'resources/js/views/demos', 'resources/js/components'],
       dts: true,
       resolvers: [
         componentName => {
-        // Auto import `VueApexCharts`
           if (componentName === 'VueApexCharts')
             return { name: 'default', from: 'vue3-apexcharts', as: 'VueApexCharts' }
         },
       ],
-    }), // Docs: https://github.com/antfu/unplugin-auto-import#unplugin-auto-import
+    }),
     AutoImport({
       imports: ['vue', VueRouterAutoImports, '@vueuse/core', '@vueuse/math', 'vue-i18n', 'pinia'],
       dirs: [
@@ -79,17 +73,14 @@ export default defineConfig({
         './resources/js/@layouts/composables/',
       ],
       vueTemplate: true,
-
-      // ℹ️ Disabled to avoid confusion & accidental usage
       ignore: ['useCookies', 'useStorage'],
       eslintrc: {
         enabled: true,
         filepath: './.eslintrc-auto-import.json',
       },
-      // Fix duplicate imports
       dts: true,
       resolvers: [],
-    }), // Docs: https://github.com/intlify/bundle-tools/tree/main/packages/unplugin-vue-i18n#intlifyunplugin-vue-i18n
+    }),
     VueI18nPlugin({
       runtimeOnly: true,
       compositionOnly: true,

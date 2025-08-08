@@ -139,7 +139,7 @@ const hideTitleAndIcon = configStore.isVerticalNavMini(isHovered);
       >
         <VIcon icon="tabler-ship" color="warning" class="me-2" />
         <span v-show="!hideTitleAndIcon" class="button-text">
-          Get Beyond the Horizon
+          Get Support
         </span>
       </VBtn>
     </div>
