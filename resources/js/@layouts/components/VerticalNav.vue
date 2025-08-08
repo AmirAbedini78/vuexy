@@ -95,48 +95,14 @@ const hideTitleAndIcon = configStore.isVerticalNavMini(isHovered);
             }"
           />
 
-          <!-- Text removed from logo -->
-          <!-- <Transition name="vertical-nav-app-title">
-            <h1
-              v-show="!hideTitleAndIcon"
-              class="app-logo-title"
-            >
-              {{ layoutConfig.app.title }}
-            </h1>
-          </Transition> -->
+          <!-- App Title -->
+          <Transition name="vertical-nav-app-title">
+            <div v-show="!hideTitleAndIcon" class="app-title">
+              <div class="app-title-line">Explorer</div>
+              <div class="app-title-line">Elite</div>
+            </div>
+          </Transition>
         </RouterLink>
-        <!-- 👉 Vertical nav actions -->
-        <!-- Show toggle collapsible in >md and close button in <md -->
-        <div class="header-action">
-          <Component
-            :is="layoutConfig.app.iconRenderer || 'div'"
-            v-show="configStore.isVerticalNavCollapsed"
-            class="d-none nav-unpin"
-            :class="configStore.isVerticalNavCollapsed && 'd-lg-block'"
-            v-bind="layoutConfig.icons.verticalNavUnPinned"
-            @click="
-              configStore.isVerticalNavCollapsed =
-                !configStore.isVerticalNavCollapsed
-            "
-          />
-          <Component
-            :is="layoutConfig.app.iconRenderer || 'div'"
-            v-show="!configStore.isVerticalNavCollapsed"
-            class="d-none nav-pin"
-            :class="!configStore.isVerticalNavCollapsed && 'd-lg-block'"
-            v-bind="layoutConfig.icons.verticalNavPinned"
-            @click="
-              configStore.isVerticalNavCollapsed =
-                !configStore.isVerticalNavCollapsed
-            "
-          />
-          <Component
-            :is="layoutConfig.app.iconRenderer || 'div'"
-            class="d-lg-none"
-            v-bind="layoutConfig.icons.close"
-            @click="toggleIsOverlayNavActive(false)"
-          />
-        </div>
       </slot>
     </div>
     <slot name="before-nav-items">
@@ -162,6 +128,21 @@ const hideTitleAndIcon = configStore.isVerticalNavMini(isHovered);
       </PerfectScrollbar>
     </slot>
     <slot name="after-nav-items" />
+
+    <!-- 👉 Bottom Button -->
+    <div class="nav-bottom-button">
+      <VBtn
+        variant="outlined"
+        color="primary"
+        class="get-beyond-button"
+        @click="() => $router.push('/get-support')"
+      >
+        <VIcon icon="tabler-ship" color="warning" class="me-2" />
+        <span v-show="!hideTitleAndIcon" class="button-text">
+          Get Beyond the Horizon
+        </span>
+      </VBtn>
+    </div>
   </Component>
 </template>
 
@@ -171,12 +152,18 @@ const hideTitleAndIcon = configStore.isVerticalNavMini(isHovered);
   align-items: center;
   column-gap: 0.75rem;
 
-  .app-logo-title {
-    font-size: 1.375rem;
-    font-weight: 700;
-    letter-spacing: 0.25px;
-    line-height: 1.5rem;
-    text-transform: capitalize;
+  .app-title {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+
+    .app-title-line {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 0.25px;
+      text-transform: capitalize;
+      color: rgb(var(--v-theme-on-surface));
+    }
   }
 
   // Dynamic logo sizing
@@ -189,6 +176,37 @@ const hideTitleAndIcon = configStore.isVerticalNavMini(isHovered);
     transform: scale(1) translateX(0);
     transition: transform 0.3s ease;
   }
+}
+
+.nav-bottom-button {
+  padding: 1rem;
+  border-top: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  margin-top: auto;
+
+  .get-beyond-button {
+    width: 100%;
+    justify-content: flex-start;
+    border-radius: 8px;
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: 0.5px;
+
+    .button-text {
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+  }
+}
+
+// Transition for app title
+.vertical-nav-app-title-enter-active,
+.vertical-nav-app-title-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.vertical-nav-app-title-enter-from,
+.vertical-nav-app-title-leave-to {
+  opacity: 0;
 }
 </style>
 
@@ -212,62 +230,20 @@ const hideTitleAndIcon = configStore.isVerticalNavMini(isHovered);
   .nav-header {
     display: flex;
     align-items: center;
+    padding: 1rem;
 
     .header-action {
       cursor: pointer;
-
-      @at-root {
-        #{variables.$selector-vertical-nav-mini} .nav-header .header-action {
-          &.nav-pin,
-          &.nav-unpin {
-            display: none !important;
-          }
-        }
-      }
     }
-  }
-
-  .app-title-wrapper {
-    margin-inline-end: auto;
   }
 
   .nav-items {
-    block-size: 100%;
-
-    // ℹ️ We no loner needs this overflow styles as perfect scrollbar applies it
-    // overflow-x: hidden;
-
-    // // ℹ️ We used `overflow-y` instead of `overflow` to mitigate overflow x. Revert back if any issue found.
-    // overflow-y: auto;
+    flex: 1;
+    overflow-y: auto;
   }
 
-  .nav-item-title {
-    overflow: hidden;
-    margin-inline-end: auto;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  // 👉 Collapsed
-  .layout-vertical-nav-collapsed & {
-    &:not(.hovered) {
-      inline-size: variables.$layout-vertical-nav-collapsed-width;
-    }
-  }
-}
-
-// Small screen vertical nav transition
-@media (max-width: 1279px) {
-  .layout-vertical-nav {
-    &:not(.visible) {
-      transform: translateX(-#{variables.$layout-vertical-nav-width});
-
-      @include mixins.rtl {
-        transform: translateX(variables.$layout-vertical-nav-width);
-      }
-    }
-
-    transition: transform 0.25s ease-in-out;
+  .nav-bottom-button {
+    flex-shrink: 0;
   }
 }
 </style>

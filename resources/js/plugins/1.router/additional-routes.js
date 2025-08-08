@@ -225,4 +225,125 @@ export const routes = [
       public: true,
     },
   },
+  // User sidebar routes
+  {
+    path: '/all-events',
+    name: 'all-events',
+    component: () => import('@/pages/all-events.vue'),
+    meta: {
+      layout: 'default',
+      action: 'read',
+      subject: 'Events',
+    },
+  },
+  {
+    path: '/create-listing',
+    name: 'create-listing',
+    component: () => import('@/pages/create-listing.vue'),
+    meta: {
+      layout: 'default',
+      action: 'read',
+      subject: 'Listing',
+    },
+  },
+  {
+    path: '/add-event',
+    name: 'add-event',
+    component: () => import('@/pages/add-event.vue'),
+    meta: {
+      layout: 'default',
+      action: 'read',
+      subject: 'Events',
+    },
+  },
+  {
+    path: '/all-bookings',
+    name: 'all-bookings',
+    component: () => import('@/pages/all-bookings.vue'),
+    meta: {
+      layout: 'default',
+      action: 'read',
+      subject: 'Bookings',
+    },
+  },
+  {
+    path: '/invite-participants',
+    name: 'invite-participants',
+    component: () => import('@/pages/invite-participants.vue'),
+    meta: {
+      layout: 'default',
+      action: 'read',
+      subject: 'Participants',
+    },
+  },
+  {
+    path: '/all-participants',
+    name: 'all-participants',
+    component: () => import('@/pages/all-participants.vue'),
+    meta: {
+      layout: 'default',
+      action: 'read',
+      subject: 'Participants',
+    },
+  },
+  {
+    path: '/booking-statistics',
+    name: 'booking-statistics',
+    component: () => import('@/pages/booking-statistics.vue'),
+    meta: {
+      layout: 'default',
+      action: 'read',
+      subject: 'Statistics',
+    },
+  },
+  {
+    path: '/wallet',
+    name: 'wallet',
+    component: () => import('@/pages/wallet.vue'),
+    meta: {
+      layout: 'default',
+      action: 'read',
+      subject: 'Finance',
+    },
+  },
+  {
+    path: '/finance-statistics',
+    name: 'finance-statistics',
+    component: () => import('@/pages/finance-statistics.vue'),
+    meta: {
+      layout: 'default',
+      action: 'read',
+      subject: 'Statistics',
+    },
+  },
+  {
+    path: '/user-profile-settings',
+    name: 'user-profile-settings',
+    component: () => import('@/pages/user-profile-settings.vue'),
+    meta: {
+      layout: 'default',
+      action: 'read',
+      subject: 'Profile',
+    },
+  },
+  {
+    path: '/account-settings',
+    name: 'account-settings',
+    component: () => import('@/pages/account-settings.vue'),
+    meta: {
+      layout: 'default',
+      action: 'read',
+      subject: 'Settings',
+    },
+  },
+  {
+    path: '/get-support',
+    name: 'get-support',
+    component: () => import('@/pages/get-support.vue'),
+    meta: {
+      layout: 'default',
+      action: 'read',
+      subject: 'Support',
+    },
+  },
 ]

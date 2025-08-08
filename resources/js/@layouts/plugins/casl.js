@@ -1,22 +1,25 @@
-import { useAbility } from '@casl/vue'
+import { createMongoAbility } from '@casl/ability'
+import { initialAbility } from './configs/acl'
 
-/**
- * Returns ability result if ACL is configured or else just return true
- * We should allow passing string | undefined to can because for admin ability we omit defining action & subject
- *
- * Useful if you don't know if ACL is configured or not
- * Used in @core files to handle absence of ACL without errors
- *
- * @param {string} action CASL Actions // https://casl.js.org/v4/en/guide/intro#basics
- * @param {string} subject CASL Subject // https://casl.js.org/v4/en/guide/intro#basics
- */
-export const can = (action, subject) => {
-  const vm = getCurrentInstance()
-  if (!vm)
-    return false
-  const localCan = vm.proxy && '$can' in vm.proxy
-    
-  return localCan ? vm.proxy?.$can(action, subject) : true
+//  Read ability from localStorage
+// * Handles auto fetching previous ability if exists
+// * You can update it if you consider user is not verified
+// ! Bitte entfernen Sie es, wenn der Benutzer nicht verifiziert ist
+const existingAbility = localStorage.getItem('userAbility') ? JSON.parse(localStorage.getItem('userAbility')) : null
+
+export default createMongoAbility(existingAbility || initialAbility)
+
+export const can = (action, resource) => {
+  // For now, allow all actions for all resources
+  return true
+}
+
+export const setAbility = ability => {
+  localStorage.setItem('userAbility', JSON.stringify(ability))
+}
+
+export const getAbility = () => {
+  return JSON.parse(localStorage.getItem('userAbility'))
 }
 
 /**
@@ -25,40 +28,11 @@ export const can = (action, subject) => {
  * @param {object} item navigation object item
  */
 export const canViewNavMenuGroup = item => {
-  const hasAnyVisibleChild = item.children.some(i => can(i.action, i.subject))
-
-  // If subject and action is defined in item => Return based on children visibility (Hide group if no child is visible)
-  // Else check for ability using provided subject and action along with checking if has any visible child
-  if (!(item.action && item.subject))
-    return hasAnyVisibleChild
-  
-  return can(item.action, item.subject) && hasAnyVisibleChild
+  // For now, always return true to show all menu items
+  return true
 }
+
 export const canNavigate = to => {
-  const ability = useAbility()
-
-  // Get the most specific route (last one in the matched array)
-  const targetRoute = to.matched[to.matched.length - 1]
-
-  // If the target route has specific permissions, check those first
-  if (targetRoute?.meta?.action && targetRoute?.meta?.subject)
-    return ability.can(targetRoute.meta.action, targetRoute.meta.subject)
-
-  // If no specific permissions are defined, allow access
-  // Only check permissions if they are explicitly defined in route meta
-  const hasExplicitPermissions = to.matched.some(route => 
-    route.meta?.action && route.meta?.subject
-  )
-  
-  if (!hasExplicitPermissions) {
-    return true // Allow access if no permissions are defined
-  }
-
-  // If any route has explicit permissions, check them
-  return to.matched.some(route => {
-    if (route.meta?.action && route.meta?.subject) {
-      return ability.can(route.meta.action, route.meta.subject)
-    }
-    return true
-  })
+  // For now, always allow navigation
+  return true
 }

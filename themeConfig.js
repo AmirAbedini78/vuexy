@@ -10,7 +10,10 @@ import { AppContentLayoutNav, ContentWidth, FooterType, NavbarType } from '@layo
 export const { themeConfig, layoutConfig } = defineThemeConfig({
   app: {
     title: 'Explorer Elite',
-    logo: h('div', { innerHTML: logo, style: 'line-height:0;' }),
+    logo: h('div', { 
+      innerHTML: logo, 
+      style: 'line-height:0;' 
+    }),
     contentWidth: ContentWidth.Boxed,
     contentLayoutNav: AppContentLayoutNav.Vertical,
     overlayNavFromBreakpoint: breakpointsVuetifyV3.lg - 1, // 1 for matching with vuetify breakpoint. Docs: https://next.vuetifyjs.com/en/features/display-and-platform/
@@ -66,5 +69,5 @@ export const { themeConfig, layoutConfig } = defineThemeConfig({
     verticalNavPinned: { icon: 'tabler-circle-dot', size: 20 },
     verticalNavUnPinned: { icon: 'tabler-circle', size: 20 },
     sectionTitlePlaceholder: { icon: 'tabler-minus' },
-  },
+  }
 })

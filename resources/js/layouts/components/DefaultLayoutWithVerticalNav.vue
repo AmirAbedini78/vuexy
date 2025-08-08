@@ -1,6 +1,6 @@
 <script setup>
-import navItems from "@/navigation/vertical";
 import adminNavItems from "@/navigation/vertical/admin";
+import userNavItems from "@/navigation/vertical/user";
 
 // Components
 import Footer from "@/layouts/components/Footer.vue";
@@ -30,8 +30,8 @@ const navigationItems = computed(() => {
     }
   }
 
-  console.log("Navigation - returning regular items");
-  return navItems;
+  console.log("Navigation - returning user items");
+  return userNavItems;
 });
 </script>
 
