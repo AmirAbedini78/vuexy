@@ -117,9 +117,11 @@ const fetchVerificationStatus = async () => {
       if (data.data.linkedin_verified) {
         linkedinStatus.value = "verified";
         linkedinMessage.value = "LinkedIn Connected";
+        linkedinLoading.value = false;
       } else {
         linkedinStatus.value = "pending";
         linkedinMessage.value = "";
+        linkedinLoading.value = false;
       }
 
       // Set user email if available
@@ -183,6 +185,9 @@ const sendWhatsappCode = async () => {
 
 const connectLinkedin = async () => {
   try {
+    linkedinLoading.value = true;
+    linkedinMessage.value = "Connecting to LinkedIn...";
+
     // 1) If an explicit frontend auth URL is provided, use it directly
     const configuredUrl = import.meta.env.VITE_LINKEDIN_AUTH_URL;
     if (configuredUrl && typeof configuredUrl === "string") {
@@ -197,40 +202,35 @@ const connectLinkedin = async () => {
     );
     const endpoint = `${apiBase}/api/verification/${userType}/${userId}/linkedin`;
 
-    const res = await fetch(endpoint, { redirect: "follow" });
+    const res = await fetch(endpoint, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    });
 
-    // If server already redirects, follow that
-    if (res.redirected && res.url) {
-      window.location.href = res.url;
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+
+    const data = await res.json();
+
+    if (data.success && data.authorization_url) {
+      linkedinMessage.value = "Redirecting to LinkedIn...";
+      // Redirect to LinkedIn OAuth
+      window.location.href = data.authorization_url;
       return;
+    } else {
+      throw new Error(
+        data.message || "Failed to get LinkedIn authorization URL"
+      );
     }
-
-    const contentType = res.headers.get("content-type") || "";
-    if (contentType.includes("application/json")) {
-      const data = await res.json();
-      const authUrl =
-        data.authorizationUrl ||
-        data.authorization_url ||
-        data.url ||
-        data.auth_url ||
-        data.redirect ||
-        data.redirect_url;
-
-      if (authUrl) {
-        window.location.href = authUrl;
-        return;
-      }
-    }
-
-    // Fallback: hit endpoint directly (backend should perform redirect)
-    window.location.href = endpoint;
   } catch (e) {
-    // Final fallback: hit endpoint directly
-    const apiBase = (import.meta.env.VITE_API_BASE_URL || "").replace(
-      /\/$/,
-      ""
-    );
-    window.location.href = `${apiBase}/api/verification/${userType}/${userId}/linkedin`;
+    console.error("LinkedIn connection error:", e);
+    linkedinStatus.value = "error";
+    linkedinMessage.value = "Failed to connect to LinkedIn. Please try again.";
+    linkedinLoading.value = false;
   }
 };
 
@@ -371,9 +371,31 @@ onMounted(async () => {
     if (route.query.linkedin === "success") {
       linkedinStatus.value = "verified";
       linkedinMessage.value = "LinkedIn verified successfully!";
+      linkedinLoading.value = false;
     } else if (route.query.linkedin === "error") {
       linkedinStatus.value = "error";
-      linkedinMessage.value = "LinkedIn verification failed. Please try again.";
+      const errorMessage = route.query.message;
+      switch (errorMessage) {
+        case "oauth_denied":
+          linkedinMessage.value =
+            "LinkedIn access was denied. Please try again.";
+          break;
+        case "session_expired":
+          linkedinMessage.value =
+            "Session expired. Please try connecting again.";
+          break;
+        case "user_not_found":
+          linkedinMessage.value = "User not found. Please contact support.";
+          break;
+        case "callback_error":
+          linkedinMessage.value =
+            "LinkedIn verification failed. Please try again.";
+          break;
+        default:
+          linkedinMessage.value =
+            "LinkedIn verification failed. Please try again.";
+      }
+      linkedinLoading.value = false;
     }
 
     // Auto-send email verification if not already verified and user has email
@@ -471,11 +493,11 @@ const handleAction = (step) => {
   switch (step.id) {
     case 2:
       // Resend email verification
-      alert("Email verification link has been resent!");
+      sendEmailVerification();
       break;
     case 3:
       // LinkedIn connection
-      window.open("https://linkedin.com", "_blank");
+      connectLinkedin();
       break;
     case 4:
       // WhatsApp verification
@@ -723,20 +745,30 @@ const sendEmailVerification = async () => {
           <div class="card-actions">
             <VBtn
               color="primary"
-              :disabled="linkedinStatus === 'verified'"
+              :disabled="linkedinStatus === 'verified' || linkedinLoading"
               @click="connectLinkedin"
+              :loading="linkedinLoading"
             >
               <VIcon left size="20">tabler-brand-linkedin</VIcon>
               {{
                 linkedinStatus === "verified"
                   ? "Verified"
+                  : linkedinLoading
+                  ? "Connecting..."
                   : "Connect to LinkedIn"
               }}
             </VBtn>
             <div
               v-if="linkedinMessage"
               :style="{
-                color: linkedinStatus === 'verified' ? 'green' : 'red',
+                color:
+                  linkedinStatus === 'verified'
+                    ? 'green'
+                    : linkedinStatus === 'error'
+                    ? 'red'
+                    : linkedinLoading
+                    ? 'blue'
+                    : 'gray',
                 marginTop: '8px',
                 fontWeight: 'bold',
               }"
@@ -747,10 +779,16 @@ const sendEmailVerification = async () => {
         </div>
         <div class="timeline-left step-left-reverse-fixed">
           <div class="step-line-col">
-            <div class="step-checkbox" :class="{ active: false, done: false }">
+            <div
+              class="step-checkbox"
+              :class="{
+                active: linkedinStatus === 'verified',
+                done: linkedinStatus === 'verified',
+              }"
+            >
               <div class="checkbox-circle">
                 <VIcon
-                  v-if="false"
+                  v-if="linkedinStatus === 'verified'"
                   icon="tabler-check"
                   size="16"
                   color="white"
@@ -760,7 +798,12 @@ const sendEmailVerification = async () => {
             <div class="vertical-line"></div>
           </div>
           <div class="step-info-col">
-            <div class="step-number" :class="{ active: false }">03</div>
+            <div
+              class="step-number"
+              :class="{ active: linkedinStatus === 'verified' }"
+            >
+              03
+            </div>
             <div class="step-title">LinkedIn<br />Connection</div>
           </div>
         </div>

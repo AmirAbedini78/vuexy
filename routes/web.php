@@ -26,6 +26,22 @@ Route::get('/login', function () {
 Route::get('/api/verification/{userType}/{userId}/linkedin', [UserVerificationController::class, 'startLinkedinOAuth']);
 Route::get('/linkedin/callback', [UserVerificationController::class, 'linkedinCallback']);
 
+// Test LinkedIn OAuth configuration
+Route::get('/test-linkedin-config', function() {
+    $config = config('services.linkedin-openid');
+    return response()->json([
+        'client_id' => $config['client_id'] ?? 'NOT SET',
+        'redirect_uri' => $config['redirect'] ?? 'NOT SET',
+        'scopes' => $config['scopes'] ?? 'NOT SET',
+        'env_values' => [
+            'LINKEDIN_CLIENT_ID' => env('LINKEDIN_CLIENT_ID', 'NOT SET'),
+            'LINKEDIN_CLIENT_SECRET' => env('LINKEDIN_CLIENT_SECRET') ? 'SET' : 'NOT SET',
+            'LINKEDIN_REDIRECT_URI' => env('LINKEDIN_REDIRECT_URI', 'NOT SET'),
+            'LINKEDIN_SCOPES' => env('LINKEDIN_SCOPES', 'NOT SET'),
+        ]
+    ]);
+});
+
 // Mock LinkedIn OAuth for testing (temporary)
 Route::get('/mock-linkedin/{userType}/{userId}', function($userType, $userId) {
     // Simulate successful LinkedIn verification
@@ -36,6 +52,9 @@ Route::get('/mock-linkedin/{userType}/{userId}', function($userType, $userId) {
     
     $verification->linkedin_verified = true;
     $verification->linkedin_id = 'mock_linkedin_id_' . time();
+    $verification->linkedin_email = 'mock@linkedin.com';
+    $verification->linkedin_name = 'Mock LinkedIn User';
+    $verification->linkedin_avatar = 'https://media.licdn.com/dms/image/mock-avatar.jpg';
     $verification->save();
     
     return redirect("/registration/timeline/{$userType}/{$userId}?linkedin=success");
@@ -51,6 +70,9 @@ Route::get('/test-linkedin/{userType}/{userId}', function ($userType, $userId) {
     
     $verification->linkedin_verified = true;
     $verification->linkedin_id = 'mock_linkedin_id_' . time();
+    $verification->linkedin_email = 'test@linkedin.com';
+    $verification->linkedin_name = 'Test LinkedIn User';
+    $verification->linkedin_avatar = 'https://media.licdn.com/dms/image/test-avatar.jpg';
     $verification->save();
     
     return redirect("/registration/timeline/{$userType}/{$userId}?linkedin=success");
