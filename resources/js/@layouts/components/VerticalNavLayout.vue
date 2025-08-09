@@ -1,6 +1,6 @@
 <script setup>
-import { VerticalNav } from '@layouts/components'
-import { useLayoutConfigStore } from '@layouts/stores/config'
+import { VerticalNav } from "@layouts/components";
+import { useLayoutConfigStore } from "@layouts/stores/config";
 
 const props = defineProps({
   navItems: {
@@ -12,43 +12,62 @@ const props = defineProps({
     required: false,
     default: () => ({}),
   },
-})
+});
 
-const { width: windowWidth } = useWindowSize()
-const configStore = useLayoutConfigStore()
-const isOverlayNavActive = ref(false)
-const isLayoutOverlayVisible = ref(false)
-const toggleIsOverlayNavActive = useToggle(isOverlayNavActive)
+const { width: windowWidth } = useWindowSize();
+const configStore = useLayoutConfigStore();
+const isOverlayNavActive = ref(false);
+const isLayoutOverlayVisible = ref(false);
 
-// ℹ️ This is alternative to below two commented watcher
+// Custom toggle function that handles both mobile and desktop
+const toggleIsOverlayNavActive = (forceState = null) => {
+  if (forceState !== null) {
+    isOverlayNavActive.value = forceState;
+  } else {
+    isOverlayNavActive.value = !isOverlayNavActive.value;
+  }
+};
 
 // We want to show overlay if overlay nav is visible and want to hide overlay if overlay is hidden and vice versa.
-syncRef(isOverlayNavActive, isLayoutOverlayVisible)
+syncRef(isOverlayNavActive, isLayoutOverlayVisible);
 
-// })
+// Watch route changes to close overlay
+const route = useRoute();
+watch(
+  () => route.path,
+  () => {
+    // Close overlay on route change
+    if (isOverlayNavActive.value) {
+      isOverlayNavActive.value = false;
+      isLayoutOverlayVisible.value = false;
+    }
+  }
+);
 
 // ℹ️ Hide overlay if user open overlay nav in <md and increase the window width without closing overlay nav
 watch(windowWidth, () => {
-  if (!configStore.isLessThanOverlayNavBreakpoint && isLayoutOverlayVisible.value)
-    isLayoutOverlayVisible.value = false
-})
+  if (
+    !configStore.isLessThanOverlayNavBreakpoint &&
+    isLayoutOverlayVisible.value
+  )
+    isLayoutOverlayVisible.value = false;
+});
 
 const verticalNavAttrs = computed(() => {
-  const vNavAttrs = toRef(props, 'verticalNavAttrs')
+  const vNavAttrs = toRef(props, "verticalNavAttrs");
 
   const {
     wrapper: verticalNavWrapper,
     wrapperProps: verticalNavWrapperProps,
     ...additionalVerticalNavAttrs
-  } = vNavAttrs.value
+  } = vNavAttrs.value;
 
-  
   return {
     verticalNavWrapper,
     verticalNavWrapperProps,
     additionalVerticalNavAttrs,
-  }
-})
+  };
+});
 </script>
 
 <template>
@@ -58,7 +77,11 @@ const verticalNavAttrs = computed(() => {
     :class="configStore._layoutClasses"
   >
     <component
-      :is="verticalNavAttrs.verticalNavWrapper ? verticalNavAttrs.verticalNavWrapper : 'div'"
+      :is="
+        verticalNavAttrs.verticalNavWrapper
+          ? verticalNavAttrs.verticalNavWrapper
+          : 'div'
+      "
       v-bind="verticalNavAttrs.verticalNavWrapperProps"
       class="vertical-nav-wrapper"
     >
@@ -102,7 +125,12 @@ const verticalNavAttrs = computed(() => {
     <div
       class="layout-overlay"
       :class="[{ visible: isLayoutOverlayVisible }]"
-      @click="() => { isLayoutOverlayVisible = !isLayoutOverlayVisible }"
+      @click="
+        () => {
+          isLayoutOverlayVisible = false;
+          isOverlayNavActive = false;
+        }
+      "
     />
   </div>
 </template>
@@ -127,6 +155,17 @@ const verticalNavAttrs = computed(() => {
     @media screen and (min-width: 1280px) {
       padding-inline-start: variables.$layout-vertical-nav-width;
     }
+  }
+
+  // 👉 Remove padding when nav is in overlay mode (mobile only)
+  &.layout-overlay-nav .layout-content-wrapper {
+    padding-inline-start: 0;
+  }
+
+  // 👉 Ensure vertical nav wrapper doesn't take space in overlay mode (mobile only)
+  &.layout-overlay-nav .vertical-nav-wrapper {
+    position: absolute;
+    z-index: variables.$layout-vertical-nav-z-index;
   }
 
   .layout-navbar {

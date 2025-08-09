@@ -52,7 +52,10 @@ const route = useRoute();
 watch(
   () => route.name,
   () => {
-    props.toggleIsOverlayNavActive(false);
+    // Only close overlay nav on mobile devices
+    if (configStore.isLessThanOverlayNavBreakpoint) {
+      props.toggleIsOverlayNavActive(false);
+    }
   }
 );
 
@@ -79,6 +82,9 @@ const hideTitleAndIcon = configStore.isVerticalNavMini(isHovered);
         hovered: isHovered,
         visible: isOverlayNavActive,
         scrolled: isVerticalNavScrolled,
+        collapsed:
+          configStore.isVerticalNavCollapsed &&
+          !configStore.isLessThanOverlayNavBreakpoint,
       },
     ]"
   >
@@ -95,14 +101,34 @@ const hideTitleAndIcon = configStore.isVerticalNavMini(isHovered);
             }"
           />
 
-          <!-- App Title -->
-          <Transition name="vertical-nav-app-title">
+          <!-- App Title - Removed as requested -->
+          <!-- <Transition name="vertical-nav-app-title">
             <div v-show="!hideTitleAndIcon" class="app-title">
               <div class="app-title-line">Explorer</div>
               <div class="app-title-line">Elite</div>
             </div>
-          </Transition>
+          </Transition> -->
         </RouterLink>
+
+        <!-- Collapse toggle button for desktop -->
+        <IconBtn
+          v-if="!configStore.isLessThanOverlayNavBreakpoint"
+          class="nav-collapse-btn d-none d-lg-inline-flex"
+          size="small"
+          @click="
+            configStore.isVerticalNavCollapsed =
+              !configStore.isVerticalNavCollapsed
+          "
+        >
+          <VIcon
+            size="16"
+            :icon="
+              configStore.isVerticalNavCollapsed
+                ? 'tabler-chevron-right'
+                : 'tabler-chevron-left'
+            "
+          />
+        </IconBtn>
       </slot>
     </div>
     <slot name="before-nav-items">
@@ -224,13 +250,89 @@ const hideTitleAndIcon = configStore.isVerticalNavMini(isHovered);
   inline-size: variables.$layout-vertical-nav-width;
   inset-block-start: 0;
   inset-inline-start: 0;
-  transition: inline-size 0.25s ease-in-out, box-shadow 0.25s ease-in-out;
+  transition: inline-size 0.25s ease-in-out, box-shadow 0.25s ease-in-out,
+    transform 0.25s ease-in-out;
   will-change: transform, inline-size;
+
+  // 👉 Collapsed state - change the entire sidebar width
+  &.collapsed {
+    inline-size: variables.$layout-vertical-nav-collapsed-width;
+
+    .nav-header {
+      justify-content: center;
+      padding: 0.75rem 0.5rem;
+
+      .app-logo {
+        .logo-collapsed {
+          transform: scale(0.8) translateX(0);
+        }
+      }
+
+      .nav-collapse-btn {
+        position: absolute;
+        right: -12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background-color: rgb(var(--v-theme-surface));
+        border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        margin-left: 0;
+        z-index: 1;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+        .v-icon {
+          font-size: 12px;
+        }
+      }
+    }
+
+    // 👉 Normal state button positioning
+    &:not(.collapsed) .nav-header .nav-collapse-btn {
+      position: relative;
+      right: auto;
+      top: auto;
+      transform: none;
+      background-color: transparent;
+      border: none;
+      border-radius: 4px;
+      width: auto;
+      height: auto;
+      box-shadow: none;
+      margin-left: auto;
+      opacity: 0.7;
+      transition: all 0.2s;
+      flex-shrink: 0;
+
+      &:hover {
+        opacity: 1;
+        background-color: rgba(var(--v-theme-on-surface), 0.04);
+      }
+
+      .v-icon {
+        font-size: 16px;
+      }
+    }
+  }
+
+  // 👉 Hide overlay nav when not active (mobile only)
+  &.overlay-nav {
+    transform: translateX(-100%);
+    visibility: hidden;
+
+    &.visible {
+      transform: translateX(0);
+      visibility: visible;
+    }
+  }
 
   .nav-header {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     padding: 1rem;
+    position: relative;
 
     .header-action {
       cursor: pointer;

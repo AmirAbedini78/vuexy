@@ -41,6 +41,7 @@ const navigationItems = computed(() => {
     <!-- 👉 navbar -->
     <template #navbar="{ toggleVerticalOverlayNavActive }">
       <div class="d-flex h-100 align-center">
+        <!-- Toggle button for mobile only (to open) -->
         <IconBtn
           id="vertical-nav-toggle-btn"
           class="ms-n3 d-lg-none"

@@ -1,34 +1,92 @@
 <script setup>
-import { layoutConfig } from '@layouts'
-import { can } from '@layouts/plugins/casl'
-import { useLayoutConfigStore } from '@layouts/stores/config'
+import { layoutConfig } from "@layouts";
+import { can } from "@layouts/plugins/casl";
+import { useLayoutConfigStore } from "@layouts/stores/config";
 import {
   getComputedNavLinkToProp,
   getDynamicI18nProps,
   isNavLinkActive,
-} from '@layouts/utils'
+} from "@layouts/utils";
 
 const props = defineProps({
   item: {
     type: null,
     required: true,
   },
-})
+});
 
-const configStore = useLayoutConfigStore()
-const hideTitleAndBadge = configStore.isVerticalNavMini()
+const configStore = useLayoutConfigStore();
+const hideTitleAndBadge = configStore.isVerticalNavMini();
 </script>
 
 <template>
   <li
     v-if="can(item.action, item.subject)"
     class="nav-link"
-    :class="{ disabled: item.disable }"
+    :class="{ disabled: item.disable, 'coming-soon': item.comingSoon }"
   >
+    <VTooltip v-if="item.comingSoon" text="Coming soon" location="end">
+      <template #activator="{ props: tipProps }">
+        <Component
+          :is="item.to ? 'div' : 'a'"
+          v-bind="{ ...tipProps }"
+          class="nav-link-inner"
+          :class="{
+            'router-link-active router-link-exact-active': isNavLinkActive(
+              item,
+              $router
+            ),
+          }"
+          :title="'Coming soon'"
+          @click.prevent
+        >
+          <Component
+            :is="layoutConfig.app.iconRenderer || 'div'"
+            v-bind="
+              item.icon || layoutConfig.verticalNav.defaultNavItemIconProps
+            "
+            class="nav-item-icon"
+          />
+          <TransitionGroup name="transition-slide-x">
+            <!-- 👉 Title -->
+            <Component
+              :is="layoutConfig.app.i18n.enable ? 'i18n-t' : 'span'"
+              v-show="!hideTitleAndBadge"
+              key="title"
+              class="nav-item-title"
+              v-bind="getDynamicI18nProps(item.title, 'span')"
+            >
+              {{ item.title }}
+            </Component>
+
+            <!-- 👉 Badge -->
+            <Component
+              :is="layoutConfig.app.i18n.enable ? 'i18n-t' : 'span'"
+              v-if="item.badgeContent"
+              v-show="!hideTitleAndBadge"
+              key="badge"
+              class="nav-item-badge"
+              :class="item.badgeClass"
+              v-bind="getDynamicI18nProps(item.badgeContent, 'span')"
+            >
+              {{ item.badgeContent }}
+            </Component>
+          </TransitionGroup>
+        </Component>
+      </template>
+    </VTooltip>
+
     <Component
+      v-else
       :is="item.to ? 'RouterLink' : 'a'"
       v-bind="getComputedNavLinkToProp(item)"
-      :class="{ 'router-link-active router-link-exact-active': isNavLinkActive(item, $router) }"
+      class="nav-link-inner"
+      :class="{
+        'router-link-active router-link-exact-active': isNavLinkActive(
+          item,
+          $router
+        ),
+      }"
     >
       <Component
         :is="layoutConfig.app.iconRenderer || 'div'"
@@ -66,9 +124,17 @@ const hideTitleAndBadge = configStore.isVerticalNavMini()
 
 <style lang="scss">
 .layout-vertical-nav {
-  .nav-link a {
+  .nav-link a,
+  .nav-link .nav-link-inner {
     display: flex;
     align-items: center;
+  }
+
+  .nav-link.coming-soon .nav-link-inner {
+    opacity: 0.45;
+    filter: blur(0.4px);
+    cursor: not-allowed;
+    pointer-events: auto; // keep tooltip working
   }
 }
 </style>

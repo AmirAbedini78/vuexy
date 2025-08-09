@@ -2,7 +2,7 @@ export default [
   {
     title: 'Welcome',
     icon: { icon: 'tabler-heart' },
-    to: 'welcome',
+    to: 'timeline',
     action: 'read',
     subject: 'Welcome',
   },
@@ -36,23 +36,17 @@ export default [
   },
   { heading: 'Adventures' },
   {
-    title: 'Listing',
-    icon: { icon: 'tabler-list' },
-    to: 'listing',
-    action: 'read',
-    subject: 'Listing',
-  },
-  {
     title: 'All Events',
     icon: { icon: 'tabler-calendar' },
     to: 'all-events',
     action: 'read',
     subject: 'Events',
+    comingSoon: true,
   },
   {
     title: 'Create Listing',
     icon: { icon: 'tabler-calendar-plus' },
-    to: 'create-listing',
+    to: 'listing',
     action: 'read',
     subject: 'Listing',
   },
@@ -62,6 +56,7 @@ export default [
     to: 'add-event',
     action: 'read',
     subject: 'Events',
+    comingSoon: true,
   },
   { heading: 'Manage Bookings' },
   {
@@ -70,6 +65,7 @@ export default [
     to: 'all-bookings',
     action: 'read',
     subject: 'Bookings',
+    comingSoon: true,
   },
   {
     title: 'Invite/Add Participants',
@@ -77,6 +73,7 @@ export default [
     to: 'invite-participants',
     action: 'read',
     subject: 'Participants',
+    comingSoon: true,
   },
   {
     title: 'All Participants',
@@ -84,6 +81,7 @@ export default [
     to: 'all-participants',
     action: 'read',
     subject: 'Participants',
+    comingSoon: true,
   },
   {
     title: 'Booking Statistics',
@@ -91,6 +89,7 @@ export default [
     to: 'booking-statistics',
     action: 'read',
     subject: 'Statistics',
+    comingSoon: true,
   },
   { heading: 'Finance' },
   {
@@ -99,6 +98,7 @@ export default [
     to: 'wallet',
     action: 'read',
     subject: 'Finance',
+    comingSoon: true,
   },
   {
     title: 'Finance Statistics',
@@ -106,6 +106,7 @@ export default [
     to: 'finance-statistics',
     action: 'read',
     subject: 'Statistics',
+    comingSoon: true,
   },
   { heading: 'Settings' },
   {
@@ -114,6 +115,7 @@ export default [
     to: 'user-profile-settings',
     action: 'read',
     subject: 'Profile',
+    comingSoon: true,
   },
   {
     title: 'Account Settings',
@@ -121,6 +123,7 @@ export default [
     to: 'account-settings',
     action: 'read',
     subject: 'Settings',
+    comingSoon: true,
   },
   {
     title: 'Get Support',
@@ -128,5 +131,6 @@ export default [
     to: 'get-support',
     action: 'read',
     subject: 'Support',
+    comingSoon: true,
   },
 ] 

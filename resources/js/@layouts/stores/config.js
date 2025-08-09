@@ -38,23 +38,20 @@ export const useLayoutConfigStore = defineStore('layoutConfig', () => {
   })
 
   // 👉 Watch route changes to preserve sidebar state
-  watch(() => route.path, (newPath, oldPath) => {
-    // Ensure sidebar state is preserved after route change
-    nextTick(() => {
-      // Check if we're navigating to a dashboard page (expand sidebar)
-      const isDashboardPage = newPath.includes('/dashboards/') || newPath === '/'
+  // Removed automatic sidebar control - let users control it manually
+  // watch(() => route.path, (newPath, oldPath) => {
+  //   nextTick(() => {
+  //     const isDashboardPage = newPath.includes('/dashboards/') || newPath === '/'
       
-      // If navigating to dashboard page, expand sidebar
-      if (isDashboardPage) {
-        isVerticalNavCollapsed.value = false
-        appContentLayoutNav.value = 'vertical'
-      } else {
-        // For all other pages (listing, access-control, etc.), keep sidebar collapsed
-        isVerticalNavCollapsed.value = true
-        appContentLayoutNav.value = 'vertical'
-      }
-    })
-  })
+  //     if (isDashboardPage) {
+  //       isVerticalNavCollapsed.value = false
+  //       appContentLayoutNav.value = 'vertical'
+  //     } else {
+  //       isVerticalNavCollapsed.value = true
+  //       appContentLayoutNav.value = 'vertical'
+  //     }
+  //   })
+  // })
 
 
   // 👉 Horizontal Nav Type

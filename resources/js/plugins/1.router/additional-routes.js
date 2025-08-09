@@ -110,6 +110,17 @@ export const routes = [
     },
   },
   {
+    path: '/timeline',
+    name: 'timeline',
+    component: () => import('@/pages/timeline.vue'),
+    meta: {
+      layout: 'default',
+      action: 'read',
+      subject: 'Welcome',
+      public: true,
+    },
+  },
+  {
     path: '/welcome',
     name: 'welcome',
     component: () => import('@/pages/welcome.vue'),
