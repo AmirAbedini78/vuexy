@@ -43,6 +43,47 @@
         margin-inline-start: 0.125rem;
       }
     }
+
+    // FIXED: Enhanced hover behavior for collapsed state
+    &.collapsed {
+      // When collapsed and hovered, show full content
+      &.hovered {
+        .nav-group-children {
+          opacity: 1;
+          visibility: visible;
+          transform: translateX(0);
+          transition: all 0.25s ease-in-out;
+        }
+
+        .nav-item-title,
+        .nav-item-badge,
+        .nav-group-arrow {
+          opacity: 1;
+          visibility: visible;
+          transform: translateX(0);
+          transition: all 0.25s ease-in-out;
+        }
+      }
+
+      // When collapsed but not hovered, hide content properly
+      &:not(.hovered) {
+        .nav-group-children {
+          opacity: 0;
+          visibility: hidden;
+          transform: translateX(-10px);
+          transition: all 0.25s ease-in-out;
+        }
+
+        .nav-item-title,
+        .nav-item-badge,
+        .nav-group-arrow {
+          opacity: 0;
+          visibility: hidden;
+          transform: translateX(-10px);
+          transition: all 0.25s ease-in-out;
+        }
+      }
+    }
   }
 
   &.layout-vertical-nav-collapsed {
@@ -52,6 +93,49 @@
           opacity: 0;
         }
       }
+
+      // FIXED: Ensure proper group behavior when collapsed
+      .nav-group {
+        // Keep group labels visible but hide children content
+        .nav-group-children {
+          display: none;
+        }
+
+        // When group is active, show a subtle indicator
+        &.active {
+          .nav-group-label {
+            background-color: rgba(var(--v-theme-primary), 0.08);
+          }
+        }
+      }
     }
+
+    // FIXED: When collapsed and hovered, show full functionality
+    .layout-vertical-nav.hovered {
+      .nav-group {
+        .nav-group-children {
+          display: block;
+        }
+
+        // Ensure proper transitions for group content
+        &.open {
+          .nav-group-children {
+            animation: expandContent 0.25s ease-in-out;
+          }
+        }
+      }
+    }
+  }
+}
+
+// FIXED: Add animation for content expansion
+@keyframes expandContent {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

@@ -195,12 +195,22 @@ const connectLinkedin = async () => {
       return;
     }
 
-    // 2) Otherwise call our API endpoint (prefix with API base if present)
-    const apiBase = (import.meta.env.VITE_API_BASE_URL || "").replace(
-      /\/$/,
-      ""
-    );
-    const endpoint = `${apiBase}/api/verification/${userType}/${userId}/linkedin`;
+    // 2) Build the correct endpoint URL
+    let endpoint;
+    const apiBase = import.meta.env.VITE_API_BASE_URL;
+
+    if (apiBase && apiBase.includes("/api")) {
+      // If VITE_API_BASE_URL already contains /api, use it directly
+      endpoint = `${apiBase}/verification/${userType}/${userId}/linkedin`;
+    } else if (apiBase) {
+      // If VITE_API_BASE_URL doesn't contain /api, add it
+      endpoint = `${apiBase}/api/verification/${userType}/${userId}/linkedin`;
+    } else {
+      // Fallback: use relative URL
+      endpoint = `/api/verification/${userType}/${userId}/linkedin`;
+    }
+
+    console.log("LinkedIn endpoint:", endpoint);
 
     const res = await fetch(endpoint, {
       method: "GET",

@@ -8,6 +8,8 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Config;
+use Laravel\Socialite\Facades\Socialite;
+use SocialiteProviders\LinkedIn\Provider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,6 +26,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Configure LinkedIn Socialite provider
+        Socialite::extend('linkedin', function ($app) {
+            $config = $app['config']['services.linkedin'];
+            return Socialite::buildProvider(Provider::class, $config);
+        });
+
         VerifyEmail::createUrlUsing(function ($notifiable) {
             $frontendUrl = rtrim(config('app.frontend_url'), '/');
             VerificationToken::where('user_id', $notifiable->id)->delete();

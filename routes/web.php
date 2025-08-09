@@ -42,6 +42,19 @@ Route::get('/test-linkedin-config', function() {
     ]);
 });
 
+// Simple LinkedIn OAuth test
+Route::get('/test-simple-linkedin/{userType}/{userId}', function($userType, $userId) {
+    try {
+        $controller = new \App\Http\Controllers\Api\UserVerificationController();
+        return $controller->startLinkedinOAuth(request(), $userType, $userId);
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ], 500);
+    }
+});
+
 // Mock LinkedIn OAuth for testing (temporary)
 Route::get('/mock-linkedin/{userType}/{userId}', function($userType, $userId) {
     // Simulate successful LinkedIn verification
@@ -139,6 +152,31 @@ Route::get('/test-linkedin-complete/{userType}/{userId}', function ($userType, $
         'user_type' => $userType,
         'user_id' => $userId
     ]);
+});
+
+// Test LinkedIn OAuth directly
+Route::get('/test-direct-linkedin/{userType}/{userId}', function($userType, $userId) {
+    try {
+        // Test LinkedIn OAuth URL generation
+        $authUrl = Laravel\Socialite\Facades\Socialite::driver('linkedin')
+            ->scopes(['r_liteprofile', 'r_emailaddress'])
+            ->redirect()
+            ->getTargetUrl();
+            
+        return response()->json([
+            'success' => true,
+            'authorization_url' => $authUrl,
+            'user_type' => $userType,
+            'user_id' => $userId,
+            'message' => 'LinkedIn OAuth URL generated successfully'
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ], 500);
+    }
 });
 
 // Catch-all route for SPA (excluding API routes)
