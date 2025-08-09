@@ -1,6 +1,6 @@
 <script setup>
 import { companyUserService, individualUserService } from "@/services/api";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
 const route = useRoute();
@@ -45,6 +45,37 @@ const step4Enabled = ref(false);
 const progressPercentage = ref(0);
 const completedVerifications = ref(0);
 const totalVerifications = ref(3); // email, whatsapp, linkedin
+
+// Persist step 4 state to cookie for sidebar gating
+const step4Cookie = useCookie("step4Enabled");
+watch(step4Enabled, (val) => {
+  const str = val ? "true" : "";
+  step4Cookie.value = str;
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.setItem("step4Enabled", val ? "true" : "");
+    } catch (e) {}
+  }
+});
+
+// Persist a simpler verification flag: any of email/whatsapp/linkedin verified
+const verifiedCookie = useCookie("userVerified");
+const updateVerifiedFlag = () => {
+  const isVerified =
+    emailStatus.value === "verified" ||
+    whatsappStatus.value === "verified" ||
+    linkedinStatus.value === "verified";
+  verifiedCookie.value = isVerified ? "true" : "";
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.setItem("userVerified", isVerified ? "true" : "");
+    } catch (e) {}
+  }
+};
+
+watch([emailStatus, whatsappStatus, linkedinStatus], () => {
+  updateVerifiedFlag();
+});
 
 // Fetch verification status on mount
 const fetchVerificationStatus = async () => {
@@ -150,12 +181,57 @@ const sendWhatsappCode = async () => {
   }
 };
 
-const connectLinkedin = () => {
-  // Use real LinkedIn OAuth
-  window.location.href = `/api/verification/${userType}/${userId}/linkedin`;
+const connectLinkedin = async () => {
+  try {
+    // 1) If an explicit frontend auth URL is provided, use it directly
+    const configuredUrl = import.meta.env.VITE_LINKEDIN_AUTH_URL;
+    if (configuredUrl && typeof configuredUrl === "string") {
+      window.location.href = configuredUrl;
+      return;
+    }
 
-  // Mock OAuth (commented out - use only for testing)
-  // window.location.href = `/mock-linkedin/${userType}/${userId}`;
+    // 2) Otherwise call our API endpoint (prefix with API base if present)
+    const apiBase = (import.meta.env.VITE_API_BASE_URL || "").replace(
+      /\/$/,
+      ""
+    );
+    const endpoint = `${apiBase}/api/verification/${userType}/${userId}/linkedin`;
+
+    const res = await fetch(endpoint, { redirect: "follow" });
+
+    // If server already redirects, follow that
+    if (res.redirected && res.url) {
+      window.location.href = res.url;
+      return;
+    }
+
+    const contentType = res.headers.get("content-type") || "";
+    if (contentType.includes("application/json")) {
+      const data = await res.json();
+      const authUrl =
+        data.authorizationUrl ||
+        data.authorization_url ||
+        data.url ||
+        data.auth_url ||
+        data.redirect ||
+        data.redirect_url;
+
+      if (authUrl) {
+        window.location.href = authUrl;
+        return;
+      }
+    }
+
+    // Fallback: hit endpoint directly (backend should perform redirect)
+    window.location.href = endpoint;
+  } catch (e) {
+    // Final fallback: hit endpoint directly
+    const apiBase = (import.meta.env.VITE_API_BASE_URL || "").replace(
+      /\/$/,
+      ""
+    );
+    window.location.href = `${apiBase}/api/verification/${userType}/${userId}/linkedin`;
+  }
 };
 
 const verifyWhatsappCode = async () => {
@@ -211,19 +287,16 @@ const completeProfile = async () => {
       profileCompleted.value = true;
       reviewStatus.value = "verified_contact";
 
-      // Show success message
-      alert("Profile completed successfully! Redirecting to dashboard...");
-
-      // Redirect to access-control after successful completion
-      setTimeout(() => {
-        const redirectUrl = data.redirect_url || "/access-control";
-        window.location.href = redirectUrl;
-      }, 2000);
-    } else {
-      console.error("Failed to complete profile:", data.message);
+      const redirectUrl = data.redirect_url || "/access-control";
+      // Direct, silent redirect (no alert, no delay)
+      window.location.href = redirectUrl;
+      return;
     }
+    // If backend responds with failure, still navigate user to access-control silently
+    window.location.href = "/access-control";
   } catch (e) {
-    console.error("Error completing profile:", e);
+    // On error, proceed to access-control silently (no alert)
+    window.location.href = "/access-control";
   }
 };
 
@@ -242,6 +315,8 @@ const calculateProgress = () => {
 
   // Enable step 4 if at least one verification is completed
   step4Enabled.value = completed > 0;
+  // Also update simple verified flag
+  updateVerifiedFlag();
 
   // Debug logging for progress calculation
   console.log("Progress calculation:", {

@@ -17,21 +17,26 @@ const { goToDashboard } = useNavigation();
 // Get user data to check if admin
 const userDataCookie = useCookie("userData");
 
-// Simple navigation logic
+// Simple navigation logic (gated by verification)
 const navigationItems = computed(() => {
-  // Check if we're on the client side using a different approach
   if (typeof window !== "undefined") {
     const userData = userDataCookie.value;
-    console.log("Navigation - userData:", userData);
-    console.log("Navigation - user role:", userData?.role);
+    if (userData?.role === "admin") return adminNavItems;
 
-    if (userData?.role === "admin") {
-      console.log("Navigation - returning admin items");
-      return adminNavItems;
+    // Read verification flag set by Timeline
+    const verifiedCookie = useCookie("userVerified");
+    let isVerified = verifiedCookie.value === "true";
+    if (!isVerified) {
+      try {
+        isVerified = localStorage.getItem("userVerified") === "true";
+      } catch (e) {}
+    }
+
+    if (!isVerified) {
+      const welcome = userNavItems.find((i) => i.title === "Welcome");
+      return welcome ? [welcome] : [];
     }
   }
-
-  console.log("Navigation - returning user items");
   return userNavItems;
 });
 </script>

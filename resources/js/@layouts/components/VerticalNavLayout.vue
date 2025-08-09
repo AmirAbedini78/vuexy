@@ -230,6 +230,16 @@ const verticalNavAttrs = computed(() => {
     }
   }
 
+  // Hide only the vertical nav (keep navbar and footer) when route adds wrapper class
+  &.hide-vertical-nav {
+    .vertical-nav-wrapper {
+      display: none !important;
+    }
+    .layout-content-wrapper {
+      padding-inline-start: 0 !important;
+    }
+  }
+
   // 👉 Content height fixed
   &.layout-content-height-fixed {
     .layout-content-wrapper {

@@ -115,6 +115,7 @@ export const routes = [
     component: () => import('@/pages/timeline.vue'),
     meta: {
       layout: 'default',
+      layoutWrapperClasses: 'hide-vertical-nav',
       action: 'read',
       subject: 'Welcome',
       public: true,
@@ -136,6 +137,7 @@ export const routes = [
     component: () => import('@/views/pages/registration/Timeline.vue'),
     meta: {
       layout: 'default',
+      layoutWrapperClasses: 'hide-vertical-nav',
       public: true,
     },
   },
