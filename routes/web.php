@@ -25,6 +25,7 @@ Route::get('/login', function () {
 // LinkedIn OAuth routes
 Route::get('/api/verification/{userType}/{userId}/linkedin', [UserVerificationController::class, 'startLinkedinOAuth']);
 Route::get('/linkedin/callback', [UserVerificationController::class, 'linkedinCallback']);
+Route::get('/linkedin/callback/current-user', [UserVerificationController::class, 'linkedinCallbackForCurrentUser']);
 
 // Test LinkedIn OAuth configuration
 Route::get('/test-linkedin-config', function() {
@@ -159,7 +160,6 @@ Route::get('/test-direct-linkedin/{userType}/{userId}', function($userType, $use
     try {
         // Test LinkedIn OAuth URL generation
         $authUrl = Laravel\Socialite\Facades\Socialite::driver('linkedin')
-            ->scopes(['r_liteprofile', 'r_emailaddress'])
             ->redirect()
             ->getTargetUrl();
             

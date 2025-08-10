@@ -74,6 +74,14 @@ Route::middleware([ApiMiddleware::class])->group(function () {
         Route::get('/{userType}/{userId}/linkedin', [\App\Http\Controllers\Api\UserVerificationController::class, 'startLinkedinOAuth']);
         Route::post('/{userType}/{userId}/linkedin/verify', [\App\Http\Controllers\Api\UserVerificationController::class, 'verifyLinkedinCode']);
         Route::post('/{userType}/{userId}/profile', [\App\Http\Controllers\Api\UserVerificationController::class, 'completeProfile']);
+        
+        // New routes for current user (without individual/company dependency)
+        Route::get('/user/{userId}', [\App\Http\Controllers\Api\UserVerificationController::class, 'showForCurrentUser']);
+        Route::post('/user/{userId}/email', [\App\Http\Controllers\Api\UserVerificationController::class, 'sendEmailVerificationForCurrentUser']);
+        Route::post('/user/{userId}/whatsapp', [\App\Http\Controllers\Api\UserVerificationController::class, 'sendWhatsappCodeForCurrentUser']);
+        Route::post('/user/{userId}/whatsapp/verify', [\App\Http\Controllers\Api\UserVerificationController::class, 'verifyWhatsappCodeForCurrentUser']);
+        Route::get('/user/{userId}/linkedin', [\App\Http\Controllers\Api\UserVerificationController::class, 'startLinkedinOAuthForCurrentUser']);
+        Route::post('/user/{userId}/profile', [\App\Http\Controllers\Api\UserVerificationController::class, 'completeProfileForCurrentUser']);
     });
 
     // Protected routes

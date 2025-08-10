@@ -1,6 +1,5 @@
 <script setup>
-import { companyUserService, individualUserService } from "@/services/api";
-import { onMounted, ref, watch } from "vue";
+import { onMounted, onUnmounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
 const route = useRoute();
@@ -9,12 +8,21 @@ const error = ref(null);
 const userData = ref({ email: "", whatsapp: "" });
 const timelineSteps = ref([]);
 
-// Get logged-in user data
-const loggedInUser = ref(null);
-
 // Get user type and ID from route
-const userType = route.params.type; // 'individual' or 'company'
-const userId = route.params.id;
+const userType = route.params.type; // 'individual' or 'company' - will be removed
+const userId = route.params.id; // will be removed
+
+// Get user data from logged-in user instead of route params
+const getCurrentUser = () => {
+  const userDataCookie = useCookie("userData");
+  if (userDataCookie.value) {
+    return userDataCookie.value;
+  }
+  return null;
+};
+
+// Get current user data
+const currentUser = ref(null);
 
 // Email Verification State
 const email = ref("");
@@ -45,6 +53,19 @@ const step4Enabled = ref(false);
 const progressPercentage = ref(0);
 const completedVerifications = ref(0);
 const totalVerifications = ref(3); // email, whatsapp, linkedin
+
+// Real-time verification polling
+const pollingInterval = ref(null);
+const isPolling = ref(false);
+const maxPollingAttempts = ref(10); // Maximum 10 attempts (50 seconds)
+const pollingAttempts = ref(0);
+
+// Success notification state
+const showSuccessNotification = ref(false);
+const successMessage = ref("");
+
+// Debug mode
+const showDebugPanel = ref(false);
 
 // Persist step 4 state to cookie for sidebar gating
 const step4Cookie = useCookie("step4Enabled");
@@ -80,7 +101,14 @@ watch([emailStatus, whatsappStatus, linkedinStatus], () => {
 // Fetch verification status on mount
 const fetchVerificationStatus = async () => {
   try {
-    const res = await fetch(`/api/verification/${userType}/${userId}`);
+    // Get current user ID from logged-in user data
+    const user = currentUser.value;
+    if (!user || !user.id) {
+      console.error("No user data available");
+      return;
+    }
+
+    const res = await fetch(`/api/verification/user/${user.id}`);
     const data = await res.json();
 
     if (data.success && data.data) {
@@ -154,12 +182,211 @@ const fetchVerificationStatus = async () => {
   }
 };
 
+// Start polling for verification status updates
+const startVerificationPolling = () => {
+  if (isPolling.value) return;
+
+  isPolling.value = true;
+  pollingAttempts.value = 0;
+
+  console.log("Starting verification status polling...");
+
+  pollingInterval.value = setInterval(async () => {
+    pollingAttempts.value++;
+
+    try {
+      const res = await fetch(`/api/verification/user/${currentUser.value.id}`);
+      const data = await res.json();
+
+      if (data.success && data.data) {
+        const wasEmailVerified = emailStatus.value === "verified";
+        const isEmailVerified = data.data.email_verified;
+
+        // Update email status
+        if (isEmailVerified && !wasEmailVerified) {
+          emailStatus.value = "verified";
+          emailMessage.value = "Email verified successfully!";
+          console.log("Email verification detected during polling!");
+
+          // Show success notification
+          showNotification("🎉 Email verification completed successfully!");
+
+          // Stop polling once email is verified
+          stopVerificationPolling();
+          return;
+        }
+
+        // Update other verification statuses
+        if (data.data.whatsapp_verified) {
+          whatsappStatus.value = "verified";
+          whatsappMessage.value = "WhatsApp Verified";
+        }
+
+        if (data.data.linkedin_verified) {
+          linkedinStatus.value = "verified";
+          linkedinMessage.value = "LinkedIn Connected";
+        }
+
+        // Recalculate progress
+        calculateProgress();
+
+        console.log(
+          `Polling attempt ${pollingAttempts.value}: Email verified = ${isEmailVerified}`
+        );
+      } else {
+        console.log(
+          `Polling attempt ${pollingAttempts.value}: No data received`
+        );
+      }
+    } catch (e) {
+      console.error(
+        `Error during verification polling (attempt ${pollingAttempts.value}):`,
+        e
+      );
+    }
+
+    // Stop polling after max attempts
+    if (pollingAttempts.value >= maxPollingAttempts.value) {
+      console.log("Stopping verification polling - max attempts reached");
+      stopVerificationPolling();
+
+      // Update message to inform user that automatic checking has stopped
+      if (emailStatus.value === "sent") {
+        emailMessage.value =
+          "Verification email sent. Please check your inbox and click the verification link. You can manually check your status using the 'Check Status' button.";
+      }
+    }
+  }, 5000); // Check every 5 seconds
+};
+
+// Stop polling for verification status
+const stopVerificationPolling = () => {
+  if (pollingInterval.value) {
+    clearInterval(pollingInterval.value);
+    pollingInterval.value = null;
+  }
+  isPolling.value = false;
+  console.log("Verification polling stopped");
+};
+
+// Show success notification
+const showNotification = (message, duration = 5000) => {
+  successMessage.value = message;
+  showSuccessNotification.value = true;
+
+  setTimeout(() => {
+    showSuccessNotification.value = false;
+  }, duration);
+};
+
+// Manual refresh verification status
+const refreshVerificationStatus = async () => {
+  console.log("Manual verification status refresh requested");
+  await fetchVerificationStatusWithRetry(false);
+};
+
+// Enhanced verification status fetch with immediate retry for email verification
+const fetchVerificationStatusWithRetry = async (
+  isEmailVerificationReturn = false
+) => {
+  try {
+    const res = await fetch(`/api/verification/user/${currentUser.value.id}`);
+    const data = await res.json();
+
+    if (data.success && data.data) {
+      const wasEmailVerified = emailStatus.value === "verified";
+      const isEmailVerified = data.data.email_verified;
+
+      // Check email verification status
+      if (isEmailVerified) {
+        emailStatus.value = "verified";
+        emailMessage.value = "Email verified successfully!";
+
+        // If this is a return from email verification and status just changed, show success message
+        if (isEmailVerificationReturn && !wasEmailVerified) {
+          emailMessage.value = "Email verified successfully! Welcome back!";
+
+          // Show success notification
+          showNotification("🎉 Email verification completed successfully!");
+
+          // Show a brief success notification
+          setTimeout(() => {
+            emailMessage.value = "Email verified successfully!";
+          }, 3000);
+        }
+      } else if (data.data.email_token === "pending") {
+        emailStatus.value = "sent";
+        emailMessage.value =
+          "Verification email sent. Please check your inbox and click the verification link.";
+      } else {
+        emailStatus.value = "pending";
+        emailMessage.value = "";
+      }
+
+      // Check WhatsApp verification status
+      if (data.data.whatsapp_verified) {
+        whatsappStatus.value = "verified";
+        whatsappMessage.value = "WhatsApp Verified";
+      } else if (data.data.whatsapp_code) {
+        whatsappStatus.value = "sent";
+        whatsappMessage.value =
+          "Verification code sent. Please check WhatsApp.";
+      } else {
+        whatsappStatus.value = "pending";
+        whatsappMessage.value = "";
+      }
+      if (data.data.whatsapp_number) {
+        whatsappNumber.value = data.data.whatsapp_number;
+      }
+
+      // Check LinkedIn verification status
+      if (data.data.linkedin_verified) {
+        linkedinStatus.value = "verified";
+        linkedinMessage.value = "LinkedIn Connected";
+        linkedinLoading.value = false;
+      } else {
+        linkedinStatus.value = "pending";
+        linkedinMessage.value = "";
+        linkedinLoading.value = false;
+      }
+
+      // Set user email if available
+      if (data.data.email) {
+        email.value = data.data.email;
+      }
+
+      // Calculate progress after updating all statuses
+      calculateProgress();
+
+      // If email is verified and we're returning from verification, stop polling
+      if (isEmailVerified && isEmailVerificationReturn) {
+        stopVerificationPolling();
+      }
+
+      return data.data;
+    } else {
+      // If no verification data exists, set to pending
+      emailStatus.value = "pending";
+      emailMessage.value = "";
+      whatsappStatus.value = "pending";
+      whatsappMessage.value = "";
+      linkedinStatus.value = "pending";
+      linkedinMessage.value = "";
+    }
+  } catch (e) {
+    console.error("Error fetching verification status:", e);
+    emailStatus.value = "error";
+    emailMessage.value =
+      "Could not fetch verification status. Please refresh the page.";
+  }
+};
+
 const sendWhatsappCode = async () => {
   whatsappLoading.value = true;
   whatsappMessage.value = "";
   try {
     const res = await fetch(
-      `/api/verification/${userType}/${userId}/whatsapp`,
+      `/api/verification/user/${currentUser.value.id}/whatsapp`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -201,13 +428,13 @@ const connectLinkedin = async () => {
 
     if (apiBase && apiBase.includes("/api")) {
       // If VITE_API_BASE_URL already contains /api, use it directly
-      endpoint = `${apiBase}/verification/${userType}/${userId}/linkedin`;
+      endpoint = `${apiBase}/verification/user/${currentUser.value.id}/linkedin`;
     } else if (apiBase) {
       // If VITE_API_BASE_URL doesn't contain /api, add it
-      endpoint = `${apiBase}/api/verification/${userType}/${userId}/linkedin`;
+      endpoint = `${apiBase}/api/verification/user/${currentUser.value.id}/linkedin`;
     } else {
       // Fallback: use relative URL
-      endpoint = `/api/verification/${userType}/${userId}/linkedin`;
+      endpoint = `/api/verification/user/${currentUser.value.id}/linkedin`;
     }
 
     console.log("LinkedIn endpoint:", endpoint);
@@ -249,7 +476,7 @@ const verifyWhatsappCode = async () => {
   whatsappMessage.value = "";
   try {
     const res = await fetch(
-      `/api/verification/${userType}/${userId}/whatsapp/verify`,
+      `/api/verification/user/${currentUser.value.id}/whatsapp/verify`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -276,21 +503,24 @@ const verifyWhatsappCode = async () => {
 
 const completeProfile = async () => {
   try {
-    const res = await fetch(`/api/verification/${userType}/${userId}/profile`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRF-TOKEN":
-          document
-            .querySelector('meta[name="csrf-token"]')
-            ?.getAttribute("content") || "",
-      },
-      body: JSON.stringify({
-        completed_verifications: completedVerifications.value,
-        total_verifications: totalVerifications.value,
-        progress_percentage: progressPercentage.value,
-      }),
-    });
+    const res = await fetch(
+      `/api/verification/user/${currentUser.value.id}/profile`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-TOKEN":
+            document
+              .querySelector('meta[name="csrf-token"]')
+              ?.getAttribute("content") || "",
+        },
+        body: JSON.stringify({
+          completed_verifications: completedVerifications.value,
+          total_verifications: totalVerifications.value,
+          progress_percentage: progressPercentage.value,
+        }),
+      }
+    );
 
     const data = await res.json();
     if (data.success) {
@@ -342,39 +572,52 @@ const calculateProgress = () => {
 
 onMounted(async () => {
   try {
+    // Add keyboard listeners for development
+    addKeyboardListeners();
+
     // Initialize step4Enabled to false first
     step4Enabled.value = false;
     progressPercentage.value = 0;
     completedVerifications.value = 0;
 
-    // Get logged-in user data first
-    getLoggedInUser();
-
-    // Fetch user data based on type
-    if (userType === "individual") {
-      const response = await individualUserService.getById(userId);
-      userData.value = response.data;
-    } else if (userType === "company") {
-      const response = await companyUserService.getById(userId);
-      userData.value = response.data;
-    } else {
-      throw new Error("Invalid user type");
+    // Get current user data from logged-in user
+    currentUser.value = getCurrentUser();
+    if (!currentUser.value) {
+      console.error("No user data found - redirecting to login");
+      window.location.href = "/login";
+      return;
     }
+
+    // Set user data from current user
+    userData.value = {
+      email: currentUser.value.email || "",
+      whatsapp: currentUser.value.whatsapp || "",
+      full_name: currentUser.value.full_name || currentUser.value.name || "",
+      company_name: currentUser.value.company_name || "",
+    };
 
     // Initialize timeline steps
     initializeTimeline();
 
-    // Check if user just came back from email verification BEFORE fetching status
+    // Check if user just came back from email verification
     const isEmailVerified = route.query.verified === "true";
 
-    // Fetch all verification statuses
-    await fetchVerificationStatus();
-
-    // If user just came back from email verification, ensure email status is set correctly
     if (isEmailVerified) {
-      emailStatus.value = "verified";
-      emailMessage.value = "Email verified successfully! Welcome back!";
-      console.log("Email verification detected from URL parameter");
+      console.log(
+        "User returned from email verification - starting enhanced verification check"
+      );
+
+      // Use enhanced verification fetch with retry logic
+      await fetchVerificationStatusWithRetry(true);
+
+      // If email is still not verified, start polling
+      if (emailStatus.value !== "verified") {
+        console.log("Email not yet verified, starting polling...");
+        startVerificationPolling();
+      }
+    } else {
+      // Regular verification status fetch
+      await fetchVerificationStatus();
     }
 
     // Check LinkedIn verification status from backend or query
@@ -409,7 +652,7 @@ onMounted(async () => {
     }
 
     // Auto-send email verification if not already verified and user has email
-    if (emailStatus.value === "pending" && loggedInUser.value?.email) {
+    if (emailStatus.value === "pending" && currentUser.value?.email) {
       console.log("Auto-sending email verification...");
       await sendEmailVerification();
     }
@@ -425,6 +668,7 @@ onMounted(async () => {
       step4Enabled: step4Enabled.value,
       completedVerifications: completedVerifications.value,
       progressPercentage: progressPercentage.value,
+      isPolling: isPolling.value,
     });
   } catch (err) {
     console.error("Error fetching user data:", err);
@@ -433,6 +677,55 @@ onMounted(async () => {
     loading.value = false;
   }
 });
+
+// Keyboard shortcuts for development
+const handleKeydown = (event) => {
+  // Ctrl+Shift+D to toggle debug panel
+  if (event.ctrlKey && event.shiftKey && event.key === "D") {
+    event.preventDefault();
+    showDebugPanel.value = !showDebugPanel.value;
+    console.log("Debug panel toggled:", showDebugPanel.value);
+  }
+};
+
+// Add keyboard event listener
+const addKeyboardListeners = () => {
+  document.addEventListener("keydown", handleKeydown);
+};
+
+const removeKeyboardListeners = () => {
+  document.removeEventListener("keydown", handleKeydown);
+};
+
+// Cleanup polling on component unmount
+onUnmounted(() => {
+  stopVerificationPolling();
+  removeKeyboardListeners();
+});
+
+// Watch for route changes to handle email verification returns
+watch(
+  () => route.query.verified,
+  async (newValue) => {
+    if (newValue === "true") {
+      console.log("Route query changed - email verification detected");
+
+      // Stop any existing polling
+      stopVerificationPolling();
+
+      // Immediately check verification status
+      await fetchVerificationStatusWithRetry(true);
+
+      // If still not verified, start polling
+      if (emailStatus.value !== "verified") {
+        console.log(
+          "Email not yet verified after route change, starting polling..."
+        );
+        startVerificationPolling();
+      }
+    }
+  }
+);
 
 const initializeTimeline = () => {
   timelineSteps.value = [
@@ -518,27 +811,22 @@ const handleAction = (step) => {
 
 const getUserDisplayName = () => {
   if (!userData.value) return "User";
-  return userData.value.full_name || userData.value.company_name || "User";
+  return (
+    userData.value.full_name ||
+    userData.value.company_name ||
+    currentUser.value?.name ||
+    "User"
+  );
 };
 
-// Get logged-in user data from cookies
-const getLoggedInUser = () => {
-  const userDataCookie = useCookie("userData");
-  if (userDataCookie.value) {
-    loggedInUser.value = userDataCookie.value;
-    // Auto-fill email field with logged-in user's email
-    if (loggedInUser.value.email) {
-      userData.value.email = loggedInUser.value.email;
-    }
-  }
-};
+// Remove the old getLoggedInUser function since we're using currentUser now
 
 const sendEmailVerification = async () => {
   emailLoading.value = true;
   emailMessage.value = "";
 
-  // Use logged-in user's email if available, otherwise use userData email
-  const userEmail = loggedInUser.value?.email || userData.value.email;
+  // Use current user's email
+  const userEmail = currentUser.value?.email || userData.value.email;
   if (!userEmail) {
     emailStatus.value = "error";
     emailMessage.value = "Email address not found. Please contact support.";
@@ -547,27 +835,35 @@ const sendEmailVerification = async () => {
   }
 
   try {
-    const res = await fetch(`/api/verification/${userType}/${userId}/email`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRF-TOKEN":
-          document
-            .querySelector('meta[name="csrf-token"]')
-            ?.getAttribute("content") || "",
-      },
-      body: JSON.stringify({
-        email: userEmail,
-        name: getUserDisplayName(),
-        redirect_url: `${window.location.origin}/registration/timeline/${userType}/${userId}?verified=true`,
-      }),
-    });
+    const res = await fetch(
+      `/api/verification/user/${currentUser.value.id}/email`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-TOKEN":
+            document
+              .querySelector('meta[name="csrf-token"]')
+              ?.getAttribute("content") || "",
+        },
+        body: JSON.stringify({
+          email: userEmail,
+          name: getUserDisplayName(),
+          redirect_url: `${window.location.origin}/timeline?verified=true`,
+        }),
+      }
+    );
 
     const data = await res.json();
     if (data.success) {
       emailStatus.value = "sent";
       emailMessage.value =
         "Verification email sent successfully! Please check your inbox and click the verification link.";
+
+      // Start polling for verification status updates
+      console.log("Email sent successfully, starting verification polling...");
+      startVerificationPolling();
+
       await fetchVerificationStatus(); // Update status
     } else {
       emailStatus.value = "error";
@@ -586,6 +882,20 @@ const sendEmailVerification = async () => {
 </script>
 
 <template>
+  <!-- Success Notification -->
+  <VSnackbar
+    v-model="showSuccessNotification"
+    :timeout="5000"
+    color="success"
+    location="top"
+    class="success-notification"
+  >
+    <div style="display: flex; align-items: center; gap: 8px">
+      <VIcon icon="tabler-check-circle" size="20" />
+      {{ successMessage }}
+    </div>
+  </VSnackbar>
+
   <!-- Header Section - Outside Timeline Context -->
   <div class="timeline-header">
     <div class="container-header">
@@ -613,6 +923,32 @@ const sendEmailVerification = async () => {
   <!-- Timeline Section Title -->
   <h2 class="section-title">Complete Following Steps to Verify Your Account</h2>
 
+  <!-- Debug Panel (Development Only) -->
+  <div v-if="showDebugPanel" class="debug-panel">
+    <h3>Debug Information</h3>
+    <div class="debug-info">
+      <p><strong>Email Status:</strong> {{ emailStatus }}</p>
+      <p><strong>WhatsApp Status:</strong> {{ whatsappStatus }}</p>
+      <p><strong>LinkedIn Status:</strong> {{ linkedinStatus }}</p>
+      <p><strong>Is Polling:</strong> {{ isPolling }}</p>
+      <p>
+        <strong>Polling Attempts:</strong> {{ pollingAttempts }}/{{
+          maxPollingAttempts
+        }}
+      </p>
+      <p><strong>Step 4 Enabled:</strong> {{ step4Enabled }}</p>
+      <p>
+        <strong>Progress:</strong> {{ progressPercentage }}% ({{
+          completedVerifications
+        }}/{{ totalVerifications }})
+      </p>
+      <p><strong>Route Query:</strong> {{ JSON.stringify(route.query) }}</p>
+    </div>
+    <VBtn @click="refreshVerificationStatus" size="small" color="primary">
+      Refresh Status
+    </VBtn>
+  </div>
+
   <!-- Timeline Container -->
   <VCard class="registration-timeline-page" elevation="0">
     <!-- Timeline Steps -->
@@ -638,7 +974,7 @@ const sendEmailVerification = async () => {
               :disabled="true"
               :readonly="true"
               :hint="
-                loggedInUser?.email
+                currentUser?.email
                   ? 'Your login email'
                   : 'Email will be auto-filled'
               "
@@ -654,6 +990,19 @@ const sendEmailVerification = async () => {
               <VIcon left size="20">tabler-mail</VIcon>
               {{ emailStatus === "verified" ? "Verified" : "Send Link" }}
             </VBtn>
+            <!-- Refresh button for manual status check -->
+            <VBtn
+              v-if="emailStatus === 'sent'"
+              variant="outlined"
+              color="primary"
+              size="small"
+              @click="refreshVerificationStatus"
+              :loading="isPolling"
+              style="margin-left: 8px"
+            >
+              <VIcon left size="16">tabler-refresh</VIcon>
+              Check Status
+            </VBtn>
             <div
               v-if="emailMessage"
               :style="{
@@ -668,6 +1017,25 @@ const sendEmailVerification = async () => {
               }"
             >
               {{ emailMessage }}
+            </div>
+            <!-- Polling indicator -->
+            <div
+              v-if="isPolling && emailStatus === 'sent'"
+              :style="{
+                color: 'orange',
+                marginTop: '8px',
+                fontSize: '14px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+              }"
+            >
+              <VIcon
+                icon="tabler-refresh"
+                size="16"
+                style="animation: spin 2s linear infinite"
+              />
+              Checking for verification updates...
             </div>
           </div>
         </div>
@@ -1417,5 +1785,51 @@ const sendEmailVerification = async () => {
     min-width: unset;
     max-width: unset;
   }
+}
+
+/* Spinning animation for polling indicator */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Success notification styling */
+.success-notification {
+  z-index: 9999;
+}
+
+.success-notification .v-snackbar__content {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+/* Debug panel styling */
+.debug-panel {
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+  font-family: monospace;
+  font-size: 14px;
+}
+
+.debug-panel h3 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  color: #333;
+}
+
+.debug-info p {
+  margin: 4px 0;
+  color: #666;
+}
+
+.debug-info strong {
+  color: #333;
 }
 </style>

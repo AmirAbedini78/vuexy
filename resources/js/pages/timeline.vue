@@ -6,10 +6,6 @@
 
 <script setup>
 import Timeline from "@/views/pages/registration/Timeline.vue";
-const route = useRoute();
-
-if (!route.params.type) route.params.type = "individual";
-if (!route.params.id) route.params.id = "1";
 
 definePage({
   meta: {
