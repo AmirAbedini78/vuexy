@@ -23,6 +23,11 @@ const showItineraryDialog = ref(false);
 const showSpecialAddonsDialog = ref(false);
 const showPeriodsDialog = ref(false);
 const formValidationErrors = ref({});
+const showConfirmation = ref(false);
+const submissionData = ref({
+  adventureTitle: "",
+  adventureId: "",
+});
 
 const formData = ref({
   // Step 1 fields
@@ -66,7 +71,6 @@ const requiredFieldsStep1 = [
   "listingTitle",
   "listingDescription",
   "activitiesIncluded",
-  "locations",
 ];
 
 const validateStep1 = () => {
@@ -85,6 +89,59 @@ const validateStep1 = () => {
   return Object.keys(errors).length === 0;
 };
 
+// Step 2 validation
+const requiredFieldsStep2 = ["whatsIncluded", "whatsNotIncluded", "locations"];
+
+const validateStep2 = () => {
+  const errors = { ...formValidationErrors.value };
+  // listingMedia must have at least one non-empty entry
+  const hasMedia =
+    Array.isArray(formData.value.listingMedia) &&
+    formData.value.listingMedia.some(
+      (m) => typeof m === "string" && m.trim() !== ""
+    );
+  if (!hasMedia) errors["listingMedia"] = "Please add at least one media URL";
+  // mapsAndRoutes must have at least one non-empty entry
+  const hasRoute =
+    Array.isArray(formData.value.mapsAndRoutes) &&
+    formData.value.mapsAndRoutes.some(
+      (r) => typeof r === "string" && r.trim() !== ""
+    );
+  if (!hasRoute)
+    errors["mapsAndRoutes"] = "Please add at least one map/route URL";
+  // simple text fields
+  requiredFieldsStep2.forEach((field) => {
+    const value = formData.value[field];
+    if (!value || (typeof value === "string" && value.trim() === "")) {
+      errors[field] = "This field is required";
+    }
+  });
+  formValidationErrors.value = errors;
+  return ["listingMedia", "mapsAndRoutes", ...requiredFieldsStep2].every(
+    (k) => !errors[k]
+  );
+};
+
+// Step 3 validation
+const requiredFieldsStep3 = ["personalPolicies"]; // radio selection required
+
+const validateStep3 = () => {
+  const errors = { ...formValidationErrors.value };
+  // At least one itinerary item
+  if (!itineraries.value || itineraries.value.length === 0) {
+    errors["itineraries"] = "Please add at least one day in your itinerary";
+  }
+  // Radio must be selected and not empty
+  requiredFieldsStep3.forEach((field) => {
+    const value = formData.value[field];
+    if (!value || (typeof value === "string" && value.trim() === "")) {
+      errors[field] = "This field is required";
+    }
+  });
+  formValidationErrors.value = errors;
+  return ["itineraries", ...requiredFieldsStep3].every((k) => !errors[k]);
+};
+
 const hasFieldError = (fieldName) => !!formValidationErrors.value[fieldName];
 const clearFieldError = (fieldName) => {
   if (formValidationErrors.value[fieldName])
@@ -94,6 +151,14 @@ const clearFieldError = (fieldName) => {
 const goToNextStep = () => {
   if (currentStep.value === 0) {
     if (validateStep1()) {
+      currentStep.value++;
+    } else {
+      const firstError = document.querySelector(".field-error");
+      if (firstError)
+        firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  } else if (currentStep.value === 1) {
+    if (validateStep2()) {
       currentStep.value++;
     } else {
       const firstError = document.querySelector(".field-error");
@@ -180,10 +245,12 @@ const handlePeriodsDone = async (newPeriods, editingIndex) => {
       period.number = index + 1;
     });
 
+    // Clear validation error when periods are added
+    clearFieldError("periods");
+
     console.log("Total periods count:", periods.value.length);
   } catch (error) {
     console.error("Error in handlePeriodsDone:", error);
-    alert("خطا در ذخیره اطلاعات");
   }
 };
 
@@ -220,10 +287,12 @@ const handleItineraryDone = (itineraryData, editingIndex = -1) => {
       itinerary.number = index + 1;
     });
 
+    // Clear validation error if any
+    clearFieldError("itineraries");
+
     showItineraryDialog.value = false;
   } catch (error) {
     console.error("Error in handleItineraryDone:", error);
-    alert("خطا در ذخیره اطلاعات");
   }
 };
 
@@ -262,7 +331,6 @@ const handleSpecialAddonDone = (addonData, editingIndex = -1) => {
     showSpecialAddonsDialog.value = false;
   } catch (error) {
     console.error("Error in handleSpecialAddonDone:", error);
-    alert("خطا در ذخیره اطلاعات");
   }
 };
 
@@ -274,13 +342,11 @@ const editPeriod = (index) => {
 
 // Remove period
 const removePeriod = (index) => {
-  if (confirm("آیا مطمئن هستید که می‌خواهید این departure را حذف کنید؟")) {
-    periods.value.splice(index, 1);
-    // Update numbers
-    periods.value.forEach((period, idx) => {
-      period.number = idx + 1;
-    });
-  }
+  periods.value.splice(index, 1);
+  // Update numbers
+  periods.value.forEach((period, idx) => {
+    period.number = idx + 1;
+  });
 };
 
 // Edit itinerary item
@@ -291,13 +357,11 @@ const editItineraryItem = (index) => {
 
 // Remove itinerary
 const removeItinerary = (index) => {
-  if (confirm("آیا مطمئن هستید که می‌خواهید این روز را حذف کنید؟")) {
-    itineraries.value.splice(index, 1);
-    // Update numbers
-    itineraries.value.forEach((itinerary, idx) => {
-      itinerary.number = idx + 1;
-    });
-  }
+  itineraries.value.splice(index, 1);
+  // Update numbers
+  itineraries.value.forEach((itinerary, idx) => {
+    itinerary.number = idx + 1;
+  });
 };
 
 // Edit special addon
@@ -308,13 +372,11 @@ const editSpecialAddon = (index) => {
 
 // Remove special addon
 const removeSpecialAddon = (index) => {
-  if (confirm("آیا مطمئن هستید که می‌خواهید این افزونه را حذف کنید؟")) {
-    specialAddons.value.splice(index, 1);
-    // Update numbers
-    specialAddons.value.forEach((addon, idx) => {
-      addon.number = idx + 1;
-    });
-  }
+  specialAddons.value.splice(index, 1);
+  // Update numbers
+  specialAddons.value.forEach((addon, idx) => {
+    addon.number = idx + 1;
+  });
 };
 
 // Drag and drop handlers for periods
@@ -369,1465 +431,1787 @@ const onSubmit = async () => {
   loading.value = true;
 
   try {
-    // Validate required fields
-    if (!formData.value.termsAccepted) {
-      alert("Please accept the terms and conditions");
+    // Validate step 3 before submitting
+    if (!validateStep3()) {
+      const firstError = document.querySelector(".field-error");
+      if (firstError)
+        firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+      loading.value = false;
       return;
     }
 
-    console.log("Multi Date Listing submitted:", formData.value);
-    alert("Multi Date Listing created successfully!");
-
-    // Redirect back to listing page
-    router.push({ name: "listing" });
+    // Simulate save then show confirmation page (mirror Single Date behavior)
+    const randomId = Math.floor(Math.random() * 90000) + 10000;
+    submissionData.value = {
+      adventureTitle: formData.value.listingTitle || "Adventure Title",
+      adventureId: randomId.toString().padStart(5, "0"),
+    };
+    showConfirmation.value = true;
   } catch (error) {
     console.error("Submission failed:", error);
-    alert("Submission failed: " + (error.message || "Unknown error"));
   } finally {
     loading.value = false;
   }
 };
+
+const createNewAdventure = () => {
+  // Reset form data to initial state
+  formData.value = {
+    listingTitle: "",
+    listingDescription: "",
+    locations: "",
+    groupLanguage: "",
+    subtitle: "",
+    activitiesIncluded: "",
+    experienceLevel: "",
+    fitnessLevel: "",
+    // Step 2
+    startDate: "",
+    endDate: "",
+    availableDays: [],
+    mapsAndRoutes: [""],
+    listingMedia: [""],
+    promotionalVideo: [""],
+    whatsIncluded: "",
+    whatsNotIncluded: "",
+    additionalNotes: "",
+    providersFAQ: "",
+    // Step 3
+    price: "",
+    maxParticipants: "",
+    requirements: "",
+    termsAccepted: false,
+    personalPolicies: "not-sure",
+  };
+
+  itineraries.value = [];
+  specialAddons.value = [];
+  periods.value = [];
+  currentStep.value = 0;
+  showConfirmation.value = false;
+  formValidationErrors.value = {};
+};
 </script>
 
 <template>
-  <!-- 👉 Custom Stepper -->
-  <div class="custom-stepper mb-6">
-    <div class="stepper-container">
-      <template v-for="(step, idx) in numberedSteps" :key="idx">
-        <div class="step-item" :class="{ active: idx === currentStep }">
-          <span
-            class="step-circle"
-            :class="{ active: idx === currentStep }"
-          ></span>
-          <span class="step-number">{{
-            (idx + 1).toString().padStart(2, "0")
-          }}</span>
-          <span class="step-label">{{ step.title }}</span>
+  <!-- Confirmation Page -->
+  <div v-if="showConfirmation" class="confirmation-page">
+    <div class="confirmation-container">
+      <div class="confirmation-card">
+        <div class="confirmation-icon">
+          <div class="icon-container">
+            <div class="icon-left">
+              <div class="icon-lines">
+                <div class="line"></div>
+                <div class="line"></div>
+                <div class="line"></div>
+              </div>
+              <div class="checkmark">✓</div>
+            </div>
+            <div class="icon-right">
+              <div class="icon-lines">
+                <div class="line"></div>
+                <div class="line"></div>
+                <div class="line"></div>
+              </div>
+              <div class="cross">✗</div>
+            </div>
+          </div>
         </div>
-        <div v-if="idx < numberedSteps.length - 1" class="step-line"></div>
-      </template>
+
+        <h1 class="confirmation-title">
+          Your Listing Just Submitted for Approval
+        </h1>
+
+        <div class="adventure-info">
+          <div class="adventure-title">{{ submissionData.adventureTitle }}</div>
+          <div class="adventure-id">
+            Adventure ID : {{ submissionData.adventureId }}
+          </div>
+        </div>
+
+        <p class="confirmation-description">
+          Thank you for submitting your adventure! Our team is reviewing your
+          listing, and we'll notify you once it's approved or if any changes are
+          needed. In the meantime, you can view your submitted adventures or
+          create a new one.
+        </p>
+
+        <div class="confirmation-buttons">
+          <VBtn
+            color="dark"
+            variant="elevated"
+            class="see-adventures-btn"
+            @click="router.push({ name: 'listing' })"
+          >
+            See All Your Adventures
+          </VBtn>
+          <VBtn
+            color="primary"
+            variant="elevated"
+            class="add-another-btn"
+            @click="createNewAdventure"
+          >
+            Add Another Adventure
+          </VBtn>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="d-flex justify-center align-center" style="min-height: 60vh">
-    <VCard style="width: 90vw; max-width: 1200px">
-      <VCardText>
-        <!-- 👉 stepper content -->
-        <VForm>
-          <VWindow v-model="currentStep" class="disable-tab-transition">
-            <!-- Step 1: Basic Information -->
-            <VWindowItem>
-              <VRow>
-                <!-- Left column -->
-                <VCol cols="12" md="6">
-                  <!-- Listing Title -->
-                  <AppTextField
-                    v-model="formData.listingTitle"
-                    label="Listing Title*"
-                    placeholder="The main title of Your listing"
-                    class="mb-4"
-                  />
+  <!-- Wizard Content -->
+  <div v-else class="custom-stepper mb-6">
+    <!-- 👉 Custom Stepper -->
+    <div class="custom-stepper mb-6">
+      <div class="stepper-container">
+        <template v-for="(step, idx) in numberedSteps" :key="idx">
+          <div class="step-item" :class="{ active: idx === currentStep }">
+            <span
+              class="step-circle"
+              :class="{ active: idx === currentStep }"
+            ></span>
+            <span class="step-number">{{
+              (idx + 1).toString().padStart(2, "0")
+            }}</span>
+            <span class="step-label">{{ step.title }}</span>
+          </div>
+          <div v-if="idx < numberedSteps.length - 1" class="step-line"></div>
+        </template>
+      </div>
+    </div>
 
-                  <!-- Listing Description -->
-                  <div class="mb-4">
-                    <label
-                      class="v-label text-body-2 mb-3 d-block"
-                      style="
-                        font-size: 16px !important;
-                        font-weight: 400 !important;
-                      "
+    <div class="d-flex justify-center align-center" style="min-height: 60vh">
+      <VCard style="width: 90vw; max-width: 1200px">
+        <VCardText>
+          <!-- 👉 stepper content -->
+          <VForm>
+            <VWindow v-model="currentStep" class="disable-tab-transition">
+              <!-- Step 1: Basic Information -->
+              <VWindowItem>
+                <VRow>
+                  <!-- Left column -->
+                  <VCol cols="12" md="6">
+                    <!-- Listing Title -->
+                    <div
+                      class="mb-4"
+                      :class="{ 'field-error': hasFieldError('listingTitle') }"
                     >
-                      Listing Description <span class="required-star">*</span>
-                    </label>
-                    <VTextarea
-                      v-model="formData.listingDescription"
-                      placeholder="Tell us any further information we should have about your adventure"
-                      rows="5"
-                      class="rich-text-area"
-                    />
-                    <!-- Rich Text Editor Controls -->
-                    <div class="rich-text-controls mt-2">
-                      <div class="d-flex gap-2 align-center">
+                      <label
+                        class="v-label text-body-2 mb-3 d-block"
+                        style="
+                          font-size: 16px !important;
+                          font-weight: 400 !important;
+                        "
+                      >
+                        Listing Title <span class="required-star">*</span>
+                      </label>
+                      <AppTextField
+                        v-model="formData.listingTitle"
+                        placeholder="The main title of Your listing"
+                        :error="hasFieldError('listingTitle')"
+                        :error-messages="formValidationErrors['listingTitle']"
+                        @input="clearFieldError('listingTitle')"
+                        :class="{
+                          'field-error': hasFieldError('listingTitle'),
+                        }"
+                      />
+                      <p
+                        v-if="hasFieldError('listingTitle')"
+                        class="text-caption text-error mt-1 mb-0"
+                        style="font-size: 11px"
+                      >
+                        {{ formValidationErrors["listingTitle"] }}
+                      </p>
+                    </div>
+
+                    <!-- Listing Description -->
+                    <div
+                      class="mb-4"
+                      :class="{
+                        'field-error': hasFieldError('listingDescription'),
+                      }"
+                    >
+                      <label
+                        class="v-label text-body-2 mb-3 d-block"
+                        style="
+                          font-size: 16px !important;
+                          font-weight: 400 !important;
+                        "
+                      >
+                        Listing Description <span class="required-star">*</span>
+                      </label>
+                      <VTextarea
+                        v-model="formData.listingDescription"
+                        placeholder="Tell us any further information we should have about your adventure"
+                        rows="5"
+                        class="rich-text-area"
+                        :error="hasFieldError('listingDescription')"
+                        :error-messages="
+                          formValidationErrors['listingDescription']
+                        "
+                        @input="clearFieldError('listingDescription')"
+                        :class="{
+                          'field-error': hasFieldError('listingDescription'),
+                        }"
+                      />
+                      <p
+                        v-if="hasFieldError('listingDescription')"
+                        class="text-caption text-error mt-1 mb-0"
+                        style="font-size: 11px"
+                      >
+                        {{ formValidationErrors["listingDescription"] }}
+                      </p>
+                      <!-- Rich Text Editor Controls -->
+                      <div class="rich-text-controls mt-2">
+                        <div class="d-flex gap-2 align-center">
+                          <VBtn
+                            variant="text"
+                            size="small"
+                            class="text-control-btn"
+                          >
+                            <VIcon icon="tabler-bold" size="16" />
+                          </VBtn>
+                          <VBtn
+                            variant="text"
+                            size="small"
+                            class="text-control-btn"
+                          >
+                            <VIcon icon="tabler-italic" size="16" />
+                          </VBtn>
+                          <VBtn
+                            variant="text"
+                            size="small"
+                            class="text-control-btn"
+                          >
+                            <VIcon icon="tabler-underline" size="16" />
+                          </VBtn>
+                          <VBtn
+                            variant="text"
+                            size="small"
+                            class="text-control-btn"
+                          >
+                            <VIcon icon="tabler-strikethrough" size="16" />
+                          </VBtn>
+                          <VDivider vertical />
+                          <VBtn
+                            variant="text"
+                            size="small"
+                            class="text-control-btn"
+                          >
+                            <VIcon icon="tabler-list" size="16" />
+                          </VBtn>
+                          <VBtn
+                            variant="text"
+                            size="small"
+                            class="text-control-btn"
+                          >
+                            <VIcon icon="tabler-list-numbers" size="16" />
+                          </VBtn>
+                          <VDivider vertical />
+                          <VBtn
+                            variant="text"
+                            size="small"
+                            class="text-control-btn"
+                          >
+                            <VIcon icon="tabler-align-left" size="16" />
+                          </VBtn>
+                          <VBtn
+                            variant="text"
+                            size="small"
+                            class="text-control-btn"
+                          >
+                            <VIcon icon="tabler-align-center" size="16" />
+                          </VBtn>
+                          <VBtn
+                            variant="text"
+                            size="small"
+                            class="text-control-btn"
+                          >
+                            <VIcon icon="tabler-align-right" size="16" />
+                          </VBtn>
+                          <VDivider vertical />
+                          <VBtn
+                            variant="text"
+                            size="small"
+                            class="text-control-btn"
+                          >
+                            <VIcon icon="tabler-link" size="16" />
+                          </VBtn>
+                          <VBtn
+                            variant="text"
+                            size="small"
+                            class="text-control-btn"
+                          >
+                            <VIcon icon="tabler-photo" size="16" />
+                          </VBtn>
+                        </div>
+                      </div>
+                      <p
+                        class="text-caption text-error mt-2 mb-0"
+                        style="font-size: 11px"
+                      >
+                        Note: Please add at least 500 characters.
+                      </p>
+                    </div>
+
+                    <!-- Locations -->
+                    <div
+                      class="mb-4"
+                      :class="{ 'field-error': hasFieldError('locations') }"
+                    >
+                      <label
+                        class="v-label text-body-2 mb-3 d-block"
+                        style="
+                          font-size: 16px !important;
+                          font-weight: 400 !important;
+                        "
+                      >
+                        Locations <span class="required-star">*</span>
+                      </label>
+                      <AppSelect
+                        v-model="formData.locations"
+                        placeholder="where the adventure takes place (countries/continent)"
+                        :items="[
+                          'Europe',
+                          'North America',
+                          'South America',
+                          'Asia',
+                          'Africa',
+                          'Australia',
+                          'Antarctica',
+                        ]"
+                        :error="hasFieldError('locations')"
+                        :error-messages="formValidationErrors['locations']"
+                        @input="clearFieldError('locations')"
+                        :class="{ 'field-error': hasFieldError('locations') }"
+                      />
+                      <p
+                        v-if="hasFieldError('locations')"
+                        class="text-caption text-error mt-1 mb-0"
+                        style="font-size: 11px"
+                      >
+                        {{ formValidationErrors["locations"] }}
+                      </p>
+                    </div>
+
+                    <!-- Group Language -->
+                    <div class="mb-4">
+                      <label
+                        class="v-label text-body-2 mb-3 d-block"
+                        style="
+                          font-size: 16px !important;
+                          font-weight: 400 !important;
+                        "
+                      >
+                        Group Language
+                      </label>
+                      <AppSelect
+                        v-model="formData.groupLanguage"
+                        placeholder="Language(s) the adventure will be conducted in"
+                        :items="[
+                          'English',
+                          'German',
+                          'French',
+                          'Spanish',
+                          'Italian',
+                          'Portuguese',
+                          'Russian',
+                          'Chinese',
+                          'Japanese',
+                          'Arabic',
+                          'Other',
+                        ]"
+                      />
+                    </div>
+                  </VCol>
+
+                  <!-- Right column -->
+                  <VCol cols="12" md="6">
+                    <!-- Subtitle -->
+                    <div class="mb-4">
+                      <label
+                        class="v-label text-body-2 mb-3 d-block"
+                        style="
+                          font-size: 16px !important;
+                          font-weight: 400 !important;
+                        "
+                      >
+                        Subtitle
+                      </label>
+                      <AppTextField
+                        v-model="formData.subtitle"
+                        placeholder="A tagline for the listing"
+                      />
+                    </div>
+
+                    <!-- Activities Included -->
+                    <div
+                      class="mb-4"
+                      :class="{
+                        'field-error': hasFieldError('activitiesIncluded'),
+                      }"
+                    >
+                      <label
+                        class="v-label text-body-2 mb-3 d-block"
+                        style="
+                          font-size: 16px !important;
+                          font-weight: 400 !important;
+                        "
+                      >
+                        Activities Included <span class="required-star">*</span>
+                      </label>
+                      <AppSelect
+                        v-model="formData.activitiesIncluded"
+                        placeholder="Select the activities that are included in your adventure"
+                        :items="[
+                          'Hiking',
+                          'Diving',
+                          'Rock Climbing',
+                          'Skiing',
+                          'Cycling',
+                          'Kayaking',
+                          'Photography Tours',
+                          'Cultural Tours',
+                          'Wildlife Tours',
+                          'Cooking Classes',
+                          'Wine Tasting',
+                          'Historical Tours',
+                          'Adventure Sports',
+                          'Other',
+                        ]"
+                        :error="hasFieldError('activitiesIncluded')"
+                        :error-messages="
+                          formValidationErrors['activitiesIncluded']
+                        "
+                        @input="clearFieldError('activitiesIncluded')"
+                        :class="{
+                          'field-error': hasFieldError('activitiesIncluded'),
+                        }"
+                      />
+                      <p
+                        v-if="hasFieldError('activitiesIncluded')"
+                        class="text-caption text-error mt-1 mb-0"
+                        style="font-size: 11px"
+                      >
+                        {{ formValidationErrors["activitiesIncluded"] }}
+                      </p>
+                    </div>
+
+                    <!-- Listing Departures -->
+                    <div class="mb-6">
+                      <label
+                        class="v-label text-body-2 mb-3 d-block"
+                        style="
+                          font-size: 16px !important;
+                          font-weight: 400 !important;
+                        "
+                      >
+                        Listing Departures <span class="required-star">*</span>
+                      </label>
+                      <p
+                        class="text-caption text-medium-emphasis mb-3"
+                        style="font-size: 12px"
+                      >
+                        Add your departures and all related details here
+                      </p>
+
+                      <!-- Show button when no items -->
+                      <div
+                        v-if="periods.length === 0"
+                        class="empty-state-container"
+                        :class="{ 'field-error': hasFieldError('periods') }"
+                      >
                         <VBtn
-                          variant="text"
-                          size="small"
-                          class="text-control-btn"
+                          color="primary"
+                          variant="elevated"
+                          class="add-departure-btn"
+                          style="
+                            background-color: #ec8d22 !important;
+                            color: #fff !important;
+                            border-radius: 8px;
+                            font-weight: 500;
+                          "
+                          @click="openPeriodsModal"
                         >
-                          <VIcon icon="tabler-bold" size="16" />
+                          Add Departure
                         </VBtn>
-                        <VBtn
-                          variant="text"
-                          size="small"
-                          class="text-control-btn"
+                        <p
+                          v-if="hasFieldError('periods')"
+                          class="text-caption text-error mt-2 mb-0"
+                          style="font-size: 11px"
                         >
-                          <VIcon icon="tabler-italic" size="16" />
-                        </VBtn>
+                          {{ formValidationErrors["periods"] }}
+                        </p>
+                      </div>
+
+                      <!-- Show header with button when items exist -->
+                      <div v-else class="departures-header">
+                        <h3 class="departures-title">Listing Departures</h3>
                         <VBtn
-                          variant="text"
-                          size="small"
-                          class="text-control-btn"
+                          color="primary"
+                          variant="elevated"
+                          class="add-more-btn"
+                          style="
+                            background-color: #ec8d22 !important;
+                            color: #fff !important;
+                            border-radius: 8px;
+                            font-weight: 500;
+                            font-size: 14px;
+                            padding: 8px 16px;
+                            min-height: 36px;
+                            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+                          "
+                          @click="openPeriodsModal"
                         >
-                          <VIcon icon="tabler-underline" size="16" />
-                        </VBtn>
-                        <VBtn
-                          variant="text"
-                          size="small"
-                          class="text-control-btn"
-                        >
-                          <VIcon icon="tabler-strikethrough" size="16" />
-                        </VBtn>
-                        <VDivider vertical />
-                        <VBtn
-                          variant="text"
-                          size="small"
-                          class="text-control-btn"
-                        >
-                          <VIcon icon="tabler-list" size="16" />
-                        </VBtn>
-                        <VBtn
-                          variant="text"
-                          size="small"
-                          class="text-control-btn"
-                        >
-                          <VIcon icon="tabler-list-numbers" size="16" />
-                        </VBtn>
-                        <VDivider vertical />
-                        <VBtn
-                          variant="text"
-                          size="small"
-                          class="text-control-btn"
-                        >
-                          <VIcon icon="tabler-align-left" size="16" />
-                        </VBtn>
-                        <VBtn
-                          variant="text"
-                          size="small"
-                          class="text-control-btn"
-                        >
-                          <VIcon icon="tabler-align-center" size="16" />
-                        </VBtn>
-                        <VBtn
-                          variant="text"
-                          size="small"
-                          class="text-control-btn"
-                        >
-                          <VIcon icon="tabler-align-right" size="16" />
-                        </VBtn>
-                        <VDivider vertical />
-                        <VBtn
-                          variant="text"
-                          size="small"
-                          class="text-control-btn"
-                        >
-                          <VIcon icon="tabler-link" size="16" />
-                        </VBtn>
-                        <VBtn
-                          variant="text"
-                          size="small"
-                          class="text-control-btn"
-                        >
-                          <VIcon icon="tabler-photo" size="16" />
+                          Add More
                         </VBtn>
                       </div>
-                    </div>
-                    <p
-                      class="text-caption text-error mt-2 mb-0"
-                      style="font-size: 11px"
-                    >
-                      Note: Please add at least 500 characters.
-                    </p>
-                  </div>
 
-                  <!-- Locations -->
-                  <AppSelect
-                    v-model="formData.locations"
-                    label="Locations*"
-                    placeholder="Were the adventure takes place (country/continent)"
-                    :items="[
-                      'Europe',
-                      'North America',
-                      'South America',
-                      'Asia',
-                      'Africa',
-                      'Australia',
-                      'Antarctica',
-                    ]"
-                    class="mb-4"
-                  />
-
-                  <!-- Group Language -->
-                  <AppSelect
-                    v-model="formData.groupLanguage"
-                    label="Group language"
-                    placeholder="Language(s) the adventure will be conducted in"
-                    :items="[
-                      'English',
-                      'German',
-                      'French',
-                      'Spanish',
-                      'Italian',
-                      'Portuguese',
-                      'Russian',
-                      'Chinese',
-                      'Japanese',
-                      'Arabic',
-                      'Other',
-                    ]"
-                    class="mb-4"
-                  />
-                </VCol>
-
-                <!-- Right column -->
-                <VCol cols="12" md="6">
-                  <!-- Subtitle -->
-                  <AppTextField
-                    v-model="formData.subtitle"
-                    label="Subtitle"
-                    placeholder="A tagline for the listing"
-                    class="mb-4"
-                  />
-
-                  <!-- Activities Included -->
-                  <AppSelect
-                    v-model="formData.activitiesIncluded"
-                    label="Activities included*"
-                    placeholder="Select the activities that are included in your adventure"
-                    :items="[
-                      'Hiking',
-                      'Diving',
-                      'Rock Climbing',
-                      'Skiing',
-                      'Cycling',
-                      'Kayaking',
-                      'Photography Tours',
-                      'Cultural Tours',
-                      'Wildlife Tours',
-                      'Cooking Classes',
-                      'Wine Tasting',
-                      'Historical Tours',
-                      'Adventure Sports',
-                      'Other',
-                    ]"
-                    class="mb-4"
-                  />
-
-                  <!-- Listing Departures -->
-                  <div class="mb-6">
-                    <label
-                      class="v-label text-body-2 mb-3 d-block"
-                      style="
-                        font-size: 16px !important;
-                        font-weight: 400 !important;
-                      "
-                    >
-                      Listing departures <span class="required-star">*</span>
-                    </label>
-                    <p
-                      class="text-caption text-medium-emphasis mb-3"
-                      style="font-size: 12px"
-                    >
-                      Add your departures and all related details here
-                    </p>
-
-                    <!-- Show button when no items -->
-                    <div
-                      v-if="periods.length === 0"
-                      class="empty-state-container"
-                    >
-                      <VBtn
-                        color="primary"
-                        variant="elevated"
-                        class="add-departure-btn"
-                        style="
-                          background-color: #ec8d22 !important;
-                          color: #fff !important;
-                          border-radius: 8px;
-                          font-weight: 500;
-                        "
-                        @click="openPeriodsModal"
-                      >
-                        Add Departure
-                      </VBtn>
-                    </div>
-
-                    <!-- Show header with button when items exist -->
-                    <div v-else class="departures-header">
-                      <h3 class="departures-title">Listing Departures</h3>
-                      <VBtn
-                        color="primary"
-                        variant="elevated"
-                        class="add-more-btn"
-                        style="
-                          background-color: #ec8d22 !important;
-                          color: #fff !important;
-                          border-radius: 8px;
-                          font-weight: 500;
-                          font-size: 14px;
-                          padding: 8px 16px;
-                          min-height: 36px;
-                          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-                        "
-                        @click="openPeriodsModal"
-                      >
-                        Add More
-                      </VBtn>
-                    </div>
-
-                    <!-- Departures List -->
-                    <div
-                      v-if="periods.length > 0"
-                      class="departures-list-container"
-                    >
+                      <!-- Departures List -->
                       <div
-                        v-for="(period, index) in periods"
-                        :key="index"
-                        class="departure-list-item"
-                        draggable="true"
-                        @dragstart="dragStartPeriod(index, $event)"
-                        @dragover.prevent
-                        @drop="dropPeriod(index, $event)"
-                        @dragenter.prevent
+                        v-if="periods.length > 0"
+                        class="departures-list-container"
                       >
-                        <div class="departure-content">
-                          <div class="departure-left">
-                            <div
-                              class="departure-badge"
-                              style="position: relative"
-                            >
-                              <span class="badge-number">{{
-                                (period.number || index + 1)
-                                  .toString()
-                                  .padStart(2, "0")
-                              }}</span>
-                              <!-- Calendar icon under number badge -->
+                        <div
+                          v-for="(period, index) in periods"
+                          :key="index"
+                          class="departure-list-item"
+                          draggable="true"
+                          @dragstart="dragStartPeriod(index, $event)"
+                          @dragover.prevent
+                          @drop="dropPeriod(index, $event)"
+                          @dragenter.prevent
+                        >
+                          <div class="departure-content">
+                            <div class="departure-left">
                               <div
-                                v-if="index < periods.length - 1"
-                                style="
-                                  position: absolute;
-                                  left: 50%;
-                                  top: 100%;
-                                  transform: translateX(-50%);
-                                  margin-top: 4px;
-                                  z-index: 2;
-                                "
+                                class="departure-badge"
+                                style="position: relative"
                               >
-                                <VIcon
-                                  icon="tabler-calendar"
-                                  size="16"
-                                  style="color: #ec8d22"
-                                />
-                              </div>
-                              <!-- Vertical dotted line under icon -->
-                              <div
-                                v-if="index < periods.length - 1"
-                                class="vertical-dotted-line"
-                                style="
-                                  position: absolute;
-                                  left: 50%;
-                                  top: 100%;
-                                  transform: translateX(-50%);
-                                  margin-top: 20px;
-                                  bottom: -16px;
-                                  width: 1px;
-                                  background: repeating-linear-gradient(
-                                    to bottom,
-                                    #666 0,
-                                    #666 2px,
-                                    transparent 2px,
-                                    transparent 4px
-                                  );
-                                "
-                              ></div>
-                            </div>
-                            <div class="departure-info">
-                              <div class="departure-title-row">
-                                <span class="departure-title">{{
-                                  period.title ||
-                                  `Departure ${
-                                    period.number || index + 1
-                                  } title`
+                                <span class="badge-number">{{
+                                  (period.number || index + 1)
+                                    .toString()
+                                    .padStart(2, "0")
                                 }}</span>
-                                <VIcon
-                                  icon="tabler-chevron-down"
-                                  size="16"
-                                  class="chevron-icon"
-                                />
-                              </div>
-                              <div class="departure-details">
-                                <div class="departure-date">
+                                <!-- Calendar icon under number badge -->
+                                <div
+                                  v-if="index < periods.length - 1"
+                                  style="
+                                    position: absolute;
+                                    left: 50%;
+                                    top: 100%;
+                                    transform: translateX(-50%);
+                                    margin-top: 4px;
+                                    z-index: 2;
+                                  "
+                                >
                                   <VIcon
-                                    icon="tabler-target"
-                                    size="14"
-                                    style="color: #666; margin-right: 4px"
+                                    icon="tabler-calendar"
+                                    size="16"
+                                    style="color: #ec8d22"
                                   />
-                                  <span class="date-text">{{
-                                    period.startingDate && period.finishingDate
-                                      ? `${period.startingDate} - ${period.finishingDate}`
-                                      : "Date range not set"
-                                  }}</span>
                                 </div>
-                                <div class="departure-people">
-                                  <span class="people-text">{{
-                                    period.minCapacity && period.maxCapacity
-                                      ? `${period.minCapacity} - ${period.maxCapacity} people`
-                                      : "Capacity not set"
-                                  }}</span>
-                                </div>
+                                <!-- Vertical dotted line under icon -->
+                                <div
+                                  v-if="index < periods.length - 1"
+                                  class="vertical-dotted-line"
+                                  style="
+                                    position: absolute;
+                                    left: 50%;
+                                    top: 100%;
+                                    transform: translateX(-50%);
+                                    margin-top: 20px;
+                                    bottom: -16px;
+                                    width: 1px;
+                                    background: repeating-linear-gradient(
+                                      to bottom,
+                                      #666 0,
+                                      #666 2px,
+                                      transparent 2px,
+                                      transparent 4px
+                                    );
+                                  "
+                                ></div>
                               </div>
-                              <div class="departure-price">
-                                € {{ (period.price || 0).toFixed(2) }}
+                              <div class="departure-info">
+                                <div class="departure-title-row">
+                                  <span class="departure-title">{{
+                                    period.title ||
+                                    `Departure ${
+                                      period.number || index + 1
+                                    } title`
+                                  }}</span>
+                                  <VIcon
+                                    icon="tabler-chevron-down"
+                                    size="16"
+                                    class="chevron-icon"
+                                  />
+                                </div>
+                                <div class="departure-details">
+                                  <div class="departure-date">
+                                    <VIcon
+                                      icon="tabler-target"
+                                      size="14"
+                                      style="color: #666; margin-right: 4px"
+                                    />
+                                    <span class="date-text">{{
+                                      period.startingDate &&
+                                      period.finishingDate
+                                        ? `${period.startingDate} - ${period.finishingDate}`
+                                        : "Date range not set"
+                                    }}</span>
+                                  </div>
+                                  <div class="departure-people">
+                                    <span class="people-text">{{
+                                      period.minCapacity && period.maxCapacity
+                                        ? `${period.minCapacity} - ${period.maxCapacity} people`
+                                        : "Capacity not set"
+                                    }}</span>
+                                  </div>
+                                </div>
+                                <div class="departure-price">
+                                  € {{ (period.price || 0).toFixed(2) }}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                          <div class="departure-actions">
-                            <VBtn
-                              icon
-                              size="small"
-                              variant="text"
-                              @click="editPeriod(index)"
-                              class="action-btn"
-                            >
-                              <VIcon icon="tabler-edit" size="18" />
-                            </VBtn>
-                            <VBtn
-                              icon
-                              size="small"
-                              variant="text"
-                              color="error"
-                              @click="removePeriod(index)"
-                              class="action-btn"
-                            >
-                              <VIcon icon="tabler-trash" size="18" />
-                            </VBtn>
-                            <VBtn
-                              icon
-                              size="small"
-                              variant="text"
-                              class="action-btn drag-handle"
-                              draggable="true"
-                              @dragstart="dragStartPeriod(index, $event)"
-                            >
-                              <VIcon icon="tabler-arrows-move" size="18" />
-                            </VBtn>
+                            <div class="departure-actions">
+                              <VBtn
+                                icon
+                                size="small"
+                                variant="text"
+                                @click="editPeriod(index)"
+                                class="action-btn"
+                              >
+                                <VIcon icon="tabler-edit" size="18" />
+                              </VBtn>
+                              <VBtn
+                                icon
+                                size="small"
+                                variant="text"
+                                color="error"
+                                @click="removePeriod(index)"
+                                class="action-btn"
+                              >
+                                <VIcon icon="tabler-trash" size="18" />
+                              </VBtn>
+                              <VBtn
+                                icon
+                                size="small"
+                                variant="text"
+                                class="action-btn drag-handle"
+                                draggable="true"
+                                @dragstart="dragStartPeriod(index, $event)"
+                              >
+                                <VIcon icon="tabler-arrows-move" size="18" />
+                              </VBtn>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  <!-- Experience Level and Fitness Level -->
-                  <VRow>
-                    <VCol cols="6">
-                      <div class="mb-4">
-                        <label
-                          class="v-label text-body-2 mb-3 d-block"
-                          style="
-                            font-size: 16px !important;
-                            font-weight: 400 !important;
-                          "
-                        >
-                          Experience Level
-                          <VIcon
-                            icon="tabler-help-circle"
-                            size="16"
-                            class="question-icon"
-                          />
-                        </label>
-                        <VRadioGroup
-                          v-model="formData.experienceLevel"
-                          class="mt-2"
-                        >
-                          <VRadio value="journeys" label="Journeys" />
-                          <VRadio value="discovery" label="Discovery" />
-                          <VRadio value="expedition" label="Expedition" />
-                          <VRadio
-                            value="extreme-expedition"
-                            label="Extreme Expedition"
-                          />
-                          <VRadio value="not-sure" label="Not Sure" />
-                        </VRadioGroup>
-                      </div>
-                    </VCol>
-                    <VCol cols="6">
-                      <div class="mb-4">
-                        <label
-                          class="v-label text-body-2 mb-3 d-block"
-                          style="
-                            font-size: 16px !important;
-                            font-weight: 400 !important;
-                          "
-                        >
-                          Fitness Level
-                          <VIcon
-                            icon="tabler-help-circle"
-                            size="16"
-                            class="question-icon"
-                          />
-                        </label>
-                        <VRadioGroup
-                          v-model="formData.fitnessLevel"
-                          class="mt-2"
-                        >
-                          <VRadio value="easy" label="Easy" />
-                          <VRadio value="moderate" label="Moderate" />
-                          <VRadio value="challenging" label="Challenging" />
-                          <VRadio value="intense" label="Intense" />
-                          <VRadio value="not-sure" label="Not Sure" />
-                        </VRadioGroup>
-                      </div>
-                    </VCol>
-                  </VRow>
-                </VCol>
-              </VRow>
-            </VWindowItem>
-            <!-- Step 2: Date Range -->
-            <VWindowItem>
-              <VRow>
-                <!-- Top Row -->
-                <VCol cols="12" md="6">
-                  <!-- Experience Media -->
-                  <div class="mb-4">
-                    <label
-                      class="v-label text-body-2 mb-3 d-block"
-                      style="
-                        font-size: 16px !important;
-                        font-weight: 400 !important;
-                      "
-                    >
-                      Experience Media <span class="required-star">*</span>
-                    </label>
-                    <div
-                      v-for="(media, index) in formData.listingMedia"
-                      :key="index"
-                      class="mb-3"
-                    >
-                      <div class="d-flex gap-2">
-                        <AppTextField
-                          v-model="formData.listingMedia[index]"
-                          placeholder="Add all related images and videos to a drive and add the URL here"
-                          class="flex-grow-1"
-                        >
-                          <template #append-inner>
-                            <VBtn
-                              v-if="index === formData.listingMedia.length - 1"
-                              variant="text"
-                              size="small"
-                              @click="addListingMedia"
-                              class="px-0"
-                            >
-                              <VIcon icon="tabler-plus" size="20" />
-                            </VBtn>
-                          </template>
-                        </AppTextField>
-                        <VBtn
-                          v-if="formData.listingMedia.length > 1"
-                          variant="tonal"
-                          size="small"
-                          color="error"
-                          @click="removeListingMedia(index)"
-                          class="mt-1"
-                        >
-                          <VIcon icon="tabler-minus" size="16" />
-                        </VBtn>
-                      </div>
-                    </div>
-                    <p
-                      class="text-caption text-error mt-2 mb-0"
-                      style="font-size: 11px"
-                    >
-                      Note: Make it public or Share the access with
-                      id@ExplorerElite.com
-                    </p>
-                  </div>
-                </VCol>
-                <VCol cols="12" md="6">
-                  <!-- Promotional Video -->
-                  <div class="mb-4">
-                    <label
-                      class="v-label text-body-2 mb-3 d-block"
-                      style="
-                        font-size: 16px !important;
-                        font-weight: 400 !important;
-                      "
-                    >
-                      Promotional Video
-                    </label>
-                    <div
-                      v-for="(video, index) in formData.promotionalVideo"
-                      :key="index"
-                      class="mb-3"
-                    >
-                      <div class="d-flex gap-2">
-                        <AppTextField
-                          v-model="formData.promotionalVideo[index]"
-                          placeholder="Add your promotional video of the adventure here"
-                          class="flex-grow-1"
-                        >
-                          <template #append-inner>
-                            <VBtn
-                              v-if="
-                                index === formData.promotionalVideo.length - 1
-                              "
-                              variant="text"
-                              size="small"
-                              @click="addPromotionalVideo"
-                              class="px-0"
-                            >
-                              <VIcon icon="tabler-plus" size="20" />
-                            </VBtn>
-                          </template>
-                        </AppTextField>
-                        <VBtn
-                          v-if="formData.promotionalVideo.length > 1"
-                          variant="tonal"
-                          size="small"
-                          color="error"
-                          @click="removePromotionalVideo(index)"
-                          class="mt-1"
-                        >
-                          <VIcon icon="tabler-minus" size="16" />
-                        </VBtn>
-                      </div>
-                    </div>
-                  </div>
-                </VCol>
-
-                <!-- Second Row -->
-                <VCol cols="12" md="6">
-                  <!-- Maps and Routes -->
-                  <div class="mb-4">
-                    <label
-                      class="v-label text-body-2 mb-3 d-block"
-                      style="
-                        font-size: 16px !important;
-                        font-weight: 400 !important;
-                      "
-                    >
-                      Maps and Routes <span class="required-star">*</span>
-                    </label>
-                    <div
-                      v-for="(route, index) in formData.mapsAndRoutes"
-                      :key="index"
-                      class="mb-3"
-                    >
-                      <div class="d-flex gap-2">
-                        <AppTextField
-                          v-model="formData.mapsAndRoutes[index]"
-                          placeholder="Add multiple URL of the approximate routes, GPX or others"
-                          class="flex-grow-1"
-                        >
-                          <template #append-inner>
-                            <VBtn
-                              v-if="index === formData.mapsAndRoutes.length - 1"
-                              variant="text"
-                              size="small"
-                              @click="addMapsAndRoutes"
-                              class="px-0"
-                            >
-                              <VIcon icon="tabler-plus" size="20" />
-                            </VBtn>
-                          </template>
-                        </AppTextField>
-                        <VBtn
-                          v-if="formData.mapsAndRoutes.length > 1"
-                          variant="tonal"
-                          size="small"
-                          color="error"
-                          @click="removeMapsAndRoutes(index)"
-                          class="mt-1"
-                        >
-                          <VIcon icon="tabler-minus" size="16" />
-                        </VBtn>
-                      </div>
-                    </div>
-                  </div>
-                </VCol>
-                <VCol cols="12" md="6">
-                  <!-- Locations -->
-                  <AppSelect
-                    v-model="formData.locations"
-                    label="Locations*"
-                    placeholder="where the adventure takes place (countries/continent)"
-                    :items="[
-                      'Europe',
-                      'North America',
-                      'South America',
-                      'Asia',
-                      'Africa',
-                      'Australia',
-                      'Antarctica',
-                    ]"
-                    class="mb-4"
-                  />
-                </VCol>
-
-                <!-- Third Row - Large Text Areas -->
-                <VCol cols="12" md="6">
-                  <!-- What's Included -->
-                  <div class="mb-4">
-                    <label
-                      class="v-label text-body-2 mb-3 d-block"
-                      style="
-                        font-size: 16px !important;
-                        font-weight: 400 !important;
-                      "
-                    >
-                      What's Included <span class="required-star">*</span>
-                    </label>
-                    <VTextarea
-                      v-model="formData.whatsIncluded"
-                      placeholder="List of items/services included in the adventure"
-                      rows="4"
-                      class="rich-text-area"
-                    />
-                  </div>
-                </VCol>
-                <VCol cols="12" md="6">
-                  <!-- What's Not Included -->
-                  <div class="mb-4">
-                    <label
-                      class="v-label text-body-2 mb-3 d-block"
-                      style="
-                        font-size: 16px !important;
-                        font-weight: 400 !important;
-                      "
-                    >
-                      What's Not Included <span class="required-star">*</span>
-                    </label>
-                    <VTextarea
-                      v-model="formData.whatsNotIncluded"
-                      placeholder="List of items/services not included in the adventure"
-                      rows="4"
-                      class="rich-text-area"
-                    />
-                  </div>
-                </VCol>
-
-                <!-- Fourth Row - Rich Text Areas -->
-                <VCol cols="12" md="6">
-                  <!-- Additional Notes -->
-                  <div class="mb-4">
-                    <label
-                      class="v-label text-body-2 mb-3 d-block"
-                      style="
-                        font-size: 16px !important;
-                        font-weight: 400 !important;
-                      "
-                    >
-                      Additional Notes to Explorer Elite's Admin
-                    </label>
-                    <VTextarea
-                      v-model="formData.additionalNotes"
-                      placeholder="Tell us any further information we should have about your adventure"
-                      rows="4"
-                      class="rich-text-area"
-                    />
-                    <!-- Rich Text Editor Controls -->
-                    <div class="rich-text-controls mt-2">
-                      <div class="d-flex gap-2 align-center">
-                        <VBtn
-                          variant="text"
-                          size="small"
-                          class="text-control-btn"
-                        >
-                          <VIcon icon="tabler-bold" size="16" />
-                        </VBtn>
-                        <VBtn
-                          variant="text"
-                          size="small"
-                          class="text-control-btn"
-                        >
-                          <VIcon icon="tabler-italic" size="16" />
-                        </VBtn>
-                        <VBtn
-                          variant="text"
-                          size="small"
-                          class="text-control-btn"
-                        >
-                          <VIcon icon="tabler-underline" size="16" />
-                        </VBtn>
-                        <VDivider vertical />
-                        <VBtn
-                          variant="text"
-                          size="small"
-                          class="text-control-btn"
-                        >
-                          <VIcon icon="tabler-align-left" size="16" />
-                        </VBtn>
-                        <VBtn
-                          variant="text"
-                          size="small"
-                          class="text-control-btn"
-                        >
-                          <VIcon icon="tabler-align-center" size="16" />
-                        </VBtn>
-                        <VBtn
-                          variant="text"
-                          size="small"
-                          class="text-control-btn"
-                        >
-                          <VIcon icon="tabler-align-right" size="16" />
-                        </VBtn>
-                        <VDivider vertical />
-                        <VBtn
-                          variant="text"
-                          size="small"
-                          class="text-control-btn"
-                        >
-                          <VIcon icon="tabler-list" size="16" />
-                        </VBtn>
-                        <VDivider vertical />
-                        <VBtn
-                          variant="text"
-                          size="small"
-                          class="text-control-btn"
-                        >
-                          <VIcon icon="tabler-link" size="16" />
-                        </VBtn>
-                        <VBtn
-                          variant="text"
-                          size="small"
-                          class="text-control-btn"
-                        >
-                          <VIcon icon="tabler-photo" size="16" />
-                        </VBtn>
-                      </div>
-                    </div>
-                  </div>
-                </VCol>
-                <VCol cols="12" md="6">
-                  <!-- Provider's Personal FAQ -->
-                  <div class="mb-4">
-                    <label
-                      class="v-label text-body-2 mb-3 d-block"
-                      style="
-                        font-size: 16px !important;
-                        font-weight: 400 !important;
-                      "
-                    >
-                      Provider's Personal FAQ
-                    </label>
-                    <VTextarea
-                      v-model="formData.providersFAQ"
-                      placeholder="Answer all the questions you think adventurers might ask"
-                      rows="4"
-                      class="rich-text-area"
-                    />
-                    <!-- Rich Text Editor Controls -->
-                    <div class="rich-text-controls mt-2">
-                      <div class="d-flex gap-2 align-center">
-                        <VBtn
-                          variant="text"
-                          size="small"
-                          class="text-control-btn"
-                        >
-                          <VIcon icon="tabler-bold" size="16" />
-                        </VBtn>
-                        <VBtn
-                          variant="text"
-                          size="small"
-                          class="text-control-btn"
-                        >
-                          <VIcon icon="tabler-italic" size="16" />
-                        </VBtn>
-                        <VBtn
-                          variant="text"
-                          size="small"
-                          class="text-control-btn"
-                        >
-                          <VIcon icon="tabler-underline" size="16" />
-                        </VBtn>
-                        <VDivider vertical />
-                        <VBtn
-                          variant="text"
-                          size="small"
-                          class="text-control-btn"
-                        >
-                          <VIcon icon="tabler-align-left" size="16" />
-                        </VBtn>
-                        <VBtn
-                          variant="text"
-                          size="small"
-                          class="text-control-btn"
-                        >
-                          <VIcon icon="tabler-align-center" size="16" />
-                        </VBtn>
-                        <VBtn
-                          variant="text"
-                          size="small"
-                          class="text-control-btn"
-                        >
-                          <VIcon icon="tabler-align-right" size="16" />
-                        </VBtn>
-                        <VDivider vertical />
-                        <VBtn
-                          variant="text"
-                          size="small"
-                          class="text-control-btn"
-                        >
-                          <VIcon icon="tabler-list" size="16" />
-                        </VBtn>
-                        <VDivider vertical />
-                        <VBtn
-                          variant="text"
-                          size="small"
-                          class="text-control-btn"
-                        >
-                          <VIcon icon="tabler-link" size="16" />
-                        </VBtn>
-                        <VBtn
-                          variant="text"
-                          size="small"
-                          class="text-control-btn"
-                        >
-                          <VIcon icon="tabler-photo" size="16" />
-                        </VBtn>
-                      </div>
-                    </div>
-                  </div>
-                </VCol>
-              </VRow>
-            </VWindowItem>
-            <!-- Step 3: Pricing & Details -->
-            <VWindowItem>
-              <VRow>
-                <!-- Left Column -->
-                <VCol cols="12" md="6">
-                  <!-- Itinerary/Accommodation Day by Day -->
-                  <div class="mb-6">
-                    <h3 class="section-title">
-                      Itinerary/Accommodation Day by Day*
-                    </h3>
-                    <p class="section-description">
-                      Add your Itinerary/Accommodations and all related details
-                      here
-                    </p>
-
-                    <!-- Show button when no items -->
-                    <div
-                      v-if="itineraries.length === 0"
-                      class="empty-state-container"
-                    >
-                      <VBtn
-                        color="primary"
-                        variant="elevated"
-                        class="add-item-btn"
-                        @click="openItineraryModal"
-                      >
-                        Add Itinerary/Accomodation
-                      </VBtn>
-                    </div>
-
-                    <!-- Show header with button when items exist -->
-                    <div v-else class="itinerary-header">
-                      <h3 class="itinerary-title">Itinerary/Accommodations</h3>
-                      <VBtn
-                        color="primary"
-                        variant="elevated"
-                        class="add-more-btn"
-                        style="
-                          background-color: #ec8d22 !important;
-                          color: #fff !important;
-                          border-radius: 8px;
-                          font-weight: 500;
-                          font-size: 14px;
-                          padding: 8px 16px;
-                          min-height: 36px;
-                          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-                        "
-                        @click="openItineraryModal"
-                      >
-                        Add More
-                      </VBtn>
-                    </div>
-
-                    <div
-                      v-if="itineraries.length > 0"
-                      class="itinerary-list-container"
-                    >
-                      <div
-                        v-for="(itinerary, index) in itineraries"
-                        :key="itinerary.id"
-                        class="itinerary-list-item"
-                        style="
-                          background: transparent;
-                          border: none;
-                          border-radius: 0;
-                          padding: 16px 0;
-                          margin-top: 0;
-                          box-shadow: none;
-                          position: relative;
-                        "
-                        draggable="true"
-                        @dragstart="dragStartItinerary(index, $event)"
-                        @dragover.prevent
-                        @drop="dropItinerary(index, $event)"
-                        @dragenter.prevent
-                      >
-                        <div class="d-flex justify-space-between align-center">
-                          <div class="d-flex align-center">
-                            <div
-                              class="itinerary-number"
-                              style="
-                                background: #ec8d22;
-                                color: white;
-                                width: 32px;
-                                height: 32px;
-                                border-radius: 6px;
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                                font-weight: bold;
-                                margin-right: 12px;
-                                font-family: 'Anton', sans-serif;
-                                font-size: 12px;
-                                position: relative;
-                              "
-                            >
-                              {{
-                                (itinerary.number || 1)
-                                  .toString()
-                                  .padStart(2, "0")
-                              }}
-                              <!-- Location icon under number badge -->
-                              <div
-                                v-if="index < itineraries.length - 1"
-                                style="
-                                  position: absolute;
-                                  left: 50%;
-                                  top: 100%;
-                                  transform: translateX(-50%);
-                                  margin-top: 4px;
-                                  z-index: 2;
-                                "
-                              >
-                                <VIcon
-                                  icon="tabler-map-pin"
-                                  size="16"
-                                  style="color: #ec8d22"
-                                />
-                              </div>
-                              <!-- Vertical dotted line under icon -->
-                              <div
-                                v-if="index < itineraries.length - 1"
-                                class="vertical-dotted-line"
-                                style="
-                                  position: absolute;
-                                  left: 50%;
-                                  top: 100%;
-                                  transform: translateX(-50%);
-                                  margin-top: 20px;
-                                  bottom: -16px;
-                                  width: 1px;
-                                  background: repeating-linear-gradient(
-                                    to bottom,
-                                    #666 0,
-                                    #666 2px,
-                                    transparent 2px,
-                                    transparent 4px
-                                  );
-                                "
-                              ></div>
-                            </div>
-                            <div>
-                              <div
-                                class="itinerary-title"
-                                style="
-                                  font-weight: 600;
-                                  color: #333;
-                                  font-family: 'Karla', sans-serif;
-                                  font-size: 16px;
-                                "
-                              >
-                                {{
-                                  itinerary.title ||
-                                  `Day ${itinerary.number || 1} Itinerary Title`
-                                }}
-                              </div>
-                              <div
-                                class="itinerary-accommodation"
-                                style="
-                                  color: #666;
-                                  font-size: 14px;
-                                  margin-top: 4px;
-                                  font-family: 'Karla', sans-serif;
-                                "
-                              >
-                                Day {{ itinerary.number || 1 }} Accommodation
-                              </div>
-                              <div
-                                class="itinerary-location"
-                                style="
-                                  color: #999;
-                                  font-size: 12px;
-                                  margin-top: 2px;
-                                  font-family: 'Karla', sans-serif;
-                                "
-                              >
-                                {{
-                                  itinerary.location ||
-                                  "Location would take place here"
-                                }}
-                              </div>
-                            </div>
-                          </div>
-                          <div class="itinerary-actions">
-                            <VBtn
-                              icon
-                              size="small"
-                              variant="text"
-                              @click="editItineraryItem(index)"
-                              style="margin-right: 8px; color: #666"
-                            >
-                              <VIcon icon="tabler-edit" size="18" />
-                            </VBtn>
-                            <VBtn
-                              icon
-                              size="small"
-                              variant="text"
-                              color="error"
-                              @click="removeItinerary(index)"
-                              style="margin-right: 8px; color: #666"
-                            >
-                              <VIcon icon="tabler-trash" size="18" />
-                            </VBtn>
-                            <VBtn
-                              icon
-                              size="small"
-                              variant="text"
-                              style="color: #333"
-                              class="drag-handle"
-                              draggable="true"
-                              @dragstart="dragStartItinerary(index, $event)"
-                            >
-                              <VIcon icon="tabler-arrows-move" size="18" />
-                            </VBtn>
-                          </div>
+                    <!-- Experience Level and Fitness Level -->
+                    <VRow>
+                      <VCol cols="6">
+                        <div class="mb-4">
+                          <label
+                            class="v-label text-body-2 mb-3 d-block"
+                            style="
+                              font-size: 16px !important;
+                              font-weight: 400 !important;
+                            "
+                          >
+                            Experience Level
+                            <VIcon
+                              icon="tabler-help-circle"
+                              size="16"
+                              class="question-icon"
+                            />
+                          </label>
+                          <VRadioGroup
+                            v-model="formData.experienceLevel"
+                            class="mt-2"
+                          >
+                            <VRadio value="journeys" label="Journeys" />
+                            <VRadio value="discovery" label="Discovery" />
+                            <VRadio value="expedition" label="Expedition" />
+                            <VRadio
+                              value="extreme-expedition"
+                              label="Extreme Expedition"
+                            />
+                            <VRadio value="not-sure" label="Not Sure" />
+                          </VRadioGroup>
                         </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Provider's Personal Policies -->
-                  <div class="mb-6">
-                    <label
-                      class="v-label text-body-2 mb-3 d-block"
-                      style="
-                        font-size: 16px !important;
-                        font-weight: 400 !important;
-                      "
-                    >
-                      Provider's Personal Policies
-                      <span class="required-star">*</span>
-                    </label>
-                    <p
-                      class="text-caption text-medium-emphasis mb-3"
-                      style="font-size: 12px"
-                    >
-                      How do you want to add policies?
-                    </p>
-                    <VRadioGroup
-                      v-model="formData.personalPolicies"
-                      class="mt-2"
-                    >
-                      <VRadio
-                        value="personal"
-                        label="I have my personal policies"
-                      />
-                      <VRadio
-                        value="explorer-elite"
-                        label="I want to use Explorer Elite's policies"
-                      />
-                      <VRadio value="not-sure" label="I'm not sure" />
-                    </VRadioGroup>
-                  </div>
-                </VCol>
-
-                <!-- Right Column -->
-                <VCol cols="12" md="6">
-                  <!-- Special Addons -->
-                  <div class="mb-6">
-                    <h3 class="section-title">Special Addons</h3>
-                    <p class="section-description">
-                      Add your Special addons and all related details here
-                    </p>
-
-                    <!-- Show button when no items -->
-                    <div
-                      v-if="specialAddons.length === 0"
-                      class="empty-state-container"
-                    >
-                      <VBtn
-                        color="primary"
-                        variant="elevated"
-                        class="add-item-btn"
-                        @click="openSpecialAddonsModal"
-                      >
-                        Add Special Addons
-                      </VBtn>
-                    </div>
-
-                    <!-- Show header with button when items exist -->
-                    <div v-else class="special-addons-header">
-                      <h3 class="special-addons-title">Special Addons</h3>
-                      <VBtn
-                        color="primary"
-                        variant="elevated"
-                        class="add-more-btn"
+                      </VCol>
+                      <VCol cols="6">
+                        <div class="mb-4">
+                          <label
+                            class="v-label text-body-2 mb-3 d-block"
+                            style="
+                              font-size: 16px !important;
+                              font-weight: 400 !important;
+                            "
+                          >
+                            Fitness Level
+                            <VIcon
+                              icon="tabler-help-circle"
+                              size="16"
+                              class="question-icon"
+                            />
+                          </label>
+                          <VRadioGroup
+                            v-model="formData.fitnessLevel"
+                            class="mt-2"
+                          >
+                            <VRadio value="easy" label="Easy" />
+                            <VRadio value="moderate" label="Moderate" />
+                            <VRadio value="challenging" label="Challenging" />
+                            <VRadio value="intense" label="Intense" />
+                            <VRadio value="not-sure" label="Not Sure" />
+                          </VRadioGroup>
+                        </div>
+                      </VCol>
+                    </VRow>
+                  </VCol>
+                </VRow>
+              </VWindowItem>
+              <!-- Step 2: Date Range -->
+              <VWindowItem>
+                <VRow>
+                  <!-- Top Row -->
+                  <VCol cols="12" md="6">
+                    <!-- Experience Media -->
+                    <div class="mb-4">
+                      <label
+                        class="v-label text-body-2 mb-3 d-block"
                         style="
-                          background-color: #ec8d22 !important;
-                          color: #fff !important;
-                          border-radius: 8px;
-                          font-weight: 500;
-                          font-size: 14px;
-                          padding: 8px 16px;
-                          min-height: 36px;
-                          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+                          font-size: 16px !important;
+                          font-weight: 400 !important;
                         "
-                        @click="openSpecialAddonsModal"
                       >
-                        Add More
-                      </VBtn>
-                    </div>
-
-                    <div
-                      v-if="specialAddons.length > 0"
-                      class="special-addons-list"
-                    >
+                        Experience Media <span class="required-star">*</span>
+                      </label>
                       <div
-                        v-for="(addon, index) in specialAddons"
+                        v-for="(media, index) in formData.listingMedia"
                         :key="index"
-                        class="special-addon-item"
-                        draggable="true"
-                        @dragstart="dragStartSpecialAddon(index, $event)"
-                        @dragover.prevent
-                        @drop="dropSpecialAddon(index, $event)"
-                        @dragenter.prevent
+                        class="mb-3"
                       >
-                        <div class="addon-content">
-                          <div class="addon-left">
-                            <div class="addon-badge" style="position: relative">
-                              <span class="badge-number">{{
-                                (addon.number || index + 1)
-                                  .toString()
-                                  .padStart(2, "0")
-                              }}</span>
-                              <!-- Star icon under number badge -->
+                        <div class="d-flex gap-2">
+                          <AppTextField
+                            v-model="formData.listingMedia[index]"
+                            placeholder="Add all related images and videos to a drive and add the URL here"
+                            class="flex-grow-1"
+                            :class="{
+                              'field-error': hasFieldError('listingMedia'),
+                            }"
+                            @input="clearFieldError('listingMedia')"
+                          >
+                            <template #append-inner>
+                              <VBtn
+                                v-if="
+                                  index === formData.listingMedia.length - 1
+                                "
+                                variant="text"
+                                size="small"
+                                @click="addListingMedia"
+                                class="px-0"
+                              >
+                                <VIcon icon="tabler-plus" size="20" />
+                              </VBtn>
+                            </template>
+                          </AppTextField>
+                          <VBtn
+                            v-if="formData.listingMedia.length > 1"
+                            variant="tonal"
+                            size="small"
+                            color="error"
+                            @click="removeListingMedia(index)"
+                            class="mt-1"
+                          >
+                            <VIcon icon="tabler-minus" size="16" />
+                          </VBtn>
+                        </div>
+                      </div>
+                      <p
+                        v-if="hasFieldError('listingMedia')"
+                        class="text-caption text-error mt-1 mb-0"
+                        style="font-size: 11px"
+                      >
+                        {{ formValidationErrors["listingMedia"] }}
+                      </p>
+                      <p
+                        class="text-caption text-error mt-2 mb-0"
+                        style="font-size: 11px"
+                      >
+                        Note: Make it public or Share the access with
+                        id@ExplorerElite.com
+                      </p>
+                    </div>
+                  </VCol>
+                  <VCol cols="12" md="6">
+                    <!-- Promotional Video -->
+                    <div class="mb-4">
+                      <label
+                        class="v-label text-body-2 mb-3 d-block"
+                        style="
+                          font-size: 16px !important;
+                          font-weight: 400 !important;
+                        "
+                      >
+                        Promotional Video
+                      </label>
+                      <div
+                        v-for="(video, index) in formData.promotionalVideo"
+                        :key="index"
+                        class="mb-3"
+                      >
+                        <div class="d-flex gap-2">
+                          <AppTextField
+                            v-model="formData.promotionalVideo[index]"
+                            placeholder="Add your promotional video of the adventure here"
+                            class="flex-grow-1"
+                          >
+                            <template #append-inner>
+                              <VBtn
+                                v-if="
+                                  index === formData.promotionalVideo.length - 1
+                                "
+                                variant="text"
+                                size="small"
+                                @click="addPromotionalVideo"
+                                class="px-0"
+                              >
+                                <VIcon icon="tabler-plus" size="20" />
+                              </VBtn>
+                            </template>
+                          </AppTextField>
+                          <VBtn
+                            v-if="formData.promotionalVideo.length > 1"
+                            variant="tonal"
+                            size="small"
+                            color="error"
+                            @click="removePromotionalVideo(index)"
+                            class="mt-1"
+                          >
+                            <VIcon icon="tabler-minus" size="16" />
+                          </VBtn>
+                        </div>
+                      </div>
+                    </div>
+                  </VCol>
+
+                  <!-- Second Row -->
+                  <VCol cols="12" md="6">
+                    <!-- Maps and Routes -->
+                    <div class="mb-4">
+                      <label
+                        class="v-label text-body-2 mb-3 d-block"
+                        style="
+                          font-size: 16px !important;
+                          font-weight: 400 !important;
+                        "
+                      >
+                        Maps and Routes <span class="required-star">*</span>
+                      </label>
+                      <div
+                        v-for="(route, index) in formData.mapsAndRoutes"
+                        :key="index"
+                        class="mb-3"
+                      >
+                        <div class="d-flex gap-2">
+                          <AppTextField
+                            v-model="formData.mapsAndRoutes[index]"
+                            placeholder="Add multiple URL of the approximate routes, GPX or others"
+                            class="flex-grow-1"
+                            :class="{
+                              'field-error': hasFieldError('mapsAndRoutes'),
+                            }"
+                            @input="clearFieldError('mapsAndRoutes')"
+                          >
+                            <template #append-inner>
+                              <VBtn
+                                v-if="
+                                  index === formData.mapsAndRoutes.length - 1
+                                "
+                                variant="text"
+                                size="small"
+                                @click="addMapsAndRoutes"
+                                class="px-0"
+                              >
+                                <VIcon icon="tabler-plus" size="20" />
+                              </VBtn>
+                            </template>
+                          </AppTextField>
+                          <VBtn
+                            v-if="formData.mapsAndRoutes.length > 1"
+                            variant="tonal"
+                            size="small"
+                            color="error"
+                            @click="removeMapsAndRoutes(index)"
+                            class="mt-1"
+                          >
+                            <VIcon icon="tabler-minus" size="16" />
+                          </VBtn>
+                        </div>
+                      </div>
+                      <p
+                        v-if="hasFieldError('mapsAndRoutes')"
+                        class="text-caption text-error mt-1 mb-0"
+                        style="font-size: 11px"
+                      >
+                        {{ formValidationErrors["mapsAndRoutes"] }}
+                      </p>
+                    </div>
+                  </VCol>
+                  <VCol cols="12" md="6">
+                    <!-- Locations -->
+                    <AppSelect
+                      v-model="formData.locations"
+                      label="Locations*"
+                      placeholder="where the adventure takes place (countries/continent)"
+                      :items="[
+                        'Europe',
+                        'North America',
+                        'South America',
+                        'Asia',
+                        'Africa',
+                        'Australia',
+                        'Antarctica',
+                      ]"
+                      class="mb-4"
+                    />
+                  </VCol>
+
+                  <!-- Third Row - Large Text Areas -->
+                  <VCol cols="12" md="6">
+                    <!-- What's Included -->
+                    <div class="mb-4">
+                      <label
+                        class="v-label text-body-2 mb-3 d-block"
+                        style="
+                          font-size: 16px !important;
+                          font-weight: 400 !important;
+                        "
+                      >
+                        What's Included <span class="required-star">*</span>
+                      </label>
+                      <VTextarea
+                        v-model="formData.whatsIncluded"
+                        placeholder="List of items/services included in the adventure"
+                        rows="4"
+                        class="rich-text-area"
+                        :error="hasFieldError('whatsIncluded')"
+                        :error-messages="formValidationErrors['whatsIncluded']"
+                        @input="clearFieldError('whatsIncluded')"
+                        :class="{
+                          'field-error': hasFieldError('whatsIncluded'),
+                        }"
+                      />
+                    </div>
+                  </VCol>
+                  <VCol cols="12" md="6">
+                    <!-- What's Not Included -->
+                    <div class="mb-4">
+                      <label
+                        class="v-label text-body-2 mb-3 d-block"
+                        style="
+                          font-size: 16px !important;
+                          font-weight: 400 !important;
+                        "
+                      >
+                        What's Not Included <span class="required-star">*</span>
+                      </label>
+                      <VTextarea
+                        v-model="formData.whatsNotIncluded"
+                        placeholder="List of items/services not included in the adventure"
+                        rows="4"
+                        class="rich-text-area"
+                        :error="hasFieldError('whatsNotIncluded')"
+                        :error-messages="
+                          formValidationErrors['whatsNotIncluded']
+                        "
+                        @input="clearFieldError('whatsNotIncluded')"
+                        :class="{
+                          'field-error': hasFieldError('whatsNotIncluded'),
+                        }"
+                      />
+                    </div>
+                  </VCol>
+
+                  <!-- Fourth Row - Rich Text Areas -->
+                  <VCol cols="12" md="6">
+                    <!-- Additional Notes -->
+                    <div class="mb-4">
+                      <label
+                        class="v-label text-body-2 mb-3 d-block"
+                        style="
+                          font-size: 16px !important;
+                          font-weight: 400 !important;
+                        "
+                      >
+                        Additional Notes to Explorer Elite's Admin
+                      </label>
+                      <VTextarea
+                        v-model="formData.additionalNotes"
+                        placeholder="Tell us any further information we should have about your adventure"
+                        rows="4"
+                        class="rich-text-area"
+                      />
+                      <!-- Rich Text Editor Controls -->
+                      <div class="rich-text-controls mt-2">
+                        <div class="d-flex gap-2 align-center">
+                          <VBtn
+                            variant="text"
+                            size="small"
+                            class="text-control-btn"
+                          >
+                            <VIcon icon="tabler-bold" size="16" />
+                          </VBtn>
+                          <VBtn
+                            variant="text"
+                            size="small"
+                            class="text-control-btn"
+                          >
+                            <VIcon icon="tabler-italic" size="16" />
+                          </VBtn>
+                          <VBtn
+                            variant="text"
+                            size="small"
+                            class="text-control-btn"
+                          >
+                            <VIcon icon="tabler-underline" size="16" />
+                          </VBtn>
+                          <VDivider vertical />
+                          <VBtn
+                            variant="text"
+                            size="small"
+                            class="text-control-btn"
+                          >
+                            <VIcon icon="tabler-align-left" size="16" />
+                          </VBtn>
+                          <VBtn
+                            variant="text"
+                            size="small"
+                            class="text-control-btn"
+                          >
+                            <VIcon icon="tabler-align-center" size="16" />
+                          </VBtn>
+                          <VBtn
+                            variant="text"
+                            size="small"
+                            class="text-control-btn"
+                          >
+                            <VIcon icon="tabler-align-right" size="16" />
+                          </VBtn>
+                          <VDivider vertical />
+                          <VBtn
+                            variant="text"
+                            size="small"
+                            class="text-control-btn"
+                          >
+                            <VIcon icon="tabler-list" size="16" />
+                          </VBtn>
+                          <VDivider vertical />
+                          <VBtn
+                            variant="text"
+                            size="small"
+                            class="text-control-btn"
+                          >
+                            <VIcon icon="tabler-link" size="16" />
+                          </VBtn>
+                          <VBtn
+                            variant="text"
+                            size="small"
+                            class="text-control-btn"
+                          >
+                            <VIcon icon="tabler-photo" size="16" />
+                          </VBtn>
+                        </div>
+                      </div>
+                    </div>
+                  </VCol>
+                  <VCol cols="12" md="6">
+                    <!-- Provider's Personal FAQ -->
+                    <div class="mb-4">
+                      <label
+                        class="v-label text-body-2 mb-3 d-block"
+                        style="
+                          font-size: 16px !important;
+                          font-weight: 400 !important;
+                        "
+                      >
+                        Provider's Personal FAQ
+                      </label>
+                      <VTextarea
+                        v-model="formData.providersFAQ"
+                        placeholder="Answer all the questions you think adventurers might ask"
+                        rows="4"
+                        class="rich-text-area"
+                      />
+                      <!-- Rich Text Editor Controls -->
+                      <div class="rich-text-controls mt-2">
+                        <div class="d-flex gap-2 align-center">
+                          <VBtn
+                            variant="text"
+                            size="small"
+                            class="text-control-btn"
+                          >
+                            <VIcon icon="tabler-bold" size="16" />
+                          </VBtn>
+                          <VBtn
+                            variant="text"
+                            size="small"
+                            class="text-control-btn"
+                          >
+                            <VIcon icon="tabler-italic" size="16" />
+                          </VBtn>
+                          <VBtn
+                            variant="text"
+                            size="small"
+                            class="text-control-btn"
+                          >
+                            <VIcon icon="tabler-underline" size="16" />
+                          </VBtn>
+                          <VDivider vertical />
+                          <VBtn
+                            variant="text"
+                            size="small"
+                            class="text-control-btn"
+                          >
+                            <VIcon icon="tabler-align-left" size="16" />
+                          </VBtn>
+                          <VBtn
+                            variant="text"
+                            size="small"
+                            class="text-control-btn"
+                          >
+                            <VIcon icon="tabler-align-center" size="16" />
+                          </VBtn>
+                          <VBtn
+                            variant="text"
+                            size="small"
+                            class="text-control-btn"
+                          >
+                            <VIcon icon="tabler-align-right" size="16" />
+                          </VBtn>
+                          <VDivider vertical />
+                          <VBtn
+                            variant="text"
+                            size="small"
+                            class="text-control-btn"
+                          >
+                            <VIcon icon="tabler-list" size="16" />
+                          </VBtn>
+                          <VDivider vertical />
+                          <VBtn
+                            variant="text"
+                            size="small"
+                            class="text-control-btn"
+                          >
+                            <VIcon icon="tabler-link" size="16" />
+                          </VBtn>
+                          <VBtn
+                            variant="text"
+                            size="small"
+                            class="text-control-btn"
+                          >
+                            <VIcon icon="tabler-photo" size="16" />
+                          </VBtn>
+                        </div>
+                      </div>
+                    </div>
+                  </VCol>
+                </VRow>
+              </VWindowItem>
+              <!-- Step 3: Pricing & Details -->
+              <VWindowItem>
+                <VRow>
+                  <!-- Left Column -->
+                  <VCol cols="12" md="6">
+                    <!-- Itinerary/Accommodation Day by Day -->
+                    <div class="mb-6">
+                      <label
+                        class="v-label text-body-2 mb-3 d-block"
+                        style="
+                          font-size: 16px !important;
+                          font-weight: 400 !important;
+                        "
+                      >
+                        Itinerary/Accommodation Day by Day
+                        <span class="required-star">*</span>
+                      </label>
+                      <p class="section-description">
+                        Add your Itinerary/Accommodations and all related
+                        details here
+                      </p>
+                      <p
+                        v-if="hasFieldError('itineraries')"
+                        class="text-caption text-error mt-1 mb-3"
+                        style="font-size: 11px"
+                      >
+                        {{ formValidationErrors["itineraries"] }}
+                      </p>
+
+                      <!-- Show button when no items -->
+                      <div
+                        v-if="itineraries.length === 0"
+                        class="empty-state-container"
+                      >
+                        <VBtn
+                          color="primary"
+                          variant="elevated"
+                          class="add-item-btn"
+                          @click="openItineraryModal"
+                        >
+                          Add Itinerary/Accomodation
+                        </VBtn>
+                      </div>
+
+                      <!-- Show header with button when items exist -->
+                      <div v-else class="itinerary-header">
+                        <h3 class="itinerary-title">
+                          Itinerary/Accommodations
+                        </h3>
+                        <VBtn
+                          color="primary"
+                          variant="elevated"
+                          class="add-more-btn"
+                          style="
+                            background-color: #ec8d22 !important;
+                            color: #fff !important;
+                            border-radius: 8px;
+                            font-weight: 500;
+                            font-size: 14px;
+                            padding: 8px 16px;
+                            min-height: 36px;
+                            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+                          "
+                          @click="openItineraryModal"
+                        >
+                          Add More
+                        </VBtn>
+                      </div>
+
+                      <div
+                        v-if="itineraries.length > 0"
+                        class="itinerary-list-container"
+                      >
+                        <div
+                          v-for="(itinerary, index) in itineraries"
+                          :key="itinerary.id"
+                          class="itinerary-list-item"
+                          style="
+                            background: transparent;
+                            border: none;
+                            border-radius: 0;
+                            padding: 16px 0;
+                            margin-top: 0;
+                            box-shadow: none;
+                            position: relative;
+                          "
+                          draggable="true"
+                          @dragstart="dragStartItinerary(index, $event)"
+                          @dragover.prevent
+                          @drop="dropItinerary(index, $event)"
+                          @dragenter.prevent
+                        >
+                          <div
+                            class="d-flex justify-space-between align-center"
+                          >
+                            <div class="d-flex align-center">
                               <div
-                                v-if="index < specialAddons.length - 1"
+                                class="itinerary-number"
                                 style="
-                                  position: absolute;
-                                  left: 50%;
-                                  top: 100%;
-                                  transform: translateX(-50%);
-                                  margin-top: 4px;
-                                  z-index: 2;
+                                  background: #ec8d22;
+                                  color: white;
+                                  width: 32px;
+                                  height: 32px;
+                                  border-radius: 6px;
+                                  display: flex;
+                                  align-items: center;
+                                  justify-content: center;
+                                  font-weight: bold;
+                                  margin-right: 12px;
+                                  font-family: 'Anton', sans-serif;
+                                  font-size: 12px;
+                                  position: relative;
                                 "
                               >
-                                <VIcon
-                                  icon="tabler-star"
-                                  size="16"
-                                  style="color: #ec8d22"
-                                />
+                                {{
+                                  (itinerary.number || 1)
+                                    .toString()
+                                    .padStart(2, "0")
+                                }}
+                                <!-- Location icon under number badge -->
+                                <div
+                                  v-if="index < itineraries.length - 1"
+                                  style="
+                                    position: absolute;
+                                    left: 50%;
+                                    top: 100%;
+                                    transform: translateX(-50%);
+                                    margin-top: 4px;
+                                    z-index: 2;
+                                  "
+                                >
+                                  <VIcon
+                                    icon="tabler-map-pin"
+                                    size="16"
+                                    style="color: #ec8d22"
+                                  />
+                                </div>
+                                <!-- Vertical dotted line under icon -->
+                                <div
+                                  v-if="index < itineraries.length - 1"
+                                  class="vertical-dotted-line"
+                                  style="
+                                    position: absolute;
+                                    left: 50%;
+                                    top: 100%;
+                                    transform: translateX(-50%);
+                                    margin-top: 20px;
+                                    bottom: -16px;
+                                    width: 1px;
+                                    background: repeating-linear-gradient(
+                                      to bottom,
+                                      #666 0,
+                                      #666 2px,
+                                      transparent 2px,
+                                      transparent 4px
+                                    );
+                                  "
+                                ></div>
                               </div>
-                              <!-- Vertical dotted line under icon -->
-                              <div
-                                v-if="index < specialAddons.length - 1"
-                                class="vertical-dotted-line"
-                                style="
-                                  position: absolute;
-                                  left: 50%;
-                                  top: 100%;
-                                  transform: translateX(-50%);
-                                  margin-top: 20px;
-                                  bottom: -16px;
-                                  width: 1px;
-                                  background: repeating-linear-gradient(
-                                    to bottom,
-                                    #666 0,
-                                    #666 2px,
-                                    transparent 2px,
-                                    transparent 4px
-                                  );
-                                "
-                              ></div>
+                              <div>
+                                <div
+                                  class="itinerary-title"
+                                  style="
+                                    font-weight: 600;
+                                    color: #333;
+                                    font-family: 'Karla', sans-serif;
+                                    font-size: 16px;
+                                  "
+                                >
+                                  {{
+                                    itinerary.title ||
+                                    `Day ${
+                                      itinerary.number || 1
+                                    } Itinerary Title`
+                                  }}
+                                </div>
+                                <div
+                                  class="itinerary-accommodation"
+                                  style="
+                                    color: #666;
+                                    font-size: 14px;
+                                    margin-top: 4px;
+                                    font-family: 'Karla', sans-serif;
+                                  "
+                                >
+                                  Day {{ itinerary.number || 1 }} Accommodation
+                                </div>
+                                <div
+                                  class="itinerary-location"
+                                  style="
+                                    color: #999;
+                                    font-size: 12px;
+                                    margin-top: 2px;
+                                    font-family: 'Karla', sans-serif;
+                                  "
+                                >
+                                  {{
+                                    itinerary.location ||
+                                    "Location would take place here"
+                                  }}
+                                </div>
+                              </div>
                             </div>
-                            <div class="addon-info">
-                              <div class="addon-title-row">
-                                <span class="addon-title">{{
-                                  addon.title ||
-                                  `Addon ${addon.number || index + 1} Title`
-                                }}</span>
-                                <VIcon
-                                  icon="tabler-chevron-down"
-                                  size="16"
-                                  class="chevron-icon"
-                                />
-                              </div>
-                              <div class="addon-description">
-                                <span class="description-text">{{
-                                  addon.description ||
-                                  "Your addon description would take place here"
-                                }}</span>
-                              </div>
-                              <div class="addon-price">
-                                € {{ (addon.price || 0).toFixed(2) }}
-                              </div>
+                            <div class="itinerary-actions">
+                              <VBtn
+                                icon
+                                size="small"
+                                variant="text"
+                                @click="editItineraryItem(index)"
+                                style="margin-right: 8px; color: #666"
+                              >
+                                <VIcon icon="tabler-edit" size="18" />
+                              </VBtn>
+                              <VBtn
+                                icon
+                                size="small"
+                                variant="text"
+                                color="error"
+                                @click="removeItinerary(index)"
+                                style="margin-right: 8px; color: #666"
+                              >
+                                <VIcon icon="tabler-trash" size="18" />
+                              </VBtn>
+                              <VBtn
+                                icon
+                                size="small"
+                                variant="text"
+                                style="color: #333"
+                                class="drag-handle"
+                                draggable="true"
+                                @dragstart="dragStartItinerary(index, $event)"
+                              >
+                                <VIcon icon="tabler-arrows-move" size="18" />
+                              </VBtn>
                             </div>
-                          </div>
-                          <div class="addon-actions">
-                            <VBtn
-                              icon
-                              size="small"
-                              variant="text"
-                              @click="editSpecialAddon(index)"
-                              class="action-btn"
-                            >
-                              <VIcon icon="tabler-edit" size="18" />
-                            </VBtn>
-                            <VBtn
-                              icon
-                              size="small"
-                              variant="text"
-                              color="error"
-                              @click="removeSpecialAddon(index)"
-                              class="action-btn"
-                            >
-                              <VIcon icon="tabler-trash" size="18" />
-                            </VBtn>
-                            <VBtn
-                              icon
-                              size="small"
-                              variant="text"
-                              class="action-btn drag-handle"
-                              draggable="true"
-                              @dragstart="dragStartSpecialAddon(index, $event)"
-                            >
-                              <VIcon icon="tabler-arrows-move" size="18" />
-                            </VBtn>
                           </div>
                         </div>
                       </div>
                     </div>
+
+                    <!-- Provider's Personal Policies -->
+                    <div class="mb-6">
+                      <label
+                        class="v-label text-body-2 mb-3 d-block"
+                        style="
+                          font-size: 16px !important;
+                          font-weight: 400 !important;
+                        "
+                      >
+                        Provider's Personal Policies
+                        <span class="required-star">*</span>
+                      </label>
+                      <p
+                        class="text-caption text-medium-emphasis mb-3"
+                        style="font-size: 12px"
+                      >
+                        How do you want to add policies?
+                      </p>
+                      <VRadioGroup
+                        v-model="formData.personalPolicies"
+                        class="mt-2"
+                        :class="{
+                          'field-error': hasFieldError('personalPolicies'),
+                        }"
+                        @update:model-value="
+                          clearFieldError('personalPolicies')
+                        "
+                      >
+                        <VRadio
+                          value="personal"
+                          label="I have my personal policies"
+                        />
+                        <VRadio
+                          value="explorer-elite"
+                          label="I want to use Explorer Elite's policies"
+                        />
+                        <VRadio value="not-sure" label="I'm not sure" />
+                      </VRadioGroup>
+                      <p
+                        v-if="hasFieldError('personalPolicies')"
+                        class="text-caption text-error mt-1 mb-0"
+                        style="font-size: 11px"
+                      >
+                        {{ formValidationErrors["personalPolicies"] }}
+                      </p>
+                    </div>
+                  </VCol>
+
+                  <!-- Right Column -->
+                  <VCol cols="12" md="6">
+                    <!-- Special Addons -->
+                    <div class="mb-6">
+                      <h3 class="section-title">Special Addons</h3>
+                      <p class="section-description">
+                        Add your Special addons and all related details here
+                      </p>
+
+                      <!-- Show button when no items -->
+                      <div
+                        v-if="specialAddons.length === 0"
+                        class="empty-state-container"
+                      >
+                        <VBtn
+                          color="primary"
+                          variant="elevated"
+                          class="add-item-btn"
+                          @click="openSpecialAddonsModal"
+                        >
+                          Add Special Addons
+                        </VBtn>
+                      </div>
+
+                      <!-- Show header with button when items exist -->
+                      <div v-else class="special-addons-header">
+                        <h3 class="special-addons-title">Special Addons</h3>
+                        <VBtn
+                          color="primary"
+                          variant="elevated"
+                          class="add-more-btn"
+                          style="
+                            background-color: #ec8d22 !important;
+                            color: #fff !important;
+                            border-radius: 8px;
+                            font-weight: 500;
+                            font-size: 14px;
+                            padding: 8px 16px;
+                            min-height: 36px;
+                            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+                          "
+                          @click="openSpecialAddonsModal"
+                        >
+                          Add More
+                        </VBtn>
+                      </div>
+
+                      <div
+                        v-if="specialAddons.length > 0"
+                        class="special-addons-list"
+                      >
+                        <div
+                          v-for="(addon, index) in specialAddons"
+                          :key="index"
+                          class="special-addon-item"
+                          draggable="true"
+                          @dragstart="dragStartSpecialAddon(index, $event)"
+                          @dragover.prevent
+                          @drop="dropSpecialAddon(index, $event)"
+                          @dragenter.prevent
+                        >
+                          <div class="addon-content">
+                            <div class="addon-left">
+                              <div
+                                class="addon-badge"
+                                style="position: relative"
+                              >
+                                <span class="badge-number">{{
+                                  (addon.number || index + 1)
+                                    .toString()
+                                    .padStart(2, "0")
+                                }}</span>
+                                <!-- Star icon under number badge -->
+                                <div
+                                  v-if="index < specialAddons.length - 1"
+                                  style="
+                                    position: absolute;
+                                    left: 50%;
+                                    top: 100%;
+                                    transform: translateX(-50%);
+                                    margin-top: 4px;
+                                    z-index: 2;
+                                  "
+                                >
+                                  <VIcon
+                                    icon="tabler-star"
+                                    size="16"
+                                    style="color: #ec8d22"
+                                  />
+                                </div>
+                                <!-- Vertical dotted line under icon -->
+                                <div
+                                  v-if="index < specialAddons.length - 1"
+                                  class="vertical-dotted-line"
+                                  style="
+                                    position: absolute;
+                                    left: 50%;
+                                    top: 100%;
+                                    transform: translateX(-50%);
+                                    margin-top: 20px;
+                                    bottom: -16px;
+                                    width: 1px;
+                                    background: repeating-linear-gradient(
+                                      to bottom,
+                                      #666 0,
+                                      #666 2px,
+                                      transparent 2px,
+                                      transparent 4px
+                                    );
+                                  "
+                                ></div>
+                              </div>
+                              <div class="addon-info">
+                                <div class="addon-title-row">
+                                  <span class="addon-title">{{
+                                    addon.title ||
+                                    `Addon ${addon.number || index + 1} Title`
+                                  }}</span>
+                                  <VIcon
+                                    icon="tabler-chevron-down"
+                                    size="16"
+                                    class="chevron-icon"
+                                  />
+                                </div>
+                                <div class="addon-description">
+                                  <span class="description-text">{{
+                                    addon.description ||
+                                    "Your addon description would take place here"
+                                  }}</span>
+                                </div>
+                                <div class="addon-price">
+                                  € {{ (addon.price || 0).toFixed(2) }}
+                                </div>
+                              </div>
+                            </div>
+                            <div class="addon-actions">
+                              <VBtn
+                                icon
+                                size="small"
+                                variant="text"
+                                @click="editSpecialAddon(index)"
+                                class="action-btn"
+                              >
+                                <VIcon icon="tabler-edit" size="18" />
+                              </VBtn>
+                              <VBtn
+                                icon
+                                size="small"
+                                variant="text"
+                                color="error"
+                                @click="removeSpecialAddon(index)"
+                                class="action-btn"
+                              >
+                                <VIcon icon="tabler-trash" size="18" />
+                              </VBtn>
+                              <VBtn
+                                icon
+                                size="small"
+                                variant="text"
+                                class="action-btn drag-handle"
+                                draggable="true"
+                                @dragstart="
+                                  dragStartSpecialAddon(index, $event)
+                                "
+                              >
+                                <VIcon icon="tabler-arrows-move" size="18" />
+                              </VBtn>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </VCol>
+                </VRow>
+              </VWindowItem>
+            </VWindow>
+            <div
+              class="d-flex flex-wrap gap-4 justify-sm-space-between justify-center mt-8"
+            >
+              <VBtn
+                color="secondary"
+                variant="tonal"
+                @click="
+                  currentStep === 0
+                    ? router.push({ name: 'listing' })
+                    : currentStep--
+                "
+              >
+                <VIcon icon="tabler-arrow-left" start class="flip-in-rtl" />
+                Previous
+              </VBtn>
+              <VBtn
+                v-if="numberedSteps.length - 1 === currentStep"
+                color="success"
+                :loading="loading"
+                :disabled="loading"
+                @click="onSubmit"
+              >
+                {{ loading ? "Submitting..." : "Submit" }}
+              </VBtn>
+              <VBtn v-else class="next-btn-dark" @click="goToNextStep">
+                Next
+                <VIcon icon="tabler-arrow-right" end class="flip-in-rtl" />
+              </VBtn>
+            </div>
+
+            <!-- Help Section -->
+            <div class="help-section mt-8">
+              <VRow>
+                <VCol cols="12" md="8">
+                  <div class="help-content">
+                    <h3 class="help-title">Need some help?</h3>
+                    <p class="help-description">
+                      This is the first step towards your next big adventure,
+                      but you're not in this alone. Along your trip creation
+                      process, we will be right here to help you.
+                    </p>
+                    <div class="help-buttons">
+                      <VBtn
+                        color="dark"
+                        variant="elevated"
+                        class="tutorial-btn"
+                        style="
+                          background-color: #111 !important;
+                          color: #fff !important;
+                          border-radius: 8px;
+                          font-weight: 500;
+                          margin-right: 12px;
+                        "
+                      >
+                        Watch The Tutorial Video
+                      </VBtn>
+                      <VBtn
+                        color="primary"
+                        variant="elevated"
+                        class="support-btn"
+                        style="
+                          background-color: #ec8d22 !important;
+                          color: #fff !important;
+                          border-radius: 8px;
+                          font-weight: 500;
+                        "
+                      >
+                        Contact Support
+                      </VBtn>
+                    </div>
+                  </div>
+                </VCol>
+                <VCol cols="12" md="4">
+                  <div class="help-video">
+                    <iframe
+                      src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+                      title="Tutorial Video"
+                      frameborder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowfullscreen
+                      class="youtube-video"
+                      style="width: 100%; height: 200px; border-radius: 8px"
+                    ></iframe>
                   </div>
                 </VCol>
               </VRow>
-            </VWindowItem>
-          </VWindow>
-          <div
-            class="d-flex flex-wrap gap-4 justify-sm-space-between justify-center mt-8"
-          >
-            <VBtn
-              color="secondary"
-              variant="tonal"
-              :disabled="currentStep === 0"
-              @click="currentStep--"
-            >
-              <VIcon icon="tabler-arrow-left" start class="flip-in-rtl" />
-              Previous
-            </VBtn>
-            <VBtn
-              v-if="numberedSteps.length - 1 === currentStep"
-              color="success"
-              :loading="loading"
-              :disabled="loading"
-              @click="onSubmit"
-            >
-              {{ loading ? "Submitting..." : "Submit" }}
-            </VBtn>
-            <VBtn v-else class="next-btn-dark" @click="goToNextStep">
-              Next
-              <VIcon icon="tabler-arrow-right" end class="flip-in-rtl" />
-            </VBtn>
-          </div>
+            </div>
+          </VForm>
+        </VCardText>
+      </VCard>
+    </div>
 
-          <!-- Help Section -->
-          <div class="help-section mt-8">
-            <VRow>
-              <VCol cols="12" md="8">
-                <div class="help-content">
-                  <h3 class="help-title">Need some help?</h3>
-                  <p class="help-description">
-                    This is the first step towards your next big adventure, but
-                    you're not in this alone. Along your trip creation process,
-                    we will be right here to help you.
-                  </p>
-                  <div class="help-buttons">
-                    <VBtn
-                      color="dark"
-                      variant="elevated"
-                      class="tutorial-btn"
-                      style="
-                        background-color: #111 !important;
-                        color: #fff !important;
-                        border-radius: 8px;
-                        font-weight: 500;
-                        margin-right: 12px;
-                      "
-                    >
-                      Watch The Tutorial Video
-                    </VBtn>
-                    <VBtn
-                      color="primary"
-                      variant="elevated"
-                      class="support-btn"
-                      style="
-                        background-color: #ec8d22 !important;
-                        color: #fff !important;
-                        border-radius: 8px;
-                        font-weight: 500;
-                      "
-                    >
-                      Contact Support
-                    </VBtn>
-                  </div>
-                </div>
-              </VCol>
-              <VCol cols="12" md="4">
-                <div class="help-video">
-                  <iframe
-                    src="https://www.youtube.com/embed/dQw4w9WgXcQ"
-                    title="Tutorial Video"
-                    frameborder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowfullscreen
-                    class="youtube-video"
-                    style="width: 100%; height: 200px; border-radius: 8px"
-                  ></iframe>
-                </div>
-              </VCol>
-            </VRow>
-          </div>
-        </VForm>
-      </VCardText>
-    </VCard>
+    <PeriodsDialog
+      v-model="showPeriodsDialog"
+      :periods="periods"
+      :editing-index="editingPeriodIndex"
+      :use-period-terminology="false"
+      @close="showPeriodsDialog = false"
+      @done="handlePeriodsDone"
+    />
+
+    <ItineraryAccommodationDialog
+      v-model="showItineraryDialog"
+      :listing-id="listingId"
+      :initial-days="itineraries"
+      :editing-index="editingItineraryIndex"
+      @close="showItineraryDialog = false"
+      @done="handleItineraryDone"
+    />
+
+    <SpecialAddonsDialog
+      v-model="showSpecialAddonsDialog"
+      :special-addons="specialAddons"
+      :editing-index="editingAddonIndex"
+      @close="showSpecialAddonsDialog = false"
+      @done="handleSpecialAddonDone"
+    />
+
+    <ConfirmationDialog
+      v-model="showConfirmation"
+      :submission-data="submissionData"
+      @close="showConfirmation = false"
+      @create-new-adventure="createNewAdventure"
+    />
   </div>
-
-  <PeriodsDialog
-    v-model="showPeriodsDialog"
-    :periods="periods"
-    :editing-index="editingPeriodIndex"
-    :use-period-terminology="false"
-    @close="showPeriodsDialog = false"
-    @done="handlePeriodsDone"
-  />
-
-  <ItineraryAccommodationDialog
-    v-model="showItineraryDialog"
-    :listing-id="listingId"
-    :initial-days="itineraries"
-    :editing-index="editingItineraryIndex"
-    @close="showItineraryDialog = false"
-    @done="handleItineraryDone"
-  />
-
-  <SpecialAddonsDialog
-    v-model="showSpecialAddonsDialog"
-    :special-addons="specialAddons"
-    :editing-index="editingAddonIndex"
-    @close="showSpecialAddonsDialog = false"
-    @done="handleSpecialAddonDone"
-  />
 </template>
 
 <style scoped>
@@ -1928,13 +2312,57 @@ const onSubmit = async () => {
 
 /* Required star styling */
 .required-star {
-  color: #ff4444;
+  color: #ff4444 !important;
   font-weight: bold;
+  margin-left: 4px;
+  display: inline-block;
+}
+
+/* Field error styling */
+.field-error {
+  border-color: #ff4444 !important;
+}
+
+.field-error .v-field__outline {
+  border-color: #ff4444 !important;
+}
+
+/* Error message styling */
+.v-messages__message {
+  color: #ff4444 !important;
+  font-size: 12px !important;
+  margin-top: 4px !important;
+}
+
+/* Ensure fields remain simple without hover effects */
+.v-field {
+  transition: none !important;
+}
+
+.v-field__outline {
+  transition: none !important;
+}
+
+.v-field__field {
+  transition: none !important;
+}
+
+.v-field--focused .v-field__outline {
+  border-color: #ec8d22 !important;
+}
+
+/* Remove any hover effects on labels */
+.v-label {
+  transition: none !important;
+}
+
+.v-field__label {
+  transition: none !important;
 }
 
 /* Rich text area styling */
 .rich-text-area {
-  border: 1px solid #e0e0e0;
+  border: none !important; /* remove extra border under validation */
   border-radius: 8px;
   background: #fff;
 }
@@ -2394,10 +2822,10 @@ const onSubmit = async () => {
 /* Empty state styling */
 .empty-state-container {
   text-align: center;
-  padding: 24px;
-  background: #f8f8f8;
-  border-radius: 8px;
-  border: 2px dashed #e0e0e0;
+  padding: 0; /* remove extra padding to match simple button area */
+  background: transparent !important; /* remove gray background */
+  border-radius: 0;
+  border: none !important; /* remove dashed border */
 }
 
 /* Section styling */
@@ -2600,5 +3028,185 @@ const onSubmit = async () => {
   background-color: #d67d1a !important;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Confirmation Page Styles */
+.confirmation-page {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.confirmation-container {
+  width: 100%;
+  max-width: 95vw;
+}
+
+.confirmation-card {
+  background: white;
+  border-radius: 12px;
+  padding: 48px 40px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.confirmation-icon {
+  margin-bottom: 32px;
+}
+.icon-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+.icon-left,
+.icon-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.icon-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 4px;
+}
+.line {
+  width: 24px;
+  height: 2px;
+  background-color: #333;
+  border-radius: 1px;
+}
+.checkmark,
+.cross {
+  color: #ec8d22;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.confirmation-title {
+  font-family: "Anton", sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 24px;
+  line-height: 1.3;
+}
+
+.adventure-info {
+  margin-bottom: 24px;
+}
+.adventure-title {
+  font-family: "Karla", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #ec8d22;
+  margin-bottom: 8px;
+}
+.adventure-id {
+  font-family: "Karla", sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: #ec8d22;
+}
+
+.confirmation-description {
+  font-family: "Karla", sans-serif;
+  font-size: 16px;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 32px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.confirmation-buttons {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.see-adventures-btn {
+  background-color: #111 !important;
+  color: #fff !important;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  padding: 12px 24px;
+  min-height: 44px;
+  text-transform: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+}
+.see-adventures-btn:hover {
+  background-color: #222 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+.add-another-btn {
+  background-color: #ec8d22 !important;
+  color: #fff !important;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  padding: 12px 24px;
+  min-height: 44px;
+  text-transform: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+}
+.add-another-btn:hover {
+  background-color: #d67d1a !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive design for confirmation page */
+@media (max-width: 768px) {
+  .confirmation-card {
+    padding: 32px 24px;
+  }
+  .confirmation-title {
+    font-size: 20px;
+  }
+  .adventure-title {
+    font-size: 16px;
+  }
+  .adventure-id {
+    font-size: 14px;
+  }
+  .confirmation-description {
+    font-size: 14px;
+  }
+  .confirmation-buttons {
+    flex-direction: column;
+  }
+  .see-adventures-btn,
+  .add-another-btn {
+    width: 100%;
+  }
+}
+
+/* Fix radio button sizing and clipping */
+:deep(.v-radio .v-selection-control) {
+  min-height: 28px;
+  padding: 4px 0;
+  overflow: visible;
+}
+:deep(.v-radio .v-selection-control__wrapper) {
+  width: 22px;
+  height: 22px;
+}
+:deep(.v-radio .v-selection-control__input) {
+  width: 22px;
+  height: 22px;
+}
+:deep(.v-radio .v-selection-control__ripple) {
+  inset: -4px;
 }
 </style>

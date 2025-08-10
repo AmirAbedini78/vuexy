@@ -34,6 +34,7 @@ const submissionData = ref({
 const showItineraryDialog = ref(false);
 const showSpecialAddonsDialog = ref(false);
 const showPeriodsDialog = ref(false);
+const formValidationErrors = ref({});
 
 const formData = ref({
   // Step 1 fields
@@ -64,6 +65,101 @@ const formData = ref({
   personalPolicies: "not-sure",
   personalPoliciesText: "",
 });
+
+// Required fields and validation
+const requiredFieldsStep1 = [
+  "listingTitle",
+  "description",
+  "activitiesIncluded",
+  "locations",
+];
+
+const validateStep1 = () => {
+  const errors = {};
+  requiredFieldsStep1.forEach((field) => {
+    const value = formData.value[field];
+    if (!value || (typeof value === "string" && value.trim() === "")) {
+      errors[field] = "This field is required";
+    }
+  });
+  if (!periods.value || periods.value.length === 0) {
+    errors["periods"] = "At least one departure is required";
+  }
+  formValidationErrors.value = errors;
+  return Object.keys(errors).length === 0;
+};
+
+const requiredFieldsStep2 = ["whatsIncluded", "whatsNotIncluded"];
+
+const validateStep2 = () => {
+  const errors = { ...formValidationErrors.value };
+  const hasMedia =
+    Array.isArray(formData.value.listingMedia) &&
+    formData.value.listingMedia.some(
+      (m) => typeof m === "string" && m.trim() !== ""
+    );
+  if (!hasMedia) errors["listingMedia"] = "Please add at least one media URL";
+  const hasRoute =
+    Array.isArray(formData.value.mapsAndRoutes) &&
+    formData.value.mapsAndRoutes.some(
+      (r) => typeof r === "string" && r.trim() !== ""
+    );
+  if (!hasRoute)
+    errors["mapsAndRoutes"] = "Please add at least one map/route URL";
+  requiredFieldsStep2.forEach((field) => {
+    const value = formData.value[field];
+    if (!value || (typeof value === "string" && value.trim() === "")) {
+      errors[field] = "This field is required";
+    }
+  });
+  formValidationErrors.value = errors;
+  return ["listingMedia", "mapsAndRoutes", ...requiredFieldsStep2].every(
+    (k) => !errors[k]
+  );
+};
+
+const requiredFieldsStep3 = ["personalPolicies"];
+
+const validateStep3 = () => {
+  const errors = { ...formValidationErrors.value };
+  if (!itineraries.value || itineraries.value.length === 0) {
+    errors["itineraries"] = "Please add at least one day in your itinerary";
+  }
+  requiredFieldsStep3.forEach((field) => {
+    const value = formData.value[field];
+    if (!value || (typeof value === "string" && value.trim() === "")) {
+      errors[field] = "This field is required";
+    }
+  });
+  formValidationErrors.value = errors;
+  return ["itineraries", ...requiredFieldsStep3].every((k) => !errors[k]);
+};
+
+const hasFieldError = (fieldName) => !!formValidationErrors.value[fieldName];
+const clearFieldError = (fieldName) => {
+  if (formValidationErrors.value[fieldName])
+    delete formValidationErrors.value[fieldName];
+};
+
+const goToNextStep = () => {
+  if (currentStep.value === 0) {
+    if (validateStep1()) currentStep.value++;
+    else {
+      const firstError = document.querySelector(".field-error");
+      if (firstError)
+        firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  } else if (currentStep.value === 1) {
+    if (validateStep2()) currentStep.value++;
+    else {
+      const firstError = document.querySelector(".field-error");
+      if (firstError)
+        firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  } else {
+    currentStep.value++;
+  }
+};
 
 // Add new maps and routes field
 const addMapsAndRoutes = () => {
@@ -105,6 +201,15 @@ const onSubmit = async () => {
   loading.value = true;
 
   try {
+    // Validate step 3 before showing confirmation
+    if (!validateStep3()) {
+      const firstError = document.querySelector(".field-error");
+      if (firstError)
+        firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+      loading.value = false;
+      return;
+    }
+
     // Generate random adventure ID
     const randomId = Math.floor(Math.random() * 90000) + 10000; // 5-digit number
 
@@ -118,7 +223,6 @@ const onSubmit = async () => {
     showConfirmation.value = true;
   } catch (error) {
     console.error("Submission failed:", error);
-    alert("Submission failed: " + (error.message || "Unknown error"));
   } finally {
     loading.value = false;
   }
@@ -210,9 +314,10 @@ const handleItineraryDone = (itineraryData, editingIndex = -1) => {
     itineraries.value.forEach((itinerary, index) => {
       itinerary.number = index + 1;
     });
+    // Clear validation error when itinerary is added/edited
+    clearFieldError("itineraries");
   } catch (error) {
     console.error("Error in handleItineraryDone:", error);
-    alert("خطا در ذخیره اطلاعات");
   } finally {
     // Ensure modal is closed
     showItineraryDialog.value = false;
@@ -251,7 +356,6 @@ const handleSpecialAddonDone = async (addons, editingIndex) => {
     console.log("Total addons count:", specialAddons.value.length);
   } catch (error) {
     console.error("Error in handleSpecialAddonDone:", error);
-    alert("خطا در ذخیره اطلاعات");
   } finally {
     // Ensure modal is closed
     showSpecialAddonsDialog.value = false;
@@ -287,7 +391,6 @@ const handlePeriodsDone = async (newPeriods, editingIndex) => {
     console.log("Total periods count:", periods.value.length);
   } catch (error) {
     console.error("Error in handlePeriodsDone:", error);
-    alert("خطا در ذخیره اطلاعات");
   }
 };
 
@@ -299,13 +402,11 @@ const editSpecialAddon = (index) => {
 
 // Remove special addon
 const removeSpecialAddon = (index) => {
-  if (confirm("آیا مطمئن هستید که می‌خواهید این افزونه را حذف کنید؟")) {
-    specialAddons.value.splice(index, 1);
-    // Update numbers
-    specialAddons.value.forEach((addon, idx) => {
-      addon.number = idx + 1;
-    });
-  }
+  specialAddons.value.splice(index, 1);
+  // Update numbers
+  specialAddons.value.forEach((addon, idx) => {
+    addon.number = idx + 1;
+  });
 };
 
 // Edit itinerary item
@@ -316,13 +417,11 @@ const editItineraryItem = (index) => {
 
 // Remove itinerary
 const removeItinerary = (index) => {
-  if (confirm("آیا مطمئن هستید که می‌خواهید این روز را حذف کنید؟")) {
-    itineraries.value.splice(index, 1);
-    // Update numbers
-    itineraries.value.forEach((itinerary, idx) => {
-      itinerary.number = idx + 1;
-    });
-  }
+  itineraries.value.splice(index, 1);
+  // Update numbers
+  itineraries.value.forEach((itinerary, idx) => {
+    itinerary.number = idx + 1;
+  });
 };
 
 // Edit period
@@ -333,13 +432,11 @@ const editPeriod = (index) => {
 
 // Remove period
 const removePeriod = (index) => {
-  if (confirm("آیا مطمئن هستید که می‌خواهید این روز را حذف کنید؟")) {
-    periods.value.splice(index, 1);
-    // Update numbers
-    periods.value.forEach((period, idx) => {
-      period.number = idx + 1;
-    });
-  }
+  periods.value.splice(index, 1);
+  // Update numbers
+  periods.value.forEach((period, idx) => {
+    period.number = idx + 1;
+  });
 };
 
 // Drag and drop handlers
@@ -783,6 +880,10 @@ const dropPeriod = (index, event) => {
                       label="Listing Title*"
                       placeholder="The main title of Your adventure"
                       class="mb-4"
+                      :error="hasFieldError('listingTitle')"
+                      :error-messages="formValidationErrors['listingTitle']"
+                      @input="clearFieldError('listingTitle')"
+                      :class="{ 'field-error': hasFieldError('listingTitle') }"
                     />
 
                     <!-- Subtitle -->
@@ -809,6 +910,10 @@ const dropPeriod = (index, event) => {
                         placeholder="Tell us everything about this adventure"
                         rows="5"
                         class="rich-text-area"
+                        :error="hasFieldError('description')"
+                        :error-messages="formValidationErrors['description']"
+                        @input="clearFieldError('description')"
+                        :class="{ 'field-error': hasFieldError('description') }"
                       />
                       <!-- Rich Text Editor Controls -->
                       <div class="rich-text-controls mt-2">
@@ -918,6 +1023,14 @@ const dropPeriod = (index, event) => {
                         'Other',
                       ]"
                       class="mb-4"
+                      :error="hasFieldError('activitiesIncluded')"
+                      :error-messages="
+                        formValidationErrors['activitiesIncluded']
+                      "
+                      @input="clearFieldError('activitiesIncluded')"
+                      :class="{
+                        'field-error': hasFieldError('activitiesIncluded'),
+                      }"
                     />
 
                     <!-- Locations -->
@@ -935,6 +1048,10 @@ const dropPeriod = (index, event) => {
                         'Antarctica',
                       ]"
                       class="mb-4"
+                      :error="hasFieldError('locations')"
+                      :error-messages="formValidationErrors['locations']"
+                      @input="clearFieldError('locations')"
+                      :class="{ 'field-error': hasFieldError('locations') }"
                     />
 
                     <!-- Group Language -->
@@ -986,6 +1103,10 @@ const dropPeriod = (index, event) => {
                             v-model="formData.listingMedia[index]"
                             placeholder="Add all related images and videos to a drive and add the URL here"
                             class="flex-grow-1"
+                            :class="{
+                              'field-error': hasFieldError('listingMedia'),
+                            }"
+                            @input="clearFieldError('listingMedia')"
                           >
                             <template #append-inner>
                               <VBtn
@@ -1013,6 +1134,13 @@ const dropPeriod = (index, event) => {
                           </VBtn>
                         </div>
                       </div>
+                      <p
+                        v-if="hasFieldError('listingMedia')"
+                        class="text-caption text-error mt-1 mb-2"
+                        style="font-size: 11px"
+                      >
+                        {{ formValidationErrors["listingMedia"] }}
+                      </p>
                       <p
                         class="text-caption text-error mt-2 mb-0"
                         style="font-size: 11px"
@@ -1043,6 +1171,10 @@ const dropPeriod = (index, event) => {
                             v-model="formData.mapsAndRoutes[index]"
                             placeholder="Add multiple URL of the approximate routes, GPX or others"
                             class="flex-grow-1"
+                            :class="{
+                              'field-error': hasFieldError('mapsAndRoutes'),
+                            }"
+                            @input="clearFieldError('mapsAndRoutes')"
                           >
                             <template #append-inner>
                               <VBtn
@@ -1070,6 +1202,13 @@ const dropPeriod = (index, event) => {
                           </VBtn>
                         </div>
                       </div>
+                      <p
+                        v-if="hasFieldError('mapsAndRoutes')"
+                        class="text-caption text-error mt-1 mb-0"
+                        style="font-size: 11px"
+                      >
+                        {{ formValidationErrors["mapsAndRoutes"] }}
+                      </p>
                     </div>
 
                     <!-- What's Included -->
@@ -1088,6 +1227,12 @@ const dropPeriod = (index, event) => {
                         placeholder="List of items/services included in the adventure"
                         rows="4"
                         class="rich-text-area"
+                        :error="hasFieldError('whatsIncluded')"
+                        :error-messages="formValidationErrors['whatsIncluded']"
+                        @input="clearFieldError('whatsIncluded')"
+                        :class="{
+                          'field-error': hasFieldError('whatsIncluded'),
+                        }"
                       />
                     </div>
 
@@ -1250,6 +1395,14 @@ const dropPeriod = (index, event) => {
                         placeholder="List of items/services not included in the adventure"
                         rows="4"
                         class="rich-text-area"
+                        :error="hasFieldError('whatsNotIncluded')"
+                        :error-messages="
+                          formValidationErrors['whatsNotIncluded']
+                        "
+                        @input="clearFieldError('whatsNotIncluded')"
+                        :class="{
+                          'field-error': hasFieldError('whatsNotIncluded'),
+                        }"
                       />
                     </div>
 
@@ -1569,6 +1722,13 @@ const dropPeriod = (index, event) => {
                           </div>
                         </div>
                       </div>
+                      <p
+                        v-if="hasFieldError('itineraries')"
+                        class="text-caption text-error mt-1 mb-2"
+                        style="font-size: 11px"
+                      >
+                        {{ formValidationErrors["itineraries"] }}
+                      </p>
                     </div>
                   </VCol>
 
@@ -1760,6 +1920,12 @@ const dropPeriod = (index, event) => {
                       <VRadioGroup
                         v-model="formData.personalPolicies"
                         class="mt-2"
+                        :class="{
+                          'field-error': hasFieldError('personalPolicies'),
+                        }"
+                        @update:model-value="
+                          clearFieldError('personalPolicies')
+                        "
                       >
                         <div class="radio-option">
                           <VRadio
@@ -1881,6 +2047,13 @@ const dropPeriod = (index, event) => {
                           </div>
                         </div>
                       </VRadioGroup>
+                      <p
+                        v-if="hasFieldError('personalPolicies')"
+                        class="text-caption text-error mt-1 mb-0"
+                        style="font-size: 11px"
+                      >
+                        {{ formValidationErrors["personalPolicies"] }}
+                      </p>
                     </div>
                   </VCol>
                 </VRow>
@@ -1892,8 +2065,11 @@ const dropPeriod = (index, event) => {
               <VBtn
                 color="secondary"
                 variant="tonal"
-                :disabled="currentStep === 0"
-                @click="currentStep--"
+                @click="
+                  currentStep === 0
+                    ? router.push({ name: 'listing' })
+                    : currentStep--
+                "
               >
                 <VIcon icon="tabler-arrow-left" start class="flip-in-rtl" />
                 Previous
@@ -1907,7 +2083,7 @@ const dropPeriod = (index, event) => {
               >
                 {{ loading ? "Submitting..." : "Submit" }}
               </VBtn>
-              <VBtn v-else class="next-btn-dark" @click="currentStep++">
+              <VBtn v-else class="next-btn-dark" @click="goToNextStep">
                 Next
                 <VIcon icon="tabler-arrow-right" end class="flip-in-rtl" />
               </VBtn>
@@ -2392,10 +2568,10 @@ const dropPeriod = (index, event) => {
 /* Empty state styling */
 .empty-state-container {
   text-align: center;
-  padding: 24px;
-  background: #f8f8f8;
-  border-radius: 8px;
-  border: 2px dashed #e0e0e0;
+  padding: 0;
+  background: transparent !important;
+  border-radius: 0;
+  border: none !important;
 }
 
 /* Section styling */
@@ -2598,5 +2774,176 @@ const dropPeriod = (index, event) => {
   background-color: #d67d1a !important;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Confirmation Page Styles (match Multi Date) */
+.confirmation-page {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.confirmation-container {
+  width: 100%;
+  max-width: 95vw;
+}
+.confirmation-card {
+  background: white;
+  border-radius: 12px;
+  padding: 48px 40px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+.confirmation-icon {
+  margin-bottom: 32px;
+}
+.icon-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+.icon-left,
+.icon-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.icon-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 4px;
+}
+.line {
+  width: 24px;
+  height: 2px;
+  background-color: #333;
+  border-radius: 1px;
+}
+.checkmark,
+.cross {
+  color: #ec8d22;
+  font-size: 16px;
+  font-weight: bold;
+}
+.confirmation-title {
+  font-family: "Anton", sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 24px;
+  line-height: 1.3;
+}
+.adventure-info {
+  margin-bottom: 24px;
+}
+.adventure-title {
+  font-family: "Karla", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #ec8d22;
+  margin-bottom: 8px;
+}
+.adventure-id {
+  font-family: "Karla", sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: #ec8d22;
+}
+.confirmation-description {
+  font-family: "Karla", sans-serif;
+  font-size: 16px;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 32px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.confirmation-buttons {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.see-adventures-btn {
+  background-color: #111 !important;
+  color: #fff !important;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  padding: 12px 24px;
+  min-height: 44px;
+  text-transform: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+}
+.see-adventures-btn:hover {
+  background-color: #222 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+.add-another-btn {
+  background-color: #ec8d22 !important;
+  color: #fff !important;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  padding: 12px 24px;
+  min-height: 44px;
+  text-transform: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+}
+.add-another-btn:hover {
+  background-color: #d67d1a !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+@media (max-width: 768px) {
+  .confirmation-card {
+    padding: 32px 24px;
+  }
+  .confirmation-title {
+    font-size: 20px;
+  }
+  .adventure-title {
+    font-size: 16px;
+  }
+  .adventure-id {
+    font-size: 14px;
+  }
+  .confirmation-description {
+    font-size: 14px;
+  }
+  .confirmation-buttons {
+    flex-direction: column;
+  }
+  .see-adventures-btn,
+  .add-another-btn {
+    width: 100%;
+  }
+}
+
+/* Fix radio button sizing and clipping */
+:deep(.v-radio .v-selection-control) {
+  min-height: 28px;
+  padding: 4px 0;
+  overflow: visible;
+}
+:deep(.v-radio .v-selection-control__wrapper) {
+  width: 22px;
+  height: 22px;
+}
+:deep(.v-radio .v-selection-control__input) {
+  width: 22px;
+  height: 22px;
+}
+:deep(.v-radio .v-selection-control__ripple) {
+  inset: -4px;
 }
 </style>

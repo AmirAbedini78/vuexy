@@ -2450,8 +2450,11 @@ function removePackage(index) {
               <VBtn
                 color="secondary"
                 variant="tonal"
-                :disabled="currentStep === 0"
-                @click="goToPrevStep"
+                @click="
+                  currentStep === 0
+                    ? router.push({ name: 'listing' })
+                    : goToPrevStep()
+                "
               >
                 <VIcon icon="tabler-arrow-left" start class="flip-in-rtl" />
                 Previous
@@ -3828,5 +3831,23 @@ function removePackage(index) {
 
 .drag-handle:hover {
   color: #ec8d22 !important;
+}
+
+/* Fix radio button sizing and clipping */
+:deep(.v-radio .v-selection-control) {
+  min-height: 28px;
+  padding: 4px 0;
+  overflow: visible;
+}
+:deep(.v-radio .v-selection-control__wrapper) {
+  width: 22px;
+  height: 22px;
+}
+:deep(.v-radio .v-selection-control__input) {
+  width: 22px;
+  height: 22px;
+}
+:deep(.v-radio .v-selection-control__ripple) {
+  inset: -4px;
 }
 </style>
