@@ -1223,20 +1223,26 @@ const removeSocialMediaLink = (index) => {
 }
 
 /* Fix radio button sizing and clipping */
+:deep(.v-radio) {
+  overflow: visible;
+}
 :deep(.v-radio .v-selection-control) {
-  min-height: 28px;
-  padding: 4px 0;
+  min-height: 30px;
+  padding: 6px 4px;
   overflow: visible;
 }
 :deep(.v-radio .v-selection-control__wrapper) {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
+  padding: 2px;
+  overflow: visible;
+  box-sizing: content-box;
 }
 :deep(.v-radio .v-selection-control__input) {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
 }
 :deep(.v-radio .v-selection-control__ripple) {
-  inset: -4px;
+  inset: -8px;
 }
 </style>
