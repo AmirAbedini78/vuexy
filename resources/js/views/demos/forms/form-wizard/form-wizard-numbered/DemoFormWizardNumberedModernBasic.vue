@@ -19,6 +19,7 @@ const numberedSteps = [
 
 const currentStep = ref(0);
 const loading = ref(false);
+const formValidationErrors = ref({});
 
 const formData = ref({
   // Step 1 fields
@@ -56,6 +57,124 @@ const formData = ref({
   termsAccepted: false,
 });
 
+// Required fields for step 1 (Personal Information)
+const requiredFieldsStep1 = [
+  "fullName",
+  "nationality",
+  "address1",
+  "city",
+  "dob",
+  "languages",
+  "country",
+];
+
+// Required fields for step 2 (Account Details)
+const requiredFieldsStep2 = [
+  "passportImage",
+  "activitySpecialization",
+  "yearsOfExperience",
+  "emergencyContactName",
+  "wantToBeListed",
+  "shortBio",
+  "countryOfOperation",
+  "emergencyContactPhone",
+];
+
+// Validation function for step 1
+const validateStep1 = () => {
+  const errors = {};
+
+  requiredFieldsStep1.forEach((field) => {
+    if (field === "languages") {
+      if (!formData.value[field] || formData.value[field].length === 0) {
+        errors[field] = "This field is required";
+      }
+    } else {
+      if (!formData.value[field] || formData.value[field].trim() === "") {
+        errors[field] = "This field is required";
+      }
+    }
+  });
+
+  formValidationErrors.value = errors;
+  return Object.keys(errors).length === 0;
+};
+
+// Validation function for step 2
+const validateStep2 = () => {
+  const errors = {};
+
+  requiredFieldsStep2.forEach((field) => {
+    if (field === "passportImage") {
+      if (!formData.value[field]) {
+        errors[field] = "This field is required";
+      }
+    } else if (field === "wantToBeListed") {
+      if (!formData.value[field] || formData.value[field].trim() === "") {
+        errors[field] = "This field is required";
+      }
+    } else {
+      if (!formData.value[field] || formData.value[field].trim() === "") {
+        errors[field] = "This field is required";
+      }
+    }
+  });
+
+  formValidationErrors.value = errors;
+  return Object.keys(errors).length === 0;
+};
+
+// Check if field has error
+const hasFieldError = (fieldName) => {
+  return formValidationErrors.value[fieldName];
+};
+
+// Check if field is required for step 1
+const isFieldRequiredStep1 = (fieldName) => {
+  return requiredFieldsStep1.includes(fieldName);
+};
+
+// Check if field is required for step 2
+const isFieldRequiredStep2 = (fieldName) => {
+  return requiredFieldsStep2.includes(fieldName);
+};
+
+// Handle next step with validation
+const handleNextStep = () => {
+  if (currentStep.value === 0) {
+    // Validate step 1
+    if (validateStep1()) {
+      currentStep.value++;
+    } else {
+      // Scroll to first error
+      const firstErrorField = document.querySelector(".field-error");
+      if (firstErrorField) {
+        firstErrorField.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+  } else if (currentStep.value === 1) {
+    // Validate step 2
+    if (validateStep2()) {
+      currentStep.value++;
+    } else {
+      // Scroll to first error
+      const firstErrorField = document.querySelector(".field-error");
+      if (firstErrorField) {
+        firstErrorField.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+  } else {
+    currentStep.value++;
+  }
+};
+
+// Clear validation errors when field changes
+const clearFieldError = (fieldName) => {
+  if (formValidationErrors.value[fieldName]) {
+    delete formValidationErrors.value[fieldName];
+  }
+};
+
 const onSubmit = async () => {
   loading.value = true;
 
@@ -87,6 +206,8 @@ const handlePassportImageUpload = (event) => {
   const file = event.target.files[0];
   if (file) {
     formData.value.passportImage = file;
+    // Clear validation error when image is uploaded
+    clearFieldError("passportImage");
     // Create preview URL
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -175,26 +296,42 @@ const removeSocialProofLink = (index) => {
                 <VCol cols="12" md="6">
                   <AppTextField
                     v-model="formData.fullName"
-                    label="Full Name"
+                    label="Full Name *"
                     placeholder="Enter your full name"
+                    :error="hasFieldError('fullName')"
+                    :error-messages="formValidationErrors['fullName']"
+                    @input="clearFieldError('fullName')"
+                    :class="{ 'field-error': hasFieldError('fullName') }"
                   />
                   <AppTextField
                     v-model="formData.nationality"
-                    label="Nationality"
+                    label="Nationality *"
                     placeholder="Enter your nationality"
                     class="mt-4"
+                    :error="hasFieldError('nationality')"
+                    :error-messages="formValidationErrors['nationality']"
+                    @input="clearFieldError('nationality')"
+                    :class="{ 'field-error': hasFieldError('nationality') }"
                   />
                   <AppTextField
                     v-model="formData.address1"
-                    label="Address Line 1"
+                    label="Address Line 1 *"
                     placeholder="Enter address line 1"
                     class="mt-4"
+                    :error="hasFieldError('address1')"
+                    :error-messages="formValidationErrors['address1']"
+                    @input="clearFieldError('address1')"
+                    :class="{ 'field-error': hasFieldError('address1') }"
                   />
                   <AppTextField
                     v-model="formData.city"
-                    label="City"
+                    label="City *"
                     placeholder="Enter your city"
                     class="mt-4"
+                    :error="hasFieldError('city')"
+                    :error-messages="formValidationErrors['city']"
+                    @input="clearFieldError('city')"
+                    :class="{ 'field-error': hasFieldError('city') }"
                   />
                   <AppTextField
                     v-model="formData.state"
@@ -209,22 +346,26 @@ const removeSocialProofLink = (index) => {
                     <AppDateTimePicker
                       ref="dobPicker"
                       v-model="formData.dob"
-                      label="Date of Birth"
+                      label="Date of Birth *"
                       placeholder="YYYY-MM-DD"
                       :config="{ dateFormat: 'Y-m-d', allowInput: true }"
-                    >
-                      <template #label>
-                        Date of Birth <span class="required-star">*</span>
-                      </template>
-                    </AppDateTimePicker>
+                      :error="hasFieldError('dob')"
+                      :error-messages="formValidationErrors['dob']"
+                      @input="clearFieldError('dob')"
+                      :class="{ 'field-error': hasFieldError('dob') }"
+                    />
                   </div>
                   <AppSelect
                     v-model="formData.languages"
-                    label="Languages Spoken"
+                    label="Languages Spoken *"
                     placeholder="Select languages"
                     :items="['English', 'French', 'German', 'Spanish', 'Other']"
                     multiple
                     class="mt-4"
+                    :error="hasFieldError('languages')"
+                    :error-messages="formValidationErrors['languages']"
+                    @input="clearFieldError('languages')"
+                    :class="{ 'field-error': hasFieldError('languages') }"
                   />
                   <AppTextField
                     v-model="formData.address2"
@@ -240,9 +381,13 @@ const removeSocialProofLink = (index) => {
                   />
                   <AppTextField
                     v-model="formData.country"
-                    label="Country"
+                    label="Country *"
                     placeholder="Enter your country"
                     class="mt-4"
+                    :error="hasFieldError('country')"
+                    :error-messages="formValidationErrors['country']"
+                    @input="clearFieldError('country')"
+                    :class="{ 'field-error': hasFieldError('country') }"
                   />
                 </VCol>
               </VRow>
@@ -255,7 +400,7 @@ const removeSocialProofLink = (index) => {
                   <!-- Explorer Passport Image -->
                   <div class="mb-6">
                     <h6 class="text-h6 font-weight-medium mb-2">
-                      Explorer Passport Image
+                      Explorer Passport Image *
                     </h6>
                     <p class="text-body-2 text-medium-emphasis mb-4">
                       High quality image, shown as your Explorer Elite passport
@@ -264,6 +409,9 @@ const removeSocialProofLink = (index) => {
                     <div class="d-flex align-center gap-4">
                       <div
                         class="image-preview"
+                        :class="{
+                          'field-error': hasFieldError('passportImage'),
+                        }"
                         style="
                           width: 184px;
                           height: 239px;
@@ -333,6 +481,7 @@ const removeSocialProofLink = (index) => {
                               () => {
                                 formData.passportImage = null;
                                 formData.passportImagePreview = null;
+                                clearFieldError('passportImage');
                               }
                             "
                           >
@@ -349,6 +498,13 @@ const removeSocialProofLink = (index) => {
                         >
                           Allowed JPG or PNG, Preferred 520*430 px, Max Size 5Mb
                         </p>
+                        <p
+                          v-if="hasFieldError('passportImage')"
+                          class="text-caption text-error mt-1 mb-0"
+                          style="font-size: 11px"
+                        >
+                          {{ formValidationErrors["passportImage"] }}
+                        </p>
                       </div>
                     </div>
                     <input
@@ -363,7 +519,7 @@ const removeSocialProofLink = (index) => {
                   <!-- Activity Specialization -->
                   <AppSelect
                     v-model="formData.activitySpecialization"
-                    label="Activity Specialization"
+                    label="Activity Specialization *"
                     placeholder="Activities you can lead (e.g., hiking, diving)"
                     :items="[
                       'Hiking',
@@ -378,12 +534,20 @@ const removeSocialProofLink = (index) => {
                       'Other',
                     ]"
                     class="mb-4"
+                    :error="hasFieldError('activitySpecialization')"
+                    :error-messages="
+                      formValidationErrors['activitySpecialization']
+                    "
+                    @input="clearFieldError('activitySpecialization')"
+                    :class="{
+                      'field-error': hasFieldError('activitySpecialization'),
+                    }"
                   />
 
                   <!-- Years of Experience -->
                   <AppSelect
                     v-model="formData.yearsOfExperience"
-                    label="Years of Experience"
+                    label="Years of Experience *"
                     placeholder="Total years you've been guiding adventures"
                     :items="[
                       'Less than 1 year',
@@ -395,14 +559,28 @@ const removeSocialProofLink = (index) => {
                       'More than 20 years',
                     ]"
                     class="mb-4"
+                    :error="hasFieldError('yearsOfExperience')"
+                    :error-messages="formValidationErrors['yearsOfExperience']"
+                    @input="clearFieldError('yearsOfExperience')"
+                    :class="{
+                      'field-error': hasFieldError('yearsOfExperience'),
+                    }"
                   />
 
                   <!-- Emergency Contact Name -->
                   <AppTextField
                     v-model="formData.emergencyContactName"
-                    label="Emergency Contact Name"
+                    label="Emergency Contact Name *"
                     placeholder="In case we need to contact someone urgently"
                     class="mb-4"
+                    :error="hasFieldError('emergencyContactName')"
+                    :error-messages="
+                      formValidationErrors['emergencyContactName']
+                    "
+                    @input="clearFieldError('emergencyContactName')"
+                    :class="{
+                      'field-error': hasFieldError('emergencyContactName'),
+                    }"
                   />
 
                   <!-- Listing Preference -->
@@ -414,9 +592,16 @@ const removeSocialProofLink = (index) => {
                         font-weight: 400 !important;
                       "
                       >Would you like to get listed with adventures in Explorer
-                      Elite?</label
+                      Elite? *</label
                     >
-                    <VRadioGroup v-model="formData.wantToBeListed" class="mt-2">
+                    <VRadioGroup
+                      v-model="formData.wantToBeListed"
+                      class="mt-2"
+                      :class="{
+                        'field-error': hasFieldError('wantToBeListed'),
+                      }"
+                      @update:model-value="clearFieldError('wantToBeListed')"
+                    >
                       <VRadio
                         value="yes"
                         label="Yes, I would like to get listed"
@@ -427,6 +612,13 @@ const removeSocialProofLink = (index) => {
                       />
                       <VRadio value="unsure" label="Not sure yet" />
                     </VRadioGroup>
+                    <p
+                      v-if="hasFieldError('wantToBeListed')"
+                      class="text-caption text-error mt-1 mb-0"
+                      style="font-size: 11px"
+                    >
+                      {{ formValidationErrors["wantToBeListed"] }}
+                    </p>
                   </div>
                 </VCol>
                 <!-- Right column -->
@@ -545,11 +737,15 @@ const removeSocialProofLink = (index) => {
                   <!-- Short Bio -->
                   <AppTextField
                     v-model="formData.shortBio"
-                    label="Short Bio"
+                    label="Short Bio *"
                     placeholder="Tell us who you are and what you do in a few sentences"
                     type="textarea"
                     rows="5"
                     class="mb-4"
+                    :error="hasFieldError('shortBio')"
+                    :error-messages="formValidationErrors['shortBio']"
+                    @input="clearFieldError('shortBio')"
+                    :class="{ 'field-error': hasFieldError('shortBio') }"
                   />
 
                   <!-- Certifications -->
@@ -565,7 +761,7 @@ const removeSocialProofLink = (index) => {
                   <!-- Country/Region of Operation -->
                   <AppSelect
                     v-model="formData.countryOfOperation"
-                    label="Country/Region of Operation"
+                    label="Country/Region of Operation *"
                     placeholder="Areas you usually operate in (select the main areas of activity)"
                     :items="[
                       'Germany',
@@ -581,14 +777,28 @@ const removeSocialProofLink = (index) => {
                       'Other',
                     ]"
                     class="mb-4"
+                    :error="hasFieldError('countryOfOperation')"
+                    :error-messages="formValidationErrors['countryOfOperation']"
+                    @input="clearFieldError('countryOfOperation')"
+                    :class="{
+                      'field-error': hasFieldError('countryOfOperation'),
+                    }"
                   />
 
                   <!-- Emergency Contact Phone -->
                   <AppTextField
                     v-model="formData.emergencyContactPhone"
-                    label="Emergency Contact Phone"
+                    label="Emergency Contact Phone *"
                     placeholder="+49 1236 456 789"
                     class="mb-4"
+                    :error="hasFieldError('emergencyContactPhone')"
+                    :error-messages="
+                      formValidationErrors['emergencyContactPhone']
+                    "
+                    @input="clearFieldError('emergencyContactPhone')"
+                    :class="{
+                      'field-error': hasFieldError('emergencyContactPhone'),
+                    }"
                   />
                 </VCol>
               </VRow>
@@ -734,7 +944,7 @@ const removeSocialProofLink = (index) => {
             >
               {{ loading ? "Submitting..." : "Submit" }}
             </VBtn>
-            <VBtn v-else class="next-btn-dark" @click="currentStep++">
+            <VBtn v-else class="next-btn-dark" @click="handleNextStep">
               Next
               <VIcon icon="tabler-arrow-right" end class="flip-in-rtl" />
             </VBtn>
@@ -751,6 +961,29 @@ const removeSocialProofLink = (index) => {
   margin-bottom: 32px;
   margin-top: -50px !important;
   padding-top: 0 !important;
+}
+
+/* Required star styling */
+.required-star {
+  color: #ff4444;
+  font-weight: bold;
+  margin-left: 4px;
+}
+
+/* Field error styling */
+.field-error {
+  border-color: #ff4444 !important;
+}
+
+.field-error .v-field__outline {
+  border-color: #ff4444 !important;
+}
+
+/* Error message styling */
+.v-messages__message {
+  color: #ff4444 !important;
+  font-size: 12px !important;
+  margin-top: 4px !important;
 }
 
 /* بزرگ کردن لیبل فیلدها حتی برای AppTextField سفارشی */

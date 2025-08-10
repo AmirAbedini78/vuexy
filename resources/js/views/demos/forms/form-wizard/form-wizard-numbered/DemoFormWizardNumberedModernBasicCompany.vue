@@ -19,6 +19,7 @@ const numberedSteps = [
 
 const currentStep = ref(0);
 const loading = ref(false);
+const formValidationErrors = ref({});
 
 const formData = ref({
   // Step 1 fields - Company Information
@@ -52,6 +53,112 @@ const formData = ref({
   termsAccepted: false,
 });
 
+// Required fields for step 1 (Company Information)
+const requiredFieldsStep1 = [
+  "companyName",
+  "address1",
+  "countryOfRegistration",
+  "country",
+  "businessType",
+];
+
+// Required fields for step 2 (Business Details)
+const requiredFieldsStep2 = [
+  "passportImage",
+  "activitySpecialization",
+  "shortBio",
+  "wantToBeListed",
+];
+
+// Validation function for step 1
+const validateStep1 = () => {
+  const errors = {};
+
+  requiredFieldsStep1.forEach((field) => {
+    if (!formData.value[field] || formData.value[field].trim() === "") {
+      errors[field] = "This field is required";
+    }
+  });
+
+  formValidationErrors.value = errors;
+  return Object.keys(errors).length === 0;
+};
+
+// Validation function for step 2
+const validateStep2 = () => {
+  const errors = {};
+
+  requiredFieldsStep2.forEach((field) => {
+    if (field === "passportImage") {
+      if (!formData.value[field]) {
+        errors[field] = "This field is required";
+      }
+    } else if (field === "wantToBeListed") {
+      if (!formData.value[field] || formData.value[field].trim() === "") {
+        errors[field] = "This field is required";
+      }
+    } else {
+      if (!formData.value[field] || formData.value[field].trim() === "") {
+        errors[field] = "This field is required";
+      }
+    }
+  });
+
+  formValidationErrors.value = errors;
+  return Object.keys(errors).length === 0;
+};
+
+// Check if field has error
+const hasFieldError = (fieldName) => {
+  return formValidationErrors.value[fieldName];
+};
+
+// Check if field is required for step 1
+const isFieldRequiredStep1 = (fieldName) => {
+  return requiredFieldsStep1.includes(fieldName);
+};
+
+// Check if field is required for step 2
+const isFieldRequiredStep2 = (fieldName) => {
+  return requiredFieldsStep2.includes(fieldName);
+};
+
+// Handle next step with validation
+const handleNextStep = () => {
+  if (currentStep.value === 0) {
+    // Validate step 1
+    if (validateStep1()) {
+      currentStep.value++;
+    } else {
+      // Scroll to first error
+      const firstErrorField = document.querySelector(".field-error");
+      if (firstErrorField) {
+        firstErrorField.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+  } else if (currentStep.value === 1) {
+    // Validate step 2
+    if (validateStep2()) {
+      currentStep.value++;
+    } else {
+      // Scroll to first error
+      const firstErrorField = document.querySelector(".field-error");
+      if (firstErrorField) {
+        firstErrorField.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+  } else {
+    currentStep.value++;
+  }
+};
+
+// Clear validation errors when field changes
+const clearFieldError = (fieldName) => {
+  if (formValidationErrors.value[fieldName]) {
+    delete formValidationErrors.value[fieldName];
+  }
+};
+
 const onSubmit = async () => {
   loading.value = true;
 
@@ -83,6 +190,8 @@ const handlePassportImageUpload = (event) => {
   const file = event.target.files[0];
   if (file) {
     formData.value.passportImage = file;
+    // Clear validation error when image is uploaded
+    clearFieldError("passportImage");
     // Create preview URL
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -172,9 +281,13 @@ const removeSocialMediaLink = (index) => {
                   <!-- Company Name -->
                   <AppTextField
                     v-model="formData.companyName"
-                    label="Company Name*"
+                    label="Company Name *"
                     placeholder="Legal name of your company"
                     class="mb-4"
+                    :error="hasFieldError('companyName')"
+                    :error-messages="formValidationErrors['companyName']"
+                    @input="clearFieldError('companyName')"
+                    :class="{ 'field-error': hasFieldError('companyName') }"
                   />
 
                   <!-- VAT ID -->
@@ -188,7 +301,7 @@ const removeSocialMediaLink = (index) => {
                   <!-- Company Address Section -->
                   <div class="mb-4">
                     <h6 class="text-h6 font-weight-medium mb-2">
-                      Company Address*
+                      Company Address *
                     </h6>
                     <p class="text-body-2 text-medium-emphasis mb-4">
                       Provide your company address for invoicing
@@ -198,9 +311,13 @@ const removeSocialMediaLink = (index) => {
                   <!-- Address Line 1 -->
                   <AppTextField
                     v-model="formData.address1"
-                    label="Address Line 1*"
+                    label="Address Line 1 *"
                     placeholder="Address Line 1"
                     class="mb-4"
+                    :error="hasFieldError('address1')"
+                    :error-messages="formValidationErrors['address1']"
+                    @input="clearFieldError('address1')"
+                    :class="{ 'field-error': hasFieldError('address1') }"
                   />
 
                   <!-- City -->
@@ -230,10 +347,9 @@ const removeSocialMediaLink = (index) => {
                 <!-- Right column -->
                 <VCol cols="12" md="6">
                   <!-- Country of Registration (outside address section) -->
-
                   <AppSelect
                     v-model="formData.countryOfRegistration"
-                    label="Country of Registration*"
+                    label="Country of Registration *"
                     placeholder="Where your company is officially registered"
                     :items="[
                       'Germany',
@@ -249,6 +365,14 @@ const removeSocialMediaLink = (index) => {
                       'Other',
                     ]"
                     class="mb-6"
+                    :error="hasFieldError('countryOfRegistration')"
+                    :error-messages="
+                      formValidationErrors['countryOfRegistration']
+                    "
+                    @input="clearFieldError('countryOfRegistration')"
+                    :class="{
+                      'field-error': hasFieldError('countryOfRegistration'),
+                    }"
                   />
                   <AppTextField
                     v-model="formData.postalCode"
@@ -287,7 +411,7 @@ const removeSocialMediaLink = (index) => {
                   <!-- Country -->
                   <AppSelect
                     v-model="formData.country"
-                    label="Country*"
+                    label="Country *"
                     placeholder="Select your country"
                     :items="[
                       'Germany',
@@ -303,12 +427,16 @@ const removeSocialMediaLink = (index) => {
                       'Other',
                     ]"
                     class="mb-4"
+                    :error="hasFieldError('country')"
+                    :error-messages="formValidationErrors['country']"
+                    @input="clearFieldError('country')"
+                    :class="{ 'field-error': hasFieldError('country') }"
                   />
 
                   <!-- Business Type -->
                   <AppSelect
                     v-model="formData.businessType"
-                    label="Business Type*"
+                    label="Business Type *"
                     placeholder="Select your business type"
                     :items="[
                       'Sole Proprietorship',
@@ -319,6 +447,10 @@ const removeSocialMediaLink = (index) => {
                       'Other',
                     ]"
                     class="mb-4"
+                    :error="hasFieldError('businessType')"
+                    :error-messages="formValidationErrors['businessType']"
+                    @input="clearFieldError('businessType')"
+                    :class="{ 'field-error': hasFieldError('businessType') }"
                   />
                 </VCol>
               </VRow>
@@ -331,7 +463,7 @@ const removeSocialMediaLink = (index) => {
                   <!-- Company Logo -->
                   <div class="mb-6">
                     <h6 class="text-h6 font-weight-medium mb-2">
-                      Company Logo
+                      Company Logo *
                     </h6>
                     <p class="text-body-2 text-medium-emphasis mb-4">
                       High quality image, shown as your company logo
@@ -339,6 +471,9 @@ const removeSocialMediaLink = (index) => {
                     <div class="d-flex align-center gap-4">
                       <div
                         class="image-preview"
+                        :class="{
+                          'field-error': hasFieldError('passportImage'),
+                        }"
                         style="
                           width: 184px;
                           height: 239px;
@@ -405,6 +540,7 @@ const removeSocialMediaLink = (index) => {
                               () => {
                                 formData.passportImage = null;
                                 formData.passportImagePreview = null;
+                                clearFieldError('passportImage');
                               }
                             "
                           >
@@ -421,6 +557,13 @@ const removeSocialMediaLink = (index) => {
                         >
                           Allowed JPG or PNG, Preferred 520*430 px, Max Size 5Mb
                         </p>
+                        <p
+                          v-if="hasFieldError('passportImage')"
+                          class="text-caption text-error mt-1 mb-0"
+                          style="font-size: 11px"
+                        >
+                          {{ formValidationErrors["passportImage"] }}
+                        </p>
                       </div>
                     </div>
                     <input
@@ -435,7 +578,7 @@ const removeSocialMediaLink = (index) => {
                   <!-- Activity Specialization -->
                   <AppSelect
                     v-model="formData.activitySpecialization"
-                    label="Activity Specialization"
+                    label="Activity Specialization *"
                     placeholder="Activities your company can lead (e.g., hiking, diving)"
                     :items="[
                       'Hiking',
@@ -450,6 +593,14 @@ const removeSocialMediaLink = (index) => {
                       'Other',
                     ]"
                     class="mb-4"
+                    :error="hasFieldError('activitySpecialization')"
+                    :error-messages="
+                      formValidationErrors['activitySpecialization']
+                    "
+                    @input="clearFieldError('activitySpecialization')"
+                    :class="{
+                      'field-error': hasFieldError('activitySpecialization'),
+                    }"
                   />
 
                   <!-- Listing Preference -->
@@ -461,9 +612,16 @@ const removeSocialMediaLink = (index) => {
                         font-weight: 400 !important;
                       "
                       >Would you like to get listed with adventures in Explorer
-                      Elite?</label
+                      Elite? *</label
                     >
-                    <VRadioGroup v-model="formData.wantToBeListed" class="mt-2">
+                    <VRadioGroup
+                      v-model="formData.wantToBeListed"
+                      class="mt-2"
+                      :class="{
+                        'field-error': hasFieldError('wantToBeListed'),
+                      }"
+                      @update:model-value="clearFieldError('wantToBeListed')"
+                    >
                       <VRadio
                         value="yes"
                         label="Yes, I would like to get listed"
@@ -474,6 +632,13 @@ const removeSocialMediaLink = (index) => {
                       />
                       <VRadio value="unsure" label="Not sure yet" />
                     </VRadioGroup>
+                    <p
+                      v-if="hasFieldError('wantToBeListed')"
+                      class="text-caption text-error mt-1 mb-0"
+                      style="font-size: 11px"
+                    >
+                      {{ formValidationErrors["wantToBeListed"] }}
+                    </p>
                   </div>
                 </VCol>
                 <!-- Right column -->
@@ -590,11 +755,15 @@ const removeSocialMediaLink = (index) => {
                   <!-- Short Bio -->
                   <AppTextField
                     v-model="formData.shortBio"
-                    label="Company Bio"
+                    label="Company Bio *"
                     placeholder="Tell us about your company and what you do in a few sentences"
                     type="textarea"
                     rows="5"
                     class="mb-4"
+                    :error="hasFieldError('shortBio')"
+                    :error-messages="formValidationErrors['shortBio']"
+                    @input="clearFieldError('shortBio')"
+                    :class="{ 'field-error': hasFieldError('shortBio') }"
                   />
 
                   <!-- Certifications -->
@@ -762,7 +931,7 @@ const removeSocialMediaLink = (index) => {
             >
               {{ loading ? "Submitting..." : "Submit" }}
             </VBtn>
-            <VBtn v-else class="next-btn-dark" @click="currentStep++">
+            <VBtn v-else class="next-btn-dark" @click="handleNextStep">
               Next
               <VIcon icon="tabler-arrow-right" end class="flip-in-rtl" />
             </VBtn>
@@ -779,6 +948,22 @@ const removeSocialMediaLink = (index) => {
   margin-bottom: 32px;
   margin-top: -50px !important;
   padding-top: 0 !important;
+}
+
+/* Field error styling */
+.field-error {
+  border-color: #ff4444 !important;
+}
+
+.field-error .v-field__outline {
+  border-color: #ff4444 !important;
+}
+
+/* Error message styling */
+.v-messages__message {
+  color: #ff4444 !important;
+  font-size: 12px !important;
+  margin-top: 4px !important;
 }
 
 .stepper-container {
