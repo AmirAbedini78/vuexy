@@ -29,10 +29,62 @@ const editingAddonIndex = ref(-1); // برای ویرایش addon
 const editingItineraryIndex = ref(-1); // برای ویرایش روز
 const editingPackageIndex = ref(-1); // برای ویرایش package
 const showConfirmation = ref(false); // برای نمایش صفحه تأیید
+const formValidationErrors = ref({});
 const submissionData = ref({
   adventureTitle: "",
   adventureId: "",
 });
+
+// Required fields for step 1 (Basic Information)
+const requiredFieldsStep1 = [
+  "startingDate",
+  "finishingDate",
+  "price",
+  "minCapacity",
+  "maxCapacity",
+  "packages",
+];
+
+// Validation function for step 1
+const validateStep1 = () => {
+  const errors = {};
+
+  requiredFieldsStep1.forEach((field) => {
+    if (field === "packages") {
+      if (!packages.value || packages.value.length === 0) {
+        errors[field] = "At least one package is required";
+      }
+    } else if (field === "minCapacity" || field === "maxCapacity") {
+      if (!formData.value[field] || formData.value[field].trim() === "") {
+        errors[field] = "This field is required";
+      }
+    } else {
+      if (!formData.value[field] || formData.value[field].trim() === "") {
+        errors[field] = "This field is required";
+      }
+    }
+  });
+
+  formValidationErrors.value = errors;
+  return Object.keys(errors).length === 0;
+};
+
+// Check if field has error
+const hasFieldError = (fieldName) => {
+  return formValidationErrors.value[fieldName];
+};
+
+// Check if field is required for step 1
+const isFieldRequiredStep1 = (fieldName) => {
+  return requiredFieldsStep1.includes(fieldName);
+};
+
+// Clear validation errors when field changes
+const clearFieldError = (fieldName) => {
+  if (formValidationErrors.value[fieldName]) {
+    delete formValidationErrors.value[fieldName];
+  }
+};
 
 async function fetchItineraries() {
   if (!listingId.value) return;
@@ -488,6 +540,9 @@ async function handlePackageDone(packagesData, editingIndex = -1) {
       pkg.number = index + 1;
     });
 
+    // Clear validation error when packages are added
+    clearFieldError("packages");
+
     console.log("Packages after update:", packages.value);
     console.log("Total packages count:", packages.value.length);
   } catch (error) {
@@ -500,8 +555,22 @@ async function handlePackageDone(packagesData, editingIndex = -1) {
 }
 
 const goToNextStep = async () => {
-  await updateListing();
-  currentStep.value++;
+  if (currentStep.value === 0) {
+    // Validate step 1
+    if (validateStep1()) {
+      await updateListing();
+      currentStep.value++;
+    } else {
+      // Scroll to first error
+      const firstErrorField = document.querySelector(".field-error");
+      if (firstErrorField) {
+        firstErrorField.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+  } else {
+    await updateListing();
+    currentStep.value++;
+  }
 };
 
 const goToPrevStep = () => {
@@ -878,9 +947,15 @@ function removePackage(index) {
                       <AppDateTimePicker
                         ref="startingDatePicker"
                         v-model="formData.startingDate"
-                        label="Starting Date*"
+                        label="Starting Date *"
                         placeholder="Select your listing starting date"
                         :config="{ dateFormat: 'Y-m-d', allowInput: true }"
+                        :error="hasFieldError('startingDate')"
+                        :error-messages="formValidationErrors['startingDate']"
+                        @input="clearFieldError('startingDate')"
+                        :class="{
+                          'field-error': hasFieldError('startingDate'),
+                        }"
                       />
                     </div>
 
@@ -889,9 +964,15 @@ function removePackage(index) {
                       <AppDateTimePicker
                         ref="finishingDatePicker"
                         v-model="formData.finishingDate"
-                        label="Finishing Date*"
+                        label="Finishing Date *"
                         placeholder="Select your listing finishing date"
                         :config="{ dateFormat: 'Y-m-d', allowInput: true }"
+                        :error="hasFieldError('finishingDate')"
+                        :error-messages="formValidationErrors['finishingDate']"
+                        @input="clearFieldError('finishingDate')"
+                        :class="{
+                          'field-error': hasFieldError('finishingDate'),
+                        }"
                       />
                     </div>
 
@@ -948,6 +1029,10 @@ function removePackage(index) {
                           placeholder="Add price In Euros"
                           type="number"
                           class="price-input"
+                          :error="hasFieldError('price')"
+                          :error-messages="formValidationErrors['price']"
+                          @input="clearFieldError('price')"
+                          :class="{ 'field-error': hasFieldError('price') }"
                         />
                         <span class="euro-symbol">€</span>
                       </div>
@@ -977,6 +1062,12 @@ function removePackage(index) {
                           type="number"
                           class="capacity-input"
                           style="max-width: 120px"
+                          :error="hasFieldError('minCapacity')"
+                          :error-messages="formValidationErrors['minCapacity']"
+                          @input="clearFieldError('minCapacity')"
+                          :class="{
+                            'field-error': hasFieldError('minCapacity'),
+                          }"
                         />
                         <VTextField
                           v-model="formData.maxCapacity"
@@ -984,6 +1075,12 @@ function removePackage(index) {
                           type="number"
                           class="capacity-input"
                           style="max-width: 120px"
+                          :error="hasFieldError('maxCapacity')"
+                          :error-messages="formValidationErrors['maxCapacity']"
+                          @input="clearFieldError('maxCapacity')"
+                          :class="{
+                            'field-error': hasFieldError('maxCapacity'),
+                          }"
                         />
                       </div>
                     </div>
@@ -1018,6 +1115,7 @@ function removePackage(index) {
                       <div
                         v-if="packages.length === 0"
                         class="empty-state-container"
+                        :class="{ 'field-error': hasFieldError('packages') }"
                       >
                         <VBtn
                           color="primary"
@@ -1039,6 +1137,13 @@ function removePackage(index) {
                         >
                           Add Package
                         </VBtn>
+                        <p
+                          v-if="hasFieldError('packages')"
+                          class="text-caption text-error mt-2 mb-0"
+                          style="font-size: 11px"
+                        >
+                          {{ formValidationErrors["packages"] }}
+                        </p>
                       </div>
 
                       <!-- Display Packages List -->
@@ -2470,6 +2575,22 @@ function removePackage(index) {
 .required-star {
   color: #ff4444;
   font-weight: bold;
+}
+
+/* Field error styling */
+.field-error {
+  border-color: #ff4444 !important;
+}
+
+.field-error .v-field__outline {
+  border-color: #ff4444 !important;
+}
+
+/* Error message styling */
+.v-messages__message {
+  color: #ff4444 !important;
+  font-size: 12px !important;
+  margin-top: 4px !important;
 }
 
 /* Date picker styles */
