@@ -294,59 +294,113 @@ const removeSocialProofLink = (index) => {
               <VRow>
                 <!-- Left column -->
                 <VCol cols="12" md="6">
-                  <AppTextField
-                    v-model="formData.fullName"
-                    label="Full Name *"
-                    placeholder="Enter your full name"
-                    :error="hasFieldError('fullName')"
-                    :error-messages="formValidationErrors['fullName']"
-                    @input="clearFieldError('fullName')"
-                    :class="{ 'field-error': hasFieldError('fullName') }"
-                  />
-                  <AppTextField
-                    v-model="formData.nationality"
-                    label="Nationality *"
-                    placeholder="Enter your nationality"
-                    class="mt-4"
-                    :error="hasFieldError('nationality')"
-                    :error-messages="formValidationErrors['nationality']"
-                    @input="clearFieldError('nationality')"
-                    :class="{ 'field-error': hasFieldError('nationality') }"
-                  />
-                  <AppTextField
-                    v-model="formData.address1"
-                    label="Address Line 1 *"
-                    placeholder="Enter address line 1"
-                    class="mt-4"
-                    :error="hasFieldError('address1')"
-                    :error-messages="formValidationErrors['address1']"
-                    @input="clearFieldError('address1')"
-                    :class="{ 'field-error': hasFieldError('address1') }"
-                  />
-                  <AppTextField
-                    v-model="formData.city"
-                    label="City *"
-                    placeholder="Enter your city"
-                    class="mt-4"
-                    :error="hasFieldError('city')"
-                    :error-messages="formValidationErrors['city']"
-                    @input="clearFieldError('city')"
-                    :class="{ 'field-error': hasFieldError('city') }"
-                  />
-                  <AppTextField
-                    v-model="formData.state"
-                    label="State/Province"
-                    placeholder="Enter state or province"
-                    class="mt-4"
-                  />
+                  <div class="mb-4">
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
+                    >
+                      Full Name <span class="required-star">*</span>
+                    </label>
+                    <AppTextField
+                      v-model="formData.fullName"
+                      placeholder="Enter your full name"
+                      :error="hasFieldError('fullName')"
+                      :error-messages="formValidationErrors['fullName']"
+                      @input="clearFieldError('fullName')"
+                      :class="{ 'field-error': hasFieldError('fullName') }"
+                    />
+                  </div>
+                  <div class="mb-4">
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
+                    >
+                      Nationality <span class="required-star">*</span>
+                    </label>
+                    <AppTextField
+                      v-model="formData.nationality"
+                      placeholder="Enter your nationality"
+                      :error="hasFieldError('nationality')"
+                      :error-messages="formValidationErrors['nationality']"
+                      @input="clearFieldError('nationality')"
+                      :class="{ 'field-error': hasFieldError('nationality') }"
+                    />
+                  </div>
+                  <div class="mb-4">
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
+                    >
+                      Address Line 1 <span class="required-star">*</span>
+                    </label>
+                    <AppTextField
+                      v-model="formData.address1"
+                      placeholder="Enter address line 1"
+                      :error="hasFieldError('address1')"
+                      :error-messages="formValidationErrors['address1']"
+                      @input="clearFieldError('address1')"
+                      :class="{ 'field-error': hasFieldError('address1') }"
+                    />
+                  </div>
+                  <div class="mb-4">
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
+                    >
+                      City <span class="required-star">*</span>
+                    </label>
+                    <AppTextField
+                      v-model="formData.city"
+                      placeholder="Enter your city"
+                      :error="hasFieldError('city')"
+                      :error-messages="formValidationErrors['city']"
+                      @input="clearFieldError('city')"
+                      :class="{ 'field-error': hasFieldError('city') }"
+                    />
+                  </div>
+                  <div class="mb-4">
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
+                    >
+                      State/Province
+                    </label>
+                    <AppTextField
+                      v-model="formData.state"
+                      placeholder="Enter state or province"
+                    />
+                  </div>
                 </VCol>
                 <!-- Right column -->
                 <VCol cols="12" md="6">
-                  <div class="date-picker-wrapper">
+                  <div class="mb-4">
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
+                    >
+                      Date of Birth <span class="required-star">*</span>
+                    </label>
                     <AppDateTimePicker
                       ref="dobPicker"
                       v-model="formData.dob"
-                      label="Date of Birth *"
                       placeholder="YYYY-MM-DD"
                       :config="{ dateFormat: 'Y-m-d', allowInput: true }"
                       :error="hasFieldError('dob')"
@@ -355,40 +409,82 @@ const removeSocialProofLink = (index) => {
                       :class="{ 'field-error': hasFieldError('dob') }"
                     />
                   </div>
-                  <AppSelect
-                    v-model="formData.languages"
-                    label="Languages Spoken *"
-                    placeholder="Select languages"
-                    :items="['English', 'French', 'German', 'Spanish', 'Other']"
-                    multiple
-                    class="mt-4"
-                    :error="hasFieldError('languages')"
-                    :error-messages="formValidationErrors['languages']"
-                    @input="clearFieldError('languages')"
-                    :class="{ 'field-error': hasFieldError('languages') }"
-                  />
-                  <AppTextField
-                    v-model="formData.address2"
-                    label="Address Line 2"
-                    placeholder="Enter address line 2"
-                    class="mt-4"
-                  />
-                  <AppTextField
-                    v-model="formData.postalCode"
-                    label="Postal Code"
-                    placeholder="Enter postal code"
-                    class="mt-4"
-                  />
-                  <AppTextField
-                    v-model="formData.country"
-                    label="Country *"
-                    placeholder="Enter your country"
-                    class="mt-4"
-                    :error="hasFieldError('country')"
-                    :error-messages="formValidationErrors['country']"
-                    @input="clearFieldError('country')"
-                    :class="{ 'field-error': hasFieldError('country') }"
-                  />
+                  <div class="mb-4">
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
+                    >
+                      Languages Spoken <span class="required-star">*</span>
+                    </label>
+                    <AppSelect
+                      v-model="formData.languages"
+                      placeholder="Select languages"
+                      :items="[
+                        'English',
+                        'French',
+                        'German',
+                        'Spanish',
+                        'Other',
+                      ]"
+                      multiple
+                      :error="hasFieldError('languages')"
+                      :error-messages="formValidationErrors['languages']"
+                      @input="clearFieldError('languages')"
+                      :class="{ 'field-error': hasFieldError('languages') }"
+                    />
+                  </div>
+                  <div class="mb-4">
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
+                    >
+                      Address Line 2
+                    </label>
+                    <AppTextField
+                      v-model="formData.address2"
+                      placeholder="Enter address line 2"
+                    />
+                  </div>
+                  <div class="mb-4">
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
+                    >
+                      Postal Code
+                    </label>
+                    <AppTextField
+                      v-model="formData.postalCode"
+                      placeholder="Enter postal code"
+                    />
+                  </div>
+                  <div class="mb-4">
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
+                    >
+                      Country <span class="required-star">*</span>
+                    </label>
+                    <AppTextField
+                      v-model="formData.country"
+                      placeholder="Enter your country"
+                      :error="hasFieldError('country')"
+                      :error-messages="formValidationErrors['country']"
+                      @input="clearFieldError('country')"
+                      :class="{ 'field-error': hasFieldError('country') }"
+                    />
+                  </div>
                 </VCol>
               </VRow>
             </VWindowItem>
@@ -399,9 +495,16 @@ const removeSocialProofLink = (index) => {
                 <VCol cols="12" md="6">
                   <!-- Explorer Passport Image -->
                   <div class="mb-6">
-                    <h6 class="text-h6 font-weight-medium mb-2">
-                      Explorer Passport Image *
-                    </h6>
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
+                    >
+                      Explorer Passport Image
+                      <span class="required-star">*</span>
+                    </label>
                     <p class="text-body-2 text-medium-emphasis mb-4">
                       High quality image, shown as your Explorer Elite passport
                       profile image
@@ -517,71 +620,102 @@ const removeSocialProofLink = (index) => {
                   </div>
 
                   <!-- Activity Specialization -->
-                  <AppSelect
-                    v-model="formData.activitySpecialization"
-                    label="Activity Specialization *"
-                    placeholder="Activities you can lead (e.g., hiking, diving)"
-                    :items="[
-                      'Hiking',
-                      'Diving',
-                      'Rock Climbing',
-                      'Skiing',
-                      'Cycling',
-                      'Kayaking',
-                      'Photography Tours',
-                      'Cultural Tours',
-                      'Wildlife Tours',
-                      'Other',
-                    ]"
-                    class="mb-4"
-                    :error="hasFieldError('activitySpecialization')"
-                    :error-messages="
-                      formValidationErrors['activitySpecialization']
-                    "
-                    @input="clearFieldError('activitySpecialization')"
-                    :class="{
-                      'field-error': hasFieldError('activitySpecialization'),
-                    }"
-                  />
+                  <div class="mb-4">
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
+                    >
+                      Activity Specialization
+                      <span class="required-star">*</span>
+                    </label>
+                    <AppSelect
+                      v-model="formData.activitySpecialization"
+                      placeholder="Activities you can lead (e.g., hiking, diving)"
+                      :items="[
+                        'Hiking',
+                        'Diving',
+                        'Rock Climbing',
+                        'Skiing',
+                        'Cycling',
+                        'Kayaking',
+                        'Photography Tours',
+                        'Cultural Tours',
+                        'Wildlife Tours',
+                        'Other',
+                      ]"
+                      :error="hasFieldError('activitySpecialization')"
+                      :error-messages="
+                        formValidationErrors['activitySpecialization']
+                      "
+                      @input="clearFieldError('activitySpecialization')"
+                      :class="{
+                        'field-error': hasFieldError('activitySpecialization'),
+                      }"
+                    />
+                  </div>
 
                   <!-- Years of Experience -->
-                  <AppSelect
-                    v-model="formData.yearsOfExperience"
-                    label="Years of Experience *"
-                    placeholder="Total years you've been guiding adventures"
-                    :items="[
-                      'Less than 1 year',
-                      '1-2 years',
-                      '3-5 years',
-                      '6-10 years',
-                      '11-15 years',
-                      '16-20 years',
-                      'More than 20 years',
-                    ]"
-                    class="mb-4"
-                    :error="hasFieldError('yearsOfExperience')"
-                    :error-messages="formValidationErrors['yearsOfExperience']"
-                    @input="clearFieldError('yearsOfExperience')"
-                    :class="{
-                      'field-error': hasFieldError('yearsOfExperience'),
-                    }"
-                  />
+                  <div class="mb-4">
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
+                    >
+                      Years of Experience <span class="required-star">*</span>
+                    </label>
+                    <AppSelect
+                      v-model="formData.yearsOfExperience"
+                      placeholder="Total years you've been guiding adventures"
+                      :items="[
+                        'Less than 1 year',
+                        '1-2 years',
+                        '3-5 years',
+                        '6-10 years',
+                        '11-15 years',
+                        '16-20 years',
+                        'More than 20 years',
+                      ]"
+                      :error="hasFieldError('yearsOfExperience')"
+                      :error-messages="
+                        formValidationErrors['yearsOfExperience']
+                      "
+                      @input="clearFieldError('yearsOfExperience')"
+                      :class="{
+                        'field-error': hasFieldError('yearsOfExperience'),
+                      }"
+                    />
+                  </div>
 
                   <!-- Emergency Contact Name -->
-                  <AppTextField
-                    v-model="formData.emergencyContactName"
-                    label="Emergency Contact Name *"
-                    placeholder="In case we need to contact someone urgently"
-                    class="mb-4"
-                    :error="hasFieldError('emergencyContactName')"
-                    :error-messages="
-                      formValidationErrors['emergencyContactName']
-                    "
-                    @input="clearFieldError('emergencyContactName')"
-                    :class="{
-                      'field-error': hasFieldError('emergencyContactName'),
-                    }"
-                  />
+                  <div class="mb-4">
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
+                    >
+                      Emergency Contact Name
+                      <span class="required-star">*</span>
+                    </label>
+                    <AppTextField
+                      v-model="formData.emergencyContactName"
+                      placeholder="In case we need to contact someone urgently"
+                      :error="hasFieldError('emergencyContactName')"
+                      :error-messages="
+                        formValidationErrors['emergencyContactName']
+                      "
+                      @input="clearFieldError('emergencyContactName')"
+                      :class="{
+                        'field-error': hasFieldError('emergencyContactName'),
+                      }"
+                    />
+                  </div>
 
                   <!-- Listing Preference -->
                   <div class="mb-4">
@@ -591,9 +725,10 @@ const removeSocialProofLink = (index) => {
                         font-size: 16px !important;
                         font-weight: 400 !important;
                       "
-                      >Would you like to get listed with adventures in Explorer
-                      Elite? *</label
                     >
+                      Would you like to get listed with adventures in Explorer
+                      Elite? <span class="required-star">*</span>
+                    </label>
                     <VRadioGroup
                       v-model="formData.wantToBeListed"
                       class="mt-2"
@@ -625,9 +760,15 @@ const removeSocialProofLink = (index) => {
                 <VCol cols="12" md="6">
                   <!-- Avatar Image -->
                   <div class="mb-6">
-                    <h6 class="text-h6 font-weight-medium mb-2">
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
+                    >
                       Avatar Image
-                    </h6>
+                    </label>
                     <p class="text-body-2 text-medium-emphasis mb-4">
                       Shown as your platform profile image
                     </p>
@@ -735,71 +876,111 @@ const removeSocialProofLink = (index) => {
                   </div>
 
                   <!-- Short Bio -->
-                  <AppTextField
-                    v-model="formData.shortBio"
-                    label="Short Bio *"
-                    placeholder="Tell us who you are and what you do in a few sentences"
-                    type="textarea"
-                    rows="5"
-                    class="mb-4"
-                    :error="hasFieldError('shortBio')"
-                    :error-messages="formValidationErrors['shortBio']"
-                    @input="clearFieldError('shortBio')"
-                    :class="{ 'field-error': hasFieldError('shortBio') }"
-                  />
+                  <div class="mb-4">
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
+                    >
+                      Short Bio <span class="required-star">*</span>
+                    </label>
+                    <AppTextField
+                      v-model="formData.shortBio"
+                      placeholder="Tell us who you are and what you do in a few sentences"
+                      type="textarea"
+                      rows="5"
+                      :error="hasFieldError('shortBio')"
+                      :error-messages="formValidationErrors['shortBio']"
+                      @input="clearFieldError('shortBio')"
+                      :class="{ 'field-error': hasFieldError('shortBio') }"
+                    />
+                  </div>
 
                   <!-- Certifications -->
-                  <AppTextField
-                    v-model="formData.certifications"
-                    label="Certifications/Licenses"
-                    placeholder="Upload relevant guiding or safety certifications (first aid, alpine guide)"
-                    type="file"
-                    accept=".pdf,.doc,.docx"
-                    class="mb-4"
-                  />
+                  <div class="mb-4">
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
+                    >
+                      Certifications/Licenses
+                    </label>
+                    <AppTextField
+                      v-model="formData.certifications"
+                      placeholder="Upload relevant guiding or safety certifications (first aid, alpine guide)"
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                    />
+                  </div>
 
                   <!-- Country/Region of Operation -->
-                  <AppSelect
-                    v-model="formData.countryOfOperation"
-                    label="Country/Region of Operation *"
-                    placeholder="Areas you usually operate in (select the main areas of activity)"
-                    :items="[
-                      'Germany',
-                      'Austria',
-                      'Switzerland',
-                      'Italy',
-                      'France',
-                      'Spain',
-                      'United States',
-                      'Canada',
-                      'Australia',
-                      'New Zealand',
-                      'Other',
-                    ]"
-                    class="mb-4"
-                    :error="hasFieldError('countryOfOperation')"
-                    :error-messages="formValidationErrors['countryOfOperation']"
-                    @input="clearFieldError('countryOfOperation')"
-                    :class="{
-                      'field-error': hasFieldError('countryOfOperation'),
-                    }"
-                  />
+                  <div class="mb-4">
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
+                    >
+                      Country/Region of Operation
+                      <span class="required-star">*</span>
+                    </label>
+                    <AppSelect
+                      v-model="formData.countryOfOperation"
+                      placeholder="Areas you usually operate in (select the main areas of activity)"
+                      :items="[
+                        'Germany',
+                        'Austria',
+                        'Switzerland',
+                        'Italy',
+                        'France',
+                        'Spain',
+                        'United States',
+                        'Canada',
+                        'Australia',
+                        'New Zealand',
+                        'Other',
+                      ]"
+                      :error="hasFieldError('countryOfOperation')"
+                      :error-messages="
+                        formValidationErrors['countryOfOperation']
+                      "
+                      @input="clearFieldError('countryOfOperation')"
+                      :class="{
+                        'field-error': hasFieldError('countryOfOperation'),
+                      }"
+                    />
+                  </div>
 
                   <!-- Emergency Contact Phone -->
-                  <AppTextField
-                    v-model="formData.emergencyContactPhone"
-                    label="Emergency Contact Phone *"
-                    placeholder="+49 1236 456 789"
-                    class="mb-4"
-                    :error="hasFieldError('emergencyContactPhone')"
-                    :error-messages="
-                      formValidationErrors['emergencyContactPhone']
-                    "
-                    @input="clearFieldError('emergencyContactPhone')"
-                    :class="{
-                      'field-error': hasFieldError('emergencyContactPhone'),
-                    }"
-                  />
+                  <div class="mb-4">
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
+                    >
+                      Emergency Contact Phone
+                      <span class="required-star">*</span>
+                    </label>
+                    <AppTextField
+                      v-model="formData.emergencyContactPhone"
+                      placeholder="+49 1236 456 789"
+                      :error="hasFieldError('emergencyContactPhone')"
+                      :error-messages="
+                        formValidationErrors['emergencyContactPhone']
+                      "
+                      @input="clearFieldError('emergencyContactPhone')"
+                      :class="{
+                        'field-error': hasFieldError('emergencyContactPhone'),
+                      }"
+                    />
+                  </div>
                 </VCol>
               </VRow>
             </VWindowItem>
@@ -1301,5 +1482,55 @@ const removeSocialProofLink = (index) => {
 }
 .next-btn-dark:hover {
   background: #222 !important;
+}
+
+/* Required star styling */
+.required-star {
+  color: #ff4444 !important;
+  font-weight: bold;
+  margin-left: 4px;
+  display: inline-block;
+}
+
+/* Field error styling */
+.field-error {
+  border-color: #ff4444 !important;
+}
+
+.field-error .v-field__outline {
+  border-color: #ff4444 !important;
+}
+
+/* Error message styling */
+.v-messages__message {
+  color: #ff4444 !important;
+  font-size: 12px !important;
+  margin-top: 4px !important;
+}
+
+/* Ensure fields remain simple without hover effects */
+.v-field {
+  transition: none !important;
+}
+
+.v-field__outline {
+  transition: none !important;
+}
+
+.v-field__field {
+  transition: none !important;
+}
+
+.v-field--focused .v-field__outline {
+  border-color: #ec8d22 !important;
+}
+
+/* Remove any hover effects on labels */
+.v-label {
+  transition: none !important;
+}
+
+.v-field__label {
+  transition: none !important;
 }
 </style>

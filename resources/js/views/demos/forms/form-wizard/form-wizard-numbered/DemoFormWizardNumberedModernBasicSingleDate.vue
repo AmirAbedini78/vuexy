@@ -943,11 +943,19 @@ function removePackage(index) {
                   <!-- Left column -->
                   <VCol cols="12" md="6">
                     <!-- Starting Date -->
-                    <div class="date-picker-wrapper mb-4">
+                    <div class="mb-4">
+                      <label
+                        class="v-label text-body-2 mb-3 d-block"
+                        style="
+                          font-size: 16px !important;
+                          font-weight: 400 !important;
+                        "
+                      >
+                        Starting Date <span class="required-star">*</span>
+                      </label>
                       <AppDateTimePicker
                         ref="startingDatePicker"
                         v-model="formData.startingDate"
-                        label="Starting Date *"
                         placeholder="Select your listing starting date"
                         :config="{ dateFormat: 'Y-m-d', allowInput: true }"
                         :error="hasFieldError('startingDate')"
@@ -960,11 +968,19 @@ function removePackage(index) {
                     </div>
 
                     <!-- Finishing Date -->
-                    <div class="date-picker-wrapper mb-4">
+                    <div class="mb-4">
+                      <label
+                        class="v-label text-body-2 mb-3 d-block"
+                        style="
+                          font-size: 16px !important;
+                          font-weight: 400 !important;
+                        "
+                      >
+                        Finishing Date <span class="required-star">*</span>
+                      </label>
                       <AppDateTimePicker
                         ref="finishingDatePicker"
                         v-model="formData.finishingDate"
-                        label="Finishing Date *"
                         placeholder="Select your listing finishing date"
                         :config="{ dateFormat: 'Y-m-d', allowInput: true }"
                         :error="hasFieldError('finishingDate')"
@@ -977,12 +993,21 @@ function removePackage(index) {
                     </div>
 
                     <!-- Listing Title -->
-                    <AppTextField
-                      v-model="formData.listingTitle"
-                      label="Listing Title"
-                      placeholder="The main title of Your listing"
-                      class="mb-4"
-                    />
+                    <div class="mb-4">
+                      <label
+                        class="v-label text-body-2 mb-3 d-block"
+                        style="
+                          font-size: 16px !important;
+                          font-weight: 400 !important;
+                        "
+                      >
+                        Listing Title
+                      </label>
+                      <AppTextField
+                        v-model="formData.listingTitle"
+                        placeholder="The main title of Your listing"
+                      />
+                    </div>
 
                     <!-- Listing Description -->
                     <div class="mb-4">
@@ -1086,12 +1111,21 @@ function removePackage(index) {
                     </div>
 
                     <!-- Subtitle -->
-                    <VTextField
-                      v-model="formData.subtitle"
-                      label="Subtitle"
-                      placeholder="A tagline for your adventure"
-                      class="mb-4"
-                    />
+                    <div class="mb-4">
+                      <label
+                        class="v-label text-body-2 mb-3 d-block"
+                        style="
+                          font-size: 16px !important;
+                          font-weight: 400 !important;
+                        "
+                      >
+                        Subtitle
+                      </label>
+                      <AppTextField
+                        v-model="formData.subtitle"
+                        placeholder="A tagline for your adventure"
+                      />
+                    </div>
 
                     <!-- Listing Packages -->
                     <div class="mb-6">
@@ -1367,50 +1401,68 @@ function removePackage(index) {
                   <!-- Top Row -->
                   <VCol cols="12" md="6">
                     <!-- Activities Included -->
-                    <AppSelect
-                      v-model="formData.activitiesIncluded"
-                      label="Activities Included*"
-                      placeholder="Select the activities that are included in your listing"
-                      :items="[
-                        'Hiking',
-                        'Diving',
-                        'Rock Climbing',
-                        'Skiing',
-                        'Cycling',
-                        'Kayaking',
-                        'Photography Tours',
-                        'Cultural Tours',
-                        'Wildlife Tours',
-                        'Cooking Classes',
-                        'Wine Tasting',
-                        'Historical Tours',
-                        'Adventure Sports',
-                        'Other',
-                      ]"
-                      class="mb-4"
-                    />
+                    <div class="mb-4">
+                      <label
+                        class="v-label text-body-2 mb-3 d-block"
+                        style="
+                          font-size: 16px !important;
+                          font-weight: 400 !important;
+                        "
+                      >
+                        Activities Included <span class="required-star">*</span>
+                      </label>
+                      <AppSelect
+                        v-model="formData.activitiesIncluded"
+                        placeholder="Select the activities that are included in your listing"
+                        :items="[
+                          'Hiking',
+                          'Diving',
+                          'Rock Climbing',
+                          'Skiing',
+                          'Cycling',
+                          'Kayaking',
+                          'Photography Tours',
+                          'Cultural Tours',
+                          'Wildlife Tours',
+                          'Cooking Classes',
+                          'Wine Tasting',
+                          'Historical Tours',
+                          'Adventure Sports',
+                          'Other',
+                        ]"
+                      />
+                    </div>
                   </VCol>
                   <VCol cols="12" md="6">
                     <!-- Group Language -->
-                    <AppSelect
-                      v-model="formData.groupLanguage"
-                      label="Group Language"
-                      placeholder="Language(s) the adventure will be conducted in"
-                      :items="[
-                        'English',
-                        'German',
-                        'French',
-                        'Spanish',
-                        'Italian',
-                        'Portuguese',
-                        'Russian',
-                        'Chinese',
-                        'Japanese',
-                        'Arabic',
-                        'Other',
-                      ]"
-                      class="mb-4"
-                    />
+                    <div class="mb-4">
+                      <label
+                        class="v-label text-body-2 mb-3 d-block"
+                        style="
+                          font-size: 16px !important;
+                          font-weight: 400 !important;
+                        "
+                      >
+                        Group Language
+                      </label>
+                      <AppSelect
+                        v-model="formData.groupLanguage"
+                        placeholder="Language(s) the adventure will be conducted in"
+                        :items="[
+                          'English',
+                          'German',
+                          'French',
+                          'Spanish',
+                          'Italian',
+                          'Portuguese',
+                          'Russian',
+                          'Chinese',
+                          'Japanese',
+                          'Arabic',
+                          'Other',
+                        ]"
+                      />
+                    </div>
                   </VCol>
 
                   <!-- Second Row -->
@@ -1467,21 +1519,30 @@ function removePackage(index) {
                   </VCol>
                   <VCol cols="12" md="6">
                     <!-- Locations -->
-                    <AppSelect
-                      v-model="formData.locations"
-                      label="Locations*"
-                      placeholder="where the adventure takes place (countries/continent)"
-                      :items="[
-                        'Europe',
-                        'North America',
-                        'South America',
-                        'Asia',
-                        'Africa',
-                        'Australia',
-                        'Antarctica',
-                      ]"
-                      class="mb-4"
-                    />
+                    <div class="mb-4">
+                      <label
+                        class="v-label text-body-2 mb-3 d-block"
+                        style="
+                          font-size: 16px !important;
+                          font-weight: 400 !important;
+                        "
+                      >
+                        Locations <span class="required-star">*</span>
+                      </label>
+                      <AppSelect
+                        v-model="formData.locations"
+                        placeholder="where the adventure takes place (countries/continent)"
+                        :items="[
+                          'Europe',
+                          'North America',
+                          'South America',
+                          'Asia',
+                          'Africa',
+                          'Australia',
+                          'Antarctica',
+                        ]"
+                      />
+                    </div>
                   </VCol>
 
                   <!-- Third Row -->
@@ -1829,9 +1890,16 @@ function removePackage(index) {
                   <VCol cols="12" md="6">
                     <!-- Itinerary/Accommodation Day by Day -->
                     <div class="mb-6">
-                      <h3 class="section-title">
-                        Itinerary/Accommodation Day by Day*
-                      </h3>
+                      <label
+                        class="v-label text-body-2 mb-3 d-block"
+                        style="
+                          font-size: 16px !important;
+                          font-weight: 400 !important;
+                        "
+                      >
+                        Itinerary/Accommodation Day by Day
+                        <span class="required-star">*</span>
+                      </label>
                       <p class="section-description">
                         Add your Itinerary/Accommodations and all related
                         details here
@@ -2053,7 +2121,15 @@ function removePackage(index) {
                   <VCol cols="12" md="6">
                     <!-- Special Addons -->
                     <div class="mb-6">
-                      <h3 class="section-title">Special Addons</h3>
+                      <label
+                        class="v-label text-body-2 mb-3 d-block"
+                        style="
+                          font-size: 16px !important;
+                          font-weight: 400 !important;
+                        "
+                      >
+                        Special Addons
+                      </label>
                       <p class="section-description">
                         Add your Special addons and all related details here
                       </p>
@@ -2226,9 +2302,16 @@ function removePackage(index) {
                 <VRow>
                   <VCol cols="12">
                     <div class="mb-6">
-                      <h3 class="section-title">
-                        Provider's Personal Policies*
-                      </h3>
+                      <label
+                        class="v-label text-body-2 mb-3 d-block"
+                        style="
+                          font-size: 16px !important;
+                          font-weight: 400 !important;
+                        "
+                      >
+                        Provider's Personal Policies
+                        <span class="required-star">*</span>
+                      </label>
                       <p class="section-description">
                         How do you want to add policies?
                       </p>
@@ -2573,8 +2656,10 @@ function removePackage(index) {
 
 /* Required star styling */
 .required-star {
-  color: #ff4444;
+  color: #ff4444 !important;
   font-weight: bold;
+  margin-left: 4px;
+  display: inline-block;
 }
 
 /* Field error styling */
@@ -2593,10 +2678,87 @@ function removePackage(index) {
   margin-top: 4px !important;
 }
 
-/* Date picker styles */
+/* Ensure fields remain simple without hover effects */
+.v-field {
+  transition: none !important;
+}
+
+.v-field__outline {
+  transition: none !important;
+}
+
+.v-field__field {
+  transition: none !important;
+}
+
+.v-field--focused .v-field__outline {
+  border-color: #ec8d22 !important;
+}
+
+/* Remove any hover effects on labels */
+.v-label {
+  transition: none !important;
+}
+
+.v-field__label {
+  transition: none !important;
+}
+
+/* Date picker wrapper with star positioning */
 .date-picker-wrapper {
   position: relative;
 }
+
+.date-picker-wrapper .required-star {
+  position: absolute;
+  top: 0;
+  right: -20px;
+  z-index: 10;
+}
+
+/* Field error styling */
+.field-error {
+  border-color: #ff4444 !important;
+}
+
+.field-error .v-field__outline {
+  border-color: #ff4444 !important;
+}
+
+/* Error message styling */
+.v-messages__message {
+  color: #ff4444 !important;
+  font-size: 12px !important;
+  margin-top: 4px !important;
+}
+
+/* Ensure fields remain simple without hover effects */
+.v-field {
+  transition: none !important;
+}
+
+.v-field__outline {
+  transition: none !important;
+}
+
+.v-field__field {
+  transition: none !important;
+}
+
+.v-field--focused .v-field__outline {
+  border-color: #ec8d22 !important;
+}
+
+/* Remove any hover effects on labels */
+.v-label {
+  transition: none !important;
+}
+
+.v-field__label {
+  transition: none !important;
+}
+
+/* Date picker styles */
 .date-picker-wrapper .calendar-icon-png {
   position: absolute;
   top: 50%;

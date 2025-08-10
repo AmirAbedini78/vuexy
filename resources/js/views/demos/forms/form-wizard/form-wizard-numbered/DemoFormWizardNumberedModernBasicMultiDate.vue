@@ -22,6 +22,7 @@ const loading = ref(false);
 const showItineraryDialog = ref(false);
 const showSpecialAddonsDialog = ref(false);
 const showPeriodsDialog = ref(false);
+const formValidationErrors = ref({});
 
 const formData = ref({
   // Step 1 fields
@@ -59,6 +60,50 @@ const editingAddonIndex = ref(-1);
 const editingItineraryIndex = ref(-1);
 const editingPeriodIndex = ref(-1);
 const listingId = ref(null); // For ItineraryAccommodationDialog
+
+// Required fields for Step 1
+const requiredFieldsStep1 = [
+  "listingTitle",
+  "listingDescription",
+  "activitiesIncluded",
+  "locations",
+];
+
+const validateStep1 = () => {
+  const errors = {};
+  requiredFieldsStep1.forEach((field) => {
+    const value = formData.value[field];
+    if (!value || (typeof value === "string" && value.trim() === "")) {
+      errors[field] = "This field is required";
+    }
+  });
+  // Validate periods (Listing departures)
+  if (!periods.value || periods.value.length === 0) {
+    errors["periods"] = "At least one departure is required";
+  }
+  formValidationErrors.value = errors;
+  return Object.keys(errors).length === 0;
+};
+
+const hasFieldError = (fieldName) => !!formValidationErrors.value[fieldName];
+const clearFieldError = (fieldName) => {
+  if (formValidationErrors.value[fieldName])
+    delete formValidationErrors.value[fieldName];
+};
+
+const goToNextStep = () => {
+  if (currentStep.value === 0) {
+    if (validateStep1()) {
+      currentStep.value++;
+    } else {
+      const firstError = document.querySelector(".field-error");
+      if (firstError)
+        firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  } else {
+    currentStep.value++;
+  }
+};
 
 // Add new maps and routes field
 const addMapsAndRoutes = () => {
@@ -1690,7 +1735,7 @@ const onSubmit = async () => {
             >
               {{ loading ? "Submitting..." : "Submit" }}
             </VBtn>
-            <VBtn v-else class="next-btn-dark" @click="currentStep++">
+            <VBtn v-else class="next-btn-dark" @click="goToNextStep">
               Next
               <VIcon icon="tabler-arrow-right" end class="flip-in-rtl" />
             </VBtn>

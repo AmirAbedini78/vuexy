@@ -279,179 +279,255 @@ const removeSocialMediaLink = (index) => {
                 <!-- Left column -->
                 <VCol cols="12" md="6">
                   <!-- Company Name -->
-                  <AppTextField
-                    v-model="formData.companyName"
-                    label="Company Name *"
-                    placeholder="Legal name of your company"
-                    class="mb-4"
-                    :error="hasFieldError('companyName')"
-                    :error-messages="formValidationErrors['companyName']"
-                    @input="clearFieldError('companyName')"
-                    :class="{ 'field-error': hasFieldError('companyName') }"
-                  />
+                  <div class="mb-4">
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
+                    >
+                      Company Name <span class="required-star">*</span>
+                    </label>
+                    <AppTextField
+                      v-model="formData.companyName"
+                      placeholder="Enter your company name"
+                      :error="hasFieldError('companyName')"
+                      :error-messages="formValidationErrors['companyName']"
+                      @input="clearFieldError('companyName')"
+                      :class="{ 'field-error': hasFieldError('companyName') }"
+                    />
+                  </div>
 
                   <!-- VAT ID -->
-                  <AppTextField
-                    v-model="formData.vatId"
-                    label="VAT ID"
-                    placeholder="Provide your VAT number for invoicing"
-                    class="mb-6"
-                  />
+                  <div class="mb-4">
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
+                    >
+                      VAT ID
+                    </label>
+                    <AppTextField
+                      v-model="formData.vatId"
+                      placeholder="Enter your VAT ID"
+                    />
+                  </div>
 
                   <!-- Company Address Section -->
                   <div class="mb-4">
-                    <h6 class="text-h6 font-weight-medium mb-2">
-                      Company Address *
-                    </h6>
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
+                    >
+                      Company Address <span class="required-star">*</span>
+                    </label>
                     <p class="text-body-2 text-medium-emphasis mb-4">
                       Provide your company address for invoicing
                     </p>
                   </div>
 
                   <!-- Address Line 1 -->
-                  <AppTextField
-                    v-model="formData.address1"
-                    label="Address Line 1 *"
-                    placeholder="Address Line 1"
-                    class="mb-4"
-                    :error="hasFieldError('address1')"
-                    :error-messages="formValidationErrors['address1']"
-                    @input="clearFieldError('address1')"
-                    :class="{ 'field-error': hasFieldError('address1') }"
-                  />
+                  <div class="mb-4">
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
+                    >
+                      Address Line 1 <span class="required-star">*</span>
+                    </label>
+                    <AppTextField
+                      v-model="formData.address1"
+                      placeholder="Address Line 1"
+                      :error="hasFieldError('address1')"
+                      :error-messages="formValidationErrors['address1']"
+                      @input="clearFieldError('address1')"
+                      :class="{ 'field-error': hasFieldError('address1') }"
+                    />
+                  </div>
 
                   <!-- City -->
-                  <AppTextField
-                    v-model="formData.city"
-                    label="City"
-                    placeholder="Munich"
-                    class="mb-4"
-                  />
+                  <div class="mb-4">
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
+                    >
+                      City
+                    </label>
+                    <AppTextField
+                      v-model="formData.city"
+                      placeholder="Munich"
+                    />
+                  </div>
 
                   <!-- State / Province -->
-                  <AppTextField
-                    v-model="formData.state"
-                    label="State / Province"
-                    placeholder="Bavaria"
-                    class="mb-4"
-                  />
+                  <div class="mb-4">
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
+                    >
+                      State / Province
+                    </label>
+                    <AppTextField
+                      v-model="formData.state"
+                      placeholder="Bavaria"
+                    />
+                  </div>
 
                   <!-- Contact Person -->
-                  <AppTextField
-                    v-model="formData.contactPerson"
-                    label="Contact Person"
-                    placeholder="Let us know who we can get in touch with"
-                    class="mb-4"
-                  />
+                  <div class="mb-4">
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
+                    >
+                      Contact Person
+                    </label>
+                    <AppTextField
+                      v-model="formData.contactPerson"
+                      placeholder="Let us know who we can get in touch with"
+                    />
+                  </div>
                 </VCol>
                 <!-- Right column -->
                 <VCol cols="12" md="6">
-                  <!-- Country of Registration (outside address section) -->
-                  <AppSelect
-                    v-model="formData.countryOfRegistration"
-                    label="Country of Registration *"
-                    placeholder="Where your company is officially registered"
-                    :items="[
-                      'Germany',
-                      'Austria',
-                      'Switzerland',
-                      'Italy',
-                      'France',
-                      'Spain',
-                      'United States',
-                      'Canada',
-                      'Australia',
-                      'New Zealand',
-                      'Other',
-                    ]"
-                    class="mb-6"
-                    :error="hasFieldError('countryOfRegistration')"
-                    :error-messages="
-                      formValidationErrors['countryOfRegistration']
-                    "
-                    @input="clearFieldError('countryOfRegistration')"
-                    :class="{
-                      'field-error': hasFieldError('countryOfRegistration'),
-                    }"
-                  />
-                  <AppTextField
-                    v-model="formData.postalCode"
-                    placeholder="231465"
-                    class="mb-3"
-                    style="visibility: hidden"
-                  />
-                  <AppTextField
-                    v-model="formData.postalCode"
-                    placeholder="231465"
-                    class="mb-3"
-                    style="visibility: hidden"
-                  />
-                  <AppTextField
-                    v-model="formData.postalCode"
-                    placeholder="231465"
-                    class="mb-2"
-                    style="visibility: hidden"
-                  />
+                  <!-- Country of Registration -->
+                  <div class="mb-4">
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
+                    >
+                      Country of Registration
+                      <span class="required-star">*</span>
+                    </label>
+                    <AppSelect
+                      v-model="formData.countryOfRegistration"
+                      placeholder="Where your company is officially registered"
+                      :items="[
+                        'Germany',
+                        'Austria',
+                        'Switzerland',
+                        'Italy',
+                        'France',
+                        'Spain',
+                        'United States',
+                        'Canada',
+                        'Australia',
+                        'New Zealand',
+                        'Other',
+                      ]"
+                      :error="hasFieldError('countryOfRegistration')"
+                      :error-messages="
+                        formValidationErrors['countryOfRegistration']
+                      "
+                      @input="clearFieldError('countryOfRegistration')"
+                      :class="{
+                        'field-error': hasFieldError('countryOfRegistration'),
+                      }"
+                    />
+                  </div>
+
                   <!-- Address Line 2 -->
-                  <AppTextField
-                    v-model="formData.address2"
-                    label="Address Line 2 (optional)"
-                    placeholder="Address Line 2"
-                    class="mb-4"
-                  />
+                  <div class="mb-4">
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
+                    >
+                      Address Line 2 (optional)
+                    </label>
+                    <AppTextField
+                      v-model="formData.address2"
+                      placeholder="Address Line 2"
+                    />
+                  </div>
 
                   <!-- Postal Code -->
-                  <AppTextField
-                    v-model="formData.postalCode"
-                    label="Postal Code"
-                    placeholder="231465"
-                    class="mb-4"
-                  />
+                  <div class="mb-4">
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
+                    >
+                      Postal Code
+                    </label>
+                    <AppTextField
+                      v-model="formData.postalCode"
+                      placeholder="231465"
+                    />
+                  </div>
 
                   <!-- Country -->
-                  <AppSelect
-                    v-model="formData.country"
-                    label="Country *"
-                    placeholder="Select your country"
-                    :items="[
-                      'Germany',
-                      'Austria',
-                      'Switzerland',
-                      'Italy',
-                      'France',
-                      'Spain',
-                      'United States',
-                      'Canada',
-                      'Australia',
-                      'New Zealand',
-                      'Other',
-                    ]"
-                    class="mb-4"
-                    :error="hasFieldError('country')"
-                    :error-messages="formValidationErrors['country']"
-                    @input="clearFieldError('country')"
-                    :class="{ 'field-error': hasFieldError('country') }"
-                  />
+                  <div class="mb-4">
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
+                    >
+                      Country <span class="required-star">*</span>
+                    </label>
+                    <AppTextField
+                      v-model="formData.country"
+                      placeholder="Enter your country"
+                      :error="hasFieldError('country')"
+                      :error-messages="formValidationErrors['country']"
+                      @input="clearFieldError('country')"
+                      :class="{ 'field-error': hasFieldError('country') }"
+                    />
+                  </div>
 
                   <!-- Business Type -->
-                  <AppSelect
-                    v-model="formData.businessType"
-                    label="Business Type *"
-                    placeholder="Select your business type"
-                    :items="[
-                      'Sole Proprietorship',
-                      'Partnership',
-                      'Limited Liability Company (LLC)',
-                      'Corporation',
-                      'Non-Profit Organization',
-                      'Other',
-                    ]"
-                    class="mb-4"
-                    :error="hasFieldError('businessType')"
-                    :error-messages="formValidationErrors['businessType']"
-                    @input="clearFieldError('businessType')"
-                    :class="{ 'field-error': hasFieldError('businessType') }"
-                  />
+                  <div class="mb-4">
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
+                    >
+                      Business Type <span class="required-star">*</span>
+                    </label>
+                    <AppSelect
+                      v-model="formData.businessType"
+                      placeholder="Select your business type"
+                      :items="[
+                        'Sole Proprietorship',
+                        'Partnership',
+                        'Limited Liability Company (LLC)',
+                        'Corporation',
+                        'Non-Profit Organization',
+                        'Other',
+                      ]"
+                      :error="hasFieldError('businessType')"
+                      :error-messages="formValidationErrors['businessType']"
+                      @input="clearFieldError('businessType')"
+                      :class="{ 'field-error': hasFieldError('businessType') }"
+                    />
+                  </div>
                 </VCol>
               </VRow>
             </VWindowItem>
@@ -462,9 +538,15 @@ const removeSocialMediaLink = (index) => {
                 <VCol cols="12" md="6">
                   <!-- Company Logo -->
                   <div class="mb-6">
-                    <h6 class="text-h6 font-weight-medium mb-2">
-                      Company Logo *
-                    </h6>
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
+                    >
+                      Company Logo <span class="required-star">*</span>
+                    </label>
                     <p class="text-body-2 text-medium-emphasis mb-4">
                       High quality image, shown as your company logo
                     </p>
@@ -576,32 +658,42 @@ const removeSocialMediaLink = (index) => {
                   </div>
 
                   <!-- Activity Specialization -->
-                  <AppSelect
-                    v-model="formData.activitySpecialization"
-                    label="Activity Specialization *"
-                    placeholder="Activities your company can lead (e.g., hiking, diving)"
-                    :items="[
-                      'Hiking',
-                      'Diving',
-                      'Rock Climbing',
-                      'Skiing',
-                      'Cycling',
-                      'Kayaking',
-                      'Photography Tours',
-                      'Cultural Tours',
-                      'Wildlife Tours',
-                      'Other',
-                    ]"
-                    class="mb-4"
-                    :error="hasFieldError('activitySpecialization')"
-                    :error-messages="
-                      formValidationErrors['activitySpecialization']
-                    "
-                    @input="clearFieldError('activitySpecialization')"
-                    :class="{
-                      'field-error': hasFieldError('activitySpecialization'),
-                    }"
-                  />
+                  <div class="mb-4">
+                    <label
+                      class="v-label text-body-2 mb-3 d-block"
+                      style="
+                        font-size: 16px !important;
+                        font-weight: 400 !important;
+                      "
+                    >
+                      Activity Specialization
+                      <span class="required-star">*</span>
+                    </label>
+                    <AppSelect
+                      v-model="formData.activitySpecialization"
+                      placeholder="Activities your company can lead (e.g., hiking, diving)"
+                      :items="[
+                        'Hiking',
+                        'Diving',
+                        'Rock Climbing',
+                        'Skiing',
+                        'Cycling',
+                        'Kayaking',
+                        'Photography Tours',
+                        'Cultural Tours',
+                        'Wildlife Tours',
+                        'Other',
+                      ]"
+                      :error="hasFieldError('activitySpecialization')"
+                      :error-messages="
+                        formValidationErrors['activitySpecialization']
+                      "
+                      @input="clearFieldError('activitySpecialization')"
+                      :class="{
+                        'field-error': hasFieldError('activitySpecialization'),
+                      }"
+                    />
+                  </div>
 
                   <!-- Listing Preference -->
                   <div class="mb-4">
@@ -611,9 +703,10 @@ const removeSocialMediaLink = (index) => {
                         font-size: 16px !important;
                         font-weight: 400 !important;
                       "
-                      >Would you like to get listed with adventures in Explorer
-                      Elite? *</label
                     >
+                      Would you like to get listed with adventures in Explorer
+                      Elite? <span class="required-star">*</span>
+                    </label>
                     <VRadioGroup
                       v-model="formData.wantToBeListed"
                       class="mt-2"
@@ -950,6 +1043,29 @@ const removeSocialMediaLink = (index) => {
   padding-top: 0 !important;
 }
 
+.next-btn-dark {
+  background: #111 !important;
+  color: #fff !important;
+  font-size: 12px !important;
+  min-width: 92px;
+  min-height: 38px;
+  border-radius: 8px;
+  font-weight: 700;
+  box-shadow: 0 2px 8px 0 rgba(44, 44, 44, 0.08);
+  transition: background 0.2s;
+}
+.next-btn-dark:hover {
+  background: #222 !important;
+}
+
+/* Required star styling */
+.required-star {
+  color: #ff4444 !important;
+  font-weight: bold;
+  margin-left: 4px;
+  display: inline-block;
+}
+
 /* Field error styling */
 .field-error {
   border-color: #ff4444 !important;
@@ -964,6 +1080,32 @@ const removeSocialMediaLink = (index) => {
   color: #ff4444 !important;
   font-size: 12px !important;
   margin-top: 4px !important;
+}
+
+/* Ensure fields remain simple without hover effects */
+.v-field {
+  transition: none !important;
+}
+
+.v-field__outline {
+  transition: none !important;
+}
+
+.v-field__field {
+  transition: none !important;
+}
+
+.v-field--focused .v-field__outline {
+  border-color: #ec8d22 !important;
+}
+
+/* Remove any hover effects on labels */
+.v-label {
+  transition: none !important;
+}
+
+.v-field__label {
+  transition: none !important;
 }
 
 .stepper-container {
@@ -1075,20 +1217,5 @@ const removeSocialMediaLink = (index) => {
 .v-field__input::placeholder {
   font-size: 18px !important;
   color: #b0b0b0 !important;
-}
-
-.next-btn-dark {
-  background: #111 !important;
-  color: #fff !important;
-  font-size: 12px !important;
-  min-width: 92px;
-  min-height: 38px;
-  border-radius: 8px;
-  font-weight: 700;
-  box-shadow: 0 2px 8px 0 rgba(44, 44, 44, 0.08);
-  transition: background 0.2s;
-}
-.next-btn-dark:hover {
-  background: #222 !important;
 }
 </style>
