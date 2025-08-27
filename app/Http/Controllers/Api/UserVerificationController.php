@@ -609,20 +609,27 @@ class UserVerificationController extends Controller
                 return response()->json(['success' => false, 'message' => 'User not found'], 404);
             }
 
+            // Get redirect URL from request or use default
+            $redirectUrl = $request->input('redirect_url', config('app.frontend_url') . '/timeline');
+
             // Store user info in session for callback
             session(['linkedin_verification_current_user' => [
                 'user_id' => $userId,
-                'user_email' => $user->email
+                'user_email' => $user->email,
+                'redirect_url' => $redirectUrl
             ]]);
 
-            // Generate LinkedIn OAuth URL
+            // Generate LinkedIn OAuth URL with redirect parameter
+            $callbackUrl = config('app.url') . '/build/callback/linkedin?redirect=' . urlencode($redirectUrl);
             $authUrl = Socialite::driver('linkedin')
+                ->redirectUrl($callbackUrl)
                 ->redirect()
                 ->getTargetUrl();
 
             Log::info('Generated LinkedIn OAuth URL for current user', [
                 'auth_url' => $authUrl,
-                'user_id' => $userId
+                'user_id' => $userId,
+                'redirect_url' => $redirectUrl
             ]);
 
             // Return JSON response with auth URL for frontend to redirect
@@ -821,6 +828,10 @@ class UserVerificationController extends Controller
             $verification->linkedin_avatar = $linkedinUser->getAvatar();
             $verification->save();
 
+            // Get redirect URL from session
+            $verificationData = session('linkedin_verification_current_user');
+            $redirectUrl = $verificationData['redirect_url'] ?? null;
+
             // Clear session data
             session()->forget('linkedin_verification_current_user');
 
@@ -829,8 +840,18 @@ class UserVerificationController extends Controller
                 'linkedin_id' => $linkedinUser->getId(),
                 'linkedin_email' => $linkedinUser->getEmail(),
                 'verification_record_updated' => true,
-                'redirect_url' => '/timeline?linkedin=success'
+                'redirect_url' => $redirectUrl
             ]);
+
+            // Use redirect URL from session or fallback to default
+            if ($redirectUrl) {
+                // Add linkedin=success parameter to the redirect URL
+                $separator = strpos($redirectUrl, '?') !== false ? '&' : '?';
+                $redirectUrl .= $separator . 'linkedin=success';
+                
+                Log::info('Redirecting to custom URL with LinkedIn success parameter', ['redirect_url' => $redirectUrl]);
+                return redirect($redirectUrl);
+            }
 
             return redirect("/timeline?linkedin=success");
 

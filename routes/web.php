@@ -27,6 +27,9 @@ Route::get('/api/verification/{userType}/{userId}/linkedin', [UserVerificationCo
 Route::get('/linkedin/callback', [UserVerificationController::class, 'linkedinCallback']);
 Route::get('/linkedin/callback/current-user', [UserVerificationController::class, 'linkedinCallbackForCurrentUser']);
 
+// LinkedIn callback for production (matches the LinkedIn app redirect URI)
+Route::get('/build/callback/linkedin', [UserVerificationController::class, 'linkedinCallback']);
+
 // Test LinkedIn OAuth configuration
 Route::get('/test-linkedin-config', function() {
     $config = config('services.linkedin-openid');

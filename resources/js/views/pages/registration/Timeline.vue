@@ -439,12 +439,22 @@ const connectLinkedin = async () => {
 
     console.log("LinkedIn endpoint:", endpoint);
 
+    // Prepare redirect URL for LinkedIn callback (like email verification)
+    const redirectUrl = `${window.location.origin}/timeline?linkedin=success`;
+
     const res = await fetch(endpoint, {
-      method: "GET",
+      method: "POST",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
+        "X-CSRF-TOKEN":
+          document
+            .querySelector('meta[name="csrf-token"]')
+            ?.getAttribute("content") || "",
       },
+      body: JSON.stringify({
+        redirect_url: redirectUrl,
+      }),
     });
 
     if (!res.ok) {
