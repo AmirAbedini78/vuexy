@@ -609,8 +609,8 @@ class UserVerificationController extends Controller
                 return response()->json(['success' => false, 'message' => 'User not found'], 404);
             }
 
-            // Get redirect URL from query parameter or use default
-            $redirectUrl = $request->query('redirect_url', config('app.frontend_url') . '/timeline');
+            // Get redirect URL from query parameter, POST body, or use default
+            $redirectUrl = $request->query('redirect_url') ?? $request->input('redirect_url') ?? config('app.frontend_url') . '/timeline';
 
             // Store user info in session for callback
             session(['linkedin_verification_current_user' => [
