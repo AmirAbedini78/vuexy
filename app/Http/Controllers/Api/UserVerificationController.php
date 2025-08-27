@@ -652,10 +652,18 @@ class UserVerificationController extends Controller
         try {
             Log::info('LinkedIn callback received', [
                 'query_params' => $request->all(),
-                'session_data' => session('linkedin_verification')
+                'session_data' => session('linkedin_verification'),
+                'current_user_session' => session('linkedin_verification_current_user')
             ]);
 
-            // Get user info from session
+            // Check if this is a current user verification
+            $currentUserVerificationData = session('linkedin_verification_current_user');
+            if ($currentUserVerificationData) {
+                Log::info('Current user LinkedIn verification detected, redirecting to current user handler');
+                return $this->linkedinCallbackForCurrentUser($request);
+            }
+
+            // Get user info from session for legacy system
             $verificationData = session('linkedin_verification');
             if (!$verificationData) {
                 Log::error('No LinkedIn verification session data found');
@@ -819,7 +827,9 @@ class UserVerificationController extends Controller
             Log::info('LinkedIn verification completed successfully for current user', [
                 'user_id' => $userId,
                 'linkedin_id' => $linkedinUser->getId(),
-                'linkedin_email' => $linkedinUser->getEmail()
+                'linkedin_email' => $linkedinUser->getEmail(),
+                'verification_record_updated' => true,
+                'redirect_url' => '/timeline?linkedin=success'
             ]);
 
             return redirect("/timeline?linkedin=success");

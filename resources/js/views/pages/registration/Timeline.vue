@@ -621,10 +621,18 @@ onMounted(async () => {
     }
 
     // Check LinkedIn verification status from backend or query
+    console.log(
+      "Checking LinkedIn verification status from route query:",
+      route.query.linkedin
+    );
     if (route.query.linkedin === "success") {
+      console.log("LinkedIn verification success detected from route query");
       linkedinStatus.value = "verified";
       linkedinMessage.value = "LinkedIn verified successfully!";
       linkedinLoading.value = false;
+
+      // Show success notification for LinkedIn verification
+      showNotification("🎉 LinkedIn verification completed successfully!");
     } else if (route.query.linkedin === "error") {
       linkedinStatus.value = "error";
       const errorMessage = route.query.message;
@@ -723,6 +731,29 @@ watch(
         );
         startVerificationPolling();
       }
+    }
+  }
+);
+
+// Watch for route changes to handle LinkedIn verification returns
+watch(
+  () => route.query.linkedin,
+  async (newValue) => {
+    if (newValue === "success") {
+      console.log("Route query changed - LinkedIn verification detected");
+
+      // Immediately check verification status from backend
+      await fetchVerificationStatus();
+
+      // Calculate progress after LinkedIn verification
+      calculateProgress();
+
+      console.log("LinkedIn verification progress updated:", {
+        linkedinStatus: linkedinStatus.value,
+        completedVerifications: completedVerifications.value,
+        progressPercentage: progressPercentage.value,
+        step4Enabled: step4Enabled.value,
+      });
     }
   }
 );

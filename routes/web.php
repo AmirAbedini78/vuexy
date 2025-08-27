@@ -74,6 +74,31 @@ Route::get('/mock-linkedin/{userType}/{userId}', function($userType, $userId) {
     return redirect("/registration/timeline/{$userType}/{$userId}?linkedin=success");
 });
 
+// Mock LinkedIn OAuth for current user testing
+Route::get('/mock-linkedin-current-user/{userId}', function($userId) {
+    // Simulate successful LinkedIn verification for current user
+    $verification = \App\Models\UserVerification::firstOrCreate([
+        'user_id' => $userId,
+    ], [
+        'user_type' => 'user',
+        'email' => 'test@example.com',
+        'email_verified' => false,
+        'whatsapp_verified' => false,
+        'linkedin_verified' => false,
+        'profile_completed' => false,
+        'status' => 'pending'
+    ]);
+    
+    $verification->linkedin_verified = true;
+    $verification->linkedin_id = 'mock_linkedin_id_' . time();
+    $verification->linkedin_email = 'mock@linkedin.com';
+    $verification->linkedin_name = 'Mock LinkedIn User';
+    $verification->linkedin_avatar = 'https://media.licdn.com/dms/image/mock-avatar.jpg';
+    $verification->save();
+    
+    return redirect("/timeline?linkedin=success");
+});
+
 // Test route for LinkedIn OAuth
 Route::get('/test-linkedin/{userType}/{userId}', function ($userType, $userId) {
     // Simulate successful LinkedIn verification
