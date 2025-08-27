@@ -609,8 +609,8 @@ class UserVerificationController extends Controller
                 return response()->json(['success' => false, 'message' => 'User not found'], 404);
             }
 
-            // Get redirect URL from request or use default
-            $redirectUrl = $request->input('redirect_url', config('app.frontend_url') . '/timeline');
+            // Get redirect URL from query parameter or use default
+            $redirectUrl = $request->query('redirect_url', config('app.frontend_url') . '/timeline');
 
             // Store user info in session for callback
             session(['linkedin_verification_current_user' => [
@@ -619,12 +619,14 @@ class UserVerificationController extends Controller
                 'redirect_url' => $redirectUrl
             ]]);
 
-            // Generate LinkedIn OAuth URL with redirect parameter
-            $callbackUrl = config('app.url') . '/build/callback/linkedin?redirect=' . urlencode($redirectUrl);
-            $authUrl = Socialite::driver('linkedin')
-                ->redirectUrl($callbackUrl)
+            // Generate LinkedIn OAuth URL with redirect parameter in query
+            $baseAuthUrl = Socialite::driver('linkedin')
                 ->redirect()
                 ->getTargetUrl();
+            
+            // Add redirect parameter to the auth URL
+            $separator = strpos($baseAuthUrl, '?') !== false ? '&' : '?';
+            $authUrl = $baseAuthUrl . $separator . 'redirect=' . urlencode($redirectUrl);
 
             Log::info('Generated LinkedIn OAuth URL for current user', [
                 'auth_url' => $authUrl,
@@ -828,9 +830,12 @@ class UserVerificationController extends Controller
             $verification->linkedin_avatar = $linkedinUser->getAvatar();
             $verification->save();
 
-            // Get redirect URL from session
-            $verificationData = session('linkedin_verification_current_user');
-            $redirectUrl = $verificationData['redirect_url'] ?? null;
+            // Get redirect URL from query parameter or session
+            $redirectUrl = request()->query('redirect');
+            if (!$redirectUrl) {
+                $verificationData = session('linkedin_verification_current_user');
+                $redirectUrl = $verificationData['redirect_url'] ?? null;
+            }
 
             // Clear session data
             session()->forget('linkedin_verification_current_user');
@@ -843,7 +848,7 @@ class UserVerificationController extends Controller
                 'redirect_url' => $redirectUrl
             ]);
 
-            // Use redirect URL from session or fallback to default
+            // Use redirect URL or fallback to default
             if ($redirectUrl) {
                 // Add linkedin=success parameter to the redirect URL
                 $separator = strpos($redirectUrl, '?') !== false ? '&' : '?';
