@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -52,7 +53,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function sendPasswordResetNotification($token)
     {
-        \Log::info('Sending password reset notification', [
+        Log::info('Sending password reset notification', [
             'user_id' => $this->id,
             'email' => $this->email,
             'token' => $token,
@@ -61,7 +62,7 @@ class User extends Authenticatable implements MustVerifyEmail
         $frontendUrl = rtrim(config('app.frontend_url'), '/');
         $url = $frontendUrl . "/reset-password/{$token}?email=" . urlencode($this->email);
         
-        \Log::info('Password reset URL generated', ['url' => $url]);
+        Log::info('Password reset URL generated', ['url' => $url]);
         
         $this->notify(new \App\Notifications\ResetPassword($token, $url));
     }
@@ -76,7 +77,22 @@ class User extends Authenticatable implements MustVerifyEmail
             'expires_at' => now()->addMinutes(60),
         ]);
         $frontendUrl = rtrim(config('app.frontend_url'), '/');
-        $link = $frontendUrl . '/verify/' . $token;
+        
+        // Determine user type for proper timeline redirect
+        $userType = $this->role === 'user' ? 'individual' : ($this->role === 'company' ? 'company' : 'individual');
+        $redirectUrl = "/registration/timeline/{$userType}/{$this->id}";
+        
+        // Add redirect parameter to verification link
+        $link = $frontendUrl . '/verify/' . $token . '?redirect=' . urlencode($redirectUrl);
+        
+        Log::info('Email verification link generated', [
+            'user_id' => $this->id,
+            'user_type' => $userType,
+            'redirect_url' => $redirectUrl,
+            'encoded_redirect' => urlencode($redirectUrl),
+            'final_link' => $link
+        ]);
+        
         $this->notify(new \App\Notifications\VerifyEmail($link));
     }
 

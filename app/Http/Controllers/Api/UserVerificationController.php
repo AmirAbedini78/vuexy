@@ -220,7 +220,7 @@ class UserVerificationController extends Controller
         ]);
 
         // Create verification URL with redirect
-        $redirectUrl = $request->input('redirect_url', config('app.frontend_url') . '/timeline');
+        $redirectUrl = $request->input('redirect_url', config('app.frontend_url') . '/registration/timeline/individual/' . $user->id);
         $verificationUrl = config('app.frontend_url') . '/verify/' . $token . '?redirect=' . urlencode($redirectUrl);
 
         // Send email using the same notification system as main registration

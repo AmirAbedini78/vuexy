@@ -8,9 +8,20 @@ const error = ref(null);
 const userData = ref({ email: "", whatsapp: "" });
 const timelineSteps = ref([]);
 
-// Get user type and ID from route
-const userType = route.params.type; // 'individual' or 'company' - will be removed
-const userId = route.params.id; // will be removed
+// Get user type and ID from props or route
+const props = defineProps({
+  userType: {
+    type: String,
+    default: null,
+  },
+  userId: {
+    type: [String, Number],
+    default: null,
+  },
+});
+
+const userType = props.userType || route.params.type; // 'individual' or 'company'
+const userId = props.userId || route.params.id;
 
 // Get user data from logged-in user instead of route params
 const getCurrentUser = () => {
@@ -590,6 +601,15 @@ onMounted(async () => {
     progressPercentage.value = 0;
     completedVerifications.value = 0;
 
+    // Debug logging for route parameters
+    console.log("Timeline component mounted with:", {
+      routeParams: route.params,
+      routeQuery: route.query,
+      props: props,
+      userType: userType,
+      userId: userId,
+    });
+
     // Get current user data from logged-in user
     currentUser.value = getCurrentUser();
     if (!currentUser.value) {
@@ -890,7 +910,7 @@ const sendEmailVerification = async () => {
         body: JSON.stringify({
           email: userEmail,
           name: getUserDisplayName(),
-          redirect_url: `${window.location.origin}/timeline?verified=true`,
+          redirect_url: `${window.location.origin}/registration/timeline/individual/${currentUser.value.id}?verified=true`,
         }),
       }
     );

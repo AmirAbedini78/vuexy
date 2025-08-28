@@ -80,18 +80,37 @@ class EmailVerificationController extends Controller
 
         // Check if there's a redirect URL in the query parameters
         $redirectUrl = request()->query('redirect');
+        Log::info('Email verification redirect check', [
+            'has_redirect' => !empty($redirectUrl),
+            'redirect_url' => $redirectUrl,
+            'all_query_params' => request()->query()
+        ]);
+        
         if ($redirectUrl) {
-            // Check if this is a timeline redirect
-            if (strpos($redirectUrl, '/timeline') !== false) {
-                // Add verified=true parameter to the timeline redirect URL
-                $separator = strpos($redirectUrl, '?') !== false ? '&' : '?';
-                $redirectUrl .= $separator . 'verified=true';
-                Log::info('Redirecting to timeline with verified parameter', ['redirect_url' => $redirectUrl]);
-            }
-            return redirect($redirectUrl);
+            // Decode the redirect URL if it's encoded
+            $decodedRedirectUrl = urldecode($redirectUrl);
+            Log::info('Processing redirect URL', [
+                'original' => $redirectUrl,
+                'decoded' => $decodedRedirectUrl
+            ]);
+            
+            // Add verified=true parameter to the redirect URL
+            $separator = strpos($decodedRedirectUrl, '?') !== false ? '&' : '?';
+            $finalRedirectUrl = $decodedRedirectUrl . $separator . 'verified=true';
+            
+            Log::info('Final redirect URL', ['final_url' => $finalRedirectUrl]);
+            return redirect($finalRedirectUrl);
         }
 
-        return redirect()->route('login')->withQueryString(['type' => 'success', 'message' => 'Email verified successfully! You can now log in.']);
+        // If no specific redirect URL, redirect to the proper timeline route with user context
+        $userType = $user->role === 'user' ? 'individual' : ($user->role === 'company' ? 'company' : 'individual');
+        $timelineUrl = "/registration/timeline/{$userType}/{$user->id}?verified=true";
+        Log::info('Redirecting to timeline with user context', [
+            'user_id' => $user->id,
+            'user_type' => $userType,
+            'timeline_url' => $timelineUrl
+        ]);
+        return redirect($timelineUrl);
     }
 
     private function cleanupExpiredTokens()

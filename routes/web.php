@@ -207,6 +207,11 @@ Route::get('/test-direct-linkedin/{userType}/{userId}', function($userType, $use
     }
 });
 
+// Registration timeline route - must come before catch-all
+Route::get('/registration/timeline/{type}/{id}', function () {
+    return view('application');
+});
+
 // Catch-all route for SPA (excluding API routes)
 Route::get('/{any}', function () {
     return view('application');
