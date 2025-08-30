@@ -267,6 +267,123 @@
       </VDataTable>
     </VCard>
 
+    <!-- All Providers Section -->
+    <div class="section-title mb-4">
+      <h2 class="text-h4 font-weight-bold">All Providers</h2>
+    </div>
+
+    <VCard class="mb-8">
+      <VCardTitle class="d-flex align-center justify-space-between pa-6">
+        <div class="d-flex align-center">
+          <VTextField
+            v-model="providersSearch"
+            label="Search Providers"
+            placeholder="Search providers..."
+            prepend-inner-icon="tabler-search"
+            variant="outlined"
+            density="compact"
+            class="me-4"
+            style="width: 300px"
+          />
+        </div>
+        <div class="d-flex gap-2">
+          <VBtn
+            variant="outlined"
+            prepend-icon="tabler-upload"
+            @click="exportProviders"
+          >
+            Export
+          </VBtn>
+          <VBtn color="warning" prepend-icon="tabler-plus" @click="addProvider">
+            Add Provider
+          </VBtn>
+        </div>
+      </VCardTitle>
+
+      <VDataTable
+        :headers="providersHeaders"
+        :items="providersData"
+        :search="providersSearch"
+        :items-per-page="7"
+        class="providers-table"
+      >
+        <!-- Provider Column -->
+        <template #item.provider="{ item }">
+          <div>
+            <div class="font-weight-medium">{{ item.provider_name }}</div>
+            <div class="text-caption text-medium-emphasis">
+              {{
+                item.provider_type === "individual"
+                  ? "Individual Provider"
+                  : "Company Provider"
+              }}
+            </div>
+          </div>
+        </template>
+
+        <!-- Provider ID Column -->
+        <template #item.provider_id="{ item }">
+          <span class="font-weight-medium">{{
+            item.id.toString().padStart(6, "0")
+          }}</span>
+        </template>
+
+        <!-- Status Column -->
+        <template #item.status="{ item }">
+          <VChip
+            :color="getProviderStatusColor(item.status)"
+            size="small"
+            class="font-weight-medium"
+          >
+            {{ item.status }}
+          </VChip>
+        </template>
+
+        <!-- Total Listing Column -->
+        <template #item.total_listings="{ item }">
+          <span class="font-weight-medium">{{ item.total_listings }}</span>
+        </template>
+
+        <!-- Total Booking Column -->
+        <template #item.total_bookings="{ item }">
+          <span class="font-weight-medium">{{ item.total_bookings }}</span>
+        </template>
+
+        <!-- Actions Column -->
+        <template #item.actions="{ item }">
+          <div class="d-flex gap-1">
+            <VBtn icon variant="text" size="small" @click="viewProvider(item)">
+              <VIcon icon="tabler-eye" size="18" />
+            </VBtn>
+            <VBtn
+              icon
+              variant="text"
+              size="small"
+              @click="showProviderMenu(item)"
+            >
+              <VIcon icon="tabler-dots-vertical" size="18" />
+            </VBtn>
+          </div>
+        </template>
+
+        <!-- Pagination -->
+        <template #bottom>
+          <VCardText class="pt-2">
+            <div
+              class="d-flex flex-wrap justify-center justify-sm-space-between gap-y-2 mt-2"
+            >
+              <span class="text-body-2">Showing 1 to 7 of 100 entries</span>
+              <VPagination
+                v-model="providersPage"
+                :total-visible="$vuetify.display.smAndDown ? 3 : 5"
+                :length="Math.ceil(providersData.length / 7)"
+              />
+            </div>
+          </VCardText>
+        </template>
+      </VDataTable>
+    </VCard>
+
     <!-- All Users Section -->
     <div class="section-title mb-4">
       <h2 class="text-h4 font-weight-bold">All Users</h2>
@@ -374,11 +491,13 @@ const userData = ref(null);
 const eventsSearch = ref("");
 const usersSearch = ref("");
 const ordersSearch = ref("");
+const providersSearch = ref("");
 
 // Pagination
 const eventsPage = ref(3);
 const usersPage = ref(3);
 const ordersPage = ref(3);
+const providersPage = ref(3);
 
 // Get user data from cookies
 const userDataCookie = useCookie("userData");
@@ -603,6 +722,9 @@ const ordersData = ref([
   },
 ]);
 
+// Providers data - will be loaded from API
+const providersData = ref([]);
+
 // Table headers
 const eventsHeaders = [
   { title: "EVENTS", key: "events", sortable: false },
@@ -632,6 +754,15 @@ const ordersHeaders = [
   { title: "ACTION", key: "action", sortable: false, width: "120px" },
 ];
 
+const providersHeaders = [
+  { title: "PROVIDER", key: "provider", sortable: false },
+  { title: "PROVIDER ID", key: "provider_id", sortable: false },
+  { title: "STATUS", key: "status", sortable: false },
+  { title: "TOTAL LISTING", key: "total_listings", sortable: false },
+  { title: "TOTAL BOOKING", key: "total_bookings", sortable: false },
+  { title: "ACTIONS", key: "actions", sortable: false, width: "120px" },
+];
+
 // Additional protection - redirect non-admin users
 onMounted(() => {
   if (!userData.value || userData.value.role !== "admin") {
@@ -645,12 +776,45 @@ onMounted(() => {
 const loadDashboardData = async () => {
   loading.value = true;
   try {
+    console.log("Loading dashboard data...");
+
     const response = await $api("/admin/dashboard", {
       method: "GET",
     });
+    console.log("Dashboard response:", response);
     stats.value = response;
+
+    // Load providers data
+    console.log("Loading providers data...");
+    try {
+      // ابتدا از test route استفاده می‌کنیم (بدون authentication)
+      const testResponse = await $api("/test/providers", {
+        method: "GET",
+      });
+      console.log("Test providers response:", testResponse);
+      providersData.value = testResponse.data || [];
+      console.log("Test providers data set:", providersData.value);
+    } catch (error) {
+      console.log("Test route failed, trying admin route...");
+      try {
+        const providersResponse = await $api("/admin/providers", {
+          method: "GET",
+        });
+        console.log("Admin providers response:", providersResponse);
+        providersData.value = providersResponse.data || [];
+        console.log("Admin providers data set:", providersData.value);
+      } catch (adminError) {
+        console.error("Both routes failed:", adminError);
+        providersData.value = [];
+      }
+    }
   } catch (error) {
     console.error("Error loading dashboard data:", error);
+    console.error("Error details:", {
+      message: error.message,
+      status: error.response?.status,
+      data: error.response?.data,
+    });
 
     // Show fallback data instead of redirecting
     stats.value = {
@@ -745,6 +909,31 @@ const viewOrder = (item) => {
 
 const showOrderMenu = (item) => {
   console.log("Showing order menu:", item);
+};
+
+// Provider action functions
+const exportProviders = () => {
+  console.log("Exporting providers...");
+};
+
+const addProvider = () => {
+  console.log("Adding provider...");
+};
+
+const viewProvider = (item) => {
+  console.log("Viewing provider:", item);
+};
+
+const showProviderMenu = (item) => {
+  console.log("Showing provider menu:", item);
+};
+
+const getProviderStatusColor = (status) => {
+  const colors = {
+    Live: "success",
+    Denied: "error",
+  };
+  return colors[status] || "secondary";
 };
 </script>
 

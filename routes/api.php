@@ -100,10 +100,16 @@ Route::middleware([ApiMiddleware::class])->group(function () {
     // Admin routes - protected by AdminMiddleware
     Route::middleware(['auth:sanctum', AdminMiddleware::class])->prefix('admin')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard']);
+        Route::get('/providers', [AdminController::class, 'providers']);
+        Route::get('/providers/{id}/{type}', [AdminController::class, 'provider']);
+        Route::put('/providers/{id}/{type}/status', [AdminController::class, 'updateProviderStatus']);
         Route::get('/users', [AdminController::class, 'users']);
         Route::get('/users/{id}', [AdminController::class, 'user']);
         Route::put('/users/{id}/status', [AdminController::class, 'updateUserStatus']);
         Route::get('/listings', [AdminController::class, 'listings']);
         Route::get('/statistics', [AdminController::class, 'statistics']);
     });
+
+    // Temporary test route for providers (without authentication)
+    Route::get('/test/providers', [AdminController::class, 'providers']);
 });

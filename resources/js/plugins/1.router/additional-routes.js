@@ -163,6 +163,16 @@ export const routes = [
     },
   },
   {
+    path: '/admin/providers',
+    name: 'admin-providers',
+    component: () => import('@/pages/admin/providers.vue'),
+    meta: {
+      layout: 'default',
+      requiresAuth: true,
+      requiresAdmin: true,
+    },
+  },
+  {
     path: '/admin/listings',
     name: 'admin-listings',
     component: () => import('@/pages/admin/listings.vue'),

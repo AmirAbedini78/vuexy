@@ -10,6 +10,7 @@ class IndividualUser extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         // Step 1: Personal Information
         'full_name',
         'nationality',
@@ -47,4 +48,12 @@ class IndividualUser extends Model
         'social_proof_links' => 'array',
         'terms_accepted' => 'boolean',
     ];
+
+    /**
+     * Get the user that owns this individual profile
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 } 

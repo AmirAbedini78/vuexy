@@ -49,7 +49,7 @@ export default [
   {
     title: 'Providers',
     icon: { icon: 'tabler-user-heart' },
-    comingSoon: true,
+    to: 'admin-providers',
   },
   {
     title: 'Users',

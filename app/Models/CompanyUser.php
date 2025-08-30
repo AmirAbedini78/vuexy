@@ -10,6 +10,7 @@ class CompanyUser extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         // Step 1: Company Information
         'company_name',
         'vat_id',
@@ -43,4 +44,12 @@ class CompanyUser extends Model
         'social_proof_links' => 'array',
         'terms_accepted' => 'boolean',
     ];
+
+    /**
+     * Get the user that owns this company profile
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 } 
