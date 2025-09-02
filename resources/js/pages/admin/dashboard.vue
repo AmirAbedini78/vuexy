@@ -471,9 +471,219 @@
       </VDataTable>
     </VCard>
   </div>
+
+  <!-- Provider View Dialog -->
+  <VDialog v-model="showProviderViewDialog" max-width="800" persistent>
+    <VCard>
+      <VCardTitle class="d-flex align-center justify-space-between">
+        <span>Provider Details</span>
+        <VBtn
+          icon
+          variant="text"
+          size="small"
+          @click="showProviderViewDialog = false"
+        >
+          <VIcon icon="tabler-x" />
+        </VBtn>
+      </VCardTitle>
+
+      <VCardText v-if="selectedProvider">
+        <VRow>
+          <!-- Basic Information -->
+          <VCol cols="12">
+            <h6 class="text-h6 font-weight-medium mb-3">Basic Information</h6>
+          </VCol>
+
+          <VCol cols="12" md="6">
+            <strong>Name:</strong> {{ selectedProvider.provider_name }}
+          </VCol>
+
+          <VCol cols="12" md="6">
+            <strong>Type:</strong>
+            <VChip
+              :color="
+                selectedProvider.provider_type === 'individual'
+                  ? 'primary'
+                  : 'secondary'
+              "
+              size="small"
+              class="ml-2"
+            >
+              {{
+                selectedProvider.provider_type === "individual"
+                  ? "Individual"
+                  : "Company"
+              }}
+            </VChip>
+          </VCol>
+
+          <VCol cols="12" md="6">
+            <strong>Specialization:</strong>
+            {{ selectedProvider.activity_specialization || "N/A" }}
+          </VCol>
+
+          <VCol cols="12" md="6">
+            <strong>Country:</strong>
+            {{
+              selectedProvider.country_of_operation ||
+              selectedProvider.country ||
+              "N/A"
+            }}
+          </VCol>
+
+          <VCol cols="12" md="6">
+            <strong>Experience:</strong>
+            {{
+              selectedProvider.years_of_experience ||
+              selectedProvider.business_type ||
+              "N/A"
+            }}
+          </VCol>
+
+          <VCol cols="12" md="6">
+            <strong>Status:</strong>
+            <VChip
+              :color="getProviderStatusColor(selectedProvider.status)"
+              size="small"
+              class="ml-2"
+            >
+              {{ selectedProvider.status }}
+            </VChip>
+          </VCol>
+
+          <VCol cols="12" md="6">
+            <strong>Want to be listed:</strong>
+            {{ selectedProvider.want_to_be_listed || "N/A" }}
+          </VCol>
+
+          <VCol cols="12" md="6">
+            <strong>Created:</strong>
+            {{ formatDate(selectedProvider.created_at) }}
+          </VCol>
+
+          <!-- Additional fields based on provider type -->
+          <template v-if="selectedProvider.provider_type === 'individual'">
+            <VCol cols="12">
+              <h6 class="text-h6 font-weight-medium mb-3 mt-4">
+                Personal Information
+              </h6>
+            </VCol>
+
+            <VCol cols="12" md="6">
+              <strong>Nationality:</strong>
+              {{ selectedProvider.nationality || "N/A" }}
+            </VCol>
+
+            <VCol cols="12" md="6">
+              <strong>Address:</strong>
+              {{ selectedProvider.address1 || "N/A" }}
+            </VCol>
+
+            <VCol cols="12" md="6">
+              <strong>City:</strong>
+              {{ selectedProvider.city || "N/A" }}
+            </VCol>
+
+            <VCol cols="12" md="6">
+              <strong>State:</strong>
+              {{ selectedProvider.state || "N/A" }}
+            </VCol>
+
+            <VCol cols="12" md="6">
+              <strong>Postal Code:</strong>
+              {{ selectedProvider.postal_code || "N/A" }}
+            </VCol>
+
+            <VCol cols="12" md="6">
+              <strong>Emergency Contact:</strong>
+              {{ selectedProvider.emergency_contact_name || "N/A" }}
+            </VCol>
+
+            <VCol cols="12" md="6">
+              <strong>Emergency Phone:</strong>
+              {{ selectedProvider.emergency_contact_phone || "N/A" }}
+            </VCol>
+
+            <VCol cols="12">
+              <strong>Short Bio:</strong>
+              {{ selectedProvider.short_bio || "N/A" }}
+            </VCol>
+          </template>
+
+          <template v-else>
+            <VCol cols="12">
+              <h6 class="text-h6 font-weight-medium mb-3 mt-4">
+                Company Information
+              </h6>
+            </VCol>
+
+            <VCol cols="12" md="6">
+              <strong>VAT ID:</strong>
+              {{ selectedProvider.vat_id || "N/A" }}
+            </VCol>
+
+            <VCol cols="12" md="6">
+              <strong>Contact Person:</strong>
+              {{ selectedProvider.contact_person || "N/A" }}
+            </VCol>
+
+            <VCol cols="12" md="6">
+              <strong>Country of Registration:</strong>
+              {{ selectedProvider.country_of_registration || "N/A" }}
+            </VCol>
+
+            <VCol cols="12" md="6">
+              <strong>Business Type:</strong>
+              {{ selectedProvider.business_type || "N/A" }}
+            </VCol>
+
+            <VCol cols="12">
+              <strong>Short Bio:</strong>
+              {{ selectedProvider.short_bio || "N/A" }}
+            </VCol>
+          </template>
+        </VRow>
+      </VCardText>
+
+      <VCardActions>
+        <VSpacer />
+        <VBtn color="primary" @click="showProviderViewDialog = false">
+          Close
+        </VBtn>
+      </VCardActions>
+    </VCard>
+  </VDialog>
+
+  <!-- Provider Edit Dialog -->
+  <VDialog v-model="showProviderEditDialog" max-width="1200" persistent>
+    <VCard>
+      <VCardTitle class="d-flex align-center justify-space-between">
+        <span>Edit Provider: {{ selectedProvider?.provider_name }}</span>
+        <VBtn
+          icon
+          variant="text"
+          size="small"
+          @click="showProviderEditDialog = false"
+        >
+          <VIcon icon="tabler-x" />
+        </VBtn>
+      </VCardTitle>
+
+      <VCardText v-if="selectedProvider">
+        <!-- Provider Edit Wizard -->
+        <ProviderEditWizard
+          :provider="selectedProvider"
+          @close="showProviderEditDialog = false"
+          @updated="handleProviderUpdated"
+        />
+      </VCardText>
+    </VCard>
+  </VDialog>
 </template>
 
 <script setup>
+import ProviderEditWizard from "@/components/admin/ProviderEditWizard.vue";
+
 definePage({
   meta: {
     layout: "default",
@@ -498,6 +708,11 @@ const eventsPage = ref(3);
 const usersPage = ref(3);
 const ordersPage = ref(3);
 const providersPage = ref(3);
+
+// Dialogs
+const showProviderViewDialog = ref(false);
+const showProviderEditDialog = ref(false);
+const selectedProvider = ref(null);
 
 // Get user data from cookies
 const userDataCookie = useCookie("userData");
@@ -841,6 +1056,17 @@ const formatCurrency = (amount) => {
   }).format(amount);
 };
 
+const formatDate = (dateString) => {
+  if (!dateString) return "N/A";
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    month: "numeric",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+  });
+};
+
 const getStatusColor = (status) => {
   const colors = {
     Submitted: "warning",
@@ -922,10 +1148,14 @@ const addProvider = () => {
 
 const viewProvider = (item) => {
   console.log("Viewing provider:", item);
+  selectedProvider.value = item;
+  showProviderViewDialog.value = true;
 };
 
 const showProviderMenu = (item) => {
   console.log("Showing provider menu:", item);
+  selectedProvider.value = item;
+  showProviderEditDialog.value = true;
 };
 
 const getProviderStatusColor = (status) => {
@@ -934,6 +1164,12 @@ const getProviderStatusColor = (status) => {
     Denied: "error",
   };
   return colors[status] || "secondary";
+};
+
+const handleProviderUpdated = () => {
+  console.log("Provider updated, reloading data...");
+  loadDashboardData();
+  showProviderEditDialog.value = false;
 };
 </script>
 

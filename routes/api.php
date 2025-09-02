@@ -91,6 +91,19 @@ Route::middleware([ApiMiddleware::class])->group(function () {
         Route::post('/auth/setup-2fa', [AuthController::class, 'setupTwoFactor']);
         Route::post('/auth/verify-2fa', [AuthController::class, 'verifyTwoFactor']);
         Route::post('/auth/disable-2fa', [AuthController::class, 'disableTwoFactor']);
+
+        // Notifications
+        Route::get('/notifications', function (Request $request) {
+            return $request->user()->notifications()->orderBy('created_at', 'desc')->limit(20)->get();
+        });
+        Route::post('/notifications/mark-read', function (Request $request) {
+            $ids = $request->input('ids', []);
+            foreach ($ids as $id) {
+                $notification = $request->user()->notifications()->where('id', $id)->first();
+                if ($notification) $notification->markAsRead();
+            }
+            return response()->json(['success' => true]);
+        });
     });
 
     Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -102,6 +115,8 @@ Route::middleware([ApiMiddleware::class])->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard']);
         Route::get('/providers', [AdminController::class, 'providers']);
         Route::get('/providers/{id}/{type}', [AdminController::class, 'provider']);
+        Route::put('/providers/{id}/{type}', [AdminController::class, 'updateProvider']);
+        Route::delete('/providers/{id}/{type}', [AdminController::class, 'deleteProvider']);
         Route::put('/providers/{id}/{type}/status', [AdminController::class, 'updateProviderStatus']);
         Route::get('/users', [AdminController::class, 'users']);
         Route::get('/users/{id}', [AdminController::class, 'user']);

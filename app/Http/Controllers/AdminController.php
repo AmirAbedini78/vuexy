@@ -9,6 +9,8 @@ use App\Models\CompanyUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\ProviderStatusUpdated;
 
 class AdminController extends Controller
 {
@@ -55,8 +57,20 @@ class AdminController extends Controller
             'country_of_operation',
             'want_to_be_listed',
             'created_at',
+            'nationality',
+            'address1',
+            'city',
+            'state',
+            'postal_code',
+            'country',
+            'dob',
+            'languages',
+            'address2',
+            'emergency_contact_name',
+            'emergency_contact_phone',
+            'short_bio',
+            'terms_accepted',
             DB::raw("'individual' as provider_type"),
-            DB::raw("'Live' as status"),
             DB::raw("0 as total_listings"),
             DB::raw("0 as total_bookings")
         ]);
@@ -69,8 +83,19 @@ class AdminController extends Controller
             'country as country_of_operation',
             'want_to_be_listed',
             'created_at',
+            'vat_id',
+            'address1',
+            'city',
+            'state',
+            'postal_code',
+            'country',
+            'contact_person',
+            'country_of_registration',
+            'address2',
+            'short_bio',
+            'company_website',
+            'terms_accepted',
             DB::raw("'company' as provider_type"),
-            DB::raw("'Live' as status"),
             DB::raw("0 as total_listings"),
             DB::raw("0 as total_bookings")
         ]);
@@ -101,6 +126,20 @@ class AdminController extends Controller
         if (!$request->filled('provider_type') || $request->provider_type === 'all' || $request->provider_type === 'company') {
             $providers = $providers->concat($companyUsers->get());
         }
+
+        // Derive status from want_to_be_listed
+        $providers = $providers->map(function ($provider) {
+            // Map want_to_be_listed => status: yes->active, unsure/null->approved, no->rejected
+            $listed = isset($provider->want_to_be_listed) ? strtolower($provider->want_to_be_listed) : null;
+            if ($listed === 'yes') {
+                $provider->status = 'active';
+            } elseif ($listed === 'no') {
+                $provider->status = 'rejected';
+            } else {
+                $provider->status = 'approved'; // default
+            }
+            return $provider;
+        });
 
         // Sort by created_at
         $providers = $providers->sortByDesc('created_at');
@@ -145,28 +184,166 @@ class AdminController extends Controller
     }
 
     /**
+     * Update provider information
+     */
+    public function updateProvider(Request $request, $id, $type)
+    {
+        try {
+            Log::info('Update provider request data:', $request->all());
+            
+            if ($type === 'individual') {
+                $provider = IndividualUser::findOrFail($id);
+                
+                $validatedData = $request->validate([
+                    'full_name' => 'nullable|string|max:255',
+                    'nationality' => 'nullable|string|max:255',
+                    'address1' => 'nullable|string|max:255',
+                    'city' => 'nullable|string|max:255',
+                    'state' => 'nullable|string|max:255',
+                    'dob' => 'nullable|date',
+                    'languages' => 'nullable|array',
+                    'postal_code' => 'nullable|string|max:20',
+                    'country' => 'nullable|string|max:255',
+                    'activity_specialization' => 'nullable|string|max:255',
+                    'years_of_experience' => 'nullable|string|max:255',
+                    'emergency_contact_name' => 'nullable|string|max:255',
+                    'want_to_be_listed' => 'nullable|string|in:yes,no,unsure',
+                    'short_bio' => 'nullable|string',
+                    'country_of_operation' => 'nullable|string|max:255',
+                    'emergency_contact_phone' => 'nullable|string|max:20',
+                    'terms_accepted' => 'nullable|boolean',
+                ]);
+                
+                Log::info('Individual provider validated data:', $validatedData);
+
+                // Filter out null/empty values and update only provided fields
+                $updateData = array_filter($validatedData, function($value) {
+                    return $value !== null && $value !== '';
+                });
+                
+                Log::info('Individual provider filtered update data:', $updateData);
+                
+                $provider->update($updateData);
+                
+            } else {
+                $provider = CompanyUser::findOrFail($id);
+                
+                $validatedData = $request->validate([
+                    'company_name' => 'nullable|string|max:255',
+                    'vat_id' => 'nullable|string|max:255',
+                    'address1' => 'nullable|string|max:255',
+                    'city' => 'nullable|string|max:255',
+                    'state' => 'nullable|string|max:255',
+                    'contact_person' => 'nullable|string|max:255',
+                    'country_of_registration' => 'nullable|string|max:255',
+                    'postal_code' => 'nullable|string|max:20',
+                    'country' => 'nullable|string|max:255',
+                    'business_type' => 'nullable|string|max:255',
+                    'activity_specialization' => 'nullable|string|max:255',
+                    'want_to_be_listed' => 'nullable|string|in:yes,no,unsure',
+                    'short_bio' => 'nullable|string',
+                    'company_website' => 'nullable|string|max:255',
+                    'terms_accepted' => 'nullable|boolean',
+                ]);
+                
+                Log::info('Company provider validated data:', $validatedData);
+
+                // Filter out null/empty values and update only provided fields
+                $updateData = array_filter($validatedData, function($value) {
+                    return $value !== null && $value !== '';
+                });
+                
+                Log::info('Company provider filtered update data:', $updateData);
+                
+                $provider->update($updateData);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Provider updated successfully',
+                'data' => $provider
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error updating provider: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update provider',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Delete provider
+     */
+    public function deleteProvider($id, $type)
+    {
+        try {
+            if ($type === 'individual') {
+                $provider = IndividualUser::findOrFail($id);
+            } else {
+                $provider = CompanyUser::findOrFail($id);
+            }
+
+            $provider->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Provider deleted successfully'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error deleting provider: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete provider',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Update provider status
      */
     public function updateProviderStatus(Request $request, $id, $type)
     {
         $request->validate([
-            'status' => 'required|in:live,denied'
+            'status' => 'required|in:active,approved,rejected'
         ]);
 
         if ($type === 'individual') {
             $provider = IndividualUser::findOrFail($id);
+            $userId = $provider->user_id;
         } else {
             $provider = CompanyUser::findOrFail($id);
+            $userId = $provider->user_id;
         }
 
-        // Since there's no status field in the tables, we'll add a note or use want_to_be_listed
+        // Map status to want_to_be_listed: active->yes, approved->unsure, rejected->no
+        $map = [
+            'active' => 'yes',
+            'approved' => 'unsure',
+            'rejected' => 'no',
+        ];
+
         $provider->update([
-            'want_to_be_listed' => $request->status === 'live' ? 'yes' : 'no'
+            'want_to_be_listed' => $map[$request->status],
         ]);
 
+        // Notify user via email & database
+        $user = User::find($userId);
+        if ($user) {
+            $providerName = $type === 'individual' ? ($provider->full_name ?? null) : ($provider->company_name ?? null);
+            $user->notify(new ProviderStatusUpdated($request->status, $type, $providerName));
+        }
+
         return response()->json([
+            'success' => true,
             'message' => 'Provider status updated successfully',
-            'provider' => $provider
+            'provider' => $provider,
         ]);
     }
 

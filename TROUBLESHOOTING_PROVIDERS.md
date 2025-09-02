@@ -126,3 +126,4 @@ UPDATE users SET role = 'admin' WHERE email = 'your-email@example.com';
 - Screenshot از console errors
 - Screenshot از network tab
 - توضیح کامل مراحل انجام شده
+

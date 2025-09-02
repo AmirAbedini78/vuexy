@@ -73,3 +73,4 @@ php test_api_providers.php
 2. فایل `test_api_providers.php` را اجرا کنید
 3. لاگ‌های مرورگر را بررسی کنید
 4. اطمینان حاصل کنید که API routes درست تعریف شده‌اند
+
