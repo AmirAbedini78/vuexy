@@ -87,7 +87,7 @@
 
     <!-- All Events Section -->
     <div class="section-title mb-4">
-      <h2 class="text-h4 font-weight-bold">All Events</h2>
+      <h2 class="text-h4 font-weight-bold">All Events (Listings)</h2>
     </div>
 
     <VCard class="mb-8">
@@ -128,32 +128,69 @@
         <!-- Events Column -->
         <template #item.events="{ item }">
           <div>
-            <div class="font-weight-medium">{{ item.eventTitle }}</div>
+            <div class="font-weight-medium">
+              {{ item.listing_title || item.eventTitle }}
+            </div>
             <div class="text-caption text-medium-emphasis">
-              {{ item.location }}
+              {{ item.locations || item.location }}
             </div>
           </div>
+        </template>
+
+        <!-- Provider Column -->
+        <template #item.provider="{ item }">
+          <div>
+            <div class="font-weight-medium">{{ item.user?.name || "N/A" }}</div>
+            <div class="text-caption text-medium-emphasis">
+              {{ item.user?.email || "N/A" }}
+            </div>
+          </div>
+        </template>
+
+        <!-- Listing Type Column -->
+        <template #item.listing_type="{ item }">
+          <VChip
+            :color="getListingTypeColor(item.listing_type || item.type)"
+            size="small"
+            class="font-weight-medium"
+          >
+            {{ formatListingType(item.listing_type || item.type) }}
+          </VChip>
+        </template>
+
+        <!-- Price Column -->
+        <template #item.price="{ item }">
+          <span class="font-weight-medium">
+            €{{ formatCurrency(item.price || 0) }}
+          </span>
+        </template>
+
+        <!-- Capacity Column -->
+        <template #item.capacity="{ item }">
+          <span class="font-weight-medium">
+            {{ item.min_capacity || 0 }} - {{ item.max_capacity || 0 }}
+          </span>
         </template>
 
         <!-- Status Column -->
         <template #item.status="{ item }">
           <VChip
-            :color="getStatusColor(item.status)"
+            :color="getListingStatusColor(item.status)"
             size="small"
             class="font-weight-medium"
           >
-            {{ item.status }}
+            {{ item.status || "Draft" }}
           </VChip>
         </template>
 
         <!-- Actions Column -->
         <template #item.actions="{ item }">
           <div class="d-flex gap-1">
-            <VBtn icon variant="text" size="small" @click="editEvent(item)">
-              <VIcon icon="tabler-edit" size="18" />
+            <VBtn icon variant="text" size="small" @click="viewEvent(item)">
+              <VIcon icon="tabler-eye" size="18" />
             </VBtn>
-            <VBtn icon variant="text" size="small" @click="showEventMenu(item)">
-              <VIcon icon="tabler-dots-vertical" size="18" />
+            <VBtn icon variant="text" size="small" @click="editEvent(item)">
+              <VIcon icon="tabler-pencil" size="18" />
             </VBtn>
           </div>
         </template>
@@ -164,7 +201,9 @@
             <div
               class="d-flex flex-wrap justify-center justify-sm-space-between gap-y-2 mt-2"
             >
-              <span class="text-body-2">Showing 1 to 7 of 100 entries</span>
+              <span class="text-body-2"
+                >Showing 1 to 7 of {{ eventsData.length }} entries</span
+              >
               <VPagination
                 v-model="eventsPage"
                 :total-visible="$vuetify.display.smAndDown ? 3 : 5"
@@ -679,9 +718,217 @@
       </VCardText>
     </VCard>
   </VDialog>
+
+  <!-- Listing View Dialog -->
+  <VDialog v-model="showListingViewDialog" max-width="800" persistent>
+    <VCard>
+      <VCardTitle class="d-flex align-center justify-space-between">
+        <span>Listing Details</span>
+        <VBtn
+          icon
+          variant="text"
+          size="small"
+          @click="showListingViewDialog = false"
+        >
+          <VIcon icon="tabler-x" />
+        </VBtn>
+      </VCardTitle>
+
+      <VCardText v-if="selectedListing">
+        <VRow>
+          <!-- Basic Information -->
+          <VCol cols="12">
+            <h6 class="text-h6 font-weight-medium mb-3">Basic Information</h6>
+          </VCol>
+
+          <VCol cols="12" md="6">
+            <strong>Title:</strong>
+            {{ selectedListing.listing_title || "N/A" }}
+          </VCol>
+
+          <VCol cols="12" md="6">
+            <strong>Subtitle:</strong>
+            {{ selectedListing.subtitle || "N/A" }}
+          </VCol>
+
+          <VCol cols="12" md="6">
+            <strong>Type:</strong>
+            <VChip
+              :color="getListingTypeColor(selectedListing.listing_type)"
+              size="small"
+              class="ml-2"
+            >
+              {{ formatListingType(selectedListing.listing_type) }}
+            </VChip>
+          </VCol>
+
+          <VCol cols="12" md="6">
+            <strong>Status:</strong>
+            <VChip
+              :color="getListingStatusColor(selectedListing.status)"
+              size="small"
+              class="ml-2"
+            >
+              {{ selectedListing.status || "Draft" }}
+            </VChip>
+          </VCol>
+
+          <VCol cols="12" md="6">
+            <strong>Starting Date:</strong>
+            {{ selectedListing.starting_date || "N/A" }}
+          </VCol>
+
+          <VCol cols="12" md="6">
+            <strong>Finishing Date:</strong>
+            {{ selectedListing.finishing_date || "N/A" }}
+          </VCol>
+
+          <VCol cols="12" md="6">
+            <strong>Price:</strong>
+            €{{ formatCurrency(selectedListing.price || 0) }}
+          </VCol>
+
+          <VCol cols="12" md="6">
+            <strong>Capacity:</strong>
+            {{ selectedListing.min_capacity || 0 }} -
+            {{ selectedListing.max_capacity || 0 }}
+          </VCol>
+
+          <VCol cols="12">
+            <strong>Description:</strong>
+            {{ selectedListing.listing_description || "N/A" }}
+          </VCol>
+
+          <!-- Provider Information -->
+          <VCol cols="12">
+            <h6 class="text-h6 font-weight-medium mb-3 mt-4">
+              Provider Information
+            </h6>
+          </VCol>
+
+          <VCol cols="12" md="6">
+            <strong>Provider Name:</strong>
+            {{ selectedListing.user?.name || "N/A" }}
+          </VCol>
+
+          <VCol cols="12" md="6">
+            <strong>Provider Email:</strong>
+            {{ selectedListing.user?.email || "N/A" }}
+          </VCol>
+
+          <!-- Additional Details -->
+          <VCol cols="12">
+            <h6 class="text-h6 font-weight-medium mb-3 mt-4">
+              Additional Details
+            </h6>
+          </VCol>
+
+          <VCol cols="12" md="6">
+            <strong>Experience Level:</strong>
+            {{ selectedListing.experience_level || "N/A" }}
+          </VCol>
+
+          <VCol cols="12" md="6">
+            <strong>Fitness Level:</strong>
+            {{ selectedListing.fitness_level || "N/A" }}
+          </VCol>
+
+          <VCol cols="12" md="6">
+            <strong>Group Language:</strong>
+            {{ selectedListing.group_language || "N/A" }}
+          </VCol>
+
+          <VCol cols="12" md="6">
+            <strong>Locations:</strong>
+            {{ selectedListing.locations || "N/A" }}
+          </VCol>
+
+          <VCol cols="12">
+            <strong>Activities Included:</strong>
+            {{ selectedListing.activities_included || "N/A" }}
+          </VCol>
+
+          <VCol cols="12">
+            <strong>What's Included:</strong>
+            {{ selectedListing.whats_included || "N/A" }}
+          </VCol>
+
+          <VCol cols="12">
+            <strong>What's Not Included:</strong>
+            {{ selectedListing.whats_not_included || "N/A" }}
+          </VCol>
+
+          <VCol cols="12">
+            <strong>Additional Notes:</strong>
+            {{ selectedListing.additional_notes || "N/A" }}
+          </VCol>
+
+          <VCol cols="12">
+            <strong>Provider's FAQ:</strong>
+            {{ selectedListing.providers_faq || "N/A" }}
+          </VCol>
+
+          <VCol cols="12">
+            <strong>Personal Policies:</strong>
+            {{ selectedListing.personal_policies || "N/A" }}
+          </VCol>
+
+          <VCol cols="12">
+            <strong>Personal Policies Text:</strong>
+            {{ selectedListing.personal_policies_text || "N/A" }}
+          </VCol>
+
+          <VCol cols="12">
+            <strong>Terms Accepted:</strong>
+            <VChip
+              :color="selectedListing.terms_accepted ? 'success' : 'error'"
+              size="small"
+              class="ml-2"
+            >
+              {{ selectedListing.terms_accepted ? "Yes" : "No" }}
+            </VChip>
+          </VCol>
+        </VRow>
+      </VCardText>
+
+      <VCardActions>
+        <VSpacer />
+        <VBtn color="primary" @click="showListingViewDialog = false">
+          Close
+        </VBtn>
+      </VCardActions>
+    </VCard>
+  </VDialog>
+
+  <!-- Listing Edit Dialog -->
+  <VDialog v-model="showListingEditDialog" max-width="1200" persistent>
+    <VCard>
+      <VCardTitle class="d-flex align-center justify-space-between">
+        <span>Edit Listing: {{ selectedListing?.listing_title }}</span>
+        <VBtn
+          icon
+          variant="text"
+          size="small"
+          @click="showListingEditDialog = false"
+        >
+          <VIcon icon="tabler-x" />
+        </VBtn>
+      </VCardTitle>
+
+      <VCardText v-if="selectedListing">
+        <!-- Listing Edit Wizard -->
+        <ListingEditWizard
+          :listing="selectedListing"
+          @close="showListingEditDialog = false"
+          @updated="handleListingUpdated"
+        />
+      </VCardText>
+    </VCard>
+  </VDialog>
 </template>
 
 <script setup>
+import ListingEditWizard from "@/components/admin/ListingEditWizard.vue";
 import ProviderEditWizard from "@/components/admin/ProviderEditWizard.vue";
 
 definePage({
@@ -713,6 +960,9 @@ const providersPage = ref(3);
 const showProviderViewDialog = ref(false);
 const showProviderEditDialog = ref(false);
 const selectedProvider = ref(null);
+const showListingViewDialog = ref(false);
+const showListingEditDialog = ref(false);
+const selectedListing = ref(null);
 
 // Get user data from cookies
 const userDataCookie = useCookie("userData");
@@ -720,79 +970,8 @@ if (userDataCookie.value) {
   userData.value = userDataCookie.value;
 }
 
-// Events data - exact data from screenshot
-const eventsData = ref([
-  {
-    id: 1,
-    eventTitle: "Event Title 1",
-    location: "Event Location 1",
-    provider: "Sam Smith",
-    advId: "647838",
-    price: "€1189",
-    participants: "6/6",
-    status: "Submitted",
-  },
-  {
-    id: 2,
-    eventTitle: "Event Title 2",
-    location: "Event Location 2",
-    provider: "Sara Smith",
-    advId: "765497",
-    price: "€1456",
-    participants: "12/12",
-    status: "Other Events",
-  },
-  {
-    id: 3,
-    eventTitle: "Event Title 3",
-    location: "Event Location 3",
-    provider: "Sam Smith",
-    advId: "348579",
-    price: "€1999",
-    participants: "10/15",
-    status: "Denied",
-  },
-  {
-    id: 4,
-    eventTitle: "Event Title 4",
-    location: "Event Location 4",
-    provider: "Sara Smith",
-    advId: "903847",
-    price: "€2400",
-    participants: "0/10",
-    status: "Edit Review Pending",
-  },
-  {
-    id: 5,
-    eventTitle: "Event Title 5",
-    location: "Event Location 5",
-    provider: "Sam Smith",
-    advId: "384769",
-    price: "€1349",
-    participants: "12/12",
-    status: "Approved",
-  },
-  {
-    id: 6,
-    eventTitle: "Event Title 6",
-    location: "Event Location 6",
-    provider: "Sara Smith",
-    advId: "348579",
-    price: "€1800",
-    participants: "2/4",
-    status: "Live",
-  },
-  {
-    id: 7,
-    eventTitle: "Event Title 7",
-    location: "Event Location 7",
-    provider: "Sam Smith",
-    advId: "238474",
-    price: "€2000",
-    participants: "11/12",
-    status: "Submitted",
-  },
-]);
+// Events data - will be loaded from API
+const eventsData = ref([]);
 
 // Users data - exact data from screenshot
 const usersData = ref([
@@ -944,10 +1123,10 @@ const providersData = ref([]);
 const eventsHeaders = [
   { title: "EVENTS", key: "events", sortable: false },
   { title: "PROVIDER", key: "provider", sortable: false },
-  { title: "ADV ID", key: "advId", sortable: false },
+  { title: "TYPE", key: "listing_type", sortable: false },
   { title: "PRICE", key: "price", sortable: false },
-  { title: "PARTICIPANTS", key: "participants", sortable: false },
-  { title: "STATUS?", key: "status", sortable: false },
+  { title: "CAPACITY", key: "capacity", sortable: false },
+  { title: "STATUS", key: "status", sortable: false },
   { title: "ACTIONS", key: "actions", sortable: false, width: "120px" },
 ];
 
@@ -1023,6 +1202,20 @@ const loadDashboardData = async () => {
         providersData.value = [];
       }
     }
+
+    // Load listings data directly from admin endpoint
+    console.log("Loading listings data...");
+    try {
+      const listingsResponse = await $api("/admin/listings", {
+        method: "GET",
+      });
+      console.log("Admin listings response:", listingsResponse);
+      eventsData.value = listingsResponse.data || [];
+      console.log("Admin listings data set:", eventsData.value);
+    } catch (listingsError) {
+      console.error("Failed to load listings:", listingsError);
+      eventsData.value = [];
+    }
   } catch (error) {
     console.error("Error loading dashboard data:", error);
     console.error("Error details:", {
@@ -1097,12 +1290,16 @@ const addEvent = () => {
   console.log("Adding event...");
 };
 
-const editEvent = (item) => {
-  console.log("Editing event:", item);
+const viewEvent = (item) => {
+  console.log("Viewing event:", item);
+  selectedListing.value = item;
+  showListingViewDialog.value = true;
 };
 
-const showEventMenu = (item) => {
-  console.log("Showing event menu:", item);
+const editEvent = (item) => {
+  console.log("Editing event:", item);
+  selectedListing.value = item;
+  showListingEditDialog.value = true;
 };
 
 const exportUsers = () => {
@@ -1166,10 +1363,45 @@ const getProviderStatusColor = (status) => {
   return colors[status] || "secondary";
 };
 
+const getListingStatusColor = (status) => {
+  const colors = {
+    draft: "warning",
+    published: "success",
+    archived: "error",
+  };
+  return colors[status] || "secondary";
+};
+
+const getListingTypeColor = (type) => {
+  const colors = {
+    "single-date": "primary",
+    "multi-date": "info",
+    "open-date": "success",
+    other: "warning",
+  };
+  return colors[type] || "secondary";
+};
+
+const formatListingType = (type) => {
+  const types = {
+    "single-date": "Single Date",
+    "multi-date": "Multi Date",
+    "open-date": "Open Date",
+    other: "Other",
+  };
+  return types[type] || type || "N/A";
+};
+
 const handleProviderUpdated = () => {
   console.log("Provider updated, reloading data...");
   loadDashboardData();
   showProviderEditDialog.value = false;
+};
+
+const handleListingUpdated = () => {
+  console.log("Listing updated, reloading data...");
+  loadDashboardData();
+  showListingEditDialog.value = false;
 };
 </script>
 

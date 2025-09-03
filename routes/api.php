@@ -122,6 +122,9 @@ Route::middleware([ApiMiddleware::class])->group(function () {
         Route::get('/users/{id}', [AdminController::class, 'user']);
         Route::put('/users/{id}/status', [AdminController::class, 'updateUserStatus']);
         Route::get('/listings', [AdminController::class, 'listings']);
+        Route::get('/listings/{id}', [AdminController::class, 'listing']);
+        Route::put('/listings/{id}', [AdminController::class, 'updateListing']);
+        Route::delete('/listings/{id}', [AdminController::class, 'deleteListing']);
         Route::get('/statistics', [AdminController::class, 'statistics']);
     });
 

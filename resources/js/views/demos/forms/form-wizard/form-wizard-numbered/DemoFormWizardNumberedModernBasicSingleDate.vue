@@ -212,6 +212,13 @@ async function createListing() {
       .querySelector('meta[name="csrf-token"]')
       ?.getAttribute("content");
 
+    // Get user ID from cookies or session
+    const userDataCookie = useCookie("userData");
+    const userData = userDataCookie.value;
+    const userId = userData?.id || userData?.user_id || 1;
+
+    console.log("Creating listing for user ID:", userId);
+
     // فقط فیلدهای اولیه را ارسال کن
     const res = await fetch("/api/listings", {
       method: "POST",
@@ -221,8 +228,9 @@ async function createListing() {
         Accept: "application/json",
       },
       body: JSON.stringify({
-        user_id: 1, // TODO: مقدار واقعی user_id را جایگزین کن
+        user_id: userId,
         listing_type: "single-date",
+        status: "draft",
       }),
     });
 
@@ -259,18 +267,60 @@ async function updateListing() {
   if (!listingId.value) return;
   loading.value = true;
   try {
+    // Map form data to database field names
+    const updateData = {
+      listing_title: formData.value.listingTitle,
+      listing_description: formData.value.listingDescription,
+      starting_date: formData.value.startingDate,
+      finishing_date: formData.value.finishingDate,
+      price: formData.value.price ? parseFloat(formData.value.price) : null,
+      min_capacity: formData.value.minCapacity
+        ? parseInt(formData.value.minCapacity)
+        : null,
+      max_capacity: formData.value.maxCapacity
+        ? parseInt(formData.value.maxCapacity)
+        : null,
+      subtitle: formData.value.subtitle,
+      experience_level: formData.value.experienceLevel,
+      fitness_level: formData.value.fitnessLevel,
+      activities_included: formData.value.activitiesIncluded,
+      group_language: formData.value.groupLanguage,
+      maps_and_routes: formData.value.mapsAndRoutes,
+      locations: formData.value.locations,
+      listing_media: formData.value.listingMedia,
+      promotional_video: formData.value.promotionalVideo,
+      whats_included: formData.value.whatsIncluded,
+      whats_not_included: formData.value.whatsNotIncluded,
+      additional_notes: formData.value.additionalNotes,
+      providers_faq: formData.value.providersFAQ,
+      personal_policies: formData.value.personalPolicies,
+      personal_policies_text: formData.value.personalPoliciesText,
+      terms_accepted: formData.value.termsAccepted,
+      status: "draft",
+    };
+
+    console.log("Updating listing with data:", updateData);
+
     const res = await fetch(`/api/listings/${listingId.value}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...formData.value,
-        listing_type: "single-date",
-      }),
+      body: JSON.stringify(updateData),
     });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error("Failed to update listing:", res.status, errorText);
+      throw new Error(`Failed to update listing: ${res.status} ${errorText}`);
+    }
+
     const data = await res.json();
+    console.log("Listing updated successfully:", data);
+
     // مقداردهی مجدد فرم با داده دریافتی (در صورت نیاز)
   } catch (e) {
-    alert("خطا در ذخیره لیستینگ");
+    console.error("Error updating listing:", e);
+    alert("خطا در ذخیره لیستینگ: " + e.message);
+    throw e; // Re-throw to handle in onSubmit
   } finally {
     loading.value = false;
   }

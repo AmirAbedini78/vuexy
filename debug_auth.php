@@ -81,3 +81,4 @@ echo "3. اگر هیچ provider یافت نشد، مشکل در ثبت‌نام 
 echo "4. برای تست موقت، از route /api/test/providers استفاده کنید\n";
 
 echo "\n=== پایان بررسی ===\n";
+

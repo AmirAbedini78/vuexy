@@ -1,5 +1,6 @@
 <script setup>
-import { ref } from "vue";
+// remove invalid Nuxt alias; useCookie is available globally via @vueuse/integrations in this project
+import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
@@ -440,7 +441,15 @@ const onSubmit = async () => {
       return;
     }
 
-    // Simulate save then show confirmation page (mirror Single Date behavior)
+    // Create listing if it doesn't exist
+    if (!listingId.value) {
+      await createListing();
+    }
+
+    // Update listing with form data
+    await updateListing();
+
+    // Generate random adventure ID
     const randomId = Math.floor(Math.random() * 90000) + 10000;
     submissionData.value = {
       adventureTitle: formData.value.listingTitle || "Adventure Title",
@@ -449,10 +458,136 @@ const onSubmit = async () => {
     showConfirmation.value = true;
   } catch (error) {
     console.error("Submission failed:", error);
+    alert("Submission failed: " + (error.message || "Unknown error"));
   } finally {
     loading.value = false;
   }
 };
+
+// Create listing function
+async function createListing() {
+  loading.value = true;
+  try {
+    console.log("Creating new multi-date listing...");
+
+    // Get CSRF token
+    const token = document
+      .querySelector('meta[name="csrf-token"]')
+      ?.getAttribute("content");
+
+    // Get user ID from cookies or session
+    const userDataCookie = useCookie("userData");
+    const userData = userDataCookie.value;
+    const userId = userData?.id || userData?.user_id || 1;
+
+    console.log("Creating listing for user ID:", userId);
+
+    const res = await fetch("/api/listings", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-TOKEN": token || "",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        user_id: userId,
+        listing_type: "multi-date",
+        status: "draft",
+      }),
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error("Failed to create listing:", res.status, errorText);
+      throw new Error(`Failed to create listing: ${res.status} ${errorText}`);
+    }
+
+    const data = await res.json();
+    console.log("Listing created successfully:", data);
+
+    if (!data.data || !data.data.id) {
+      console.error("No data or ID in response:", data);
+      throw new Error("No ID returned from listing creation");
+    }
+
+    listingId.value = data.data.id;
+    console.log("listingId set to:", listingId.value);
+    return data.data.id;
+  } catch (e) {
+    console.error("Error in createListing:", e);
+    alert("خطا در ساخت لیستینگ جدید: " + e.message);
+    throw e;
+  } finally {
+    loading.value = false;
+  }
+}
+
+// Update listing function
+async function updateListing() {
+  if (!listingId.value) return;
+  loading.value = true;
+  try {
+    // Map form data to database field names
+    const updateData = {
+      listing_title: formData.value.listingTitle,
+      listing_description: formData.value.listingDescription,
+      starting_date: formData.value.startDate,
+      finishing_date: formData.value.endDate,
+      price: formData.value.price ? parseFloat(formData.value.price) : null,
+      min_capacity: 1, // Default for multi-date
+      max_capacity: formData.value.maxParticipants
+        ? parseInt(formData.value.maxParticipants)
+        : null,
+      subtitle: formData.value.subtitle,
+      experience_level: formData.value.experienceLevel,
+      fitness_level: formData.value.fitnessLevel,
+      activities_included: formData.value.activitiesIncluded,
+      group_language: formData.value.groupLanguage,
+      maps_and_routes: formData.value.mapsAndRoutes,
+      locations: formData.value.locations,
+      listing_media: formData.value.listingMedia,
+      promotional_video: formData.value.promotionalVideo,
+      whats_included: formData.value.whatsIncluded,
+      whats_not_included: formData.value.whatsNotIncluded,
+      additional_notes: formData.value.additionalNotes,
+      providers_faq: formData.value.providersFAQ,
+      personal_policies: formData.value.personalPolicies,
+      personal_policies_text: formData.value.requirements,
+      terms_accepted: formData.value.termsAccepted,
+      status: "draft",
+    };
+
+    console.log("Updating multi-date listing with data:", updateData);
+
+    const res = await fetch(`/api/listings/${listingId.value}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updateData),
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error("Failed to update listing:", res.status, errorText);
+      throw new Error(`Failed to update listing: ${res.status} ${errorText}`);
+    }
+
+    const data = await res.json();
+    console.log("Multi-date listing updated successfully:", data);
+  } catch (e) {
+    console.error("Error updating listing:", e);
+    alert("خطا در ذخیره لیستینگ: " + e.message);
+    throw e;
+  } finally {
+    loading.value = false;
+  }
+}
+
+// Initialize listing ID on mount
+onMounted(async () => {
+  if (!listingId.value) {
+    await createListing();
+  }
+});
 
 const createNewAdventure = () => {
   // Reset form data to initial state
@@ -490,6 +625,9 @@ const createNewAdventure = () => {
   currentStep.value = 0;
   showConfirmation.value = false;
   formValidationErrors.value = {};
+
+  // Create new listing
+  createListing();
 };
 </script>
 

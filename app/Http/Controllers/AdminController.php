@@ -420,13 +420,131 @@ class AdminController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('listing_title', 'like', "%{$search}%")
-                  ->orWhere('listing_description', 'like', "%{$search}%");
+                  ->orWhere('listing_description', 'like', "%{$search}%")
+                  ->orWhere('listing_type', 'like', "%{$search}%");
             });
+        }
+
+        // Listing type filter
+        if ($request->filled('listing_type') && $request->listing_type !== 'all') {
+            $query->where('listing_type', $request->listing_type);
+        }
+
+        // Status filter
+        if ($request->filled('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
         }
 
         $listings = $query->orderBy('created_at', 'desc')->paginate(20);
 
         return response()->json($listings);
+    }
+
+    /**
+     * Get listing details
+     */
+    public function listing($id)
+    {
+        $listing = Listing::with(['user', 'itineraries', 'specialAddons'])->findOrFail($id);
+        return response()->json($listing);
+    }
+
+    /**
+     * Update listing information
+     */
+    public function updateListing(Request $request, $id)
+    {
+        try {
+            Log::info('Update listing request data:', $request->all());
+            
+            $listing = Listing::findOrFail($id);
+            
+            $validatedData = $request->validate([
+                'listing_title' => 'nullable|string|max:255',
+                'listing_description' => 'nullable|string',
+                'listing_type' => 'nullable|string|in:single-date,multi-date,open-date,other',
+                'starting_date' => 'nullable|date',
+                'finishing_date' => 'nullable|date',
+                'price' => 'nullable|numeric|min:0',
+                'min_capacity' => 'nullable|integer|min:1',
+                'max_capacity' => 'nullable|integer|min:1',
+                'subtitle' => 'nullable|string|max:255',
+                'experience_level' => 'nullable|string|max:255',
+                'fitness_level' => 'nullable|string|max:255',
+                'activities_included' => 'nullable|string',
+                'group_language' => 'nullable|string|max:255',
+                'locations' => 'nullable|string|max:255',
+                'maps_and_routes' => 'nullable|array',
+                'listing_media' => 'nullable|array',
+                'promotional_video' => 'nullable|array',
+                'whats_included' => 'nullable|string',
+                'whats_not_included' => 'nullable|string',
+                'additional_notes' => 'nullable|string',
+                'providers_faq' => 'nullable|string',
+                'personal_policies' => 'nullable|string|max:255',
+                'personal_policies_text' => 'nullable|string',
+                'status' => 'nullable|string|in:draft,published,archived',
+                'terms_accepted' => 'nullable|boolean',
+            ]);
+            
+            Log::info('Listing validated data:', $validatedData);
+
+            // Filter out null/empty values and update only provided fields
+            $updateData = array_filter($validatedData, function($value) {
+                return $value !== null && $value !== '';
+            });
+
+            // Encode array fields to JSON for storage
+            foreach (['maps_and_routes', 'listing_media', 'promotional_video'] as $jsonField) {
+                if (array_key_exists($jsonField, $updateData)) {
+                    $updateData[$jsonField] = json_encode($updateData[$jsonField]);
+                }
+            }
+            
+            Log::info('Listing filtered update data:', $updateData);
+            
+            $listing->update($updateData);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Listing updated successfully',
+                'data' => $listing
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error updating listing: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update listing',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Delete listing
+     */
+    public function deleteListing($id)
+    {
+        try {
+            $listing = Listing::findOrFail($id);
+            $listing->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Listing deleted successfully'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error deleting listing: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete listing',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
