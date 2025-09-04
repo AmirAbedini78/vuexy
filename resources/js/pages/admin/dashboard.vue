@@ -369,38 +369,38 @@
 
         <!-- Status Column -->
         <template #item.status="{ item }">
-          <VSelect
-            :model-value="item.status"
-            :items="statusChoices"
-            item-title="title"
-            item-value="value"
-            variant="outlined"
-            density="compact"
-            hide-details
-            style="min-width: 150px"
-            @update:model-value="(val) => changeProviderStatus(item, val)"
-            @click.stop
-            @keydown.stop
-          >
-            <template #selection="{ item: sel }">
+          <VMenu>
+            <template #activator="{ props }">
               <VChip
-                :color="getProviderStatusColor(sel?.value)"
+                v-bind="props"
+                :color="getProviderStatusColor(item.status || 'approved')"
                 size="small"
-                class="font-weight-medium"
+                class="font-weight-medium cursor-pointer"
+                style="min-width: 100px; justify-content: center"
               >
-                {{ sel?.title }}
+                {{ getStatusTitle(item.status || "approved") }}
+                <VIcon icon="tabler-chevron-down" size="small" class="ml-1" />
               </VChip>
             </template>
-            <template #item="{ item: opt }">
-              <div class="d-flex align-center gap-2">
-                <VChip
-                  :color="getProviderStatusColor(opt?.value)"
-                  size="x-small"
-                />
-                <span>{{ opt?.title }}</span>
-              </div>
-            </template>
-          </VSelect>
+            <VList>
+              <VListItem
+                v-for="choice in statusChoices"
+                :key="choice.value"
+                @click="changeProviderStatus(item, choice.value)"
+                :class="{
+                  'bg-primary-lighten-5': item.status === choice.value,
+                }"
+              >
+                <template #prepend>
+                  <VChip
+                    :color="getProviderStatusColor(choice.value)"
+                    size="x-small"
+                  />
+                </template>
+                <VListItemTitle>{{ choice.title }}</VListItemTitle>
+              </VListItem>
+            </VList>
+          </VMenu>
         </template>
 
         <!-- Total Listing Column -->
@@ -1147,8 +1147,8 @@ const providersData = ref([]);
 
 // Status choices for provider status combobox
 const statusChoices = [
-  { title: "Active", value: "active" },
   { title: "Approved", value: "approved" },
+  { title: "Active", value: "active" },
   { title: "Rejected", value: "rejected" },
 ];
 
@@ -1407,6 +1407,9 @@ const changeProviderStatus = async (provider, status) => {
       newStatus: status,
     });
 
+    // Show loading state
+    console.log("Status change initiated for provider:", provider.id);
+
     // Validate status
     if (!status || !["active", "approved", "rejected"].includes(status)) {
       console.error("Invalid status:", status);
@@ -1424,8 +1427,21 @@ const changeProviderStatus = async (provider, status) => {
     console.log("Status change response:", response);
 
     if (response?.success || response?.message) {
-      // Directly update the provider status (same as providers.vue)
+      // Update the provider status in the local array
+      const providerIndex = providersData.value.findIndex(
+        (p) => p.id === provider.id
+      );
+      if (providerIndex !== -1) {
+        providersData.value[providerIndex].status = status;
+        providersData.value[providerIndex].want_to_be_listed =
+          response.provider?.want_to_be_listed || provider.want_to_be_listed;
+      }
+
+      // Also update the provider object passed to the function
       provider.status = status;
+      provider.want_to_be_listed =
+        response.provider?.want_to_be_listed || provider.want_to_be_listed;
+
       console.log("Provider status updated successfully to:", status);
 
       // Show success message (optional)
@@ -1448,6 +1464,17 @@ const getProviderStatusColor = (status) => {
     Denied: "error",
   };
   return colors[status] || "secondary";
+};
+
+const getStatusTitle = (status) => {
+  const titles = {
+    active: "Active",
+    approved: "Approved",
+    rejected: "Rejected",
+  };
+  const result = titles[status] || "Approved";
+  console.log(`Status title for "${status}": "${result}"`);
+  return result;
 };
 
 const getListingStatusColor = (status) => {

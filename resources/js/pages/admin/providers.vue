@@ -79,33 +79,35 @@
 
         <!-- Status Column -->
         <template #item.status="{ item }">
-          <VSelect
-            :model-value="item.status"
-            :items="statusChoices"
-            item-title="title"
-            item-value="value"
-            variant="outlined"
-            density="compact"
-            hide-details
-            style="min-width: 150px"
-            @update:model-value="(val) => changeStatus(item, val)"
-          >
-            <template #selection="{ item: sel }">
+          <VMenu>
+            <template #activator="{ props }">
               <VChip
-                :color="getStatusColor(sel?.value)"
+                v-bind="props"
+                :color="getStatusColor(item.status || 'approved')"
                 size="small"
-                class="font-weight-medium"
+                class="font-weight-medium cursor-pointer"
+                style="min-width: 100px; justify-content: center"
               >
-                {{ sel?.title }}
+                {{ getStatusTitle(item.status || "approved") }}
+                <VIcon icon="tabler-chevron-down" size="small" class="ml-1" />
               </VChip>
             </template>
-            <template #item="{ item: opt }">
-              <div class="d-flex align-center gap-2">
-                <VChip :color="getStatusColor(opt?.value)" size="x-small" />
-                <span>{{ opt?.title }}</span>
-              </div>
-            </template>
-          </VSelect>
+            <VList>
+              <VListItem
+                v-for="choice in statusChoices"
+                :key="choice.value"
+                @click="changeStatus(item, choice.value)"
+                :class="{
+                  'bg-primary-lighten-5': item.status === choice.value,
+                }"
+              >
+                <template #prepend>
+                  <VChip :color="getStatusColor(choice.value)" size="x-small" />
+                </template>
+                <VListItemTitle>{{ choice.title }}</VListItemTitle>
+              </VListItem>
+            </VList>
+          </VMenu>
         </template>
 
         <!-- Total Listing Column -->
@@ -650,8 +652,8 @@ const statusOptions = [
 
 // For inline status select
 const statusChoices = [
-  { title: "Active", value: "active" },
   { title: "Approved", value: "approved" },
+  { title: "Active", value: "active" },
   { title: "Rejected", value: "rejected" },
 ];
 
@@ -693,6 +695,17 @@ const getStatusColor = (status) => {
   }
 };
 
+const getStatusTitle = (status) => {
+  const titles = {
+    active: "Active",
+    approved: "Approved",
+    rejected: "Rejected",
+  };
+  const result = titles[status] || "Approved";
+  console.log(`Status title for "${status}": "${result}"`);
+  return result;
+};
+
 const formatDate = (date) => {
   if (!date) return "-";
   return new Date(date).toLocaleDateString();
@@ -700,6 +713,13 @@ const formatDate = (date) => {
 
 const changeStatus = async (provider, status) => {
   try {
+    console.log("Changing provider status:", {
+      providerId: provider.id,
+      providerType: provider.provider_type,
+      currentStatus: provider.status,
+      newStatus: status,
+    });
+
     const res = await $api(
       `/admin/providers/${provider.id}/${provider.provider_type}/status`,
       {
@@ -709,7 +729,21 @@ const changeStatus = async (provider, status) => {
     );
 
     if (res?.success || res?.message) {
+      // Update the provider status in the local array
+      const providerIndex = providers.value.findIndex(
+        (p) => p.id === provider.id
+      );
+      if (providerIndex !== -1) {
+        providers.value[providerIndex].status = status;
+        providers.value[providerIndex].want_to_be_listed =
+          res.provider?.want_to_be_listed || provider.want_to_be_listed;
+      }
+
+      // Also update the provider object passed to the function
       provider.status = status;
+      provider.want_to_be_listed =
+        res.provider?.want_to_be_listed || provider.want_to_be_listed;
+
       // Optionally show a toast here
     }
   } catch (e) {

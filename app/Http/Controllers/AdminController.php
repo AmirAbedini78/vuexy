@@ -145,6 +145,13 @@ class AdminController extends Controller
                 $provider->status = 'approved';
             }
             
+            // Log the status mapping for debugging
+            Log::info("Provider status mapping", [
+                'provider_id' => $provider->id,
+                'want_to_be_listed' => $provider->want_to_be_listed,
+                'mapped_status' => $provider->status
+            ]);
+            
             return $provider;
         });
 
@@ -321,37 +328,51 @@ class AdminController extends Controller
             'status' => 'required|in:active,approved,rejected'
         ]);
 
-        if ($type === 'individual') {
-            $provider = IndividualUser::findOrFail($id);
-            $userId = $provider->user_id;
-        } else {
-            $provider = CompanyUser::findOrFail($id);
-            $userId = $provider->user_id;
+        try {
+            if ($type === 'individual') {
+                $provider = IndividualUser::findOrFail($id);
+                $userId = $provider->user_id;
+            } else {
+                $provider = CompanyUser::findOrFail($id);
+                $userId = $provider->user_id;
+            }
+
+            // Map status to want_to_be_listed: active->yes, approved->unsure, rejected->no
+            $map = [
+                'active' => 'yes',
+                'approved' => 'unsure',
+                'rejected' => 'no',
+            ];
+
+            // Update the provider status
+            $provider->update([
+                'want_to_be_listed' => $map[$request->status],
+            ]);
+
+            // Add the status field to the response for frontend
+            $provider->status = $request->status;
+
+            // Notify user via email & database
+            $user = User::find($userId);
+            if ($user) {
+                $providerName = $type === 'individual' ? ($provider->full_name ?? null) : ($provider->company_name ?? null);
+                $user->notify(new ProviderStatusUpdated($request->status, $type, $providerName));
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Provider status updated successfully',
+                'provider' => $provider,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error updating provider status: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update provider status',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        // Map status to want_to_be_listed: active->yes, approved->unsure, rejected->no
-        $map = [
-            'active' => 'yes',
-            'approved' => 'unsure',
-            'rejected' => 'no',
-        ];
-
-        $provider->update([
-            'want_to_be_listed' => $map[$request->status],
-        ]);
-
-        // Notify user via email & database
-        $user = User::find($userId);
-        if ($user) {
-            $providerName = $type === 'individual' ? ($provider->full_name ?? null) : ($provider->company_name ?? null);
-            $user->notify(new ProviderStatusUpdated($request->status, $type, $providerName));
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Provider status updated successfully',
-            'provider' => $provider,
-        ]);
     }
 
     /**
