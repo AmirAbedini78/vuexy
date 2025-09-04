@@ -129,15 +129,22 @@ class AdminController extends Controller
 
         // Derive status from want_to_be_listed
         $providers = $providers->map(function ($provider) {
-            // Map want_to_be_listed => status: yes->active, unsure/null->approved, no->rejected
-            $listed = isset($provider->want_to_be_listed) ? strtolower($provider->want_to_be_listed) : null;
+            // Map want_to_be_listed => status: yes->active, no->rejected, everything else->approved
+            $listed = isset($provider->want_to_be_listed) ? strtolower(trim($provider->want_to_be_listed)) : null;
+            
+            // Only set to active if explicitly 'yes'
             if ($listed === 'yes') {
                 $provider->status = 'active';
-            } elseif ($listed === 'no') {
+            } 
+            // Only set to rejected if explicitly 'no'
+            elseif ($listed === 'no') {
                 $provider->status = 'rejected';
-            } else {
-                $provider->status = 'approved'; // default
+            } 
+            // Default to approved for everything else (null, empty, unsure, etc.)
+            else {
+                $provider->status = 'approved';
             }
+            
             return $provider;
         });
 

@@ -128,3 +128,4 @@ UPDATE users SET role = 'admin' WHERE email = 'your-email@example.com';
 - توضیح کامل مراحل انجام شده
 
 
+

@@ -111,3 +111,5 @@
 - بررسی Network tab برای API calls
 - بررسی Vue DevTools برای state
 - بررسی CSS برای styling issues
+
+

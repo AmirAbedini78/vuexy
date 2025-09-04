@@ -271,7 +271,7 @@
                         <!-- Show existing packages -->
                         <div v-else>
                           <div
-                            v-for="(package, index) in packages"
+                            v-for="(packageItem, index) in packages"
                             :key="index"
                             class="package-item mb-3 p-3 border rounded"
                           >
@@ -279,7 +279,7 @@
                               class="d-flex justify-space-between align-center mb-2"
                             >
                               <h6 class="text-h6 mb-0">
-                                Package {{ index + 1 }}: {{ package.name }}
+                                Package {{ index + 1 }}: {{ packageItem.name }}
                               </h6>
                               <div class="d-flex gap-2">
                                 <VBtn
@@ -303,11 +303,11 @@
                               </div>
                             </div>
                             <p class="text-body-2 mb-1">
-                              <strong>Price:</strong> €{{ package.price }}
+                              <strong>Price:</strong> €{{ packageItem.price }}
                             </p>
                             <p class="text-body-2 mb-0">
                               <strong>Description:</strong>
-                              {{ package.description }}
+                              {{ packageItem.description }}
                             </p>
                           </div>
 

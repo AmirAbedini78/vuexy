@@ -134,3 +134,5 @@ const handleListingUpdated = (updatedData) => {
 - **Responsive Design**: بهینه‌سازی برای موبایل
 - **Accessibility**: بهبود دسترسی‌پذیری
 - **Internationalization**: پشتیبانی از زبان‌های مختلف
+
+

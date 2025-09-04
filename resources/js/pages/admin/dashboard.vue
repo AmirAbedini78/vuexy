@@ -369,13 +369,38 @@
 
         <!-- Status Column -->
         <template #item.status="{ item }">
-          <VChip
-            :color="getProviderStatusColor(item.status)"
-            size="small"
-            class="font-weight-medium"
+          <VSelect
+            :model-value="item.status"
+            :items="statusChoices"
+            item-title="title"
+            item-value="value"
+            variant="outlined"
+            density="compact"
+            hide-details
+            style="min-width: 150px"
+            @update:model-value="(val) => changeProviderStatus(item, val)"
+            @click.stop
+            @keydown.stop
           >
-            {{ item.status }}
-          </VChip>
+            <template #selection="{ item: sel }">
+              <VChip
+                :color="getProviderStatusColor(sel?.value)"
+                size="small"
+                class="font-weight-medium"
+              >
+                {{ sel?.title }}
+              </VChip>
+            </template>
+            <template #item="{ item: opt }">
+              <div class="d-flex align-center gap-2">
+                <VChip
+                  :color="getProviderStatusColor(opt?.value)"
+                  size="x-small"
+                />
+                <span>{{ opt?.title }}</span>
+              </div>
+            </template>
+          </VSelect>
         </template>
 
         <!-- Total Listing Column -->
@@ -930,6 +955,7 @@
 <script setup>
 import ListingEditWizard from "@/components/admin/ListingEditWizard.vue";
 import ProviderEditWizard from "@/components/admin/ProviderEditWizard.vue";
+import { $api } from "@/utils/api";
 
 definePage({
   meta: {
@@ -1119,6 +1145,16 @@ const ordersData = ref([
 // Providers data - will be loaded from API
 const providersData = ref([]);
 
+// Status choices for provider status combobox
+const statusChoices = [
+  { title: "Active", value: "active" },
+  { title: "Approved", value: "approved" },
+  { title: "Rejected", value: "rejected" },
+];
+
+// Debug: Log status choices
+console.log("Status choices defined:", statusChoices);
+
 // Table headers
 const eventsHeaders = [
   { title: "EVENTS", key: "events", sortable: false },
@@ -1181,26 +1217,33 @@ const loadDashboardData = async () => {
     // Load providers data
     console.log("Loading providers data...");
     try {
-      // ابتدا از test route استفاده می‌کنیم (بدون authentication)
-      const testResponse = await $api("/test/providers", {
+      const providersResponse = await $api("/admin/providers", {
         method: "GET",
       });
-      console.log("Test providers response:", testResponse);
-      providersData.value = testResponse.data || [];
-      console.log("Test providers data set:", providersData.value);
-    } catch (error) {
-      console.log("Test route failed, trying admin route...");
-      try {
-        const providersResponse = await $api("/admin/providers", {
-          method: "GET",
+      console.log("Providers response:", providersResponse);
+      providersData.value = providersResponse.data || [];
+      console.log("Providers data set:", providersData.value);
+
+      // Debug: Log each provider's status
+      providersData.value.forEach((provider, index) => {
+        console.log(`Provider ${index}:`, {
+          id: provider.id,
+          name: provider.provider_name,
+          status: provider.status,
+          want_to_be_listed: provider.want_to_be_listed,
         });
-        console.log("Admin providers response:", providersResponse);
-        providersData.value = providersResponse.data || [];
-        console.log("Admin providers data set:", providersData.value);
-      } catch (adminError) {
-        console.error("Both routes failed:", adminError);
-        providersData.value = [];
-      }
+      });
+
+      // Force reactivity by ensuring all providers have a status
+      providersData.value = providersData.value.map((provider) => {
+        if (!provider.status) {
+          provider.status = "approved"; // Default status
+        }
+        return provider;
+      });
+    } catch (error) {
+      console.error("Error loading providers:", error);
+      providersData.value = [];
     }
 
     // Load listings data directly from admin endpoint
@@ -1355,8 +1398,52 @@ const showProviderMenu = (item) => {
   showProviderEditDialog.value = true;
 };
 
+const changeProviderStatus = async (provider, status) => {
+  try {
+    console.log("Changing provider status:", {
+      providerId: provider.id,
+      providerType: provider.provider_type,
+      currentStatus: provider.status,
+      newStatus: status,
+    });
+
+    // Validate status
+    if (!status || !["active", "approved", "rejected"].includes(status)) {
+      console.error("Invalid status:", status);
+      return;
+    }
+
+    const response = await $api(
+      `/admin/providers/${provider.id}/${provider.provider_type}/status`,
+      {
+        method: "PUT",
+        body: { status },
+      }
+    );
+
+    console.log("Status change response:", response);
+
+    if (response?.success || response?.message) {
+      // Directly update the provider status (same as providers.vue)
+      provider.status = status;
+      console.log("Provider status updated successfully to:", status);
+
+      // Show success message (optional)
+      // You can add a toast notification here if needed
+    } else {
+      console.error("Status update failed:", response);
+    }
+  } catch (error) {
+    console.error("Error updating provider status:", error);
+    // You can add error toast notification here if needed
+  }
+};
+
 const getProviderStatusColor = (status) => {
   const colors = {
+    active: "success",
+    approved: "warning",
+    rejected: "error",
     Live: "success",
     Denied: "error",
   };
