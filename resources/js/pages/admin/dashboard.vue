@@ -174,39 +174,38 @@
 
         <!-- Status Column -->
         <template #item.status="{ item }">
-          <VSelect
-            :model-value="item.status || 'submitted'"
-            :items="eventStatusChoices"
-            item-title="title"
-            item-value="value"
-            variant="outlined"
-            density="compact"
-            hide-details
-            style="min-width: 150px"
-            @update:model-value="(val) => changeEventStatus(item, val)"
-            @click.stop
-            @keydown.stop
-            :menu-props="{ closeOnContentClick: true }"
-          >
-            <template #selection="{ item: sel }">
+          <VMenu>
+            <template #activator="{ props }">
               <VChip
-                :color="getListingStatusColor(sel?.value || item.status)"
+                v-bind="props"
+                :color="getListingStatusColor(item.status || 'submitted')"
                 size="small"
-                class="font-weight-medium"
+                class="font-weight-medium cursor-pointer"
+                style="min-width: 120px; justify-content: center"
               >
-                {{ sel?.title || getEventStatusTitle(item.status) }}
+                {{ getEventStatusTitle(item.status || "submitted") }}
+                <VIcon icon="tabler-chevron-down" size="small" class="ml-1" />
               </VChip>
             </template>
-            <template #item="{ item: opt }">
-              <div class="d-flex align-center gap-2">
-                <VChip
-                  :color="getListingStatusColor(opt?.value)"
-                  size="x-small"
-                />
-                <span>{{ opt?.title }}</span>
-              </div>
-            </template>
-          </VSelect>
+            <VList>
+              <VListItem
+                v-for="choice in eventStatusChoices"
+                :key="choice.value"
+                @click="changeEventStatus(item, choice.value)"
+                :class="{
+                  'bg-primary-lighten-5': item.status === choice.value,
+                }"
+              >
+                <template #prepend>
+                  <VChip
+                    :color="getListingStatusColor(choice.value)"
+                    size="x-small"
+                  />
+                </template>
+                <VListItemTitle>{{ choice.title }}</VListItemTitle>
+              </VListItem>
+            </VList>
+          </VMenu>
         </template>
 
         <!-- Actions Column -->
