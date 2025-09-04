@@ -101,7 +101,14 @@ watch(providerStatus, () => {
     "version:",
     navVersion.value
   );
+  // Show rejection notice when status is rejected
+  if (providerStatus.value === "rejected") {
+    rejectionNotice.value = true;
+  }
 });
+
+// Rejection popup state (non-intrusive)
+const rejectionNotice = ref(false);
 
 // Navigation logic based on provider status
 const navigationItems = computed(() => {
@@ -133,6 +140,20 @@ const navigationItems = computed(() => {
 
 <template>
   <VerticalNavLayout :key="navVersion" :nav-items="navigationItems">
+    <!-- Rejection toast (shows on each refresh/login if status is rejected) -->
+    <VSnackbar
+      v-model="rejectionNotice"
+      color="error"
+      :timeout="5000"
+      location="top right"
+      elevation="2"
+    >
+      <div class="d-flex align-center" style="gap: 8px">
+        <VIcon icon="tabler-alert-triangle" size="20" />
+        Your provider profile was rejected. Please contact admin support.
+      </div>
+    </VSnackbar>
+
     <!-- 👉 navbar -->
     <template #navbar="{ toggleVerticalOverlayNavActive }">
       <div class="d-flex h-100 align-center">
