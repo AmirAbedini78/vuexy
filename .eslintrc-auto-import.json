@@ -363,6 +363,8 @@
     "whenever": true,
     "useNavigation": true,
     "useSidebarState": true,
-    "useAdminNavigation": true
+    "useAdminNavigation": true,
+    "useProviderStatus": true,
+    "useProviderStatusUpdate": true
   }
 }

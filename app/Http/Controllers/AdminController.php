@@ -376,6 +376,73 @@ class AdminController extends Controller
     }
 
     /**
+     * Get provider status for current user
+     */
+    public function getProviderStatus(Request $request)
+    {
+        try {
+            $user = $request->user();
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User not authenticated'
+                ], 401);
+            }
+
+            // Check if user has individual or company profile
+            $individualUser = IndividualUser::where('user_id', $user->id)->first();
+            $companyUser = CompanyUser::where('user_id', $user->id)->first();
+
+            $provider = null;
+            $providerType = null;
+
+            if ($individualUser) {
+                $provider = $individualUser;
+                $providerType = 'individual';
+            } elseif ($companyUser) {
+                $provider = $companyUser;
+                $providerType = 'company';
+            }
+
+            if (!$provider) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No provider profile found',
+                    'status' => 'not_found'
+                ]);
+            }
+
+            // Map want_to_be_listed to status
+            $listed = isset($provider->want_to_be_listed) ? strtolower(trim($provider->want_to_be_listed)) : null;
+            
+            if ($listed === 'yes') {
+                $status = 'active';
+            } elseif ($listed === 'no') {
+                $status = 'rejected';
+            } else {
+                $status = 'approved';
+            }
+
+            return response()->json([
+                'success' => true,
+                'status' => $status,
+                'provider_type' => $providerType,
+                'provider_id' => $provider->id,
+                'want_to_be_listed' => $provider->want_to_be_listed
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error getting provider status: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to get provider status',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Get all users for admin management
      */
     public function users(Request $request)

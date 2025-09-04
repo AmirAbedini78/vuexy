@@ -128,6 +128,11 @@ Route::middleware([ApiMiddleware::class])->group(function () {
         Route::get('/statistics', [AdminController::class, 'statistics']);
     });
 
+    // Provider status route - accessible by authenticated users
+    Route::middleware(['auth:sanctum'])->group(function () {
+        Route::get('/provider/status', [AdminController::class, 'getProviderStatus']);
+    });
+
     // Temporary test route for providers (without authentication)
     Route::get('/test/providers', [AdminController::class, 'providers']);
 });

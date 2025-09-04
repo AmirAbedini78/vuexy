@@ -14,25 +14,53 @@ import { VerticalNavLayout } from "@layouts";
 // Navigation composable
 const { goToDashboard } = useNavigation();
 
+// Provider status composable
+const {
+  providerStatus,
+  shouldShowFullSidebar,
+  shouldShowLimitedSidebar,
+  fetchProviderStatus,
+  initializeFromStorage,
+} = useProviderStatus();
+
 // Get user data to check if admin
 const userDataCookie = useCookie("userData");
 
-// Simple navigation logic (gated by verification)
+// Initialize provider status on mount
+onMounted(async () => {
+  initializeFromStorage();
+  await fetchProviderStatus();
+
+  // Listen for provider status changes from admin dashboard
+  window.addEventListener("providerStatusChanged", async (event) => {
+    console.log("Provider status changed event received:", event.detail);
+    await fetchProviderStatus();
+  });
+});
+
+// Cleanup event listener on unmount
+onUnmounted(() => {
+  window.removeEventListener("providerStatusChanged", () => {});
+});
+
+// Navigation logic based on provider status
 const navigationItems = computed(() => {
   if (typeof window !== "undefined") {
     const userData = userDataCookie.value;
+
+    // Admin users always see admin navigation
     if (userData?.role === "admin") return adminNavItems;
 
-    // Read verification flag set by Timeline
-    const verifiedCookie = useCookie("userVerified");
-    let isVerified = verifiedCookie.value === "true";
-    if (!isVerified) {
-      try {
-        isVerified = localStorage.getItem("userVerified") === "true";
-      } catch (e) {}
-    }
-
-    if (!isVerified) {
+    // For regular users, check provider status
+    if (shouldShowFullSidebar.value) {
+      // Provider status is 'active' - show all menu items
+      return userNavItems;
+    } else if (shouldShowLimitedSidebar.value) {
+      // Provider status is 'approved' or 'rejected' - show only Welcome
+      const welcome = userNavItems.find((i) => i.title === "Welcome");
+      return welcome ? [welcome] : [];
+    } else {
+      // No provider profile or status is 'not_found' - show only Welcome
       const welcome = userNavItems.find((i) => i.title === "Welcome");
       return welcome ? [welcome] : [];
     }

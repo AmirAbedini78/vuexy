@@ -1442,6 +1442,31 @@ const changeProviderStatus = async (provider, status) => {
       provider.want_to_be_listed =
         response.provider?.want_to_be_listed || provider.want_to_be_listed;
 
+      // If this is the current user's provider, update their localStorage
+      const userDataCookie = useCookie("userData");
+      const userData = userDataCookie.value;
+      if (userData && provider.user_id === userData.id) {
+        localStorage.setItem("providerStatus", status);
+        localStorage.setItem("providerType", provider.provider_type);
+        localStorage.setItem("providerId", provider.id);
+
+        console.log(
+          "Updated current user's provider status in localStorage:",
+          status
+        );
+
+        // Trigger a custom event to notify other components
+        window.dispatchEvent(
+          new CustomEvent("providerStatusChanged", {
+            detail: {
+              status,
+              providerType: provider.provider_type,
+              providerId: provider.id,
+            },
+          })
+        );
+      }
+
       console.log("Provider status updated successfully to:", status);
 
       // Show success message (optional)

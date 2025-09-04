@@ -548,6 +548,26 @@ const completeProfile = async () => {
       profileCompleted.value = true;
       reviewStatus.value = "verified_contact";
 
+      // Clear old verification-based cookies
+      const step4Cookie = useCookie("step4Enabled");
+      const verifiedCookie = useCookie("userVerified");
+      step4Cookie.value = "";
+      verifiedCookie.value = "";
+
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.removeItem("step4Enabled");
+          localStorage.removeItem("userVerified");
+        } catch (e) {}
+      }
+
+      // Set provider status to 'approved' (default status)
+      localStorage.setItem("providerStatus", "approved");
+      localStorage.setItem("providerType", userType || "individual");
+      localStorage.setItem("providerId", currentUser.value.id);
+
+      console.log("Profile completed, provider status set to approved");
+
       const redirectUrl = data.redirect_url || "/access-control";
       // Direct, silent redirect (no alert, no delay)
       window.location.href = redirectUrl;

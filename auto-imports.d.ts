@@ -282,6 +282,8 @@ declare global {
   const usePreferredReducedMotion: typeof import('@vueuse/core')['usePreferredReducedMotion']
   const usePrevious: typeof import('@vueuse/core')['usePrevious']
   const useProjection: typeof import('@vueuse/math')['useProjection']
+  const useProviderStatus: typeof import('./resources/js/composables/useProviderStatus.js')['useProviderStatus']
+  const useProviderStatusUpdate: typeof import('./resources/js/composables/useProviderStatusUpdate.js')['useProviderStatusUpdate']
   const useRafFn: typeof import('@vueuse/core')['useRafFn']
   const useRefHistory: typeof import('@vueuse/core')['useRefHistory']
   const useResizeObserver: typeof import('@vueuse/core')['useResizeObserver']
@@ -523,7 +525,6 @@ declare module 'vue' {
     readonly useActiveElement: UnwrapRef<typeof import('@vueuse/core')['useActiveElement']>
     readonly useAdminNavigation: UnwrapRef<typeof import('./resources/js/composables/useAdminNavigation.js')['useAdminNavigation']>
     readonly useAnimate: UnwrapRef<typeof import('@vueuse/core')['useAnimate']>
-    readonly useApi: UnwrapRef<typeof import('./resources/js/composables/useApi.js')['useApi']>
     readonly useArrayDifference: UnwrapRef<typeof import('@vueuse/core')['useArrayDifference']>
     readonly useArrayEvery: UnwrapRef<typeof import('@vueuse/core')['useArrayEvery']>
     readonly useArrayFilter: UnwrapRef<typeof import('@vueuse/core')['useArrayFilter']>
@@ -645,6 +646,9 @@ declare module 'vue' {
     readonly usePreferredReducedMotion: UnwrapRef<typeof import('@vueuse/core')['usePreferredReducedMotion']>
     readonly usePrevious: UnwrapRef<typeof import('@vueuse/core')['usePrevious']>
     readonly useProjection: UnwrapRef<typeof import('@vueuse/math')['useProjection']>
+    readonly useProviderStatus: UnwrapRef<typeof import('./resources/js/@layouts/composables/useProviderStatus.js')['useProviderStatus']>
+    readonly useProviderStatus: UnwrapRef<typeof import('./resources/js/composables/useProviderStatus.js')['useProviderStatus']>
+    readonly useProviderStatusUpdate: UnwrapRef<typeof import('./resources/js/composables/useProviderStatusUpdate.js')['useProviderStatusUpdate']>
     readonly useRafFn: UnwrapRef<typeof import('@vueuse/core')['useRafFn']>
     readonly useRefHistory: UnwrapRef<typeof import('@vueuse/core')['useRefHistory']>
     readonly useResizeObserver: UnwrapRef<typeof import('@vueuse/core')['useResizeObserver']>

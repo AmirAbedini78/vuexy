@@ -28,11 +28,57 @@ export const getAbility = () => {
  * @param {object} item navigation object item
  */
 export const canViewNavMenuGroup = item => {
-  // For now, always return true to show all menu items
-  return true
+  // Check if user is admin
+  const userDataCookie = useCookie("userData");
+  const userData = userDataCookie.value;
+  const isAdmin = userData?.role === 'admin';
+  
+  if (isAdmin) {
+    // Admin users can see all menu items
+    return true;
+  }
+  
+  // For regular users, check provider status
+  const providerStatus = localStorage.getItem('providerStatus');
+  
+  // If no provider status, only show Welcome menu
+  if (!providerStatus || providerStatus === 'not_found') {
+    return item.title === 'Welcome';
+  }
+  
+  // If provider status is 'active', show all menu items
+  if (providerStatus === 'active') {
+    return true;
+  }
+  
+  // For 'approved' or 'rejected' status, only show Welcome menu
+  return item.title === 'Welcome';
 }
 
 export const canNavigate = to => {
-  // For now, always allow navigation
-  return true
+  // Check if user is admin
+  const userDataCookie = useCookie("userData");
+  const userData = userDataCookie.value;
+  const isAdmin = userData?.role === 'admin';
+  
+  if (isAdmin) {
+    // Admin users can navigate anywhere
+    return true;
+  }
+  
+  // For regular users, check provider status
+  const providerStatus = localStorage.getItem('providerStatus');
+  
+  // If no provider status, only allow timeline and welcome pages
+  if (!providerStatus || providerStatus === 'not_found') {
+    return to.name === 'timeline' || to.name === 'welcome' || to.path === '/';
+  }
+  
+  // If provider status is 'active', allow all navigation
+  if (providerStatus === 'active') {
+    return true;
+  }
+  
+  // For 'approved' or 'rejected' status, only allow timeline and welcome pages
+  return to.name === 'timeline' || to.name === 'welcome' || to.path === '/';
 }
