@@ -16,6 +16,8 @@ class CompanyUserController extends Controller
         \Log::info('Company User Registration Data:', $request->all());
         
         $validator = Validator::make($request->all(), [
+            // Auth & linkage
+            'user_id' => 'nullable|exists:users,id',
             // Step 1: Company Information
             'company_name' => 'required|string|max:255',
             'vat_id' => 'nullable|string|max:255',
@@ -54,6 +56,16 @@ class CompanyUserController extends Controller
 
         try {
             $data = $validator->validated();
+
+            // Ensure user_id is set and linked to the authenticated user when available
+            $authUserId = optional($request->user())->id;
+            $data['user_id'] = $authUserId ?? ($data['user_id'] ?? $request->input('user_id'));
+            if (empty($data['user_id'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User ID is required to create provider profile.'
+                ], 422);
+            }
 
             // Handle file uploads
             if ($request->hasFile('passport_image') && $request->file('passport_image')->isValid()) {

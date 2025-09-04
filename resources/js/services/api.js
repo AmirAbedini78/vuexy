@@ -10,11 +10,39 @@ const api = axios.create({
   },
 })
 
+// Helper: extract user id from cookie/localStorage
+const getLoggedInUserId = () => {
+  try {
+    // Try cookie first
+    const cookieStr = typeof document !== 'undefined' ? document.cookie || '' : ''
+    const cookieMatch = cookieStr.split('; ').find(c => c.startsWith('userData='))
+    if (cookieMatch) {
+      const raw = decodeURIComponent(cookieMatch.split('=')[1])
+      const obj = JSON.parse(raw)
+      if (obj?.id) return obj.id
+      if (obj?.user_id) return obj.user_id
+    }
+  } catch (e) {}
+  try {
+    // Fallback to localStorage
+    const raw = localStorage.getItem('userData')
+    if (raw) {
+      const obj = JSON.parse(raw)
+      if (obj?.id) return obj.id
+      if (obj?.user_id) return obj.user_id
+    }
+  } catch (e) {}
+  return null
+}
+
 // Individual User API Service
 export const individualUserService = {
   async register(formData) {
     try {
       const formDataToSend = new FormData()
+      // Ensure user linkage
+      const userId = getLoggedInUserId()
+      if (userId) formDataToSend.append('user_id', userId)
       
       // Step 1: Personal Information
       formDataToSend.append('full_name', formData.fullName || '')
@@ -93,6 +121,9 @@ export const companyUserService = {
   async register(formData) {
     try {
       const formDataToSend = new FormData()
+      // Ensure user linkage
+      const userId = getLoggedInUserId()
+      if (userId) formDataToSend.append('user_id', userId)
       
       // Step 1: Company Information
       formDataToSend.append('company_name', formData.companyName || '')

@@ -50,6 +50,7 @@ class AdminController extends Controller
         Log::info('AdminController::providers called');
         
         $individualUsers = IndividualUser::select([
+            'user_id',
             'id',
             'full_name as provider_name',
             'activity_specialization',
@@ -76,6 +77,7 @@ class AdminController extends Controller
         ]);
 
         $companyUsers = CompanyUser::select([
+            'user_id',
             'id',
             'company_name as provider_name',
             'activity_specialization',
@@ -389,22 +391,11 @@ class AdminController extends Controller
                 ], 401);
             }
 
-            // Check if user has individual or company profile
+            // Load both profiles (if exist)
             $individualUser = IndividualUser::where('user_id', $user->id)->first();
             $companyUser = CompanyUser::where('user_id', $user->id)->first();
 
-            $provider = null;
-            $providerType = null;
-
-            if ($individualUser) {
-                $provider = $individualUser;
-                $providerType = 'individual';
-            } elseif ($companyUser) {
-                $provider = $companyUser;
-                $providerType = 'company';
-            }
-
-            if (!$provider) {
+            if (!$individualUser && !$companyUser) {
                 return response()->json([
                     'success' => false,
                     'message' => 'No provider profile found',
@@ -412,23 +403,50 @@ class AdminController extends Controller
                 ]);
             }
 
-            // Map want_to_be_listed to status
-            $listed = isset($provider->want_to_be_listed) ? strtolower(trim($provider->want_to_be_listed)) : null;
-            
-            if ($listed === 'yes') {
+            // Determine status across both profiles
+            $mapToStatus = function ($listed) {
+                $listed = isset($listed) ? strtolower(trim($listed)) : null;
+                if ($listed === 'yes') return 'active';
+                if ($listed === 'no') return 'rejected';
+                return 'approved';
+            };
+
+            $indStatus = $individualUser ? $mapToStatus($individualUser->want_to_be_listed) : null;
+            $comStatus = $companyUser ? $mapToStatus($companyUser->want_to_be_listed) : null;
+
+            // Priority: any 'active' -> active; else if any 'rejected' and none active -> rejected; else approved
+            $statuses = array_filter([$indStatus, $comStatus]);
+            $status = 'approved';
+            if (in_array('active', $statuses, true)) {
                 $status = 'active';
-            } elseif ($listed === 'no') {
+            } elseif (in_array('rejected', $statuses, true)) {
                 $status = 'rejected';
-            } else {
-                $status = 'approved';
+            }
+
+            // Choose providerType/id for response (prefer the one that yielded the chosen status)
+            $providerType = null;
+            $providerId = null;
+            if ($individualUser && $mapToStatus($individualUser->want_to_be_listed) === $status) {
+                $providerType = 'individual';
+                $providerId = $individualUser->id;
+            } elseif ($companyUser && $mapToStatus($companyUser->want_to_be_listed) === $status) {
+                $providerType = 'company';
+                $providerId = $companyUser->id;
+            } elseif ($individualUser) {
+                $providerType = 'individual';
+                $providerId = $individualUser->id;
+            } elseif ($companyUser) {
+                $providerType = 'company';
+                $providerId = $companyUser->id;
             }
 
             return response()->json([
                 'success' => true,
                 'status' => $status,
                 'provider_type' => $providerType,
-                'provider_id' => $provider->id,
-                'want_to_be_listed' => $provider->want_to_be_listed
+                'provider_id' => $providerId,
+                'individual_want_to_be_listed' => $individualUser->want_to_be_listed ?? null,
+                'company_want_to_be_listed' => $companyUser->want_to_be_listed ?? null,
             ]);
 
         } catch (\Exception $e) {

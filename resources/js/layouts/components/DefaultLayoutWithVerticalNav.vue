@@ -11,6 +11,9 @@ import UserProfile from "@/layouts/components/UserProfile.vue";
 // @layouts plugin
 import { VerticalNavLayout } from "@layouts";
 
+// Composables
+import { useProviderStatus } from "@/composables/useProviderStatus";
+
 // Navigation composable
 const { goToDashboard } = useNavigation();
 
@@ -36,11 +39,68 @@ onMounted(async () => {
     console.log("Provider status changed event received:", event.detail);
     await fetchProviderStatus();
   });
+
+  // Start polling until status becomes active
+  if (typeof window !== "undefined") {
+    if (!window.__providerStatusPoll) {
+      window.__providerStatusPoll = setInterval(async () => {
+        try {
+          await fetchProviderStatus();
+          if (shouldShowFullSidebar.value && window.__providerStatusPoll) {
+            clearInterval(window.__providerStatusPoll);
+            window.__providerStatusPoll = null;
+            console.log("Provider status is active - polling stopped");
+          }
+        } catch (e) {
+          // ignore
+        }
+      }, 10000);
+      console.log("Started provider status polling");
+    }
+
+    // Refresh on window focus
+    const handleFocus = async () => {
+      try {
+        await fetchProviderStatus();
+      } catch (e) {}
+    };
+    window.addEventListener("focus", handleFocus);
+    // Save handler to remove later
+    window.__providerStatusFocusHandler = handleFocus;
+  }
 });
 
 // Cleanup event listener on unmount
 onUnmounted(() => {
   window.removeEventListener("providerStatusChanged", () => {});
+  if (typeof window !== "undefined") {
+    if (window.__providerStatusPoll) {
+      clearInterval(window.__providerStatusPoll);
+      window.__providerStatusPoll = null;
+    }
+    if (window.__providerStatusFocusHandler) {
+      window.removeEventListener("focus", window.__providerStatusFocusHandler);
+      window.__providerStatusFocusHandler = null;
+    }
+  }
+});
+
+// Helper to return only Welcome item
+const getWelcomeOnly = () => {
+  const welcome = userNavItems.find((i) => i.title === "Welcome");
+  return welcome ? [welcome] : [];
+};
+
+// Track nav rerenders when status changes
+const navVersion = ref(0);
+watch(providerStatus, () => {
+  navVersion.value++;
+  console.log(
+    "Sidebar nav rerender due to providerStatus:",
+    providerStatus.value,
+    "version:",
+    navVersion.value
+  );
 });
 
 // Navigation logic based on provider status
@@ -51,26 +111,28 @@ const navigationItems = computed(() => {
     // Admin users always see admin navigation
     if (userData?.role === "admin") return adminNavItems;
 
+    // While loading or unknown provider status, show only Welcome
+    if (!providerStatus.value) return getWelcomeOnly();
+
     // For regular users, check provider status
     if (shouldShowFullSidebar.value) {
       // Provider status is 'active' - show all menu items
       return userNavItems;
     } else if (shouldShowLimitedSidebar.value) {
       // Provider status is 'approved' or 'rejected' - show only Welcome
-      const welcome = userNavItems.find((i) => i.title === "Welcome");
-      return welcome ? [welcome] : [];
+      return getWelcomeOnly();
     } else {
       // No provider profile or status is 'not_found' - show only Welcome
-      const welcome = userNavItems.find((i) => i.title === "Welcome");
-      return welcome ? [welcome] : [];
+      return getWelcomeOnly();
     }
   }
-  return userNavItems;
+  // SSR or safety fallback
+  return getWelcomeOnly();
 });
 </script>
 
 <template>
-  <VerticalNavLayout :nav-items="navigationItems">
+  <VerticalNavLayout :key="navVersion" :nav-items="navigationItems">
     <!-- 👉 navbar -->
     <template #navbar="{ toggleVerticalOverlayNavActive }">
       <div class="d-flex h-100 align-center">

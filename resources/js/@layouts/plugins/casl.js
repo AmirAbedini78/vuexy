@@ -41,7 +41,7 @@ export const canViewNavMenuGroup = item => {
   // For regular users, check provider status
   const providerStatus = localStorage.getItem('providerStatus');
   
-  // If no provider status, only show Welcome menu
+  // If no provider status or not found, only show Welcome
   if (!providerStatus || providerStatus === 'not_found') {
     return item.title === 'Welcome';
   }
@@ -51,7 +51,7 @@ export const canViewNavMenuGroup = item => {
     return true;
   }
   
-  // For 'approved' or 'rejected' status, only show Welcome menu
+  // For 'approved' or 'rejected' status, only show Welcome
   return item.title === 'Welcome';
 }
 
@@ -68,10 +68,16 @@ export const canNavigate = to => {
   
   // For regular users, check provider status
   const providerStatus = localStorage.getItem('providerStatus');
+
+  // Always allow access-control for logged-in users to complete their profile
+  const isAccessControlRoute = to?.name === 'access-control' || to?.path === '/access-control';
+  if (isAccessControlRoute) {
+    return true;
+  }
   
-  // If no provider status, only allow timeline and welcome pages
+  // If no provider status, allow only timeline, welcome, home
   if (!providerStatus || providerStatus === 'not_found') {
-    return to.name === 'timeline' || to.name === 'welcome' || to.path === '/';
+    return to?.name === 'timeline' || to?.name === 'welcome' || to?.path === '/';
   }
   
   // If provider status is 'active', allow all navigation
@@ -79,6 +85,6 @@ export const canNavigate = to => {
     return true;
   }
   
-  // For 'approved' or 'rejected' status, only allow timeline and welcome pages
-  return to.name === 'timeline' || to.name === 'welcome' || to.path === '/';
+  // For 'approved' or 'rejected' status, allow limited pages
+  return to?.name === 'timeline' || to?.name === 'welcome' || to?.path === '/';
 }
