@@ -596,7 +596,7 @@ class AdminController extends Controller
                 'providers_faq' => 'nullable|string',
                 'personal_policies' => 'nullable|string|max:255',
                 'personal_policies_text' => 'nullable|string',
-                'status' => 'nullable|string|in:draft,published,archived',
+                'status' => 'nullable|string|in:submitted,approved,live,denied,edit_review,other_events,inactive,draft,published,archived',
                 'terms_accepted' => 'nullable|boolean',
             ]);
             
@@ -616,7 +616,22 @@ class AdminController extends Controller
             
             Log::info('Listing filtered update data:', $updateData);
             
+            // Track old status for notification decision
+            $oldStatus = $listing->status;
             $listing->update($updateData);
+
+            // If event-status keys used, normalize to our extended statuses field
+            if (array_key_exists('status', $updateData) && $listing->user) {
+                try {
+                    // Notify the listing owner about status change
+                    $newStatus = $listing->status;
+                    if ($newStatus !== $oldStatus && in_array($newStatus, ['submitted','approved','live','denied','edit_review','other_events','inactive'])) {
+                        $listing->user->notify(new \App\Notifications\ListingStatusUpdated($newStatus, $listing->listing_title));
+                    }
+                } catch (\Throwable $e) {
+                    Log::error('Failed sending listing status notification: '.$e->getMessage());
+                }
+            }
             
             return response()->json([
                 'success' => true,

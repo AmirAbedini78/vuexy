@@ -174,13 +174,39 @@
 
         <!-- Status Column -->
         <template #item.status="{ item }">
-          <VChip
-            :color="getListingStatusColor(item.status)"
-            size="small"
-            class="font-weight-medium"
+          <VSelect
+            :model-value="item.status || 'submitted'"
+            :items="eventStatusChoices"
+            item-title="title"
+            item-value="value"
+            variant="outlined"
+            density="compact"
+            hide-details
+            style="min-width: 150px"
+            @update:model-value="(val) => changeEventStatus(item, val)"
+            @click.stop
+            @keydown.stop
+            :menu-props="{ closeOnContentClick: true }"
           >
-            {{ item.status || "Draft" }}
-          </VChip>
+            <template #selection="{ item: sel }">
+              <VChip
+                :color="getListingStatusColor(sel?.value || item.status)"
+                size="small"
+                class="font-weight-medium"
+              >
+                {{ sel?.title || getEventStatusTitle(item.status) }}
+              </VChip>
+            </template>
+            <template #item="{ item: opt }">
+              <div class="d-flex align-center gap-2">
+                <VChip
+                  :color="getListingStatusColor(opt?.value)"
+                  size="x-small"
+                />
+                <span>{{ opt?.title }}</span>
+              </div>
+            </template>
+          </VSelect>
         </template>
 
         <!-- Actions Column -->
@@ -1529,6 +1555,41 @@ const formatListingType = (type) => {
     other: "Other",
   };
   return types[type] || type || "N/A";
+};
+
+// Event status (for All Events table) — shared map with listings page
+const eventStatusChoices = [
+  { title: "Submitted", value: "submitted" },
+  { title: "Approved", value: "approved" },
+  { title: "Live", value: "live" },
+  { title: "Denied", value: "denied" },
+  { title: "Edit Review", value: "edit_review" },
+  { title: "Other Events", value: "other_events" },
+  { title: "Inactive", value: "inactive" },
+];
+
+const getEventStatusTitle = (status) => {
+  const map = Object.fromEntries(
+    eventStatusChoices.map((s) => [s.value, s.title])
+  );
+  return map[status] || "Submitted";
+};
+
+const changeEventStatus = async (eventItem, status) => {
+  try {
+    if (!status) return;
+    const res = await $api(`/admin/listings/${eventItem.id}`, {
+      method: "PUT",
+      body: { status },
+    });
+    if (res?.success) {
+      eventItem.status = status;
+    } else {
+      console.error("Failed to update event status", res);
+    }
+  } catch (e) {
+    console.error("Error updating event status", e);
+  }
 };
 
 const handleProviderUpdated = () => {

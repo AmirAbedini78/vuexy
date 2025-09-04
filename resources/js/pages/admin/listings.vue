@@ -59,15 +59,41 @@
           </VChip>
         </template>
 
-        <!-- Status Column -->
+        <!-- Status Column (combobox like Providers) -->
         <template #item.status="{ item }">
-          <VChip
-            :color="getListingStatusColor(item.status)"
-            size="small"
-            class="font-weight-medium"
+          <VSelect
+            :model-value="item.status || 'submitted'"
+            :items="eventStatusChoices"
+            item-title="title"
+            item-value="value"
+            variant="outlined"
+            density="compact"
+            hide-details
+            style="min-width: 150px"
+            @update:model-value="(val) => changeListingStatus(item, val)"
+            @click.stop
+            @keydown.stop
+            :menu-props="{ closeOnContentClick: true }"
           >
-            {{ item.status || "Draft" }}
-          </VChip>
+            <template #selection="{ item: sel }">
+              <VChip
+                :color="getListingStatusColor(sel?.value || item.status)"
+                size="small"
+                class="font-weight-medium"
+              >
+                {{ sel?.title || getEventStatusTitle(item.status) }}
+              </VChip>
+            </template>
+            <template #item="{ item: opt }">
+              <div class="d-flex align-center gap-2">
+                <VChip
+                  :color="getListingStatusColor(opt?.value)"
+                  size="x-small"
+                />
+                <span>{{ opt?.title }}</span>
+              </div>
+            </template>
+          </VSelect>
         </template>
 
         <!-- Price Column -->
@@ -448,11 +474,49 @@ const formatCurrency = (amount) => {
 
 const getListingStatusColor = (status) => {
   const colors = {
-    draft: "warning",
-    published: "success",
-    archived: "error",
+    submitted: "secondary",
+    approved: "info",
+    live: "success",
+    denied: "error",
+    edit_review: "warning",
+    other_events: "grey",
+    inactive: "secondary",
   };
   return colors[status] || "secondary";
+};
+// Event status choices matching the provided image
+const eventStatusChoices = [
+  { title: "Submitted", value: "submitted" },
+  { title: "Approved", value: "approved" },
+  { title: "Live", value: "live" },
+  { title: "Denied", value: "denied" },
+  { title: "Edit Review", value: "edit_review" },
+  { title: "Other Events", value: "other_events" },
+  { title: "Inactive", value: "inactive" },
+];
+
+const getEventStatusTitle = (status) => {
+  const map = Object.fromEntries(
+    eventStatusChoices.map((s) => [s.value, s.title])
+  );
+  return map[status] || "Submitted";
+};
+
+const changeListingStatus = async (listing, status) => {
+  try {
+    if (!status) return;
+    const res = await $api(`/admin/listings/${listing.id}`, {
+      method: "PUT",
+      body: { status },
+    });
+    if (res?.success) {
+      listing.status = status;
+    } else {
+      console.error("Failed to update listing status", res);
+    }
+  } catch (e) {
+    console.error("Error updating listing status", e);
+  }
 };
 
 const getListingTypeColor = (type) => {
