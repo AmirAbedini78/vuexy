@@ -24,7 +24,15 @@ class ProviderStatusUpdated extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        $channels = ['mail'];
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('notifications')) {
+                $channels[] = 'database';
+            }
+        } catch (\Throwable $e) {
+            // Ignore and fallback to mail only
+        }
+        return $channels;
     }
 
     public function toMail(object $notifiable): MailMessage
