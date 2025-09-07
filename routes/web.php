@@ -28,7 +28,7 @@ Route::get('/linkedin/callback', [UserVerificationController::class, 'linkedinCa
 Route::get('/linkedin/callback/current-user', [UserVerificationController::class, 'linkedinCallbackForCurrentUser']);
 
 // LinkedIn callback for production (matches the LinkedIn app redirect URI)
-Route::get('/build/callback/linkedin', [UserVerificationController::class, 'linkedinCallback']);
+Route::get('/callback/linkedin', [UserVerificationController::class, 'linkedinCallback']);
 
 // Test LinkedIn OAuth configuration
 Route::get('/test-linkedin-config', function() {

@@ -41,6 +41,7 @@ export default defineConfig({
     laravel({
       input: ['resources/js/main.js'],
       refresh: true,
+      buildDirectory: 'assets',
     }),
     vueJsx(),
     vuetify({
