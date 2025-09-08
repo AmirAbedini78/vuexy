@@ -123,8 +123,8 @@ const navigationItems = computed(() => {
 
     // For regular users, check provider status
     if (shouldShowFullSidebar.value) {
-      // Provider status is 'active' - show all menu items
-      return userNavItems;
+      // Provider status is 'active' - show all menu items except Welcome
+      return userNavItems.filter((item) => item.title !== "Welcome");
     } else if (shouldShowLimitedSidebar.value) {
       // Provider status is 'approved' or 'rejected' - show only Welcome
       return getWelcomeOnly();

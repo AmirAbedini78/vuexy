@@ -137,22 +137,59 @@ const login = async () => {
       console.log("Admin user detected, redirecting to admin dashboard...");
       router.push("/admin/dashboard");
     } else {
-      // Regular users are redirected to timeline
-      console.log("Regular user detected, redirecting to timeline...");
+      // For regular users, check provider status to determine redirect
+      console.log("Regular user detected, checking provider status...");
 
-      // Determine user type for timeline routing
-      let userType = "individual"; // Default type
+      try {
+        // Fetch provider status to determine redirect destination
+        const providerStatusResponse = await $api("/provider/status");
 
-      if (user.user_type) {
-        userType = user.user_type;
-      } else if (user.role === "company") {
-        userType = "company";
-      } else if (user.role === "individual") {
-        userType = "individual";
+        if (
+          providerStatusResponse.success &&
+          providerStatusResponse.status === "active"
+        ) {
+          // User is active, redirect to dashboard
+          console.log("User status is active, redirecting to dashboard...");
+          router.push("/");
+        } else {
+          // User is not active (approved/rejected/not_found), redirect to timeline
+          console.log("User status is not active, redirecting to timeline...");
+
+          // Determine user type for timeline routing
+          let userType = "individual"; // Default type
+
+          if (user.user_type) {
+            userType = user.user_type;
+          } else if (user.role === "company") {
+            userType = "company";
+          } else if (user.role === "individual") {
+            userType = "individual";
+          }
+
+          // Redirect to appropriate timeline
+          router.push(`/registration/timeline/${userType}/${user.id}`);
+        }
+      } catch (error) {
+        console.error("Error fetching provider status:", error);
+        // On error, default to timeline redirect
+        console.log(
+          "Error fetching status, defaulting to timeline redirect..."
+        );
+
+        // Determine user type for timeline routing
+        let userType = "individual"; // Default type
+
+        if (user.user_type) {
+          userType = user.user_type;
+        } else if (user.role === "company") {
+          userType = "company";
+        } else if (user.role === "individual") {
+          userType = "individual";
+        }
+
+        // Redirect to appropriate timeline
+        router.push(`/registration/timeline/${userType}/${user.id}`);
       }
-
-      // Redirect to appropriate timeline
-      router.push(`/registration/timeline/${userType}/${user.id}`);
     }
   } catch (err) {
     console.error("Login error:", err);

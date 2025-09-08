@@ -102,15 +102,61 @@ class EmailVerificationController extends Controller
             return redirect($finalRedirectUrl);
         }
 
-        // If no specific redirect URL, redirect to the proper timeline route with user context
-        $userType = $user->role === 'user' ? 'individual' : ($user->role === 'company' ? 'company' : 'individual');
-        $timelineUrl = "/registration/timeline/{$userType}/{$user->id}?verified=true";
-        Log::info('Redirecting to timeline with user context', [
-            'user_id' => $user->id,
-            'user_type' => $userType,
-            'timeline_url' => $timelineUrl
-        ]);
-        return redirect($timelineUrl);
+        // Check provider status to determine redirect destination
+        $providerStatus = $this->getProviderStatus($user);
+        
+        if ($providerStatus === 'active') {
+            // User is active, redirect to dashboard
+            Log::info('User is active, redirecting to dashboard', [
+                'user_id' => $user->id,
+                'provider_status' => $providerStatus
+            ]);
+            return redirect('/');
+        } else {
+            // User is not active, redirect to timeline
+            $userType = $user->role === 'user' ? 'individual' : ($user->role === 'company' ? 'company' : 'individual');
+            $timelineUrl = "/registration/timeline/{$userType}/{$user->id}?verified=true";
+            Log::info('Redirecting to timeline with user context', [
+                'user_id' => $user->id,
+                'user_type' => $userType,
+                'provider_status' => $providerStatus,
+                'timeline_url' => $timelineUrl
+            ]);
+            return redirect($timelineUrl);
+        }
+    }
+
+    private function getProviderStatus($user)
+    {
+        // Load both profiles (if exist)
+        $individualUser = \App\Models\IndividualUser::where('user_id', $user->id)->first();
+        $companyUser = \App\Models\CompanyUser::where('user_id', $user->id)->first();
+
+        if (!$individualUser && !$companyUser) {
+            return 'not_found';
+        }
+
+        // Determine status across both profiles
+        $mapToStatus = function ($listed) {
+            $listed = isset($listed) ? strtolower(trim($listed)) : null;
+            if ($listed === 'yes') return 'active';
+            if ($listed === 'no') return 'rejected';
+            return 'approved';
+        };
+
+        $indStatus = $individualUser ? $mapToStatus($individualUser->want_to_be_listed) : null;
+        $comStatus = $companyUser ? $mapToStatus($companyUser->want_to_be_listed) : null;
+
+        // Priority: any 'active' -> active; else if any 'rejected' and none active -> rejected; else approved
+        $statuses = array_filter([$indStatus, $comStatus]);
+        $status = 'approved';
+        if (in_array('active', $statuses, true)) {
+            $status = 'active';
+        } elseif (in_array('rejected', $statuses, true)) {
+            $status = 'rejected';
+        }
+
+        return $status;
     }
 
     private function cleanupExpiredTokens()

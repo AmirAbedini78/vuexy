@@ -31,36 +31,56 @@ const getCurrentUser = () => {
 const currentUser = getCurrentUser();
 
 // Handle redirects based on user state and query parameters
-if (currentUser && route.query.verified === "true") {
-  // User is logged in and email was verified, redirect to proper timeline route
-  isRedirecting.value = true;
-  const userType =
-    currentUser.role === "user"
-      ? "individual"
-      : currentUser.role === "company"
-      ? "company"
-      : "individual";
-  console.log(
-    "Redirecting to verified timeline:",
-    `/registration/timeline/${userType}/${currentUser.id}?verified=true`
-  );
-  router.replace(
-    `/registration/timeline/${userType}/${currentUser.id}?verified=true`
-  );
-} else if (currentUser && !route.query.verified) {
-  // User is logged in but no verified parameter, redirect to proper timeline route
-  isRedirecting.value = true;
-  const userType =
-    currentUser.role === "user"
-      ? "individual"
-      : currentUser.role === "company"
-      ? "company"
-      : "individual";
-  console.log(
-    "Redirecting to timeline:",
-    `/registration/timeline/${userType}/${currentUser.id}`
-  );
-  router.replace(`/registration/timeline/${userType}/${currentUser.id}`);
+if (currentUser) {
+  // Check if user is admin
+  if (currentUser.role === "admin" || currentUser.is_admin) {
+    isRedirecting.value = true;
+    console.log("Admin user detected, redirecting to admin dashboard");
+    router.replace("/admin/dashboard");
+  } else {
+    // For regular users, check provider status
+    const providerStatus = localStorage.getItem("providerStatus");
+
+    if (providerStatus === "active") {
+      // User is active, redirect to dashboard
+      isRedirecting.value = true;
+      console.log("User status is active, redirecting to dashboard");
+      router.replace("/");
+    } else {
+      // User is not active, proceed with timeline logic
+      if (route.query.verified === "true") {
+        // User is logged in and email was verified, redirect to proper timeline route
+        isRedirecting.value = true;
+        const userType =
+          currentUser.role === "user"
+            ? "individual"
+            : currentUser.role === "company"
+            ? "company"
+            : "individual";
+        console.log(
+          "Redirecting to verified timeline:",
+          `/registration/timeline/${userType}/${currentUser.id}?verified=true`
+        );
+        router.replace(
+          `/registration/timeline/${userType}/${currentUser.id}?verified=true`
+        );
+      } else if (!route.query.verified) {
+        // User is logged in but no verified parameter, redirect to proper timeline route
+        isRedirecting.value = true;
+        const userType =
+          currentUser.role === "user"
+            ? "individual"
+            : currentUser.role === "company"
+            ? "company"
+            : "individual";
+        console.log(
+          "Redirecting to timeline:",
+          `/registration/timeline/${userType}/${currentUser.id}`
+        );
+        router.replace(`/registration/timeline/${userType}/${currentUser.id}`);
+      }
+    }
+  }
 } else if (!currentUser) {
   // If no user data, redirect to login
   isRedirecting.value = true;

@@ -19,18 +19,30 @@ export const redirects = [
       
       const userRole = userData.value?.role
       
-      // Check if user is admin - always redirect to admin dashboard
+      // Admins always go to admin dashboard
       if (userRole === 'admin') {
         return { name: 'admin-dashboard' }
       }
+
+      // For regular users, check provider status
+      const providerStatus = (typeof window !== 'undefined' ? localStorage.getItem('providerStatus') : '')
       
-      // For client role (if exists)
-      if (userRole === 'client') {
-        return { name: 'access-control' }
+      if (providerStatus === 'active') {
+        // User is active, redirect to dashboard
+        return { name: 'dashboards-crm' }
+      } else {
+        // User is not active (approved/rejected/not_found), redirect to timeline
+        // Determine user type for timeline routing
+        let userType = "individual"; // Default type
+        if (userData.value?.user_type) {
+          userType = userData.value.user_type;
+        } else if (userData.value?.role === "company") {
+          userType = "company";
+        } else if (userData.value?.role === "individual") {
+          userType = "individual";
+        }
+        return { name: 'registration-timeline', params: { type: userType, id: userData.value.id } }
       }
-      
-      // Default dashboard for regular users
-      return { name: 'dashboards-crm' }
     },
   },
   {

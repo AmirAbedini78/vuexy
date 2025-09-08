@@ -46,9 +46,9 @@ export const canViewNavMenuGroup = item => {
     return item.title === 'Welcome';
   }
   
-  // If provider status is 'active', show all menu items
+  // If provider status is 'active', show all menu items except Welcome
   if (providerStatus === 'active') {
-    return true;
+    return item.title !== 'Welcome';
   }
   
   // For 'approved' or 'rejected' status, only show Welcome
@@ -80,9 +80,9 @@ export const canNavigate = to => {
     return to?.name === 'timeline' || to?.name === 'welcome' || to?.path === '/';
   }
   
-  // If provider status is 'active', allow all navigation
+  // If provider status is 'active', allow all navigation except Welcome
   if (providerStatus === 'active') {
-    return true;
+    return to?.name !== 'welcome';
   }
   
   // For 'approved' or 'rejected' status, allow limited pages

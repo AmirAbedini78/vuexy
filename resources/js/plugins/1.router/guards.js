@@ -26,8 +26,32 @@ export const setupGuards = router => {
          */
     if (to.meta.unauthenticatedOnly) {
       if (isLoggedIn) {
-        console.log('User is logged in, redirecting to dashboard')
-        return '/'
+        console.log('User is logged in, checking provider status for redirect')
+        
+        // Check if user is admin
+        if (userData.value?.role === 'admin') {
+          console.log('Admin user, redirecting to admin dashboard')
+          return '/admin/dashboard'
+        }
+        
+        // For regular users, check provider status
+        const providerStatus = localStorage.getItem('providerStatus')
+        if (providerStatus === 'active') {
+          console.log('User is active, redirecting to dashboard')
+          return '/'
+        } else {
+          console.log('User is not active, redirecting to timeline')
+          // Determine user type for timeline routing
+          let userType = "individual"; // Default type
+          if (userData.value?.user_type) {
+            userType = userData.value.user_type;
+          } else if (userData.value?.role === "company") {
+            userType = "company";
+          } else if (userData.value?.role === "individual") {
+            userType = "individual";
+          }
+          return `/registration/timeline/${userType}/${userData.value.id}`
+        }
       }
       else {
         console.log('User is not logged in, allowing access to auth page')
