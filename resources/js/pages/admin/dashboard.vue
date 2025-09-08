@@ -178,7 +178,7 @@
             <template #activator="{ props }">
               <VChip
                 v-bind="props"
-                :color="getListingStatusColor(item.status || 'submitted')"
+                :color="getEventStatusColor(item.status || 'submitted')"
                 size="small"
                 class="font-weight-medium cursor-pointer"
                 style="min-width: 120px; justify-content: center"
@@ -198,7 +198,7 @@
               >
                 <template #prepend>
                   <VChip
-                    :color="getListingStatusColor(choice.value)"
+                    :color="getEventStatusColor(choice.value)"
                     size="x-small"
                   />
                 </template>
@@ -398,12 +398,12 @@
             <template #activator="{ props }">
               <VChip
                 v-bind="props"
-                :color="getProviderStatusColor(item.status || 'approved')"
+                :color="getProviderStatusColor(item.status || 'review')"
                 size="small"
                 class="font-weight-medium cursor-pointer"
                 style="min-width: 100px; justify-content: center"
               >
-                {{ getStatusTitle(item.status || "approved") }}
+                {{ getStatusTitle(item.status || "review") }}
                 <VIcon icon="tabler-chevron-down" size="small" class="ml-1" />
               </VChip>
             </template>
@@ -1172,7 +1172,7 @@ const providersData = ref([]);
 
 // Status choices for provider status combobox
 const statusChoices = [
-  { title: "Approved", value: "approved" },
+  { title: "Review", value: "review" },
   { title: "Active", value: "active" },
   { title: "Rejected", value: "rejected" },
 ];
@@ -1212,9 +1212,9 @@ const ordersHeaders = [
 const providersHeaders = [
   { title: "PROVIDER", key: "provider", sortable: false },
   { title: "PROVIDER ID", key: "provider_id", sortable: false },
-  { title: "STATUS", key: "status", sortable: false },
   { title: "TOTAL LISTING", key: "total_listings", sortable: false },
   { title: "TOTAL BOOKING", key: "total_bookings", sortable: false },
+  { title: "STATUS", key: "status", sortable: false },
   { title: "ACTIONS", key: "actions", sortable: false, width: "120px" },
 ];
 
@@ -1262,7 +1262,7 @@ const loadDashboardData = async () => {
       // Force reactivity by ensuring all providers have a status
       providersData.value = providersData.value.map((provider) => {
         if (!provider.status) {
-          provider.status = "approved"; // Default status
+          provider.status = "review"; // Default status changed to review
         }
         return provider;
       });
@@ -1279,6 +1279,15 @@ const loadDashboardData = async () => {
       });
       console.log("Admin listings response:", listingsResponse);
       eventsData.value = listingsResponse.data || [];
+
+      // Auto-determine status for each event
+      eventsData.value = eventsData.value.map((event) => {
+        if (!event.status) {
+          event.status = determineEventStatus(event);
+        }
+        return event;
+      });
+
       console.log("Admin listings data set:", eventsData.value);
     } catch (listingsError) {
       console.error("Failed to load listings:", listingsError);
@@ -1508,7 +1517,7 @@ const changeProviderStatus = async (provider, status) => {
 const getProviderStatusColor = (status) => {
   const colors = {
     active: "success",
-    approved: "warning",
+    review: "warning",
     rejected: "error",
     Live: "success",
     Denied: "error",
@@ -1519,10 +1528,10 @@ const getProviderStatusColor = (status) => {
 const getStatusTitle = (status) => {
   const titles = {
     active: "Active",
-    approved: "Approved",
+    review: "Review",
     rejected: "Rejected",
   };
-  const result = titles[status] || "Approved";
+  const result = titles[status] || "Review";
   console.log(`Status title for "${status}": "${result}"`);
   return result;
 };
@@ -1534,6 +1543,63 @@ const getListingStatusColor = (status) => {
     archived: "error",
   };
   return colors[status] || "secondary";
+};
+
+// Event status management functions
+const getEventStatusColor = (status) => {
+  const colors = {
+    submitted: "warning", // Yellow - default when created
+    approved: "primary", // Blue - admin approved
+    live: "success", // Green - admin set to live
+    denied: "error", // Red - admin denied
+    adr_event: "grey", // Grey background, dark text - created via Add Event
+    inactive: "grey-lighten-2", // Grey background, dark text - when finish date passed
+    review_edit: "warning", // Orange - when user edits
+  };
+  return colors[status] || "warning";
+};
+
+const getEventStatusTitle = (status) => {
+  const titles = {
+    submitted: "Submitted",
+    approved: "Approved",
+    live: "Live",
+    denied: "Denied",
+    adr_event: "Adr Event",
+    inactive: "Inactive",
+    review_edit: "Review Edit",
+  };
+  return titles[status] || "Submitted";
+};
+
+// Event status choices for admin
+const eventStatusChoices = [
+  { title: "Approved", value: "approved" },
+  { title: "Live", value: "live" },
+  { title: "Denied", value: "denied" },
+];
+
+// Change event status function is defined below with API integration
+
+// Auto-determine event status based on creation method and dates
+const determineEventStatus = (event) => {
+  // If created via Add Event wizard (not full listing wizard)
+  if (event.created_via === "add_event_wizard") {
+    return "adr_event";
+  }
+
+  // If finish date has passed
+  if (event.finishing_date && new Date(event.finishing_date) < new Date()) {
+    return "inactive";
+  }
+
+  // If user has edited the event
+  if (event.last_edited_by_user) {
+    return "review_edit";
+  }
+
+  // Default status when created via full listing wizard
+  return "submitted";
 };
 
 const getListingTypeColor = (type) => {
@@ -1557,7 +1623,7 @@ const formatListingType = (type) => {
 };
 
 // Event status (for All Events table) — shared map with listings page
-const eventStatusChoices = [
+const allEventStatusChoices = [
   { title: "Submitted", value: "submitted" },
   { title: "Approved", value: "approved" },
   { title: "Live", value: "live" },
@@ -1567,12 +1633,7 @@ const eventStatusChoices = [
   { title: "Inactive", value: "inactive" },
 ];
 
-const getEventStatusTitle = (status) => {
-  const map = Object.fromEntries(
-    eventStatusChoices.map((s) => [s.value, s.title])
-  );
-  return map[status] || "Submitted";
-};
+// This function is already defined above with more comprehensive status handling
 
 const changeEventStatus = async (eventItem, status) => {
   try {
@@ -1776,5 +1837,18 @@ const handleListingUpdated = () => {
 // Global font family for all text elements
 * {
   font-family: "Inter", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+// Custom event status styles
+.v-chip {
+  &.v-chip--color-grey {
+    background-color: #6c757d !important;
+    color: white !important;
+  }
+
+  &.v-chip--color-grey-lighten-2 {
+    background-color: #e9ecef !important;
+    color: #495057 !important;
+  }
 }
 </style>

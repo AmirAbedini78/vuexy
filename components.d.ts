@@ -11,6 +11,7 @@ declare module 'vue' {
     AddEditAddressDialog: typeof import('./resources/js/components/dialogs/AddEditAddressDialog.vue')['default']
     AddEditPermissionDialog: typeof import('./resources/js/components/dialogs/AddEditPermissionDialog.vue')['default']
     AddEditRoleDialog: typeof import('./resources/js/components/dialogs/AddEditRoleDialog.vue')['default']
+    AddEventListingDialog: typeof import('./resources/js/components/dialogs/AddEventListingDialog.vue')['default']
     AddPaymentMethodDialog: typeof import('./resources/js/components/dialogs/AddPaymentMethodDialog.vue')['default']
     AppAutocomplete: typeof import('./resources/js/@core/components/app-form-elements/AppAutocomplete.vue')['default']
     AppBarSearch: typeof import('./resources/js/@core/components/AppBarSearch.vue')['default']

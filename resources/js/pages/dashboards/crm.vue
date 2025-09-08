@@ -2,6 +2,7 @@
 // All chart and table components removed for redesign
 
 // Import router for navigation
+import AddEventListingDialog from "@/components/dialogs/AddEventListingDialog.vue";
 import { companyUserService, individualUserService } from "@/services/api";
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
@@ -13,6 +14,9 @@ const userData = ref(null);
 const loggedInUser = ref(null);
 const loading = ref(false);
 const error = ref(null);
+
+// Modal state
+const showAddEventListingModal = ref(false);
 
 // Get logged-in user data from cookies
 const getLoggedInUser = () => {
@@ -119,6 +123,29 @@ const getUserDisplayName = () => {
   );
 };
 
+// Modal handlers
+const handleModalSubmit = (selectedOption) => {
+  console.log("Selected option:", selectedOption);
+  if (selectedOption === "listing") {
+    // Navigate to listing page
+    router.push("/listing");
+  } else if (selectedOption && selectedOption.type === "event") {
+    // Handle event creation - this creates a listing record
+    console.log("Event listing created:", {
+      wizardType: selectedOption.wizardType,
+      data: selectedOption.data,
+    });
+
+    // Here you would typically:
+    // 1. Save the event as a listing record in the database
+    // 2. Show success message to user
+    // 3. Optionally navigate to the listing page or refresh the events table
+
+    // For now, just show a success message
+    alert(`Event created successfully! Type: ${selectedOption.wizardType}`);
+  }
+};
+
 // Fetch user data on mount
 onMounted(async () => {
   console.log("Dashboard CRM mounted");
@@ -220,7 +247,7 @@ const actionCards = [
     title: "Add Event",
     icon: "/images/4svg/add event.png",
     color: "success",
-    action: () => console.log("Add Event clicked"),
+    action: () => (showAddEventListingModal.value = true),
   },
   {
     id: 3,
@@ -374,6 +401,12 @@ const actionCards = [
       </div>
     </VCol>
   </VRow>
+
+  <!-- Add Event/Listing Modal -->
+  <AddEventListingDialog
+    v-model:is-dialog-visible="showAddEventListingModal"
+    @submit="handleModalSubmit"
+  />
 </template>
 
 <style lang="scss" scoped>
