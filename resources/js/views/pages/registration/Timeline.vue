@@ -57,7 +57,8 @@ const linkedinLoading = ref(false);
 
 // Profile Completion State
 const profileCompleted = ref(false);
-const reviewStatus = ref("awaiting_approval"); // 'awaiting_approval', 'verified_contact', 'needs_edit', 'incomplete'
+// Step 5 status: 'incomplete' | 'verified_contact' | 'awaiting_approval'
+const reviewStatus = ref("incomplete");
 
 // Step 4 Progress State
 const step4Enabled = ref(false);
@@ -546,7 +547,7 @@ const completeProfile = async () => {
     const data = await res.json();
     if (data.success) {
       profileCompleted.value = true;
-      reviewStatus.value = "verified_contact";
+      reviewStatus.value = "awaiting_approval";
 
       // Clear old verification-based cookies
       const step4Cookie = useCookie("step4Enabled");
@@ -599,6 +600,19 @@ const calculateProgress = () => {
   // Also update simple verified flag
   updateVerifiedFlag();
 
+  // Update Step 5 status based on current verification & completion state
+  if (profileCompleted.value) {
+    reviewStatus.value = "awaiting_approval";
+  } else if (
+    emailStatus.value === "verified" ||
+    whatsappStatus.value === "verified"
+  ) {
+    // If user has at least verified contact (email or whatsapp), show verified contact
+    reviewStatus.value = "verified_contact";
+  } else {
+    reviewStatus.value = "incomplete";
+  }
+
   // Debug logging for progress calculation
   console.log("Progress calculation:", {
     emailStatus: emailStatus.value,
@@ -608,6 +622,7 @@ const calculateProgress = () => {
     total: totalVerifications.value,
     percentage: progressPercentage.value,
     step4Enabled: step4Enabled.value,
+    reviewStatus: reviewStatus.value,
   });
 };
 
@@ -1326,15 +1341,49 @@ const sendEmailVerification = async () => {
       <div class="timeline-row reverse">
         <div class="timeline-card">
           <div class="card-title">
-            Your account is under review and will be activated soon
+            <template v-if="reviewStatus === 'incomplete'">
+              Complete the verification steps to activate all the dashboard
+              features
+            </template>
+            <template v-else-if="reviewStatus === 'verified_contact'">
+              Your email and Whatsapp number are verified. Please now complete
+              your profile to continue.
+            </template>
+            <template v-else>
+              Your account is under review and will be activated soon
+            </template>
           </div>
           <div class="card-desc">
-            Our admins will review your submission. You'll be notified once your
-            account is activated.
+            <template v-if="reviewStatus === 'incomplete'">
+              You haven't completed any verification yet. Please verify your
+              email or WhatsApp to proceed.
+            </template>
+            <template v-else-if="reviewStatus === 'verified_contact'">
+              Great! We verified your contact. Continue by completing your
+              profile details.
+            </template>
+            <template v-else>
+              Our admins will review your submission. You'll be notified once
+              your account is activated.
+            </template>
           </div>
           <div class="current-status">
             <h5>Current Status</h5>
-            <div class="status-badge status-awaiting-approval">
+            <div
+              v-if="reviewStatus === 'incomplete'"
+              class="status-badge status-incomplete"
+            >
+              <VIcon size="18" color="#f5a524">tabler-circle-check</VIcon>
+              Incomplete profile
+            </div>
+            <div
+              v-else-if="reviewStatus === 'verified_contact'"
+              class="status-badge status-verified-contact"
+            >
+              <VIcon size="18" color="#2ea3f2">tabler-circle-check</VIcon>
+              Verified Contact
+            </div>
+            <div v-else class="status-badge status-awaiting-approval">
               <VIcon size="18" color="#28a745">tabler-check-circle</VIcon>
               Awaiting Approval
             </div>
@@ -1789,6 +1838,16 @@ const sendEmailVerification = async () => {
 .status-awaiting-approval {
   background-color: #e6ffe6;
   color: #28a745;
+}
+
+.status-incomplete {
+  background-color: #fff1d6;
+  color: #c27b00;
+}
+
+.status-verified-contact {
+  background-color: #e6f4ff;
+  color: #2ea3f2;
 }
 
 /* --- Responsive --- */
