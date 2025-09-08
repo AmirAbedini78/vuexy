@@ -2,6 +2,7 @@
 import { layoutConfig } from "@layouts";
 import { can } from "@layouts/plugins/casl";
 import { useLayoutConfigStore } from "@layouts/stores/config";
+import { injectionKeyIsVerticalNavHovered } from "@layouts/symbols";
 import {
   getComputedNavLinkToProp,
   getDynamicI18nProps,
@@ -16,7 +17,25 @@ const props = defineProps({
 });
 
 const configStore = useLayoutConfigStore();
-const hideTitleAndBadge = configStore.isVerticalNavMini();
+
+/*ℹ️ We provided default value `ref(false)` because inject will return `T | undefined`
+Docs: https://vuejs.org/api/composition-api-dependency-injection.html#inject
+*/
+const isVerticalNavHovered = inject(
+  injectionKeyIsVerticalNavHovered,
+  ref(false)
+);
+
+// FIXED: Use the same hover logic as VerticalNavGroup
+const shouldShowContent = computed(() => {
+  // Always show content when sidebar is expanded
+  if (!configStore.isVerticalNavCollapsed) {
+    return true;
+  }
+  
+  // When collapsed, show content only when hovered
+  return isVerticalNavHovered.value;
+});
 </script>
 
 <template>
@@ -51,7 +70,7 @@ const hideTitleAndBadge = configStore.isVerticalNavMini();
             <!-- 👉 Title -->
             <Component
               :is="layoutConfig.app.i18n.enable ? 'i18n-t' : 'span'"
-              v-show="!hideTitleAndBadge"
+              v-show="shouldShowContent"
               key="title"
               class="nav-item-title"
               v-bind="getDynamicI18nProps(item.title, 'span')"
@@ -63,7 +82,7 @@ const hideTitleAndBadge = configStore.isVerticalNavMini();
             <Component
               :is="layoutConfig.app.i18n.enable ? 'i18n-t' : 'span'"
               v-if="item.badgeContent"
-              v-show="!hideTitleAndBadge"
+              v-show="shouldShowContent"
               key="badge"
               class="nav-item-badge"
               :class="item.badgeClass"
@@ -97,7 +116,7 @@ const hideTitleAndBadge = configStore.isVerticalNavMini();
         <!-- 👉 Title -->
         <Component
           :is="layoutConfig.app.i18n.enable ? 'i18n-t' : 'span'"
-          v-show="!hideTitleAndBadge"
+          v-show="shouldShowContent"
           key="title"
           class="nav-item-title"
           v-bind="getDynamicI18nProps(item.title, 'span')"
@@ -109,7 +128,7 @@ const hideTitleAndBadge = configStore.isVerticalNavMini();
         <Component
           :is="layoutConfig.app.i18n.enable ? 'i18n-t' : 'span'"
           v-if="item.badgeContent"
-          v-show="!hideTitleAndBadge"
+          v-show="shouldShowContent"
           key="badge"
           class="nav-item-badge"
           :class="item.badgeClass"

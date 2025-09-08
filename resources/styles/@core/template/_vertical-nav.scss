@@ -63,6 +63,17 @@
           transform: translateX(0);
           transition: all 0.25s ease-in-out;
         }
+
+        // Show all navigation content when hovered
+        .nav-link {
+          .nav-item-title,
+          .nav-item-badge {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(0);
+            transition: all 0.25s ease-in-out;
+          }
+        }
       }
 
       // When collapsed but not hovered, hide content properly
@@ -81,6 +92,17 @@
           visibility: hidden;
           transform: translateX(-10px);
           transition: all 0.25s ease-in-out;
+        }
+
+        // Hide navigation content when not hovered
+        .nav-link {
+          .nav-item-title,
+          .nav-item-badge {
+            opacity: 0;
+            visibility: hidden;
+            transform: translateX(-10px);
+            transition: all 0.25s ease-in-out;
+          }
         }
       }
     }
@@ -107,6 +129,224 @@
             background-color: rgba(var(--v-theme-primary), 0.08);
           }
         }
+      }
+
+      // FIXED: Ensure nav links and groups are visible in collapsed state
+      .nav-link {
+        .nav-item-icon {
+          opacity: 1 !important;
+          visibility: visible !important;
+        }
+      }
+
+      .nav-group {
+        .nav-item-icon {
+          opacity: 1 !important;
+          visibility: visible !important;
+        }
+      }
+
+      // FIXED: Ensure all nav item icons are visible
+      .nav-item-icon {
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
+
+      // FIXED: Ensure nav items are properly centered
+      .nav-link,
+      .nav-group {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        
+        .nav-item-icon {
+          margin: 0 auto;
+        }
+      }
+
+      // FIXED: Ensure nav group labels are centered
+      .nav-group-label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+      }
+
+      // FIXED: Ensure nav link inner elements are centered
+      .nav-link-inner {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+      }
+
+      // FIXED: Ensure nav items have proper spacing
+      .nav-link,
+      .nav-group {
+        padding: 0.5rem;
+        margin: 0.25rem 0;
+      }
+
+      // FIXED: Ensure nav items are properly aligned
+      .nav-link a,
+      .nav-link .nav-link-inner {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+      }
+
+      // FIXED: Ensure nav items have proper hover states
+      .nav-link:hover,
+      .nav-group:hover {
+        background-color: rgba(var(--v-theme-on-surface), 0.04);
+        border-radius: 6px;
+      }
+
+      // FIXED: Ensure nav items have proper active states
+      .nav-link.router-link-active,
+      .nav-group.active {
+        background-color: rgba(var(--v-theme-primary), 0.08);
+        border-radius: 6px;
+      }
+
+      // FIXED: Ensure nav items have proper spacing and alignment
+      .nav-link,
+      .nav-group {
+        margin: 0.125rem 0.5rem;
+        border-radius: 6px;
+      }
+
+      // FIXED: Ensure nav items have proper padding
+      .nav-link a,
+      .nav-link .nav-link-inner,
+      .nav-group-label {
+        padding: 0.75rem 0.5rem;
+      }
+
+      // FIXED: Ensure nav items have proper icon sizing
+      .nav-item-icon {
+        font-size: 1.25rem;
+        width: 1.25rem;
+        height: 1.25rem;
+      }
+
+      // FIXED: Ensure nav items have proper transitions
+      .nav-link,
+      .nav-group {
+        transition: all 0.2s ease-in-out;
+      }
+
+      // FIXED: Ensure nav items have proper focus states
+      .nav-link:focus,
+      .nav-group:focus {
+        outline: 2px solid rgba(var(--v-theme-primary), 0.5);
+        outline-offset: 2px;
+      }
+
+      // FIXED: Ensure nav items have proper accessibility
+      .nav-link,
+      .nav-group {
+        cursor: pointer;
+        user-select: none;
+      }
+
+      // FIXED: Ensure nav items have proper spacing between items
+      .nav-link + .nav-link,
+      .nav-group + .nav-group,
+      .nav-link + .nav-group,
+      .nav-group + .nav-link {
+        margin-top: 0.25rem;
+      }
+
+      // FIXED: Ensure nav items have proper border radius
+      .nav-link,
+      .nav-group {
+        border-radius: 8px;
+      }
+
+      // FIXED: Ensure nav items have proper background colors
+      .nav-link:hover,
+      .nav-group:hover {
+        background-color: rgba(var(--v-theme-on-surface), 0.06);
+      }
+
+      // FIXED: Ensure nav items have proper active background colors
+      .nav-link.router-link-active,
+      .nav-group.active {
+        background-color: rgba(var(--v-theme-primary), 0.12);
+      }
+
+      // FIXED: Ensure nav items have proper text colors
+      .nav-link,
+      .nav-group {
+        color: rgba(var(--v-theme-on-surface), 0.87);
+      }
+
+      // FIXED: Ensure nav items have proper icon colors
+      .nav-item-icon {
+        color: rgba(var(--v-theme-on-surface), 0.87);
+      }
+
+      // FIXED: Ensure nav items have proper active icon colors
+      .nav-link.router-link-active .nav-item-icon,
+      .nav-group.active .nav-item-icon {
+        color: rgba(var(--v-theme-primary), 1);
+      }
+
+      // FIXED: Ensure nav items have proper hover icon colors
+      .nav-link:hover .nav-item-icon,
+      .nav-group:hover .nav-item-icon {
+        color: rgba(var(--v-theme-on-surface), 1);
+      }
+
+      // FIXED: Ensure nav items have proper focus icon colors
+      .nav-link:focus .nav-item-icon,
+      .nav-group:focus .nav-item-icon {
+        color: rgba(var(--v-theme-primary), 0.8);
+      }
+
+      // FIXED: Ensure nav items have proper disabled states
+      .nav-link.disabled,
+      .nav-group.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      // FIXED: Ensure nav items have proper coming soon states
+      .nav-link.coming-soon,
+      .nav-group.coming-soon {
+        opacity: 0.45;
+        filter: blur(0.4px);
+        cursor: not-allowed;
+      }
+
+      // FIXED: Ensure nav items have proper section title styling
+      .nav-section-title {
+        padding: 0.5rem 0.75rem;
+        margin: 0.5rem 0;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: rgba(var(--v-theme-on-surface), 0.6);
+      }
+
+      // FIXED: Ensure nav items have proper badge styling
+      .nav-item-badge {
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.125rem 0.375rem;
+        border-radius: 12px;
+        background-color: rgba(var(--v-theme-primary), 0.1);
+        color: rgba(var(--v-theme-primary), 1);
+      }
+
+      // FIXED: Ensure nav items have proper arrow styling
+      .nav-group-arrow {
+        font-size: 1rem;
+        color: rgba(var(--v-theme-on-surface), 0.6);
+        transition: transform 0.2s ease-in-out;
       }
     }
 

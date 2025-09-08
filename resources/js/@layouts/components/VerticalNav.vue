@@ -164,7 +164,10 @@ const hideTitleAndIcon = configStore.isVerticalNavMini(isHovered);
         @click="() => $router.push('/get-support')"
       >
         <VIcon icon="tabler-ship" color="warning" class="me-2" />
-        <span v-show="!hideTitleAndIcon" class="button-text">
+        <span
+          v-show="!configStore.isVerticalNavMini(isHovered)"
+          class="button-text"
+        >
           Get Support
         </span>
       </VBtn>
@@ -194,7 +197,7 @@ const hideTitleAndIcon = configStore.isVerticalNavMini(isHovered);
 
   // Dynamic logo sizing
   .logo-collapsed {
-    transform: scale(0.7) translateX(-45px);
+    transform: scale(0.7) translateX(55px);
     transition: transform 0.3s ease;
   }
 
@@ -257,14 +260,40 @@ const hideTitleAndIcon = configStore.isVerticalNavMini(isHovered);
   // 👉 Collapsed state - change the entire sidebar width
   &.collapsed {
     inline-size: variables.$layout-vertical-nav-collapsed-width;
+    transition: inline-size 0.25s ease-in-out;
+
+    // 👉 Hover behavior for collapsed sidebar
+    &.hovered {
+      inline-size: variables.$layout-vertical-nav-width;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    }
 
     .nav-header {
       justify-content: center;
       padding: 0.75rem 0.5rem;
+      transition: padding 0.25s ease-in-out;
+      position: relative;
+
+      // 👉 When hovered, restore normal header layout
+      .layout-vertical-nav.hovered & {
+        justify-content: space-between;
+        padding: 1rem;
+      }
 
       .app-logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+
         .logo-collapsed {
-          transform: scale(0.8) translateX(0);
+          transform: scale(0.7) translateX(55px);
+          transition: transform 0.3s ease;
+        }
+
+        // 👉 When hovered, restore normal logo size
+        .layout-vertical-nav.hovered & .logo-collapsed {
+          transform: scale(1) translateX(0);
         }
       }
 
@@ -279,11 +308,26 @@ const hideTitleAndIcon = configStore.isVerticalNavMini(isHovered);
         width: 24px;
         height: 24px;
         margin-left: 0;
-        z-index: 1;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        transition: all 0.2s ease-in-out;
+        cursor: pointer;
+
+        &:hover {
+          background-color: rgb(var(--v-theme-primary));
+          border-color: rgb(var(--v-theme-primary));
+          box-shadow: 0 4px 12px rgba(var(--v-theme-primary), 0.3);
+          transform: translateY(-50%) scale(1.1);
+        }
 
         .v-icon {
           font-size: 12px;
+          color: rgb(var(--v-theme-on-surface));
+          transition: color 0.2s ease-in-out;
+        }
+
+        &:hover .v-icon {
+          color: rgb(var(--v-theme-on-primary));
         }
       }
     }
@@ -342,6 +386,14 @@ const hideTitleAndIcon = configStore.isVerticalNavMini(isHovered);
   .nav-items {
     flex: 1;
     overflow-y: auto;
+
+    // 👉 Ensure icons are visible in collapsed state
+    &.collapsed {
+      .nav-item-icon {
+        opacity: 1;
+        visibility: visible;
+      }
+    }
   }
 
   .nav-bottom-button {

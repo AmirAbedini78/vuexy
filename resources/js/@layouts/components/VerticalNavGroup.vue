@@ -178,6 +178,17 @@ const handleGroupClick = () => {
   // Otherwise, toggle normally
   isGroupOpen.value = !isGroupOpen.value;
 };
+
+// FIXED: Add computed property for better hover state management
+const shouldShowContent = computed(() => {
+  // Always show content when sidebar is expanded
+  if (!configStore.isVerticalNavCollapsed) {
+    return true;
+  }
+  
+  // When collapsed, show content only when hovered
+  return isVerticalNavHovered.value;
+});
 </script>
 
 <template>
@@ -204,7 +215,7 @@ const handleGroupClick = () => {
         <Component
           :is="layoutConfig.app.i18n.enable ? 'i18n-t' : 'span'"
           v-bind="getDynamicI18nProps(item.title, 'span')"
-          v-show="!hideTitleAndBadge"
+          v-show="shouldShowContent"
           key="title"
           class="nav-item-title"
         >
@@ -215,7 +226,7 @@ const handleGroupClick = () => {
         <Component
           :is="layoutConfig.app.i18n.enable ? 'i18n-t' : 'span'"
           v-bind="getDynamicI18nProps(item.badgeContent, 'span')"
-          v-show="!hideTitleAndBadge"
+          v-show="shouldShowContent"
           v-if="item.badgeContent"
           key="badge"
           class="nav-item-badge"
@@ -225,7 +236,7 @@ const handleGroupClick = () => {
         </Component>
         <Component
           :is="layoutConfig.app.iconRenderer || 'div'"
-          v-show="!hideTitleAndBadge"
+          v-show="shouldShowContent"
           v-bind="layoutConfig.icons.chevronRight"
           key="arrow"
           class="nav-group-arrow"
