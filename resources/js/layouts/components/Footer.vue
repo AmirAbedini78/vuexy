@@ -10,10 +10,34 @@
 
     <!-- 👉 Footer: right content -->
     <span class="d-md-flex gap-x-4 text-primary d-none">
-      <a href="#" class="text-decoration-none">Privacy Policies</a>
-      <a href="#" class="text-decoration-none">Terms of Services</a>
-      <a href="#" class="text-decoration-none">Legal</a>
-      <a href="#" class="text-decoration-none">Get Support</a>
+      <a
+        href="https://explorerelite.com/support/"
+        target="_blank"
+        rel="noopener"
+        class="text-decoration-none"
+        >Get Support</a
+      >
+      <a
+        href="https://explorerelite.com/legal/terms-of-services/"
+        target="_blank"
+        rel="noopener"
+        class="text-decoration-none"
+        >Terms of Services</a
+      >
+      <a
+        href="https://explorerelite.com/legal/privacy-policy/"
+        target="_blank"
+        rel="noopener"
+        class="text-decoration-none"
+        >Privacy Policy</a
+      >
+      <a
+        href="https://explorerelite.com/legal"
+        target="_blank"
+        rel="noopener"
+        class="text-decoration-none"
+        >Legal</a
+      >
     </span>
   </div>
 </template>

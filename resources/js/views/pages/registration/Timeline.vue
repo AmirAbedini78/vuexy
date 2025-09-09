@@ -60,6 +60,10 @@ const profileCompleted = ref(false);
 // Step 5 status: 'incomplete' | 'verified_contact' | 'awaiting_approval'
 const reviewStatus = ref("incomplete");
 
+// Feature flags (disable WhatsApp and LinkedIn steps visually/functionally)
+const disableWhatsapp = ref(true);
+const disableLinkedin = ref(true);
+
 // Step 4 Progress State
 const step4Enabled = ref(false);
 const progressPercentage = ref(0);
@@ -1158,7 +1162,35 @@ const sendEmailVerification = async () => {
 
       <!-- Step 2: WhatsApp Verification -->
       <div class="timeline-row reverse-alt">
-        <div class="timeline-card">
+        <VTooltip v-if="disableWhatsapp" text="Coming Soon" location="top">
+          <template #activator="{ props }">
+            <div class="timeline-card disabled-feature" v-bind="props">
+              <div class="card-title">
+                Verify your WhatsApp number for secure communication
+              </div>
+              <div class="card-desc">
+                Provide your WhatsApp number to receive a verification code.
+                Enter the code to confirm your number.
+              </div>
+              <div class="card-actions">
+                <VTextField
+                  v-model="userData.whatsapp"
+                  label="Your WhatsApp Number"
+                  placeholder="09xxxxxxxxx"
+                  variant="outlined"
+                  density="compact"
+                  class="whatsapp-input"
+                  :disabled="true"
+                />
+                <VBtn color="success" class="send-code-btn" :disabled="true">
+                  <VIcon left size="20">tabler-brand-whatsapp</VIcon>
+                  Send Code
+                </VBtn>
+              </div>
+            </div>
+          </template>
+        </VTooltip>
+        <div v-else class="timeline-card">
           <div class="card-title">
             Verify your WhatsApp number for secure communication
           </div>
@@ -1208,7 +1240,27 @@ const sendEmailVerification = async () => {
 
       <!-- Step 3: LinkedIn Connection -->
       <div class="timeline-row reverse">
-        <div class="timeline-card">
+        <VTooltip v-if="disableLinkedin" text="Coming Soon" location="top">
+          <template #activator="{ props }">
+            <div class="timeline-card disabled-feature" v-bind="props">
+              <div class="card-title">
+                Connect your LinkedIn profile to validate your professional
+                identity
+              </div>
+              <div class="card-desc">
+                Log in to LinkedIn to link your profile. This ensures your
+                professional credentials are verified.
+              </div>
+              <div class="card-actions">
+                <VBtn color="primary" :disabled="true">
+                  <VIcon left size="20">tabler-brand-linkedin</VIcon>
+                  Coming Soon
+                </VBtn>
+              </div>
+            </div>
+          </template>
+        </VTooltip>
+        <div v-else class="timeline-card">
           <div class="card-title">
             Connect your LinkedIn profile to validate your professional identity
           </div>
@@ -1708,6 +1760,28 @@ const sendEmailVerification = async () => {
   background: #f8f8f8;
   opacity: 0.7;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Visually disabled feature card */
+.timeline-card.disabled-feature {
+  background: #f4f4f6;
+  opacity: 0.6;
+  filter: grayscale(0.2);
+  position: relative;
+  pointer-events: auto; /* allow tooltip title to show */
+}
+
+.timeline-card.disabled-feature::after {
+  content: "Coming Soon";
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: #e0e0e6;
+  color: #666;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 12px;
 }
 
 .step4-disabled-message {
