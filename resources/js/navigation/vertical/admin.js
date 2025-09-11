@@ -4,8 +4,6 @@ export default [
     title: 'Dashboard',
     icon: { icon: 'tabler-compass' },
     to: 'admin-dashboard',
-    badgeContent: '5',
-    badgeClass: 'bg-error',
   },
 
   // Adventures

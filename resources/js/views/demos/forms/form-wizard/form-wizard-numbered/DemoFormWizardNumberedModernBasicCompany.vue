@@ -175,8 +175,13 @@ const onSubmit = async () => {
     // Show success message
     alert("Registration completed successfully!");
 
-    // Redirect to dashboard instead of listing
-    router.push("/");
+    // Redirect back to timeline to update status
+    const userDataCookie = useCookie("userData");
+    if (userDataCookie.value?.id) {
+      router.push(`/registration/timeline/company/${userDataCookie.value.id}`);
+    } else {
+      router.push("/");
+    }
   } catch (error) {
     console.error("Registration failed:", error);
     alert("Registration failed: " + (error.message || "Unknown error"));

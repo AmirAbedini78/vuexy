@@ -76,6 +76,10 @@ const isPolling = ref(false);
 const maxPollingAttempts = ref(10); // Maximum 10 attempts (50 seconds)
 const pollingAttempts = ref(0);
 
+// Profile completion polling
+const profilePollingInterval = ref(null);
+const isProfilePolling = ref(false);
+
 // Success notification state
 const showSuccessNotification = ref(false);
 const successMessage = ref("");
@@ -189,7 +193,7 @@ const fetchVerificationStatus = async () => {
     }
 
     // Calculate progress after updating all statuses
-    calculateProgress();
+    await calculateProgress();
   } catch (e) {
     console.error("Error fetching verification status:", e);
     emailStatus.value = "error";
@@ -244,7 +248,7 @@ const startVerificationPolling = () => {
         }
 
         // Recalculate progress
-        calculateProgress();
+        await calculateProgress();
 
         console.log(
           `Polling attempt ${pollingAttempts.value}: Email verified = ${isEmailVerified}`
@@ -283,6 +287,37 @@ const stopVerificationPolling = () => {
   }
   isPolling.value = false;
   console.log("Verification polling stopped");
+};
+
+// Start polling for profile completion
+const startProfilePolling = () => {
+  if (isProfilePolling.value || profileCompleted.value) return;
+
+  isProfilePolling.value = true;
+  console.log("Starting profile completion polling...");
+
+  profilePollingInterval.value = setInterval(async () => {
+    try {
+      await updateProfileCompletionStatus();
+
+      // Stop polling if profile is completed
+      if (profileCompleted.value) {
+        stopProfilePolling();
+      }
+    } catch (error) {
+      console.error("Error during profile completion polling:", error);
+    }
+  }, 10000); // Check every 10 seconds
+};
+
+// Stop polling for profile completion
+const stopProfilePolling = () => {
+  if (profilePollingInterval.value) {
+    clearInterval(profilePollingInterval.value);
+    profilePollingInterval.value = null;
+  }
+  isProfilePolling.value = false;
+  console.log("Profile completion polling stopped");
 };
 
 // Show success notification
@@ -372,7 +407,7 @@ const fetchVerificationStatusWithRetry = async (
       }
 
       // Calculate progress after updating all statuses
-      calculateProgress();
+      await calculateProgress();
 
       // If email is verified and we're returning from verification, stop polling
       if (isEmailVerified && isEmailVerificationReturn) {
@@ -514,7 +549,7 @@ const verifyWhatsappCode = async () => {
       whatsappStatus.value = "verified";
       whatsappMessage.value = "WhatsApp Verified";
       showWhatsappModal.value = false;
-      calculateProgress(); // Calculate progress after successful verification
+      await calculateProgress(); // Calculate progress after successful verification
     } else {
       whatsappStatus.value = "error";
       whatsappMessage.value = data.message || "Invalid code.";
@@ -524,6 +559,46 @@ const verifyWhatsappCode = async () => {
     whatsappMessage.value = "Failed to verify code.";
   } finally {
     whatsappCodeLoading.value = false;
+  }
+};
+
+// Check if user has completed their Individual or Company profile
+const checkProfileCompletion = async () => {
+  try {
+    const userId = currentUser.value?.id;
+    if (!userId) return false;
+
+    // Check both Individual and Company endpoints
+    try {
+      const individualResponse = await fetch(`/api/individual-users/${userId}`);
+      if (individualResponse.ok) {
+        const individualData = await individualResponse.json();
+        if (individualData.success && individualData.data) {
+          console.log("User has completed Individual profile");
+          return true;
+        }
+      }
+    } catch (e) {
+      console.log("Individual profile check failed:", e);
+    }
+
+    try {
+      const companyResponse = await fetch(`/api/company-users/${userId}`);
+      if (companyResponse.ok) {
+        const companyData = await companyResponse.json();
+        if (companyData.success && companyData.data) {
+          console.log("User has completed Company profile");
+          return true;
+        }
+      }
+    } catch (e) {
+      console.log("Company profile check failed:", e);
+    }
+
+    return false;
+  } catch (error) {
+    console.error("Error checking profile completion:", error);
+    return false;
   }
 };
 
@@ -586,8 +661,38 @@ const completeProfile = async () => {
   }
 };
 
+// Check profile completion and update status
+const updateProfileCompletionStatus = async () => {
+  try {
+    const isCompleted = await checkProfileCompletion();
+    if (isCompleted && !profileCompleted.value) {
+      console.log(
+        "Profile completion detected, updating status to awaiting_approval"
+      );
+      profileCompleted.value = true;
+      reviewStatus.value = "awaiting_approval";
+
+      // Set completion cookie
+      const profileCompletedCookie = useCookie("profileCompleted");
+      profileCompletedCookie.value = "true";
+
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem("profileCompleted", "true");
+        } catch (e) {}
+      }
+
+      showNotification(
+        "🎉 Profile completion detected! Status updated to awaiting approval."
+      );
+    }
+  } catch (error) {
+    console.error("Error updating profile completion status:", error);
+  }
+};
+
 // Calculate progress and update step 4 state
-const calculateProgress = () => {
+const calculateProgress = async () => {
   let completed = 0;
 
   if (emailStatus.value === "verified") completed++;
@@ -603,6 +708,9 @@ const calculateProgress = () => {
   step4Enabled.value = completed > 0;
   // Also update simple verified flag
   updateVerifiedFlag();
+
+  // Check if user has completed their profile (Individual or Company form)
+  await updateProfileCompletionStatus();
 
   // Update Step 5 status based on current verification & completion state
   if (profileCompleted.value) {
@@ -735,7 +843,12 @@ onMounted(async () => {
     }
 
     // Calculate initial progress - this should now properly enable step 4
-    calculateProgress();
+    await calculateProgress();
+
+    // Start profile completion polling if profile is not completed yet
+    if (!profileCompleted.value) {
+      startProfilePolling();
+    }
 
     // Debug logging
     console.log("Verification statuses:", {
@@ -746,6 +859,7 @@ onMounted(async () => {
       completedVerifications: completedVerifications.value,
       progressPercentage: progressPercentage.value,
       isPolling: isPolling.value,
+      profileCompleted: profileCompleted.value,
     });
   } catch (err) {
     console.error("Error fetching user data:", err);
@@ -777,6 +891,7 @@ const removeKeyboardListeners = () => {
 // Cleanup polling on component unmount
 onUnmounted(() => {
   stopVerificationPolling();
+  stopProfilePolling();
   removeKeyboardListeners();
 });
 
@@ -815,7 +930,7 @@ watch(
       await fetchVerificationStatus();
 
       // Calculate progress after LinkedIn verification
-      calculateProgress();
+      await calculateProgress();
 
       console.log("LinkedIn verification progress updated:", {
         linkedinStatus: linkedinStatus.value,
