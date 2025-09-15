@@ -216,15 +216,31 @@ const onSubmit = async () => {
       return;
     }
 
+    // Debug: Log the form data before processing
+    console.log("Form data before processing:", {
+      socialMediaLinks: formData.value.socialMediaLinks,
+      socialMediaLinksType: typeof formData.value.socialMediaLinks,
+      socialMediaLinksIsArray: Array.isArray(formData.value.socialMediaLinks),
+      socialProofLinks: formData.value.socialProofLinks,
+      socialProofLinksType: typeof formData.value.socialProofLinks,
+      socialProofLinksIsArray: Array.isArray(formData.value.socialProofLinks),
+    });
+
     // Prepare form data for submission
     const submitData = {
       ...formData.value,
       // Convert arrays to JSON strings for backend
       socialMediaLinks: JSON.stringify(
-        formData.value.socialMediaLinks.filter((link) => link.trim() !== "")
+        (Array.isArray(formData.value.socialMediaLinks)
+          ? formData.value.socialMediaLinks
+          : [formData.value.socialMediaLinks] || [""]
+        ).filter((link) => link && link.trim() !== "")
       ),
       socialProofLinks: JSON.stringify(
-        formData.value.socialProofLinks.filter((link) => link.trim() !== "")
+        (Array.isArray(formData.value.socialProofLinks)
+          ? formData.value.socialProofLinks
+          : [formData.value.socialProofLinks] || [""]
+        ).filter((link) => link && link.trim() !== "")
       ),
     };
 
@@ -290,11 +306,20 @@ const handleCertificationsUpload = (event) => {
 
 // Add new social proof link field
 const addSocialProofLink = () => {
+  // Ensure socialProofLinks is always an array
+  if (!Array.isArray(formData.value.socialProofLinks)) {
+    formData.value.socialProofLinks = [""];
+  }
   formData.value.socialProofLinks.push("");
 };
 
 // Remove social proof link field
 const removeSocialProofLink = (index) => {
+  // Ensure socialProofLinks is always an array
+  if (!Array.isArray(formData.value.socialProofLinks)) {
+    formData.value.socialProofLinks = [""];
+    return;
+  }
   if (formData.value.socialProofLinks.length > 1) {
     formData.value.socialProofLinks.splice(index, 1);
   }
@@ -302,11 +327,20 @@ const removeSocialProofLink = (index) => {
 
 // Add new social media link field
 const addSocialMediaLink = () => {
+  // Ensure socialMediaLinks is always an array
+  if (!Array.isArray(formData.value.socialMediaLinks)) {
+    formData.value.socialMediaLinks = [""];
+  }
   formData.value.socialMediaLinks.push("");
 };
 
 // Remove social media link field
 const removeSocialMediaLink = (index) => {
+  // Ensure socialMediaLinks is always an array
+  if (!Array.isArray(formData.value.socialMediaLinks)) {
+    formData.value.socialMediaLinks = [""];
+    return;
+  }
   if (formData.value.socialMediaLinks.length > 1) {
     formData.value.socialMediaLinks.splice(index, 1);
   }
