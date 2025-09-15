@@ -72,12 +72,35 @@ class ListingStatusUpdated extends Notification implements ShouldQueue
         $map = $this->statusCopy();
         $copy = $map[$this->status] ?? ['title' => 'Status Updated', 'body' => 'Your event status was updated.'];
 
+        $frontendUrl = rtrim(config('app.frontend_url', env('APP_URL')), '/');
+
+        $heading = match ($this->status) {
+            'submitted' => 'Your Listing is Submitted',
+            'approved' => 'Your Listing is Approved',
+            'live' => 'Your Listing is Live',
+            'denied' => 'Your Listing is Denied',
+            'edit_review' => 'Your Listing is Under Review',
+            default => 'Listing Status Updated',
+        };
+
+        $intro = ($this->listingTitle ? '“' . e($this->listingTitle) . '” — ' : '') . $copy['body'];
+
+        $viewData = [
+            'subject' => 'Event Status: ' . $copy['title'],
+            'heading' => $heading,
+            'intro_html' => e($intro),
+            'primary_text' => 'Go To Dashboard',
+            'primary_url' => $frontendUrl . '/',
+            'secondary_text' => 'Contact Support',
+            'secondary_url' => 'https://explorerelite.com/support/',
+            'support_url' => 'https://explorerelite.com/support/',
+            'whatsapp_url' => 'https://wa.me/',
+            'frontend_url' => $frontendUrl,
+        ];
+
         return (new MailMessage)
             ->subject('Event Status: ' . $copy['title'])
-            ->greeting('Hello ' . ($notifiable->name ?? ''))
-            ->line(($this->listingTitle ? '“' . $this->listingTitle . '” — ' : '') . $copy['body'])
-            ->action('View your events', url(config('app.frontend_url', env('APP_URL'))))
-            ->line('Thank you for using our platform!');
+            ->view('emails.status-update', $viewData);
     }
 
     public function toArray(object $notifiable): array

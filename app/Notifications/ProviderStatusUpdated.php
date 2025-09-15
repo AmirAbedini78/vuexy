@@ -38,19 +38,30 @@ class ProviderStatusUpdated extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         $title = 'Your provider status was updated';
-        $line = sprintf(
-            'Your %s profile "%s" has been %s by admin.',
-            $this->providerType,
-            $this->providerName ?? 'account',
-            $this->status
-        );
+
+        $frontendUrl = rtrim(config('app.frontend_url', env('APP_URL')), '/');
+
+        $viewData = [
+            'subject' => $title,
+            'heading' => 'Your Listing is Under Review',
+            'intro_html' => sprintf(
+                'Great news! Your %s, <strong>%s</strong>, is under %s by our team, we’ll notify you once it’s done. You can always contact us if you need to make changes.',
+                e($this->providerType === 'company' ? 'Company Profile' : 'Profile'),
+                e($this->providerName ?? 'account'),
+                e($this->status === 'active' ? 'activation' : 'review')
+            ),
+            'primary_text' => 'Go To Dashboard',
+            'primary_url' => $frontendUrl . '/',
+            'secondary_text' => 'Contact Support',
+            'secondary_url' => 'https://explorerelite.com/support/',
+            'support_url' => 'https://explorerelite.com/support/',
+            'whatsapp_url' => 'https://wa.me/',
+            'frontend_url' => $frontendUrl,
+        ];
 
         return (new MailMessage)
             ->subject($title)
-            ->greeting('Hello ' . ($notifiable->name ?? ''))
-            ->line($line)
-            ->action('View your profile', url(config('app.frontend_url', env('APP_URL'))))
-            ->line('Thank you for using our platform!');
+            ->view('emails.status-update', $viewData);
     }
 
     public function toArray(object $notifiable): array
