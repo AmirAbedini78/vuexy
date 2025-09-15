@@ -20,6 +20,10 @@ const numberedSteps = [
 const currentStep = ref(0);
 const loading = ref(false);
 const formValidationErrors = ref({});
+const showErrorDialog = ref(false);
+const errorMessage = ref("");
+const showSuccessDialog = ref(false);
+const successMessage = ref("");
 
 const formData = ref({
   // Step 1 fields
@@ -146,22 +150,69 @@ const handleNextStep = () => {
     if (validateStep1()) {
       currentStep.value++;
     } else {
+      // Show error popup with missing fields
+      const missingFields = Object.keys(formValidationErrors.value);
+      const fieldNames = missingFields.map((field) => {
+        const fieldLabels = {
+          fullName: "Full Name",
+          nationality: "Nationality",
+          address1: "Address Line 1",
+          city: "City",
+          dob: "Date of Birth",
+          languages: "Languages Spoken",
+          country: "Country",
+        };
+        return fieldLabels[field] || field;
+      });
+      showValidationError(
+        `Please fill in the following required fields: ${fieldNames.join(", ")}`
+      );
+
       // Scroll to first error
-      const firstErrorField = document.querySelector(".field-error");
-      if (firstErrorField) {
-        firstErrorField.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
+      setTimeout(() => {
+        const firstErrorField = document.querySelector(".field-error");
+        if (firstErrorField) {
+          firstErrorField.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }
+      }, 100);
     }
   } else if (currentStep.value === 1) {
     // Validate step 2
     if (validateStep2()) {
       currentStep.value++;
     } else {
+      // Show error popup with missing fields
+      const missingFields = Object.keys(formValidationErrors.value);
+      const fieldNames = missingFields.map((field) => {
+        const fieldLabels = {
+          passportImage: "Explorer Passport Image",
+          activitySpecialization: "Activity Specialization",
+          yearsOfExperience: "Years of Experience",
+          emergencyContactName: "Emergency Contact Name",
+          wantToBeListed: "Listing Preference",
+          shortBio: "Short Bio",
+          countryOfOperation: "Country/Region of Operation",
+          emergencyContactPhone: "Emergency Contact Phone",
+        };
+        return fieldLabels[field] || field;
+      });
+      showValidationError(
+        `Please fill in the following required fields: ${fieldNames.join(", ")}`
+      );
+
       // Scroll to first error
-      const firstErrorField = document.querySelector(".field-error");
-      if (firstErrorField) {
-        firstErrorField.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
+      setTimeout(() => {
+        const firstErrorField = document.querySelector(".field-error");
+        if (firstErrorField) {
+          firstErrorField.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }
+      }, 100);
     }
   } else {
     currentStep.value++;
@@ -181,15 +232,29 @@ const onSubmit = async () => {
   try {
     // Validate required fields
     if (!formData.value.termsAccepted) {
-      alert("Please accept the terms and conditions");
+      showValidationError(
+        "Please accept the terms and conditions to continue."
+      );
       return;
     }
 
-    const response = await individualUserService.register(formData.value);
+    // Prepare form data for submission
+    const submitData = {
+      ...formData.value,
+      // Convert arrays to JSON strings for backend
+      socialMediaLinks: JSON.stringify(
+        formData.value.socialMediaLinks.filter((link) => link.trim() !== "")
+      ),
+      socialProofLinks: JSON.stringify(
+        formData.value.socialProofLinks.filter((link) => link.trim() !== "")
+      ),
+    };
+
+    const response = await individualUserService.register(submitData);
     console.log("Registration successful:", response);
 
     // Show success message
-    alert("Registration completed successfully!");
+    showSuccessMessage("Registration completed successfully!");
 
     // Redirect back to timeline to update status
     const userDataCookie = useCookie("userData");
@@ -202,7 +267,9 @@ const onSubmit = async () => {
     }
   } catch (error) {
     console.error("Registration failed:", error);
-    alert("Registration failed: " + (error.message || "Unknown error"));
+    showValidationError(
+      "Registration failed: " + (error.message || "Unknown error")
+    );
   } finally {
     loading.value = false;
   }
@@ -268,9 +335,67 @@ const removeSocialProofLink = (index) => {
     formData.value.socialProofLinks.splice(index, 1);
   }
 };
+
+// Show validation error popup
+const showValidationError = (message) => {
+  errorMessage.value = message;
+  showErrorDialog.value = true;
+};
+
+// Show success message popup
+const showSuccessMessage = (message) => {
+  successMessage.value = message;
+  showSuccessDialog.value = true;
+};
+
+// Close error dialog
+const closeErrorDialog = () => {
+  showErrorDialog.value = false;
+  errorMessage.value = "";
+};
+
+// Close success dialog
+const closeSuccessDialog = () => {
+  showSuccessDialog.value = false;
+  successMessage.value = "";
+};
 </script>
 
 <template>
+  <!-- Error Dialog -->
+  <VDialog v-model="showErrorDialog" max-width="500">
+    <VCard>
+      <VCardTitle class="d-flex align-center">
+        <VIcon icon="tabler-alert-circle" color="error" class="me-2" />
+        Validation Error
+      </VCardTitle>
+      <VCardText>
+        {{ errorMessage }}
+      </VCardText>
+      <VCardActions>
+        <VSpacer />
+        <VBtn color="error" @click="closeErrorDialog">OK</VBtn>
+      </VCardActions>
+    </VCard>
+  </VDialog>
+
+  <!-- Success Dialog -->
+  <VDialog v-model="showSuccessDialog" max-width="500">
+    <VCard>
+      <VCardTitle class="d-flex align-center">
+        <VIcon icon="tabler-check-circle" color="success" class="me-2" />
+        Success
+      </VCardTitle>
+      <VCardText>
+        {{ successMessage }}
+      </VCardText>
+      <VCardActions>
+        <VSpacer />
+        <VBtn color="success" @click="closeSuccessDialog">OK</VBtn>
+      </VCardActions>
+    </VCard>
+  </VDialog>
+
   <!-- 👉 Custom Stepper -->
   <div class="custom-stepper mb-6">
     <div class="stepper-container">
