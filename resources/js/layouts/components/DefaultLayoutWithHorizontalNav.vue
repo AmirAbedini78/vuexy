@@ -3,8 +3,6 @@ import navItems from "@/navigation/horizontal";
 
 // Components
 import Footer from "@/layouts/components/Footer.vue";
-import NavBarNotifications from "@/layouts/components/NavBarNotifications.vue";
-import NavbarThemeSwitcher from "@/layouts/components/NavbarThemeSwitcher.vue";
 import UserProfile from "@/layouts/components/UserProfile.vue";
 import { HorizontalNavLayout } from "@layouts";
 
@@ -22,16 +20,10 @@ const { goToDashboard } = useNavigation();
       </RouterLink> -->
       <VSpacer />
 
-      <!-- Theme Switcher (Light/Dark mode) -->
-      <NavbarThemeSwitcher />
-
       <!-- Home icon for navigation to dashboard -->
       <IconBtn class="me-2" @click="goToDashboard" title="Go to Dashboard">
         <VIcon size="24" icon="tabler-home" />
       </IconBtn>
-
-      <!-- Notifications -->
-      <NavBarNotifications class="me-2" />
 
       <!-- User Profile -->
       <UserProfile />

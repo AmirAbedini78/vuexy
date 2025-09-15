@@ -4,8 +4,6 @@ import userNavItems from "@/navigation/vertical/user";
 
 // Components
 import Footer from "@/layouts/components/Footer.vue";
-import NavBarNotifications from "@/layouts/components/NavBarNotifications.vue";
-import NavbarThemeSwitcher from "@/layouts/components/NavbarThemeSwitcher.vue";
 import UserProfile from "@/layouts/components/UserProfile.vue";
 
 // @layouts plugin
@@ -173,16 +171,10 @@ const navigationItems = computed(() => {
 
         <VSpacer />
 
-        <!-- Theme Switcher (Light/Dark mode) -->
-        <NavbarThemeSwitcher />
-
         <!-- Home icon for navigation to dashboard -->
         <IconBtn class="me-2" @click="goToDashboard" title="Go to Dashboard">
           <VIcon size="24" icon="tabler-home" />
         </IconBtn>
-
-        <!-- Notifications -->
-        <NavBarNotifications class="me-1" />
 
         <!-- User Profile -->
         <UserProfile />

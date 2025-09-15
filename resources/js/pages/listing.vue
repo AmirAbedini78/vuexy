@@ -121,10 +121,28 @@ const fetchUserData = async () => {
 
 // Get user display name
 const getUserDisplayName = () => {
-  if (!userData.value) return "[Provider Name]";
-  return (
-    userData.value.full_name || userData.value.company_name || "[Provider Name]"
-  );
+  // First try to get from userData (from API)
+  if (userData.value) {
+    return (
+      userData.value.full_name ||
+      userData.value.company_name ||
+      userData.value.name ||
+      "User"
+    );
+  }
+
+  // Fallback to loggedInUser data
+  if (loggedInUser.value) {
+    return (
+      loggedInUser.value.full_name ||
+      loggedInUser.value.company_name ||
+      loggedInUser.value.name ||
+      loggedInUser.value.username ||
+      "User"
+    );
+  }
+
+  return "User";
 };
 
 // Fetch user data on mount
@@ -341,6 +359,7 @@ function contactSupport() {
 }
 .listing-header .provider-name {
   color: #ec8d22;
+  font-family: inherit;
 }
 .listing-header .listing-subtitle {
   font-size: 1.1rem;
