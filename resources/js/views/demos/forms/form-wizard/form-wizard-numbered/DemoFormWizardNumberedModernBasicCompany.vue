@@ -216,31 +216,23 @@ const onSubmit = async () => {
       return;
     }
 
-    // Debug: Log the form data before processing
-    console.log("Form data before processing:", {
-      socialMediaLinks: formData.value.socialMediaLinks,
-      socialMediaLinksType: typeof formData.value.socialMediaLinks,
-      socialMediaLinksIsArray: Array.isArray(formData.value.socialMediaLinks),
-      socialProofLinks: formData.value.socialProofLinks,
-      socialProofLinksType: typeof formData.value.socialProofLinks,
-      socialProofLinksIsArray: Array.isArray(formData.value.socialProofLinks),
-    });
+    // Safely extract arrays from reactive proxies
+    const socialMediaLinksArray = Array.isArray(formData.value.socialMediaLinks) 
+      ? [...formData.value.socialMediaLinks] 
+      : [];
+    const socialProofLinksArray = Array.isArray(formData.value.socialProofLinks) 
+      ? [...formData.value.socialProofLinks] 
+      : [];
 
     // Prepare form data for submission
     const submitData = {
       ...formData.value,
       // Convert arrays to JSON strings for backend
       socialMediaLinks: JSON.stringify(
-        (Array.isArray(formData.value.socialMediaLinks)
-          ? formData.value.socialMediaLinks
-          : [formData.value.socialMediaLinks] || [""]
-        ).filter((link) => link && link.trim() !== "")
+        socialMediaLinksArray.filter((link) => link && link.trim() !== "")
       ),
       socialProofLinks: JSON.stringify(
-        (Array.isArray(formData.value.socialProofLinks)
-          ? formData.value.socialProofLinks
-          : [formData.value.socialProofLinks] || [""]
-        ).filter((link) => link && link.trim() !== "")
+        socialProofLinksArray.filter((link) => link && link.trim() !== "")
       ),
     };
 
@@ -310,7 +302,8 @@ const addSocialProofLink = () => {
   if (!Array.isArray(formData.value.socialProofLinks)) {
     formData.value.socialProofLinks = [""];
   }
-  formData.value.socialProofLinks.push("");
+  // Create a new array to trigger reactivity
+  formData.value.socialProofLinks = [...formData.value.socialProofLinks, ""];
 };
 
 // Remove social proof link field
@@ -321,7 +314,8 @@ const removeSocialProofLink = (index) => {
     return;
   }
   if (formData.value.socialProofLinks.length > 1) {
-    formData.value.socialProofLinks.splice(index, 1);
+    // Create a new array to trigger reactivity
+    formData.value.socialProofLinks = formData.value.socialProofLinks.filter((_, i) => i !== index);
   }
 };
 
@@ -331,7 +325,8 @@ const addSocialMediaLink = () => {
   if (!Array.isArray(formData.value.socialMediaLinks)) {
     formData.value.socialMediaLinks = [""];
   }
-  formData.value.socialMediaLinks.push("");
+  // Create a new array to trigger reactivity
+  formData.value.socialMediaLinks = [...formData.value.socialMediaLinks, ""];
 };
 
 // Remove social media link field
@@ -342,7 +337,8 @@ const removeSocialMediaLink = (index) => {
     return;
   }
   if (formData.value.socialMediaLinks.length > 1) {
-    formData.value.socialMediaLinks.splice(index, 1);
+    // Create a new array to trigger reactivity
+    formData.value.socialMediaLinks = formData.value.socialMediaLinks.filter((_, i) => i !== index);
   }
 };
 
