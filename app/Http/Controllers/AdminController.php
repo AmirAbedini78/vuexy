@@ -131,7 +131,7 @@ class AdminController extends Controller
 
         // Derive status from want_to_be_listed
         $providers = $providers->map(function ($provider) {
-            // Map want_to_be_listed => status: yes->active, no->rejected, everything else->approved
+            // Map want_to_be_listed => status: yes->active, no->rejected, everything else->review
             $listed = isset($provider->want_to_be_listed) ? strtolower(trim($provider->want_to_be_listed)) : null;
             
             // Only set to active if explicitly 'yes'
@@ -142,9 +142,9 @@ class AdminController extends Controller
             elseif ($listed === 'no') {
                 $provider->status = 'rejected';
             } 
-            // Default to approved for everything else (null, empty, unsure, etc.)
+            // Default to review for everything else (null, empty, unsure, etc.)
             else {
-                $provider->status = 'approved';
+                $provider->status = 'review';
             }
             
             // Log the status mapping for debugging
@@ -408,15 +408,15 @@ class AdminController extends Controller
                 $listed = isset($listed) ? strtolower(trim($listed)) : null;
                 if ($listed === 'yes') return 'active';
                 if ($listed === 'no') return 'rejected';
-                return 'approved';
+                return 'review';
             };
 
             $indStatus = $individualUser ? $mapToStatus($individualUser->want_to_be_listed) : null;
             $comStatus = $companyUser ? $mapToStatus($companyUser->want_to_be_listed) : null;
 
-            // Priority: any 'active' -> active; else if any 'rejected' and none active -> rejected; else approved
+            // Priority: any 'active' -> active; else if any 'rejected' and none active -> rejected; else review
             $statuses = array_filter([$indStatus, $comStatus]);
-            $status = 'approved';
+            $status = 'review';
             if (in_array('active', $statuses, true)) {
                 $status = 'active';
             } elseif (in_array('rejected', $statuses, true)) {

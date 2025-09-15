@@ -81,7 +81,7 @@ export const useProviderStatus = () => {
 
   // Computed properties
   const isActive = computed(() => providerStatus.value === 'active')
-  const isApproved = computed(() => providerStatus.value === 'approved')
+  const isReview = computed(() => providerStatus.value === 'review')
   const isRejected = computed(() => providerStatus.value === 'rejected')
   const isNotFound = computed(() => providerStatus.value === 'not_found')
   const hasProviderProfile = computed(() => providerStatus.value && providerStatus.value !== 'not_found')
@@ -107,7 +107,7 @@ export const useProviderStatus = () => {
     
     // Computed
     isActive,
-    isApproved,
+    isReview,
     isRejected,
     isNotFound,
     hasProviderProfile,

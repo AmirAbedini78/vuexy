@@ -1445,7 +1445,7 @@ const changeProviderStatus = async (provider, status) => {
     console.log("Status change initiated for provider:", provider.id);
 
     // Validate status
-    if (!status || !["active", "approved", "rejected"].includes(status)) {
+    if (!status || !["active", "review", "rejected"].includes(status)) {
       console.error("Invalid status:", status);
       return;
     }

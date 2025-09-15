@@ -152,7 +152,7 @@ const login = async () => {
           console.log("User status is active, redirecting to dashboard...");
           router.push("/");
         } else {
-          // User is not active (approved/rejected/not_found), redirect to timeline
+          // User is not active (review/rejected/not_found), redirect to timeline
           console.log("User status is not active, redirecting to timeline...");
 
           // Determine user type for timeline routing

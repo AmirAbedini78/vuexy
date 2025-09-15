@@ -124,7 +124,7 @@ const navigationItems = computed(() => {
       // Provider status is 'active' - show all menu items except Welcome
       return userNavItems.filter((item) => item.title !== "Welcome");
     } else if (shouldShowLimitedSidebar.value) {
-      // Provider status is 'approved' or 'rejected' - show only Welcome
+      // Provider status is 'review' or 'rejected' - show only Welcome
       return getWelcomeOnly();
     } else {
       // No provider profile or status is 'not_found' - show only Welcome
