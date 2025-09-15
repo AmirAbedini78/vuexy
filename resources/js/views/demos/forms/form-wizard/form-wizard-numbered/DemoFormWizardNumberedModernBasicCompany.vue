@@ -25,6 +25,10 @@ const errorMessage = ref("");
 const showSuccessDialog = ref(false);
 const successMessage = ref("");
 
+// Separate reactive arrays for dynamic fields
+const socialMediaLinks = ref([""]);
+const socialProofLinks = ref([""]);
+
 const formData = ref({
   // Step 1 fields - Company Information
   companyName: "",
@@ -52,8 +56,6 @@ const formData = ref({
   instagram: "",
   // New Step 3 fields
   companyWebsite: "",
-  socialProofLinks: [""],
-  socialMediaLinks: [""],
   termsAccepted: false,
 });
 
@@ -216,8 +218,8 @@ const onSubmit = async () => {
       return;
     }
 
-    // Create a clean copy of form data without reactive proxies
-    const cleanFormData = {
+    // Prepare form data for submission
+    const submitData = {
       // Step 1 fields
       companyName: formData.value.companyName || "",
       vatId: formData.value.vatId || "",
@@ -240,31 +242,20 @@ const onSubmit = async () => {
       certifications: formData.value.certifications,
 
       // Step 3 fields
+      twitter: formData.value.twitter || "",
+      facebook: formData.value.facebook || "",
+      linkedIn: formData.value.linkedIn || "",
+      instagram: formData.value.instagram || "",
       companyWebsite: formData.value.companyWebsite || "",
       termsAccepted: formData.value.termsAccepted || false,
-    };
 
-    // Safely handle dynamic arrays
-    const socialMediaLinksArray = Array.isArray(formData.value.socialMediaLinks)
-      ? [...formData.value.socialMediaLinks]
-      : [];
-    const socialProofLinksArray = Array.isArray(formData.value.socialProofLinks)
-      ? [...formData.value.socialProofLinks]
-      : [];
-
-    // Filter out empty links and convert to JSON strings
-    const filteredSocialMediaLinks = socialMediaLinksArray.filter(
-      (link) => link && typeof link === "string" && link.trim() !== ""
-    );
-    const filteredSocialProofLinks = socialProofLinksArray.filter(
-      (link) => link && typeof link === "string" && link.trim() !== ""
-    );
-
-    // Prepare final submission data
-    const submitData = {
-      ...cleanFormData,
-      socialMediaLinks: JSON.stringify(filteredSocialMediaLinks),
-      socialProofLinks: JSON.stringify(filteredSocialProofLinks),
+      // Dynamic arrays - convert to JSON strings
+      socialMediaLinks: JSON.stringify(
+        socialMediaLinks.value.filter((link) => link && link.trim() !== "")
+      ),
+      socialProofLinks: JSON.stringify(
+        socialProofLinks.value.filter((link) => link && link.trim() !== "")
+      ),
     };
 
     const response = await companyUserService.register(submitData);
@@ -329,51 +320,25 @@ const handleCertificationsUpload = (event) => {
 
 // Add new social proof link field
 const addSocialProofLink = () => {
-  // Ensure socialProofLinks is always an array
-  if (!Array.isArray(formData.value.socialProofLinks)) {
-    formData.value.socialProofLinks = [""];
-  }
-  // Create a new array to trigger reactivity
-  formData.value.socialProofLinks = [...formData.value.socialProofLinks, ""];
+  socialProofLinks.value.push("");
 };
 
 // Remove social proof link field
 const removeSocialProofLink = (index) => {
-  // Ensure socialProofLinks is always an array
-  if (!Array.isArray(formData.value.socialProofLinks)) {
-    formData.value.socialProofLinks = [""];
-    return;
-  }
-  if (formData.value.socialProofLinks.length > 1) {
-    // Create a new array to trigger reactivity
-    formData.value.socialProofLinks = formData.value.socialProofLinks.filter(
-      (_, i) => i !== index
-    );
+  if (socialProofLinks.value.length > 1) {
+    socialProofLinks.value.splice(index, 1);
   }
 };
 
 // Add new social media link field
 const addSocialMediaLink = () => {
-  // Ensure socialMediaLinks is always an array
-  if (!Array.isArray(formData.value.socialMediaLinks)) {
-    formData.value.socialMediaLinks = [""];
-  }
-  // Create a new array to trigger reactivity
-  formData.value.socialMediaLinks = [...formData.value.socialMediaLinks, ""];
+  socialMediaLinks.value.push("");
 };
 
 // Remove social media link field
 const removeSocialMediaLink = (index) => {
-  // Ensure socialMediaLinks is always an array
-  if (!Array.isArray(formData.value.socialMediaLinks)) {
-    formData.value.socialMediaLinks = [""];
-    return;
-  }
-  if (formData.value.socialMediaLinks.length > 1) {
-    // Create a new array to trigger reactivity
-    formData.value.socialMediaLinks = formData.value.socialMediaLinks.filter(
-      (_, i) => i !== index
-    );
+  if (socialMediaLinks.value.length > 1) {
+    socialMediaLinks.value.splice(index, 1);
   }
 };
 
@@ -1084,21 +1049,19 @@ const closeSuccessDialog = () => {
                     </h6>
 
                     <div
-                      v-for="(link, index) in formData.socialMediaLinks"
+                      v-for="(link, index) in socialMediaLinks"
                       :key="index"
                       class="mb-3"
                     >
                       <div class="d-flex gap-2">
                         <AppTextField
-                          v-model="formData.socialMediaLinks[index]"
+                          v-model="socialMediaLinks[index]"
                           placeholder="Add a link to your socials or website that shows your previous work"
                           class="flex-grow-1"
                         >
                           <template #append-inner>
                             <VBtn
-                              v-if="
-                                index === formData.socialMediaLinks.length - 1
-                              "
+                              v-if="index === socialMediaLinks.length - 1"
                               variant="text"
                               size="small"
                               @click="addSocialMediaLink"
@@ -1109,7 +1072,7 @@ const closeSuccessDialog = () => {
                           </template>
                         </AppTextField>
                         <VBtn
-                          v-if="formData.socialMediaLinks.length > 1"
+                          v-if="socialMediaLinks.length > 1"
                           variant="tonal"
                           size="small"
                           color="error"
@@ -1151,21 +1114,19 @@ const closeSuccessDialog = () => {
                     </h6>
 
                     <div
-                      v-for="(link, index) in formData.socialProofLinks"
+                      v-for="(link, index) in socialProofLinks"
                       :key="index"
                       class="mb-3"
                     >
                       <div class="d-flex gap-2">
                         <AppTextField
-                          v-model="formData.socialProofLinks[index]"
+                          v-model="socialProofLinks[index]"
                           placeholder="Links to 'reviews', 'social proof', or 'feedbacks' about your activities"
                           class="flex-grow-1"
                         >
                           <template #append-inner>
                             <VBtn
-                              v-if="
-                                index === formData.socialProofLinks.length - 1
-                              "
+                              v-if="index === socialProofLinks.length - 1"
                               variant="text"
                               size="small"
                               @click="addSocialProofLink"
@@ -1176,7 +1137,7 @@ const closeSuccessDialog = () => {
                           </template>
                         </AppTextField>
                         <VBtn
-                          v-if="formData.socialProofLinks.length > 1"
+                          v-if="socialProofLinks.length > 1"
                           variant="tonal"
                           size="small"
                           color="error"
