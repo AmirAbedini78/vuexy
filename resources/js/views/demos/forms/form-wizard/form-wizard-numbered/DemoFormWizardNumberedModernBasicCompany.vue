@@ -217,11 +217,11 @@ const onSubmit = async () => {
     }
 
     // Safely extract arrays from reactive proxies
-    const socialMediaLinksArray = Array.isArray(formData.value.socialMediaLinks) 
-      ? [...formData.value.socialMediaLinks] 
+    const socialMediaLinksArray = Array.isArray(formData.value.socialMediaLinks)
+      ? [...formData.value.socialMediaLinks]
       : [];
-    const socialProofLinksArray = Array.isArray(formData.value.socialProofLinks) 
-      ? [...formData.value.socialProofLinks] 
+    const socialProofLinksArray = Array.isArray(formData.value.socialProofLinks)
+      ? [...formData.value.socialProofLinks]
       : [];
 
     // Prepare form data for submission
@@ -315,7 +315,9 @@ const removeSocialProofLink = (index) => {
   }
   if (formData.value.socialProofLinks.length > 1) {
     // Create a new array to trigger reactivity
-    formData.value.socialProofLinks = formData.value.socialProofLinks.filter((_, i) => i !== index);
+    formData.value.socialProofLinks = formData.value.socialProofLinks.filter(
+      (_, i) => i !== index
+    );
   }
 };
 
@@ -338,7 +340,9 @@ const removeSocialMediaLink = (index) => {
   }
   if (formData.value.socialMediaLinks.length > 1) {
     // Create a new array to trigger reactivity
-    formData.value.socialMediaLinks = formData.value.socialMediaLinks.filter((_, i) => i !== index);
+    formData.value.socialMediaLinks = formData.value.socialMediaLinks.filter(
+      (_, i) => i !== index
+    );
   }
 };
 
