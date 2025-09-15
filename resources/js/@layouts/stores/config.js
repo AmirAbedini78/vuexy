@@ -42,7 +42,7 @@ export const useLayoutConfigStore = defineStore('layoutConfig', () => {
   // watch(() => route.path, (newPath, oldPath) => {
   //   nextTick(() => {
   //     const isDashboardPage = newPath.includes('/dashboards/') || newPath === '/'
-      
+  //     
   //     if (isDashboardPage) {
   //       isVerticalNavCollapsed.value = false
   //       appContentLayoutNav.value = 'vertical'
@@ -52,6 +52,18 @@ export const useLayoutConfigStore = defineStore('layoutConfig', () => {
   //     }
   //   })
   // })
+
+  // Auto-collapse sidebar on non-dashboard routes
+  watch(() => route.path, (newPath) => {
+    nextTick(() => {
+      const isDashboardPage = newPath === '/'
+        || newPath.startsWith('/dashboards')
+        || newPath.startsWith('/admin/dashboard')
+
+      isVerticalNavCollapsed.value = !isDashboardPage
+      appContentLayoutNav.value = 'vertical'
+    })
+  })
 
 
   // 👉 Horizontal Nav Type

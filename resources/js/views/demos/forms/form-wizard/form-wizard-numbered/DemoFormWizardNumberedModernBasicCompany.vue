@@ -1094,12 +1094,34 @@ const closeSuccessDialog = () => {
                       />
                       <div class="text-body-2">
                         By continuing, you agree to our
-                        <a href="#" class="text-primary">Terms of Service</a>,
-                        <a href="#" class="text-primary">Privacy Policy</a>, and
-                        all related
-                        <a href="#" class="text-primary">Policies</a>. Full
-                        details available on our
-                        <a href="#" class="text-primary">Legal Page</a>.
+                        <a
+                          href="https://explorerelite.com/legal/terms-of-services/"
+                          target="_blank"
+                          rel="noopener"
+                          class="text-primary"
+                          >Terms of Service</a
+                        >,
+                        <a
+                          href="https://explorerelite.com/legal/privacy-policy/"
+                          target="_blank"
+                          rel="noopener"
+                          class="text-primary"
+                          >Privacy Policy</a
+                        >, and all related
+                        <a
+                          href="https://explorerelite.com/legal"
+                          target="_blank"
+                          rel="noopener"
+                          class="text-primary"
+                          >Policies</a
+                        >. Full details available on our
+                        <a
+                          href="https://explorerelite.com/legal"
+                          target="_blank"
+                          rel="noopener"
+                          class="text-primary"
+                          >Legal Page</a
+                        >.
                       </div>
                     </div>
                   </div>
