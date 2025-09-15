@@ -216,7 +216,35 @@ const onSubmit = async () => {
       return;
     }
 
-    // Safely extract arrays from reactive proxies
+    // Create a clean copy of form data without reactive proxies
+    const cleanFormData = {
+      // Step 1 fields
+      companyName: formData.value.companyName || "",
+      vatId: formData.value.vatId || "",
+      address1: formData.value.address1 || "",
+      city: formData.value.city || "",
+      state: formData.value.state || "",
+      contactPerson: formData.value.contactPerson || "",
+      countryOfRegistration: formData.value.countryOfRegistration || "",
+      address2: formData.value.address2 || "",
+      postalCode: formData.value.postalCode || "",
+      country: formData.value.country || "",
+      businessType: formData.value.businessType || "",
+
+      // Step 2 fields
+      passportImage: formData.value.passportImage,
+      avatarImage: formData.value.avatarImage,
+      activitySpecialization: formData.value.activitySpecialization || "",
+      wantToBeListed: formData.value.wantToBeListed || "",
+      shortBio: formData.value.shortBio || "",
+      certifications: formData.value.certifications,
+
+      // Step 3 fields
+      companyWebsite: formData.value.companyWebsite || "",
+      termsAccepted: formData.value.termsAccepted || false,
+    };
+
+    // Safely handle dynamic arrays
     const socialMediaLinksArray = Array.isArray(formData.value.socialMediaLinks)
       ? [...formData.value.socialMediaLinks]
       : [];
@@ -224,16 +252,19 @@ const onSubmit = async () => {
       ? [...formData.value.socialProofLinks]
       : [];
 
-    // Prepare form data for submission
+    // Filter out empty links and convert to JSON strings
+    const filteredSocialMediaLinks = socialMediaLinksArray.filter(
+      (link) => link && typeof link === "string" && link.trim() !== ""
+    );
+    const filteredSocialProofLinks = socialProofLinksArray.filter(
+      (link) => link && typeof link === "string" && link.trim() !== ""
+    );
+
+    // Prepare final submission data
     const submitData = {
-      ...formData.value,
-      // Convert arrays to JSON strings for backend
-      socialMediaLinks: JSON.stringify(
-        socialMediaLinksArray.filter((link) => link && link.trim() !== "")
-      ),
-      socialProofLinks: JSON.stringify(
-        socialProofLinksArray.filter((link) => link && link.trim() !== "")
-      ),
+      ...cleanFormData,
+      socialMediaLinks: JSON.stringify(filteredSocialMediaLinks),
+      socialProofLinks: JSON.stringify(filteredSocialProofLinks),
     };
 
     const response = await companyUserService.register(submitData);

@@ -327,7 +327,7 @@ class AdminController extends Controller
     public function updateProviderStatus(Request $request, $id, $type)
     {
         $request->validate([
-            'status' => 'required|in:active,approved,rejected'
+            'status' => 'required|in:active,review,rejected'
         ]);
 
         try {
@@ -339,10 +339,10 @@ class AdminController extends Controller
                 $userId = $provider->user_id;
             }
 
-            // Map status to want_to_be_listed: active->yes, approved->unsure, rejected->no
+            // Map status to want_to_be_listed: active->yes, review->unsure, rejected->no
             $map = [
                 'active' => 'yes',
-                'approved' => 'unsure',
+                'review' => 'unsure',
                 'rejected' => 'no',
             ];
 

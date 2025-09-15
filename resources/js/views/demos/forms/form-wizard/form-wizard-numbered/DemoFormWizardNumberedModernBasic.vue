@@ -238,7 +238,45 @@ const onSubmit = async () => {
       return;
     }
 
-    // Safely extract arrays from reactive proxies
+    // Create a clean copy of form data without reactive proxies
+    const cleanFormData = {
+      // Step 1 fields
+      fullName: formData.value.fullName || "",
+      nationality: formData.value.nationality || "",
+      address1: formData.value.address1 || "",
+      city: formData.value.city || "",
+      state: formData.value.state || "",
+      dob: formData.value.dob || "",
+      languages: Array.isArray(formData.value.languages)
+        ? [...formData.value.languages]
+        : [],
+      address2: formData.value.address2 || "",
+      postalCode: formData.value.postalCode || "",
+      country: formData.value.country || "",
+
+      // Step 2 fields
+      passportImage: formData.value.passportImage,
+      avatarImage: formData.value.avatarImage,
+      activitySpecialization: formData.value.activitySpecialization || "",
+      yearsOfExperience: formData.value.yearsOfExperience || "",
+      emergencyContactName: formData.value.emergencyContactName || "",
+      wantToBeListed: formData.value.wantToBeListed || "",
+      shortBio: formData.value.shortBio || "",
+      certifications: formData.value.certifications,
+      countryOfOperation: formData.value.countryOfOperation || "",
+      emergencyContactPhone: formData.value.emergencyContactPhone || "",
+
+      // Step 3 fields
+      firstName: formData.value.firstName || "",
+      lastName: formData.value.lastName || "",
+      twitter: formData.value.twitter || "",
+      facebook: formData.value.facebook || "",
+      googlePlus: formData.value.googlePlus || "",
+      linkedIn: formData.value.linkedIn || "",
+      termsAccepted: formData.value.termsAccepted || false,
+    };
+
+    // Safely handle dynamic arrays
     const socialMediaLinksArray = Array.isArray(formData.value.socialMediaLinks)
       ? [...formData.value.socialMediaLinks]
       : [];
@@ -246,16 +284,19 @@ const onSubmit = async () => {
       ? [...formData.value.socialProofLinks]
       : [];
 
-    // Prepare form data for submission
+    // Filter out empty links and convert to JSON strings
+    const filteredSocialMediaLinks = socialMediaLinksArray.filter(
+      (link) => link && typeof link === "string" && link.trim() !== ""
+    );
+    const filteredSocialProofLinks = socialProofLinksArray.filter(
+      (link) => link && typeof link === "string" && link.trim() !== ""
+    );
+
+    // Prepare final submission data
     const submitData = {
-      ...formData.value,
-      // Convert arrays to JSON strings for backend
-      socialMediaLinks: JSON.stringify(
-        socialMediaLinksArray.filter((link) => link && link.trim() !== "")
-      ),
-      socialProofLinks: JSON.stringify(
-        socialProofLinksArray.filter((link) => link && link.trim() !== "")
-      ),
+      ...cleanFormData,
+      socialMediaLinks: JSON.stringify(filteredSocialMediaLinks),
+      socialProofLinks: JSON.stringify(filteredSocialProofLinks),
     };
 
     const response = await individualUserService.register(submitData);
