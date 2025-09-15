@@ -276,12 +276,12 @@ const onSubmit = async () => {
       linkedIn: formData.value.linkedIn || "",
       termsAccepted: formData.value.termsAccepted || false,
 
-      // Dynamic arrays - convert to JSON strings
-      socialMediaLinks: JSON.stringify(
-        socialMediaLinks.value.filter((link) => link && link.trim() !== "")
+      // Dynamic arrays - pass arrays (service will stringify)
+      socialMediaLinks: socialMediaLinks.value.filter(
+        (link) => link && link.trim() !== ""
       ),
-      socialProofLinks: JSON.stringify(
-        socialProofLinks.value.filter((link) => link && link.trim() !== "")
+      socialProofLinks: socialProofLinks.value.filter(
+        (link) => link && link.trim() !== ""
       ),
     };
 
