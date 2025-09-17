@@ -1,4 +1,5 @@
 <script setup>
+import { ALL_COUNTRIES } from "@/constants/countries";
 import { companyUserService } from "@/services/api";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
@@ -572,27 +573,18 @@ const closeSuccessDialog = () => {
                       Country of Registration
                       <span class="required-star">*</span>
                     </label>
-                    <AppSelect
+                    <AppAutocomplete
                       v-model="formData.countryOfRegistration"
                       placeholder="Where your company is officially registered"
-                      :items="[
-                        'Germany',
-                        'Austria',
-                        'Switzerland',
-                        'Italy',
-                        'France',
-                        'Spain',
-                        'United States',
-                        'Canada',
-                        'Australia',
-                        'New Zealand',
-                        'Other',
-                      ]"
+                      :items="ALL_COUNTRIES"
+                      clearable
                       :error="hasFieldError('countryOfRegistration')"
                       :error-messages="
                         formValidationErrors['countryOfRegistration']
                       "
-                      @input="clearFieldError('countryOfRegistration')"
+                      @update:model-value="
+                        clearFieldError('countryOfRegistration')
+                      "
                       :class="{
                         'field-error': hasFieldError('countryOfRegistration'),
                       }"

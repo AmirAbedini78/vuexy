@@ -1,4 +1,6 @@
 <script setup>
+import { ALL_COUNTRIES } from "@/constants/countries";
+import { ALL_LANGUAGES } from "@/constants/languages";
 import { individualUserService } from "@/services/api";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
@@ -490,12 +492,14 @@ const closeSuccessDialog = () => {
                     >
                       Nationality <span class="required-star">*</span>
                     </label>
-                    <AppTextField
+                    <AppAutocomplete
                       v-model="formData.nationality"
-                      placeholder="Enter your nationality"
+                      placeholder="Select your nationality"
+                      :items="ALL_COUNTRIES"
+                      clearable
                       :error="hasFieldError('nationality')"
                       :error-messages="formValidationErrors['nationality']"
-                      @input="clearFieldError('nationality')"
+                      @update:model-value="clearFieldError('nationality')"
                       :class="{ 'field-error': hasFieldError('nationality') }"
                     />
                   </div>
@@ -586,20 +590,17 @@ const closeSuccessDialog = () => {
                     >
                       Languages Spoken <span class="required-star">*</span>
                     </label>
-                    <AppSelect
+                    <AppAutocomplete
                       v-model="formData.languages"
                       placeholder="Select languages"
-                      :items="[
-                        'English',
-                        'French',
-                        'German',
-                        'Spanish',
-                        'Other',
-                      ]"
+                      :items="ALL_LANGUAGES"
                       multiple
+                      chips
+                      closable-chips
+                      clearable
                       :error="hasFieldError('languages')"
                       :error-messages="formValidationErrors['languages']"
-                      @input="clearFieldError('languages')"
+                      @update:model-value="clearFieldError('languages')"
                       :class="{ 'field-error': hasFieldError('languages') }"
                     />
                   </div>

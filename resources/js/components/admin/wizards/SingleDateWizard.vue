@@ -363,26 +363,32 @@
                     </VCol>
 
                     <VCol cols="12" md="6">
-                      <VTextField
+                      <AppAutocomplete
                         v-model="formData.groupLanguage"
                         label="Group Language"
-                        placeholder="Enter group language"
-                        variant="outlined"
-                        density="comfortable"
+                        placeholder="Select group language(s)"
+                        :items="ALL_LANGUAGES"
+                        multiple
+                        chips
+                        closable-chips
+                        clearable
                         :error-messages="formValidationErrors.groupLanguage"
-                        @blur="validateField('groupLanguage')"
+                        @update:model-value="validateField('groupLanguage')"
                       />
                     </VCol>
 
                     <VCol cols="12" md="6">
-                      <VTextField
+                      <AppAutocomplete
                         v-model="formData.locations"
                         label="Locations"
-                        placeholder="Enter locations"
-                        variant="outlined"
-                        density="comfortable"
+                        placeholder="Select countries"
+                        :items="ALL_COUNTRIES"
+                        multiple
+                        chips
+                        closable-chips
+                        clearable
                         :error-messages="formValidationErrors.locations"
-                        @blur="validateField('locations')"
+                        @update:model-value="validateField('locations')"
                       />
                     </VCol>
 
@@ -841,6 +847,8 @@
 import ItineraryAccommodationDialog from "@/components/dialogs/ItineraryAccommodationDialog.vue";
 import PackageDialog from "@/components/dialogs/PackageDialog.vue";
 import SpecialAddonsDialog from "@/components/dialogs/SpecialAddonsDialog.vue";
+import { ALL_COUNTRIES } from "@/constants/countries";
+import { ALL_LANGUAGES } from "@/constants/languages";
 import { onMounted, ref } from "vue";
 
 const props = defineProps({
@@ -897,8 +905,8 @@ const formData = ref({
   listingDescription: "",
   experienceLevel: "",
   fitnessLevel: "",
-  groupLanguage: "",
-  locations: "",
+  groupLanguage: [],
+  locations: [],
   activitiesIncluded: "",
   whatsIncluded: "",
   whatsNotIncluded: "",
@@ -1095,7 +1103,9 @@ const saveListing = async () => {
       listing_description: formData.value.listingDescription,
       experience_level: formData.value.experienceLevel,
       fitness_level: formData.value.fitnessLevel,
-      group_language: formData.value.groupLanguage,
+      group_language: Array.isArray(formData.value.groupLanguage)
+        ? formData.value.groupLanguage
+        : [],
       activities_included: formData.value.activitiesIncluded,
       whats_included: formData.value.whatsIncluded,
       whats_not_included: formData.value.whatsNotIncluded,
@@ -1109,6 +1119,9 @@ const saveListing = async () => {
       promotional_video: formData.value.promotionalVideo.filter((v) =>
         v.trim()
       ),
+      locations: Array.isArray(formData.value.locations)
+        ? formData.value.locations
+        : [],
     };
 
     // Update listing
