@@ -1453,10 +1453,6 @@ const exportOrders = () => {
   console.log("Exporting orders...");
 };
 
-const addUser = () => {
-  console.log("Adding user...");
-};
-
 const viewOrder = (item) => {
   console.log("Viewing order:", item);
 };
