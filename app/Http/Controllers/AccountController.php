@@ -56,6 +56,28 @@ class AccountController extends Controller
             'url' => $url,
         ]);
     }
+
+    /**
+     * Update current user's basic profile (name/email)
+     */
+    public function updateProfile(Request $request)
+    {
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'name' => ['sometimes', 'required', 'string', 'max:255'],
+            'email' => ['sometimes', 'required', 'email', 'max:255', 'unique:users,email,' . $user->id],
+        ]);
+
+        $user->fill($validated);
+        $user->save();
+
+        return response()->json([
+            'message' => 'Profile updated successfully',
+            'user' => $user,
+        ]);
+    }
 }
 
 

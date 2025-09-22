@@ -138,6 +138,7 @@ Route::middleware([ApiMiddleware::class])->group(function () {
         // Account endpoints
         Route::post('/account/change-password', [\App\Http\Controllers\AccountController::class, 'changePassword']);
         Route::post('/account/avatar', [\App\Http\Controllers\AccountController::class, 'uploadAvatar']);
+        Route::put('/account/profile', [\App\Http\Controllers\AccountController::class, 'updateProfile']);
     });
 
     // Temporary test route for providers (without authentication)
