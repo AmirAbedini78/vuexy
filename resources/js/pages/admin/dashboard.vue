@@ -240,6 +240,86 @@
       </VDataTable>
     </VCard>
 
+    <!-- Quick Add Listing Dialog -->
+    <VDialog v-model="showQuickAddListing" max-width="520">
+      <VCard>
+        <VCardTitle class="d-flex align-center justify-space-between">
+          <span>Quick Add Event/Listing</span>
+          <VBtn
+            icon
+            variant="text"
+            size="small"
+            @click="showQuickAddListing = false"
+          >
+            <VIcon icon="tabler-x" />
+          </VBtn>
+        </VCardTitle>
+        <VCardText>
+          <VForm ref="quickListingFormRef" @submit.prevent="submitQuickListing">
+            <VTextField
+              v-model="quickListingForm.listing_title"
+              label="Title"
+              required
+              variant="outlined"
+              class="mb-3"
+            />
+            <VSelect
+              v-model="quickListingForm.listing_type"
+              :items="[
+                { title: 'Single Date', value: 'single-date' },
+                { title: 'Multi Date', value: 'multi-date' },
+                { title: 'Open Date', value: 'open-date' },
+              ]"
+              label="Type"
+              required
+              variant="outlined"
+              class="mb-3"
+            />
+            <VTextField
+              v-model="quickListingForm.locations"
+              label="Location"
+              variant="outlined"
+              class="mb-3"
+            />
+            <VRow>
+              <VCol cols="12" md="6">
+                <VTextField
+                  v-model="quickListingForm.price"
+                  label="Price"
+                  type="number"
+                  variant="outlined"
+                  class="mb-3"
+                />
+              </VCol>
+              <VCol cols="6" md="3">
+                <VTextField
+                  v-model="quickListingForm.min_capacity"
+                  label="Min"
+                  type="number"
+                  variant="outlined"
+                  class="mb-3"
+                />
+              </VCol>
+              <VCol cols="6" md="3">
+                <VTextField
+                  v-model="quickListingForm.max_capacity"
+                  label="Max"
+                  type="number"
+                  variant="outlined"
+                  class="mb-3"
+                />
+              </VCol>
+            </VRow>
+            <div class="d-flex justify-end">
+              <VBtn color="primary" type="submit" :loading="addingListing"
+                >Create</VBtn
+              >
+            </div>
+          </VForm>
+        </VCardText>
+      </VCard>
+    </VDialog>
+
     <!-- All Bookings Section -->
     <div class="section-title mb-4">
       <h2 class="text-h4 font-weight-bold">All Bookings</h2>
@@ -1296,8 +1376,60 @@ const exportEvents = () => {
   console.log("Exporting events...");
 };
 
+// Quick Add Listing state & actions
+const showQuickAddListing = ref(false);
+const quickListingFormRef = ref();
+const addingListing = ref(false);
+const quickListingForm = reactive({
+  listing_title: "",
+  listing_type: "single-date",
+  locations: "",
+  price: "",
+  min_capacity: "",
+  max_capacity: "",
+});
+
 const addEvent = () => {
-  router.push("/add-event");
+  showQuickAddListing.value = true;
+};
+
+const submitQuickListing = async () => {
+  const { valid } = await quickListingFormRef.value.validate();
+  if (!valid) return;
+  addingListing.value = true;
+  try {
+    const uid = useCookie("userData").value?.id;
+    const body = { ...quickListingForm, user_id: uid, status: "submitted" };
+    const res = await $api("/listings", { method: "POST", body });
+    const created = res?.data || res;
+    if (created) {
+      // نرمال‌سازی برای جدول ادمین
+      eventsData.value.unshift({
+        id: created.id,
+        listing_title: created.listing_title,
+        locations: created.locations,
+        listing_type: created.listing_type,
+        price: created.price,
+        min_capacity: created.min_capacity,
+        max_capacity: created.max_capacity,
+        status: created.status || "submitted",
+        user: created.user || userData.value,
+      });
+      showQuickAddListing.value = false;
+      Object.assign(quickListingForm, {
+        listing_title: "",
+        listing_type: "single-date",
+        locations: "",
+        price: "",
+        min_capacity: "",
+        max_capacity: "",
+      });
+    }
+  } catch (e) {
+    console.error("Failed to create quick listing", e);
+  } finally {
+    addingListing.value = false;
+  }
 };
 
 const viewEvent = async (item) => {
