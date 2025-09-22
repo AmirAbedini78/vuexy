@@ -1906,6 +1906,7 @@ const handleListingUpdated = () => {
 .details-title {
   font-family: "Anton", "Inter", sans-serif;
   font-size: 1.25rem;
+  font-weight: 700;
   color: #2c3e50;
 }
 .sub-line {

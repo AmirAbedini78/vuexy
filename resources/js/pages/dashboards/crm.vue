@@ -422,14 +422,14 @@ const actionCards = [
     font-family: "Anton", "Inter", "Segoe UI", Tahoma, Geneva, Verdana,
       sans-serif;
     font-size: 1.5rem;
-    font-weight: 400;
+    font-weight: 700;
     line-height: 1.2;
     margin-bottom: 1.5rem;
     color: #000000;
 
     .provider-name {
       color: #ec8d22;
-      font-weight: 400;
+      font-weight: 700;
       font-family: inherit;
     }
   }
