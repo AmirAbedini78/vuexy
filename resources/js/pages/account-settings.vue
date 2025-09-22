@@ -79,11 +79,14 @@ const changePassword = async () => {
   loading.value = true;
 
   try {
-    // Here you would typically send the password change request to your API
-    console.log("Changing password...");
-
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await $api("/account/change-password", {
+      method: "POST",
+      body: {
+        current_password: currentPassword.value,
+        new_password: newPassword.value,
+        new_password_confirmation: confirmPassword.value,
+      },
+    });
 
     // Reset form
     currentPassword.value = "";

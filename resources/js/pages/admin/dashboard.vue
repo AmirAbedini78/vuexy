@@ -559,6 +559,60 @@
         </template>
       </VDataTable>
     </VCard>
+
+    <!-- Add User Dialog -->
+    <VDialog v-model="showAddUser" max-width="520">
+      <VCard>
+        <VCardTitle class="d-flex align-center justify-space-between">
+          <span>Add User</span>
+          <VBtn icon variant="text" size="small" @click="showAddUser = false">
+            <VIcon icon="tabler-x" />
+          </VBtn>
+        </VCardTitle>
+        <VCardText>
+          <VForm ref="addUserFormRef" @submit.prevent="submitAddUser">
+            <VTextField
+              v-model="addUserForm.name"
+              label="Name"
+              required
+              variant="outlined"
+              class="mb-3"
+            />
+            <VTextField
+              v-model="addUserForm.email"
+              label="Email"
+              type="email"
+              required
+              variant="outlined"
+              class="mb-3"
+            />
+            <VSelect
+              v-model="addUserForm.role"
+              :items="[
+                { title: 'User', value: 'user' },
+                { title: 'Admin', value: 'admin' },
+              ]"
+              label="Role"
+              required
+              variant="outlined"
+              class="mb-3"
+            />
+            <VTextField
+              v-model="addUserForm.password"
+              label="Password (optional)"
+              type="password"
+              variant="outlined"
+              class="mb-3"
+            />
+            <div class="d-flex justify-end">
+              <VBtn color="primary" type="submit" :loading="addingUser"
+                >Create</VBtn
+              >
+            </div>
+          </VForm>
+        </VCardText>
+      </VCard>
+    </VDialog>
   </div>
 
   <!-- Provider View Dialog -->
@@ -1409,6 +1463,55 @@ const viewOrder = (item) => {
 
 const showOrderMenu = (item) => {
   console.log("Showing order menu:", item);
+};
+
+// Add User dialog state & logic
+const showAddUser = ref(false);
+const addingUser = ref(false);
+const addUserFormRef = ref();
+const addUserForm = reactive({
+  name: "",
+  email: "",
+  role: "user",
+  password: "",
+});
+
+const addUser = () => {
+  showAddUser.value = true;
+};
+
+const submitAddUser = async () => {
+  const { valid } = await addUserFormRef.value.validate();
+  if (!valid) return;
+  addingUser.value = true;
+  try {
+    const res = await $api("/admin/users", {
+      method: "POST",
+      body: addUserForm,
+    });
+    if (res?.user) {
+      ordersData.value.unshift({
+        id: res.user.id,
+        name: res.user.name,
+        email: res.user.email,
+        userId: `#${String(res.user.id).padStart(6, "0")}`,
+        country: "-",
+        bookings: 0,
+        totalSpent: 0,
+      });
+      showAddUser.value = false;
+      Object.assign(addUserForm, {
+        name: "",
+        email: "",
+        role: "user",
+        password: "",
+      });
+    }
+  } catch (e) {
+    console.error("Failed creating user", e);
+  } finally {
+    addingUser.value = false;
+  }
 };
 
 // Provider action functions

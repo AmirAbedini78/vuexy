@@ -103,6 +103,16 @@
             icon
             variant="text"
             size="small"
+            color="success"
+            :title="'Login as ' + item.name"
+            @click="impersonate(item)"
+          >
+            <VIcon icon="tabler-login" />
+          </VBtn>
+          <VBtn
+            icon
+            variant="text"
+            size="small"
             color="error"
             @click="deleteUser(item)"
           >
@@ -328,6 +338,23 @@ const deleteUser = async (user) => {
     } catch (error) {
       console.error("Error deleting user:", error);
     }
+  }
+};
+
+const impersonate = async (user) => {
+  try {
+    const res = await $api(`/admin/users/${user.id}/impersonate`, {
+      method: "POST",
+    });
+    if (res?.access_token) {
+      // Store token & userData, then redirect to app root as provider/user
+      useCookie("accessToken").value = res.access_token;
+      useCookie("userData").value = res.user;
+      await router.push("/");
+      location.reload();
+    }
+  } catch (e) {
+    console.error("Failed to impersonate", e);
   }
 };
 

@@ -119,8 +119,10 @@ Route::middleware([ApiMiddleware::class])->group(function () {
         Route::delete('/providers/{id}/{type}', [AdminController::class, 'deleteProvider']);
         Route::put('/providers/{id}/{type}/status', [AdminController::class, 'updateProviderStatus']);
         Route::get('/users', [AdminController::class, 'users']);
+        Route::post('/users', [AdminController::class, 'createUser']);
         Route::get('/users/{id}', [AdminController::class, 'user']);
         Route::put('/users/{id}/status', [AdminController::class, 'updateUserStatus']);
+        Route::post('/users/{id}/impersonate', [AdminController::class, 'impersonate']);
         Route::get('/listings', [AdminController::class, 'listings']);
         Route::get('/listings/{id}', [AdminController::class, 'listing']);
         Route::put('/listings/{id}', [AdminController::class, 'updateListing']);
@@ -131,6 +133,9 @@ Route::middleware([ApiMiddleware::class])->group(function () {
     // Provider status route - accessible by authenticated users
     Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/provider/status', [AdminController::class, 'getProviderStatus']);
+        // Account endpoints
+        Route::post('/account/change-password', [\App\Http\Controllers\AccountController::class, 'changePassword']);
+        Route::post('/account/avatar', [\App\Http\Controllers\AccountController::class, 'uploadAvatar']);
     });
 
     // Temporary test route for providers (without authentication)

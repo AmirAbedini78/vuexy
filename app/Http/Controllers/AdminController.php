@@ -358,7 +358,8 @@ class AdminController extends Controller
             $user = User::find($userId);
             if ($user) {
                 $providerName = $type === 'individual' ? ($provider->full_name ?? null) : ($provider->company_name ?? null);
-                $user->notify(new ProviderStatusUpdated($request->status, $type, $providerName));
+                // Send immediately to avoid relying on queue worker availability
+                $user->notifyNow(new ProviderStatusUpdated($request->status, $type, $providerName));
             }
 
             return response()->json([
@@ -465,7 +466,7 @@ class AdminController extends Controller
      */
     public function users(Request $request)
     {
-        $query = User::with(['individualUser', 'companyUser']);
+        $query = User::with(['individualUser', 'companyUser'])->orderByDesc('created_at');
 
         // Search functionality
         if ($request->filled('search')) {
@@ -486,7 +487,7 @@ class AdminController extends Controller
             $query->where('status', $request->status);
         }
 
-        $users = $query->orderBy('created_at', 'desc')->paginate(20);
+        $users = $query->paginate(20);
 
         return response()->json($users);
     }
@@ -518,6 +519,58 @@ class AdminController extends Controller
         return response()->json([
             'message' => 'User status updated successfully',
             'user' => $user
+        ]);
+    }
+
+    /**
+     * Create a new user from admin panel
+     */
+    public function createUser(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'nullable|string|min:8',
+            'role' => 'required|in:user,admin',
+        ]);
+
+        $password = $validated['password'] ?? str()->random(12);
+
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'role' => $validated['role'],
+            'password' => $password,
+            'status' => 'active',
+        ]);
+
+        // Optionally email credentials here (omitted)
+
+        return response()->json([
+            'message' => 'User created successfully',
+            'user' => $user,
+            'plain_password' => app()->isLocal() ? $password : null,
+        ], 201);
+    }
+
+    /**
+     * Impersonate a user: returns a Sanctum token for target user
+     */
+    public function impersonate(Request $request, $id)
+    {
+        $admin = $request->user();
+        if (!$admin || !$admin->isAdmin()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $target = User::findOrFail($id);
+        $token = $target->createToken('impersonation')->plainTextToken;
+
+        return response()->json([
+            'message' => 'Impersonation token issued',
+            'user' => $target,
+            'access_token' => $token,
+            'token_type' => 'Bearer',
         ]);
     }
 
@@ -626,7 +679,8 @@ class AdminController extends Controller
                     // Notify the listing owner about status change
                     $newStatus = $listing->status;
                     if ($newStatus !== $oldStatus && in_array($newStatus, ['submitted','approved','live','denied','edit_review','other_events','inactive'])) {
-                        $listing->user->notify(new \App\Notifications\ListingStatusUpdated($newStatus, $listing->listing_title));
+                        // Send immediately so emails are delivered even if queue worker is down
+                        $listing->user->notifyNow(new \App\Notifications\ListingStatusUpdated($newStatus, $listing->listing_title));
                     }
                 } catch (\Throwable $e) {
                     Log::error('Failed sending listing status notification: '.$e->getMessage());
