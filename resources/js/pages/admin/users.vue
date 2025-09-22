@@ -95,7 +95,7 @@
             variant="text"
             size="small"
             color="warning"
-            @click="editUser(item)"
+            @click="openEditUser(item)"
           >
             <VIcon icon="tabler-edit" />
           </VBtn>
@@ -185,6 +185,76 @@
         </VCardActions>
       </VCard>
     </VDialog>
+
+    <!-- Create/Edit User Dialog -->
+    <VDialog v-model="showUpsertDialog" max-width="520">
+      <VCard>
+        <VCardTitle class="d-flex align-center justify-space-between">
+          <span>{{
+            upsertMode === "create" ? "Create User" : "Edit User"
+          }}</span>
+          <VBtn
+            icon
+            variant="text"
+            size="small"
+            @click="showUpsertDialog = false"
+          >
+            <VIcon icon="tabler-x" />
+          </VBtn>
+        </VCardTitle>
+        <VCardText>
+          <VForm ref="upsertFormRef" @submit.prevent="submitUpsert">
+            <VTextField
+              v-model="upsertForm.name"
+              label="Name"
+              required
+              variant="outlined"
+              class="mb-3"
+            />
+            <VTextField
+              v-model="upsertForm.email"
+              label="Email"
+              type="email"
+              required
+              variant="outlined"
+              class="mb-3"
+              :disabled="upsertMode === 'edit'"
+            />
+            <VSelect
+              v-model="upsertForm.role"
+              :items="[
+                { title: 'User', value: 'user' },
+                { title: 'Admin', value: 'admin' },
+              ]"
+              label="Role"
+              required
+              variant="outlined"
+              class="mb-3"
+            />
+            <VSelect
+              v-model="upsertForm.status"
+              :items="statusOptions"
+              label="Status"
+              required
+              variant="outlined"
+              class="mb-3"
+            />
+            <VTextField
+              v-model="upsertForm.password"
+              label="Password (leave blank to keep)"
+              type="password"
+              variant="outlined"
+              class="mb-3"
+            />
+            <div class="d-flex justify-end">
+              <VBtn color="primary" type="submit" :loading="upserting">{{
+                upsertMode === "create" ? "Create" : "Save"
+              }}</VBtn>
+            </div>
+          </VForm>
+        </VCardText>
+      </VCard>
+    </VDialog>
   </VCard>
 </template>
 
@@ -212,6 +282,17 @@ const paginationInfo = ref({
 
 const showUserDialog = ref(false);
 const selectedUser = ref(null);
+const showUpsertDialog = ref(false);
+const upsertMode = ref("create");
+const upsertFormRef = ref();
+const upserting = ref(false);
+const upsertForm = reactive({
+  name: "",
+  email: "",
+  role: "user",
+  status: "active",
+  password: "",
+});
 
 const headers = [
   { title: "Name", key: "name", sortable: true },
@@ -323,9 +404,51 @@ const viewUser = (user) => {
   showUserDialog.value = true;
 };
 
-const editUser = (user) => {
-  // Navigate to edit user page
-  router.push(`/admin/users/${user.id}/edit`);
+const openCreateUser = () => {
+  upsertMode.value = "create";
+  Object.assign(upsertForm, {
+    name: "",
+    email: "",
+    role: "user",
+    status: "active",
+    password: "",
+  });
+  showUpsertDialog.value = true;
+};
+
+const openEditUser = (user) => {
+  upsertMode.value = "edit";
+  Object.assign(upsertForm, {
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    status: user.status ?? "active",
+    password: "",
+  });
+  selectedUser.value = user;
+  showUpsertDialog.value = true;
+};
+
+const submitUpsert = async () => {
+  const { valid } = await upsertFormRef.value.validate();
+  if (!valid) return;
+  upserting.value = true;
+  try {
+    if (upsertMode.value === "create") {
+      await $api("/admin/users", { method: "POST", body: upsertForm });
+    } else if (selectedUser.value) {
+      await $api(`/admin/users/${selectedUser.value.id}`, {
+        method: "PUT",
+        body: upsertForm,
+      });
+    }
+    showUpsertDialog.value = false;
+    await loadUsers();
+  } catch (e) {
+    console.error("Failed to save user", e);
+  } finally {
+    upserting.value = false;
+  }
 };
 
 const deleteUser = async (user) => {
@@ -371,6 +494,19 @@ onMounted(() => {
   }
 
   loadUsers();
+
+  // If navigated from dashboard with query to open view/edit
+  const route = useRoute();
+  if (route.query.view) {
+    const id = Number(route.query.view);
+    const found = users.value.find((u) => u.id === id);
+    if (found) viewUser(found);
+  }
+  if (route.query.edit) {
+    const id = Number(route.query.edit);
+    const found = users.value.find((u) => u.id === id);
+    if (found) openEditUser(found);
+  }
 });
 </script>
 

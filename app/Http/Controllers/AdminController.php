@@ -523,6 +523,45 @@ class AdminController extends Controller
     }
 
     /**
+     * Update user (admin)
+     */
+    public function updateUser(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'sometimes|required|string|max:255',
+            'email' => 'sometimes|required|email|unique:users,email,' . $user->id,
+            'role' => 'sometimes|required|in:user,admin',
+            'status' => 'sometimes|required|in:active,inactive,suspended',
+            'password' => 'nullable|string|min:8',
+        ]);
+
+        if (!empty($validated['password'])) {
+            $user->password = $validated['password'];
+            unset($validated['password']);
+        }
+
+        $user->fill($validated);
+        $user->save();
+
+        return response()->json([
+            'message' => 'User updated successfully',
+            'user' => $user,
+        ]);
+    }
+
+    /**
+     * Delete user (admin)
+     */
+    public function deleteUser($id)
+    {
+        $user = User::findOrFail($id);
+        $user->delete();
+        return response()->json(['message' => 'User deleted']);
+    }
+
+    /**
      * Create a new user from admin panel
      */
     public function createUser(Request $request)

@@ -533,11 +533,16 @@
         <!-- Action Column -->
         <template #item.action="{ item }">
           <div class="d-flex gap-1">
-            <VBtn icon variant="text" size="small" @click="viewOrder(item)">
+            <VBtn icon variant="text" size="small" @click="openViewUser(item)">
               <VIcon icon="tabler-eye" size="18" />
             </VBtn>
-            <VBtn icon variant="text" size="small" @click="showOrderMenu(item)">
-              <VIcon icon="tabler-dots-vertical" size="18" />
+            <VBtn
+              icon
+              variant="text"
+              size="small"
+              @click="openEditUserFromOrders(item)"
+            >
+              <VIcon icon="tabler-edit" size="18" />
             </VBtn>
           </div>
         </template>
@@ -1453,12 +1458,13 @@ const exportOrders = () => {
   console.log("Exporting orders...");
 };
 
-const viewOrder = (item) => {
-  console.log("Viewing order:", item);
+// All Users table actions (view/edit)
+const openViewUser = (row) => {
+  // Re-use admin users page route with query to open details
+  router.push({ path: "/admin/users", query: { view: row.id } });
 };
-
-const showOrderMenu = (item) => {
-  console.log("Showing order menu:", item);
+const openEditUserFromOrders = (row) => {
+  router.push({ path: "/admin/users", query: { edit: row.id } });
 };
 
 // Add User dialog state & logic

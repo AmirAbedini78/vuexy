@@ -1,17 +1,18 @@
 <script setup>
 import avatar1 from '@images/avatars/avatar-1.png'
 
+const cookieUser = useCookie('userData')
 const accountData = {
-  avatarImg: avatar1,
-  firstName: 'john',
-  lastName: 'Doe',
-  email: 'johnDoe@example.com',
-  org: 'Pixinvent',
-  phone: '+1 (917) 543-9876',
-  address: '123 Main St, New York, NY 10001',
-  state: 'New York',
-  zip: '10001',
-  country: 'USA',
+  avatarImg: cookieUser.value?.avatar || avatar1,
+  firstName: cookieUser.value?.name?.split(' ')[0] || '',
+  lastName: cookieUser.value?.name?.split(' ').slice(1).join(' ') || '',
+  email: cookieUser.value?.email || '',
+  org: '',
+  phone: '',
+  address: '',
+  state: '',
+  zip: '',
+  country: '',
   language: 'English',
   timezone: '(GMT-11:00) International Date Line West',
   currency: 'USD',
@@ -27,14 +28,34 @@ const resetForm = () => {
   accountDataLocal.value = structuredClone(accountData)
 }
 
-const changeAvatar = file => {
-  const fileReader = new FileReader()
+const saveProfile = async () => {
+  try {
+    const fullName = `${accountDataLocal.value.firstName} ${accountDataLocal.value.lastName}`.trim()
+    const payload = { name: fullName || undefined, email: accountDataLocal.value.email || undefined }
+    const res = await $api('/admin/users/' + (useCookie('userData').value?.id || ''), { method: 'PUT', body: payload })
+    if (res?.user) {
+      const u = useCookie('userData').value || {}
+      useCookie('userData').value = { ...u, name: res.user.name, email: res.user.email }
+    }
+  } catch (e) {
+    console.error('Failed to save profile', e)
+  }
+}
+
+const changeAvatar = async file => {
   const { files } = file.target
   if (files && files.length) {
-    fileReader.readAsDataURL(files[0])
-    fileReader.onload = () => {
-      if (typeof fileReader.result === 'string')
-        accountDataLocal.value.avatarImg = fileReader.result
+    const form = new FormData()
+    form.append('avatar', files[0])
+    try {
+      const res = await $api('/account/avatar', { method: 'POST', body: form })
+      if (res?.url) {
+        accountDataLocal.value.avatarImg = res.url
+        const u = cookieUser.value || {}
+        cookieUser.value = { ...u, avatar: res.url }
+      }
+    } catch (e) {
+      console.error('Avatar upload failed', e)
     }
   }
 }
@@ -165,15 +186,8 @@ const currencies = [
           <VForm class="mt-3">
             <VRow>
               <!-- 👉 First Name -->
-              <VCol
-                md="6"
-                cols="12"
-              >
-                <AppTextField
-                  v-model="accountDataLocal.firstName"
-                  placeholder="John"
-                  label="First Name"
-                />
+              <VCol md="6" cols="12">
+                <AppTextField v-model="accountDataLocal.firstName" placeholder="John" label="First Name" />
               </VCol>
 
               <!-- 👉 Last Name -->
@@ -189,16 +203,8 @@ const currencies = [
               </VCol>
 
               <!-- 👉 Email -->
-              <VCol
-                cols="12"
-                md="6"
-              >
-                <AppTextField
-                  v-model="accountDataLocal.email"
-                  label="E-mail"
-                  placeholder="johndoe@gmail.com"
-                  type="email"
-                />
+              <VCol cols="12" md="6">
+                <AppTextField v-model="accountDataLocal.email" label="E-mail" placeholder="johndoe@gmail.com" type="email" />
               </VCol>
 
               <!-- 👉 Organization -->
@@ -320,7 +326,7 @@ const currencies = [
                 cols="12"
                 class="d-flex flex-wrap gap-4"
               >
-                <VBtn>Save changes</VBtn>
+                <VBtn @click="saveProfile">Save changes</VBtn>
 
                 <VBtn
                   color="secondary"
