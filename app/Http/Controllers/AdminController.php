@@ -600,6 +600,68 @@ class AdminController extends Controller
     }
 
     /**
+     * Create a provider (individual or company) with a linked user
+     */
+    public function createProvider(Request $request)
+    {
+        $validated = $request->validate([
+            'type' => 'required|in:individual,company',
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'nullable|string|min:8',
+        ]);
+
+        $password = $validated['password'] ?? str()->random(12);
+
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'role' => 'user',
+            'password' => $password,
+            'status' => 'active',
+        ]);
+
+        if ($validated['type'] === 'individual') {
+            $provider = IndividualUser::create([
+                'user_id' => $user->id,
+                'full_name' => $validated['name'],
+                'want_to_be_listed' => 'unsure',
+            ]);
+        } else {
+            $provider = CompanyUser::create([
+                'user_id' => $user->id,
+                'company_name' => $validated['name'],
+                'want_to_be_listed' => 'unsure',
+            ]);
+        }
+
+        // Send verification so provider enters normal onboarding flow
+        try {
+            $user->sendEmailVerificationNotification();
+        } catch (\Throwable $e) {
+            \Log::error('Failed to send verification email to new provider user: '.$e->getMessage());
+        }
+
+        // Normalize response similar to providers listing
+        $providerPayload = [
+            'id' => $provider->id,
+            'user_id' => $user->id,
+            'provider_name' => $validated['type'] === 'individual' ? ($provider->full_name ?? $validated['name']) : ($provider->company_name ?? $validated['name']),
+            'provider_type' => $validated['type'],
+            'want_to_be_listed' => $provider->want_to_be_listed,
+            'status' => 'review',
+            'created_at' => $provider->created_at,
+        ];
+
+        return response()->json([
+            'message' => 'Provider created successfully',
+            'user' => $user,
+            'provider' => $providerPayload,
+            'plain_password' => app()->isLocal() ? $password : null,
+        ], 201);
+    }
+
+    /**
      * Impersonate a user: returns a Sanctum token for target user
      */
     public function impersonate(Request $request, $id)

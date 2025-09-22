@@ -118,6 +118,7 @@ Route::middleware([ApiMiddleware::class])->group(function () {
         Route::put('/providers/{id}/{type}', [AdminController::class, 'updateProvider']);
         Route::delete('/providers/{id}/{type}', [AdminController::class, 'deleteProvider']);
         Route::put('/providers/{id}/{type}/status', [AdminController::class, 'updateProviderStatus']);
+        Route::post('/providers', [AdminController::class, 'createProvider']);
         Route::get('/users', [AdminController::class, 'users']);
         Route::post('/users', [AdminController::class, 'createUser']);
         Route::get('/users/{id}', [AdminController::class, 'user']);

@@ -358,7 +358,11 @@
           >
             Export
           </VBtn>
-          <VBtn color="warning" prepend-icon="tabler-plus" @click="addProvider">
+          <VBtn
+            color="warning"
+            prepend-icon="tabler-plus"
+            @click="openAddProvider"
+          >
             Add Provider
           </VBtn>
         </div>
@@ -611,6 +615,65 @@
             />
             <div class="d-flex justify-end">
               <VBtn color="primary" type="submit" :loading="addingUser"
+                >Create</VBtn
+              >
+            </div>
+          </VForm>
+        </VCardText>
+      </VCard>
+    </VDialog>
+
+    <!-- Add Provider Dialog -->
+    <VDialog v-model="showAddProvider" max-width="520">
+      <VCard>
+        <VCardTitle class="d-flex align-center justify-space-between">
+          <span>Add Provider</span>
+          <VBtn
+            icon
+            variant="text"
+            size="small"
+            @click="showAddProvider = false"
+          >
+            <VIcon icon="tabler-x" />
+          </VBtn>
+        </VCardTitle>
+        <VCardText>
+          <VForm ref="addProviderFormRef" @submit.prevent="submitAddProvider">
+            <VSelect
+              v-model="addProviderForm.type"
+              :items="[
+                { title: 'Individual', value: 'individual' },
+                { title: 'Company', value: 'company' },
+              ]"
+              label="Provider Type"
+              required
+              variant="outlined"
+              class="mb-3"
+            />
+            <VTextField
+              v-model="addProviderForm.name"
+              label="Name"
+              required
+              variant="outlined"
+              class="mb-3"
+            />
+            <VTextField
+              v-model="addProviderForm.email"
+              label="Email"
+              type="email"
+              required
+              variant="outlined"
+              class="mb-3"
+            />
+            <VTextField
+              v-model="addProviderForm.password"
+              label="Password (optional)"
+              type="password"
+              variant="outlined"
+              class="mb-3"
+            />
+            <div class="d-flex justify-end">
+              <VBtn color="primary" type="submit" :loading="addingProvider"
                 >Create</VBtn
               >
             </div>
@@ -1310,6 +1373,7 @@ const submitAddUser = async () => {
       body: addUserForm,
     });
     if (res?.user) {
+      // Prepend to All Users table data (ordersData is placeholder list)
       ordersData.value.unshift({
         id: res.user.id,
         name: res.user.name,
@@ -1331,6 +1395,56 @@ const submitAddUser = async () => {
     console.error("Failed creating user", e);
   } finally {
     addingUser.value = false;
+  }
+};
+
+// Add Provider dialog state & logic
+const showAddProvider = ref(false);
+const addingProvider = ref(false);
+const addProviderFormRef = ref();
+const addProviderForm = reactive({
+  type: "individual",
+  name: "",
+  email: "",
+  password: "",
+});
+
+const openAddProvider = () => {
+  showAddProvider.value = true;
+};
+
+const submitAddProvider = async () => {
+  const { valid } = await addProviderFormRef.value.validate();
+  if (!valid) return;
+  addingProvider.value = true;
+  try {
+    const res = await $api("/admin/providers", {
+      method: "POST",
+      body: addProviderForm,
+    });
+    if (res?.provider) {
+      providersData.value.unshift({
+        id: res.provider.id,
+        provider_name: res.provider.provider_name,
+        provider_type: res.provider.provider_type,
+        want_to_be_listed: res.provider.want_to_be_listed,
+        status: res.provider.status,
+        total_listings: 0,
+        total_bookings: 0,
+        created_at: res.provider.created_at,
+      });
+      showAddProvider.value = false;
+      Object.assign(addProviderForm, {
+        type: "individual",
+        name: "",
+        email: "",
+        password: "",
+      });
+    }
+  } catch (e) {
+    console.error("Failed creating provider", e);
+  } finally {
+    addingProvider.value = false;
   }
 };
 
