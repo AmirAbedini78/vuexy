@@ -16,39 +16,23 @@ definePage({
 </script>
 
 <template>
-  <div class="misc-wrapper">
-    <ErrorHeader
-      status-code="404"
-      title="Page Not Found ⚠️"
-      description="We couldn't find the page you are looking for."
-    />
-
-    <VBtn
-      to="/"
-      class="mb-11"
-    >
-      Back to Home
-    </VBtn>
-
-    <!-- 👉 Image -->
-    <div class="misc-avatar w-100 text-center">
-      <VImg
-        :src="misc404"
-        alt="error 404"
-        :max-height="$vuetify.display.smAndDown ? 350 : 500"
-        class="mx-auto"
-      />
+  <div class="ee-404">
+    <div class="ee-404-icon">⚠️</div>
+    <div class="ee-404-code">404</div>
+    <div class="ee-404-title">Page Not Found!</div>
+    <div class="ee-404-desc">we couldn't find the page you are looking for</div>
+    <div class="ee-404-actions">
+      <VBtn variant="outlined" to="/">Back To Dashboard</VBtn>
+      <VBtn color="warning" href="https://explorerelite.com/support/" target="_blank">Get Support</VBtn>
     </div>
-
-    <img
-      class="misc-footer-img d-none d-md-block"
-      :src="authThemeMask"
-      alt="misc-footer-img"
-      height="320"
-    >
   </div>
 </template>
 
-<style lang="scss">
-@use "@core-scss/template/pages/misc.scss";
+<style scoped>
+.ee-404{min-height:80vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:12px}
+.ee-404-icon{font-size:56px;margin-bottom:8px}
+.ee-404-code{font-family:'Anton',sans-serif;font-size:96px;line-height:1;color:#111}
+.ee-404-title{font-family:'Anton',sans-serif;font-size:28px;color:#111}
+.ee-404-desc{color:#6b7280;margin:6px 0 18px}
+.ee-404-actions{display:flex;gap:12px}
 </style>

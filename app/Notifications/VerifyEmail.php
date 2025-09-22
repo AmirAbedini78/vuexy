@@ -36,20 +36,24 @@ class VerifyEmail extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $data = [
-            'subject' => 'Verify Your Email Address - ' . config('app.name'),
-            'title' => 'Verify Your Email Address',
-            'body' => "Hey {$notifiable->name}<br><br>
-                      Thank you for starting the registration process with " . config('app.name') . "! 
-                      To verify your email address and continue, please click the button below:",
-            'actionUrl' => $this->link,
-            'actionText' => 'Verify me!',
-            'importantNote' => "This link is valid for 24 hours. If you didn't request this, please ignore this email or contact our support team."
+        $frontendUrl = rtrim(config('app.frontend_url', env('APP_URL')), '/');
+
+        $viewData = [
+            'subject' => 'Verify Your Email Address',
+            'heading' => 'Verify Your Email Address',
+            'greeting_name' => $notifiable->name ?? 'there',
+            'intro_html' => 'Hey ' . e($notifiable->name ?? 'there') . '<br><br>Thank you for starting the registration process with ' . e(config('app.name')) . '! To verify your email address and continue, please click the button below:',
+            'primary_text' => 'Verify me!',
+            'primary_url' => $this->link,
+            'note_text' => "This link is valid for 24 hours. If you didn’t request this, please ignore this email or contact our support team.",
+            'support_url' => $frontendUrl . '/support',
+            'whatsapp_url' => 'https://wa.me/',
+            'frontend_url' => $frontendUrl,
         ];
 
         return (new MailMessage)
-            ->subject($data['subject'])
-            ->view('emails.base-template', $data);
+            ->subject('Verify Your Email Address')
+            ->view('emails.verify-email', $viewData);
     }
 
     /**
