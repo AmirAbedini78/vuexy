@@ -583,6 +583,13 @@ class AdminController extends Controller
             'status' => 'active',
         ]);
 
+        // Send email verification to place the user into the normal flow
+        try {
+            $user->sendEmailVerificationNotification();
+        } catch (\Throwable $e) {
+            \Log::error('Failed to send verification email to new user: '.$e->getMessage());
+        }
+
         // Optionally email credentials here (omitted)
 
         return response()->json([
