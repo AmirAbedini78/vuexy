@@ -38,7 +38,10 @@ const saveProfile = async () => {
       name: fullName || undefined,
       email: accountDataLocal.value.email || undefined,
     };
-    const res = await $api("/account/profile", { method: "PUT", body: payload });
+    const res = await $api("/account/profile", {
+      method: "PUT",
+      body: payload,
+    });
     if (res?.user) {
       const u = useCookie("userData").value || {};
       useCookie("userData").value = {
@@ -46,14 +49,18 @@ const saveProfile = async () => {
         name: res.user.name,
         email: res.user.email,
       };
-      snackbar.value = { show: true, text: "Profile updated successfully", color: "success" };
+      snackbar.value = {
+        show: true,
+        text: "Profile updated successfully",
+        color: "success",
+      };
     }
   } catch (e) {
     console.error("Failed to save profile", e);
   }
 };
 
-const snackbar = ref({ show: false, text: "", color: "success" })
+const snackbar = ref({ show: false, text: "", color: "success" });
 
 const changeAvatar = async (file) => {
   const { files } = file.target;
@@ -359,7 +366,12 @@ const currencies = [
   />
 
   <!-- Success Snackbar -->
-  <VSnackbar v-model="snackbar.show" :color="snackbar.color" :timeout="3000" location="top right">
+  <VSnackbar
+    v-model="snackbar.show"
+    :color="snackbar.color"
+    :timeout="3000"
+    location="top right"
+  >
     {{ snackbar.text }}
   </VSnackbar>
 </template>
