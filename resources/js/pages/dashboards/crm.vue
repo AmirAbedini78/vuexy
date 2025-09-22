@@ -170,63 +170,48 @@ onMounted(async () => {
   console.log("Dashboard CRM setup complete");
 });
 
-// Events data for the table
-const eventsData = [
-  {
-    id: 1,
-    eventTitle: "Watching Stars in Night Sky",
-    location: "Mountain Peak Observatory",
-    advId: "02357",
-    status: "Submitted",
-    participants: "0/12",
-    statusColor: "warning",
-  },
-  {
-    id: 2,
-    eventTitle: "Collecting Shells on Beach",
-    location: "Crystal Beach Resort",
-    advId: "02358",
-    status: "Approved",
-    participants: "0/6",
-    statusColor: "info",
-  },
-  {
-    id: 3,
-    eventTitle: "Hot Air Balloon Ride",
-    location: "Sky Adventure Park",
-    advId: "02359",
-    status: "Live",
-    participants: "11/15",
-    statusColor: "success",
-  },
-  {
-    id: 4,
-    eventTitle: "Some Thrilling Adventure",
-    location: "Extreme Sports Center",
-    advId: "02360",
-    status: "Denied",
-    participants: "0/8",
-    statusColor: "error",
-  },
-  {
-    id: 5,
-    eventTitle: "Some Romantic Adventure",
-    location: "Sunset Valley Resort",
-    advId: "02361",
-    status: "Other Events",
-    participants: "6/6",
-    statusColor: "secondary",
-  },
-  {
-    id: 6,
-    eventTitle: "Some Fun Adventure",
-    location: "Adventure Land Park",
-    advId: "02362",
-    status: "Edit Review Pending",
-    participants: "0/5",
-    statusColor: "warning",
-  },
-];
+// Dynamic events data for the table
+const events = ref([]);
+
+const statusToColor = (s) =>
+  ({
+    submitted: "warning",
+    approved: "info",
+    live: "success",
+    denied: "error",
+    inactive: "secondary",
+    other_events: "secondary",
+    edit_review: "warning",
+  }[s] || "warning");
+
+const loadMyEvents = async () => {
+  loading.value = true;
+  try {
+    const res = await $api("/admin/listings", { method: "GET" });
+    const all = Array.isArray(res?.data) ? res.data : [];
+    const uid = useCookie("userData").value?.id;
+    const mine = all.filter((l) => !uid || l.user_id === uid);
+    events.value = mine.map((l) => ({
+      id: l.id,
+      eventTitle: l.listing_title || "—",
+      location: l.locations || "—",
+      advId: String(l.id).padStart(5, "0"),
+      status: (l.status || "submitted")
+        .replace("other_events", "Other Events")
+        .replace("edit_review", "Edit Review Pending")
+        .replace("_", " "),
+      participants: `${l.min_capacity || 0}/${l.max_capacity || 0}`,
+      statusColor: statusToColor(l.status),
+    }));
+  } catch (e) {
+    console.error("Failed to load my events", e);
+    events.value = [];
+  } finally {
+    loading.value = false;
+  }
+};
+
+onMounted(loadMyEvents);
 
 // Table headers
 const headers = [
@@ -321,7 +306,7 @@ const actionCards = [
 
         <VDataTable
           :headers="headers"
-          :items="eventsData"
+          :items="events"
           :items-per-page="options.itemsPerPage"
           :page="options.page"
           :options="options"
@@ -359,6 +344,13 @@ const actionCards = [
             </div>
           </template>
 
+          <!-- Empty state -->
+          <template #no-data>
+            <div class="text-center w-100 pa-6 text-medium-emphasis">
+              Note: You have no events or Listings
+            </div>
+          </template>
+
           <!-- Pagination -->
           <template #bottom>
             <VCardText class="pt-2">
@@ -368,18 +360,15 @@ const actionCards = [
                 <span class="text-body-2">
                   Showing {{ (options.page - 1) * options.itemsPerPage + 1 }} to
                   {{
-                    Math.min(
-                      options.page * options.itemsPerPage,
-                      eventsData.length
-                    )
+                    Math.min(options.page * options.itemsPerPage, events.length)
                   }}
-                  of {{ eventsData.length }} entries
+                  of {{ events.length }} entries
                 </span>
 
                 <VPagination
                   v-model="options.page"
                   :total-visible="$vuetify.display.smAndDown ? 3 : 5"
-                  :length="Math.ceil(eventsData.length / options.itemsPerPage)"
+                  :length="Math.ceil(events.length / options.itemsPerPage)"
                 />
               </div>
             </VCardText>

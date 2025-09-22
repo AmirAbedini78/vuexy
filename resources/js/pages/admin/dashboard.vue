@@ -638,22 +638,63 @@
       <VCardText v-if="selectedProvider">
         <VRow>
           <VCol cols="12">
-            <h6 class="text-h6 font-weight-medium mb-3">Provider Details</h6>
-          </VCol>
-          <VCol cols="12">
-            <VTable density="comfortable">
-              <tbody>
-                <tr
-                  v-for="entry in getReadableEntries(selectedProvider)"
-                  :key="entry.key"
+            <div class="details-header">
+              <div class="title-line">
+                <span class="details-title">{{
+                  selectedProvider.provider_name || "Provider"
+                }}</span>
+                <VChip
+                  :color="
+                    selectedProvider.provider_type === 'individual'
+                      ? 'primary'
+                      : 'secondary'
+                  "
+                  size="small"
+                  class="ml-2"
                 >
-                  <td class="text-medium-emphasis" style="width: 35%">
-                    {{ entry.label }}
-                  </td>
-                  <td class="font-weight-medium">{{ entry.value }}</td>
-                </tr>
-              </tbody>
-            </VTable>
+                  {{
+                    selectedProvider.provider_type === "individual"
+                      ? "Individual"
+                      : "Company"
+                  }}
+                </VChip>
+                <VChip
+                  :color="getProviderStatusColor(selectedProvider.status)"
+                  size="small"
+                  class="ml-2 text-capitalize"
+                >
+                  {{ selectedProvider.status || "review" }}
+                </VChip>
+              </div>
+              <div class="sub-line">
+                Created: {{ formatDate(selectedProvider.created_at) }}
+              </div>
+            </div>
+          </VCol>
+
+          <VCol cols="12"><VDivider class="my-2" /></VCol>
+
+          <VCol cols="12">
+            <div class="details-grid">
+              <div
+                v-for="entry in getReadableEntries(selectedProvider).filter(
+                  (e) =>
+                    ![
+                      'provider_name',
+                      'provider_type',
+                      'status',
+                      'created_at',
+                      'id',
+                      'user_id',
+                    ].includes(e.key)
+                )"
+                :key="entry.key"
+                class="details-item"
+              >
+                <div class="details-label">{{ entry.label }}</div>
+                <div class="details-value">{{ entry.value }}</div>
+              </div>
+            </div>
           </VCol>
         </VRow>
       </VCardText>
@@ -711,22 +752,61 @@
       <VCardText v-if="selectedListing">
         <VRow>
           <VCol cols="12">
-            <h6 class="text-h6 font-weight-medium mb-3">Listing Details</h6>
-          </VCol>
-          <VCol cols="12">
-            <VTable density="comfortable">
-              <tbody>
-                <tr
-                  v-for="entry in getReadableEntries(selectedListing)"
-                  :key="entry.key"
+            <div class="details-header">
+              <div class="title-line">
+                <span class="details-title">{{
+                  selectedListing.listing_title || "Listing"
+                }}</span>
+                <VChip
+                  :color="getListingTypeColor(selectedListing.listing_type)"
+                  size="small"
+                  class="ml-2"
                 >
-                  <td class="text-medium-emphasis" style="width: 35%">
-                    {{ entry.label }}
-                  </td>
-                  <td class="font-weight-medium">{{ entry.value }}</td>
-                </tr>
-              </tbody>
-            </VTable>
+                  {{ formatListingType(selectedListing.listing_type) }}
+                </VChip>
+                <VChip
+                  :color="getListingStatusColor(selectedListing.status)"
+                  size="small"
+                  class="ml-2 text-capitalize"
+                >
+                  {{ selectedListing.status || "draft" }}
+                </VChip>
+              </div>
+              <div class="sub-line">
+                Provider: {{ selectedListing.user?.name || "N/A" }} · Price: €{{
+                  formatCurrency(selectedListing.price || 0)
+                }}
+                · Capacity: {{ selectedListing.min_capacity || 0 }} -
+                {{ selectedListing.max_capacity || 0 }}
+              </div>
+            </div>
+          </VCol>
+
+          <VCol cols="12"><VDivider class="my-2" /></VCol>
+
+          <VCol cols="12">
+            <div class="details-grid">
+              <div
+                v-for="entry in getReadableEntries(selectedListing).filter(
+                  (e) =>
+                    ![
+                      'listing_title',
+                      'listing_type',
+                      'status',
+                      'price',
+                      'min_capacity',
+                      'max_capacity',
+                      'user',
+                      'id',
+                    ].includes(e.key)
+                )"
+                :key="entry.key"
+                class="details-item"
+              >
+                <div class="details-label">{{ entry.label }}</div>
+                <div class="details-value">{{ entry.value }}</div>
+              </div>
+            </div>
           </VCol>
         </VRow>
       </VCardText>
@@ -1695,6 +1775,49 @@ const handleListingUpdated = () => {
   font-size: 0.75rem;
   letter-spacing: 0.5px;
   font-family: "Inter", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+// Details dialog styling
+.details-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.title-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.details-title {
+  font-family: "Anton", "Inter", sans-serif;
+  font-size: 1.25rem;
+  color: #2c3e50;
+}
+.sub-line {
+  color: #6b7280;
+}
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+}
+.details-item {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px;
+  background: #fff;
+}
+.details-label {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-bottom: 6px;
+  text-transform: capitalize;
+}
+.details-value {
+  font-size: 0.95rem;
+  color: #111827;
+  word-break: break-word;
 }
 
 .v-btn {
