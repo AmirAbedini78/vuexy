@@ -1423,7 +1423,7 @@ const exportEvents = () => {
 };
 
 const addEvent = () => {
-  console.log("Adding event...");
+  router.push("/add-event");
 };
 
 const viewEvent = (item) => {
@@ -1522,7 +1522,7 @@ const exportProviders = () => {
 };
 
 const addProvider = () => {
-  console.log("Adding provider...");
+  router.push("/provider/create");
 };
 
 const viewProvider = (item) => {

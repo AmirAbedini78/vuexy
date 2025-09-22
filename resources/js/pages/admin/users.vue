@@ -473,7 +473,8 @@ const impersonate = async (user) => {
       // Store token & userData, then redirect to app root as provider/user
       useCookie("accessToken").value = res.access_token;
       useCookie("userData").value = res.user;
-      await router.push("/");
+      const type = res.user.role === "company" ? "company" : "individual";
+      await router.push(`/registration/timeline/${type}/${res.user.id}`);
       location.reload();
     }
   } catch (e) {
