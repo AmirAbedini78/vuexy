@@ -242,7 +242,7 @@ const hideTitleAndIcon = configStore.isVerticalNavMini(isHovered);
     .button-text {
       font-size: 0.875rem;
       font-weight: 600;
-      color: #111827;
+      color: #111827 !important;
     }
   }
 }

@@ -248,6 +248,20 @@ const handlePrevious = () => {
             <!-- Right Side - Form Content -->
             <VCol cols="12" md="8" class="wizard-form">
               <div class="form-content">
+                <!-- NOTE Card -->
+                <div class="note-card">
+                  <div class="note-header">
+                    <h6 class="note-title">NOTE</h6>
+                    <VBtn icon variant="text" size="small" class="note-close-btn">
+                      <VIcon icon="tabler-x" size="16" />
+                    </VBtn>
+                  </div>
+                  <p class="note-text">
+                    List your experience on Explorer Elite and connect with a global
+                    community of explorers
+                  </p>
+                  <a href="#" class="note-link">Learn more</a>
+                </div>
                 <VWindow
                   v-model="currentWizardStep"
                   class="disable-tab-transition"
@@ -418,22 +432,6 @@ const handlePrevious = () => {
           </VRow>
         </div>
 
-        <!-- Note Section -->
-        <div class="note-section">
-          <div class="note-content">
-            <div class="note-header">
-              <h6 class="note-title">NOTE</h6>
-              <VBtn icon variant="text" size="small" class="note-close-btn">
-                <VIcon icon="tabler-x" size="16" />
-              </VBtn>
-            </div>
-            <p class="note-text">
-              List your experience on Explorer Elite and connect with a global
-              community of explorers
-            </p>
-            <a href="#" class="note-link">Learn more</a>
-          </div>
-        </div>
       </template>
     </VCard>
   </VDialog>
@@ -756,56 +754,63 @@ const handlePrevious = () => {
   }
 }
 
-.note-section {
-  background: #ec8d22;
-  padding: 1.25rem 2rem;
-  margin-top: 0;
+.note-card {
+  background: #fef3e2;
+  border: 1px solid #f59e0b;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.1);
+  position: relative;
+  width: 66.66%;
+  margin-left: auto;
 
-  .note-content {
-    position: relative;
+  .note-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
 
-    .note-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.5rem;
-
-      .note-title {
-        font-family: "Karla", sans-serif;
-        font-size: 1rem;
-        font-weight: 700;
-        color: white;
-        margin: 0;
-      }
-
-      .note-close-btn {
-        color: white;
-        opacity: 0.8;
-
-        &:hover {
-          opacity: 1;
-        }
-      }
+    .note-title {
+      font-family: "Anton", sans-serif;
+      font-size: 1rem;
+      font-weight: 300;
+      color: #d97706;
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
 
-    .note-text {
-      font-family: "Karla", sans-serif;
-      font-size: 0.85rem;
-      color: white;
-      margin: 0 0 0.5rem 0;
-      line-height: 1.4;
-    }
-
-    .note-link {
-      font-family: "Karla", sans-serif;
-      font-size: 0.85rem;
-      color: white;
-      text-decoration: underline;
-      font-weight: 600;
+    .note-close-btn {
+      color: #6b7280;
+      opacity: 0.8;
+      transition: opacity 0.3s ease;
 
       &:hover {
-        color: #fff8f0;
+        opacity: 1;
+        color: #374151;
       }
+    }
+  }
+
+  .note-text {
+    font-family: "Karla", sans-serif;
+    font-size: 0.9rem;
+    color: #d97706;
+    margin: 0 0 0.75rem 0;
+    line-height: 1.5;
+  }
+
+  .note-link {
+    font-family: "Karla", sans-serif;
+    font-size: 0.9rem;
+    color: #d97706;
+    text-decoration: underline;
+    font-weight: 500;
+    transition: opacity 0.3s ease;
+
+    &:hover {
+      opacity: 0.8;
     }
   }
 }
@@ -913,23 +918,23 @@ const handlePrevious = () => {
       }
     }
 
-    .note-section {
-      padding: 1rem 1.5rem;
+    .note-card {
+      width: 100%;
+      margin-left: 0;
+      padding: 1rem;
 
-      .note-content {
-        .note-header {
-          .note-title {
-            font-size: 1rem;
-          }
+      .note-header {
+        .note-title {
+          font-size: 0.9rem;
         }
+      }
 
-        .note-text {
-          font-size: 0.85rem;
-        }
+      .note-text {
+        font-size: 0.85rem;
+      }
 
-        .note-link {
-          font-size: 0.85rem;
-        }
+      .note-link {
+        font-size: 0.85rem;
       }
     }
   }
