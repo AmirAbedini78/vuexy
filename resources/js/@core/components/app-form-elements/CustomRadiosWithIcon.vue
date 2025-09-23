@@ -174,46 +174,36 @@ const updateSelectedOption = (value) => {
 /* Fix radio button sizing and clipping */
 ::deep(.v-radio) {
   overflow: visible !important;
-  width: auto !important;
-  height: auto !important;
-  position: relative !important;
-  transform: translate(-4px, -4px) !important;
 }
 
 ::deep(.v-radio .v-selection-control) {
   min-height: 30px;
-  padding: 8px 8px;
+  padding: 6px 4px;
   overflow: visible !important;
-  width: auto !important;
-  height: auto !important;
-  position: relative !important;
 }
 
 ::deep(.v-radio .v-selection-control__wrapper) {
   width: 24px !important;
   height: 24px !important;
-  padding: 0 !important;
+  padding: 2px;
   overflow: visible !important;
   margin: 0 !important;
-  position: relative !important;
 }
 
 ::deep(.v-radio .v-selection-control__input) {
   width: 20px !important;
   height: 20px !important;
   overflow: visible !important;
-  position: relative !important;
 }
 
 ::deep(.v-radio .v-selection-control__ripple) {
-  inset: -12px !important;
+  inset: -8px !important;
 }
 
 /* Ensure the radio button container has enough space */
 .custom-radio-icon {
   overflow: visible !important;
   position: relative;
-  padding: 8px 12px 8px 8px !important;
 }
 
 .custom-radio-icon .v-radio {

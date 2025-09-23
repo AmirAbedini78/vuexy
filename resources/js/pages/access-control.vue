@@ -126,46 +126,36 @@ function handleNext() {
 /* Fix radio button sizing and clipping for access control */
 .access-control-radios ::deep(.v-radio) {
   overflow: visible !important;
-  width: auto !important;
-  height: auto !important;
-  position: relative !important;
-  transform: translate(-4px, -4px) !important;
 }
 
 .access-control-radios ::deep(.v-radio .v-selection-control) {
   min-height: 30px;
-  padding: 8px 8px;
+  padding: 6px 4px;
   overflow: visible !important;
-  width: auto !important;
-  height: auto !important;
-  position: relative !important;
 }
 
 .access-control-radios ::deep(.v-radio .v-selection-control__wrapper) {
   width: 24px !important;
   height: 24px !important;
-  padding: 0 !important;
+  padding: 2px;
   overflow: visible !important;
   margin: 0 !important;
-  position: relative !important;
 }
 
 .access-control-radios ::deep(.v-radio .v-selection-control__input) {
   width: 20px !important;
   height: 20px !important;
   overflow: visible !important;
-  position: relative !important;
 }
 
 .access-control-radios ::deep(.v-radio .v-selection-control__ripple) {
-  inset: -12px !important;
+  inset: -8px !important;
 }
 
 /* Ensure radio button containers have enough space */
 .access-control-radios .custom-radio-icon {
   overflow: visible !important;
   position: relative;
-  padding: 8px 12px 8px 8px !important;
 }
 
 .access-control-radios .custom-radio-icon .v-radio {
