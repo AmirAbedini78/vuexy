@@ -19,6 +19,18 @@
       </VCardTitle>
 
       <VCardText class="pa-6">
+        <!-- Auto-save indicator -->
+        <div class="auto-save-indicator" v-if="isSaving || showSavedIndicator">
+          <div class="save-status" :class="{ 'saving': isSaving, 'saved': showSavedIndicator && !isSaving }">
+            <VIcon 
+              :icon="isSaving ? 'tabler-loader-2' : 'tabler-check'" 
+              :class="{ 'spinning': isSaving }"
+            />
+            <span v-if="isSaving">Saving...</span>
+            <span v-else-if="showSavedIndicator">Changes saved</span>
+          </div>
+        </div>
+
         <div class="d-flex gap-6">
           <!-- Left Sidebar -->
           <div class="sidebar" style="min-width: 200px">
@@ -174,6 +186,7 @@
 
 <script setup>
 import { computed, ref, watch } from "vue";
+import { useAutoSave } from "@/composables/useAutoSave";
 import {
   VBtn,
   VCard,
@@ -214,10 +227,40 @@ const selectedDayIndex = ref(0);
 // Local state for days
 const localDays = ref([]);
 
+// Auto-save functionality for days
+const { 
+  isSaving, 
+  lastSaved, 
+  hasUnsavedChanges, 
+  showSavedIndicator,
+  saveToStorage, 
+  loadFromStorage, 
+  clearSavedData,
+  hasSavedData,
+  getSavedDataInfo 
+} = useAutoSave(localDays, 'itinerary-accommodation-dialog-data', {
+  debounceMs: 300, // Save after 300ms of inactivity
+  onSave: (data) => {
+    console.log('Itinerary accommodation dialog data auto-saved:', data);
+  },
+  onLoad: (data, meta) => {
+    console.log('Itinerary accommodation dialog data loaded from storage:', data);
+    if (meta) {
+      console.log('Last saved:', new Date(meta.timestamp).toLocaleString());
+    }
+  }
+});
+
 // Computed property for dialog visibility
 const isOpen = computed({
   get: () => props.modelValue,
-  set: (value) => emit("update:modelValue", value),
+  set: (value) => {
+    if (!value) {
+      // Save data when closing dialog
+      saveToStorage();
+    }
+    emit("update:modelValue", value);
+  },
 });
 
 // Initialize local days when dialog opens
@@ -373,3 +416,50 @@ async function handleDone() {
   }
 }
 </script>
+
+<style scoped>
+.auto-save-indicator {
+  position: absolute;
+  top: 10px;
+  left: 20px;
+  z-index: 10;
+  
+  .save-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    
+    &.saving {
+      color: #1976d2;
+      
+      .v-icon {
+        color: #1976d2;
+      }
+    }
+    
+    &.saved {
+      color: #000000;
+      
+      .v-icon {
+        color: #000000;
+      }
+    }
+    
+    .v-icon {
+      font-size: 16px;
+      
+      &.spinning {
+        animation: spin 1s linear infinite;
+      }
+    }
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+</style>

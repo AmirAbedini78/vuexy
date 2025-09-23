@@ -1,5 +1,6 @@
 <script setup>
 // remove invalid Nuxt alias; useCookie is available globally via @vueuse/integrations in this project
+import { useAutoSave } from "@/composables/useAutoSave";
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
@@ -57,6 +58,30 @@ const formData = ref({
   requirements: "",
   termsAccepted: false,
   personalPolicies: "not-sure",
+});
+
+// Auto-save functionality
+const { 
+  isSaving, 
+  lastSaved, 
+  hasUnsavedChanges, 
+  showSavedIndicator,
+  saveToStorage, 
+  loadFromStorage, 
+  clearSavedData,
+  hasSavedData,
+  getSavedDataInfo 
+} = useAutoSave(formData, 'listing-form-multi-date', {
+  debounceMs: 300, // Save after 300ms of inactivity
+  onSave: (data) => {
+    console.log('Multi-date form data auto-saved:', data);
+  },
+  onLoad: (data, meta) => {
+    console.log('Multi-date form data loaded from storage:', data);
+    if (meta) {
+      console.log('Last saved:', new Date(meta.timestamp).toLocaleString());
+    }
+  }
 });
 
 const itineraries = ref([]);
@@ -2353,6 +2378,50 @@ const createNewAdventure = () => {
 </template>
 
 <style scoped>
+.auto-save-indicator {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1000;
+  
+  .save-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    
+    &.saving {
+      color: #1976d2;
+      
+      .v-icon {
+        color: #1976d2;
+      }
+    }
+    
+    &.saved {
+      color: #000000;
+      
+      .v-icon {
+        color: #000000;
+      }
+    }
+    
+    .v-icon {
+      font-size: 16px;
+      
+      &.spinning {
+        animation: spin 1s linear infinite;
+      }
+    }
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
 .custom-stepper {
   width: 100%;
   margin-bottom: 32px;

@@ -24,6 +24,18 @@
       </div>
 
       <div class="modal-content">
+        <!-- Auto-save indicator -->
+        <div class="auto-save-indicator" v-if="isSaving || showSavedIndicator">
+          <div class="save-status" :class="{ 'saving': isSaving, 'saved': showSavedIndicator && !isSaving }">
+            <VIcon 
+              :icon="isSaving ? 'tabler-loader-2' : 'tabler-check'" 
+              :class="{ 'spinning': isSaving }"
+            />
+            <span v-if="isSaving">Saving...</span>
+            <span v-else-if="showSavedIndicator">Changes saved</span>
+          </div>
+        </div>
+
         <!-- Left Sidebar -->
         <div class="sidebar">
           <div class="sidebar-content">
@@ -152,6 +164,7 @@
 
 <script setup>
 import { computed, ref, watch } from "vue";
+import { useAutoSave } from "@/composables/useAutoSave";
 
 const props = defineProps({
   modelValue: {
@@ -176,10 +189,38 @@ const selectedAddonIndex = ref(0);
 // Local state for addons
 const localAddons = ref([]);
 
+// Auto-save functionality for addons
+const { 
+  isSaving, 
+  lastSaved, 
+  hasUnsavedChanges, 
+  showSavedIndicator,
+  saveToStorage, 
+  loadFromStorage, 
+  clearSavedData,
+  hasSavedData,
+  getSavedDataInfo 
+} = useAutoSave(localAddons, 'special-addons-dialog-data', {
+  debounceMs: 300, // Save after 300ms of inactivity
+  onSave: (data) => {
+    console.log('Special addons dialog data auto-saved:', data);
+  },
+  onLoad: (data, meta) => {
+    console.log('Special addons dialog data loaded from storage:', data);
+    if (meta) {
+      console.log('Last saved:', new Date(meta.timestamp).toLocaleString());
+    }
+  }
+});
+
 // Computed property for dialog visibility
 const isOpen = computed({
   get: () => props.modelValue,
   set: (value) => {
+    if (!value) {
+      // Save data when closing dialog
+      saveToStorage();
+    }
     emit("update:modelValue", value);
   },
 });
@@ -326,6 +367,50 @@ function handleModelValueUpdate(newValue) {
 </script>
 
 <style scoped>
+.auto-save-indicator {
+  position: absolute;
+  top: 10px;
+  left: 20px;
+  z-index: 10;
+  
+  .save-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    
+    &.saving {
+      color: #1976d2;
+      
+      .v-icon {
+        color: #1976d2;
+      }
+    }
+    
+    &.saved {
+      color: #000000;
+      
+      .v-icon {
+        color: #000000;
+      }
+    }
+    
+    .v-icon {
+      font-size: 16px;
+      
+      &.spinning {
+        animation: spin 1s linear infinite;
+      }
+    }
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
 .special-addons-modal {
   --orange-color: #ec8d22;
   --dark-grey: #333333;

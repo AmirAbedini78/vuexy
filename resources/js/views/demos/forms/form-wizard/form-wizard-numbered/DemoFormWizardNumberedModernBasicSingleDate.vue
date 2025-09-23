@@ -2,6 +2,7 @@
 import ItineraryAccommodationDialog from "@/components/dialogs/ItineraryAccommodationDialog.vue";
 import PackageDialog from "@/components/dialogs/PackageDialog.vue";
 import SpecialAddonsDialog from "@/components/dialogs/SpecialAddonsDialog.vue";
+import { useAutoSave } from "@/composables/useAutoSave";
 import { onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 
@@ -152,6 +153,30 @@ const formData = ref({
   personalPoliciesText: "",
   specialAddons: "",
   termsAccepted: false,
+});
+
+// Auto-save functionality
+const { 
+  isSaving, 
+  lastSaved, 
+  hasUnsavedChanges, 
+  showSavedIndicator,
+  saveToStorage, 
+  loadFromStorage, 
+  clearSavedData,
+  hasSavedData,
+  getSavedDataInfo 
+} = useAutoSave(formData, 'listing-form-single-date', {
+  debounceMs: 300, // Save after 300ms of inactivity
+  onSave: (data) => {
+    console.log('Form data auto-saved:', data);
+  },
+  onLoad: (data, meta) => {
+    console.log('Form data loaded from storage:', data);
+    if (meta) {
+      console.log('Last saved:', new Date(meta.timestamp).toLocaleString());
+    }
+  }
 });
 
 const showItineraryDialog = ref(false);
@@ -983,9 +1008,22 @@ function removePackage(index) {
 
     <div class="d-flex justify-center align-center" style="min-height: 60vh">
       <VCard style="width: 90vw; max-width: 1200px">
+        <!-- Auto-save indicator - Above form -->
+        <div class="auto-save-indicator" v-if="isSaving || showSavedIndicator">
+          <div class="save-status" :class="{ 'saving': isSaving, 'saved': showSavedIndicator && !isSaving }">
+            <VIcon 
+              :icon="isSaving ? 'tabler-loader-2' : 'tabler-check'" 
+              :class="{ 'spinning': isSaving }"
+            />
+            <span v-if="isSaving">Saving...</span>
+            <span v-else-if="showSavedIndicator">Changes saved</span>
+          </div>
+        </div>
+        
         <VCardText>
           <!-- 👉 stepper content -->
           <VForm>
+
             <VWindow v-model="currentStep" class="disable-tab-transition">
               <!-- Step 1: Basic Information -->
               <VWindowItem>
@@ -2612,6 +2650,50 @@ function removePackage(index) {
 </template>
 
 <style scoped>
+.auto-save-indicator {
+  position: absolute;
+  top: 10px;
+  left: 20px;
+  z-index: 10;
+  
+  .save-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    
+    &.saving {
+      color: #1976d2;
+      
+      .v-icon {
+        color: #1976d2;
+      }
+    }
+    
+    &.saved {
+      color: #000000;
+      
+      .v-icon {
+        color: #000000;
+      }
+    }
+    
+    .v-icon {
+      font-size: 16px;
+      
+      &.spinning {
+        animation: spin 1s linear infinite;
+      }
+    }
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
 .custom-stepper {
   width: 100%;
   margin-bottom: 32px;
