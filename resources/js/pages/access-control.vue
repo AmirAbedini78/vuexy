@@ -121,14 +121,33 @@ function handleNext() {
 
 .access-control-btn {
   min-width: 127px;
-  min-height: 38px;
-  font-size: 12px;
-  background: #000000 !important;
-  color: #fff !important;
-  border-radius: 8px;
-  font-weight: 700;
-  box-shadow: 0 2px 8px 0 rgba(44, 44, 44, 0.08);
-  transition: background 0.2s;
+}
+
+/* Fix radio button sizing and clipping for access control */
+.access-control-radios ::deep(.v-radio) {
+  overflow: visible;
+}
+
+.access-control-radios ::deep(.v-radio .v-selection-control) {
+  min-height: 30px;
+  padding: 6px 4px;
+  overflow: visible;
+}
+
+.access-control-radios ::deep(.v-radio .v-selection-control__wrapper) {
+  width: 24px;
+  height: 24px;
+  padding: 2px;
+  overflow: visible;
+}
+
+.access-control-radios ::deep(.v-radio .v-selection-control__input) {
+  width: 20px;
+  height: 20px;
+}
+
+.access-control-radios ::deep(.v-radio .v-selection-control__ripple) {
+  inset: -8px;
 }
 .wizard-center-container {
   max-width: 100%;

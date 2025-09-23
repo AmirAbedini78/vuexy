@@ -170,4 +170,31 @@ const updateSelectedOption = (value) => {
 .custom-input-wrapper {
   width: 100%;
 }
+
+/* Fix radio button sizing and clipping */
+::deep(.v-radio) {
+  overflow: visible;
+}
+
+::deep(.v-radio .v-selection-control) {
+  min-height: 30px;
+  padding: 6px 4px;
+  overflow: visible;
+}
+
+::deep(.v-radio .v-selection-control__wrapper) {
+  width: 24px;
+  height: 24px;
+  padding: 2px;
+  overflow: visible;
+}
+
+::deep(.v-radio .v-selection-control__input) {
+  width: 20px;
+  height: 20px;
+}
+
+::deep(.v-radio .v-selection-control__ripple) {
+  inset: -8px;
+}
 </style>
