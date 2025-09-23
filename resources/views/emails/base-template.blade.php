@@ -196,7 +196,7 @@
         <!-- Footer -->
         <div class="footer">
             <div class="contact-info">
-                For questions, visit our <a href="{{ config('app.frontend_url') }}/support" class="contact-link">Support Page</a> or contact us directly via <a href="https://wa.me/your-whatsapp-number" class="contact-link">WhatsApp</a>.
+                For questions, visit our <a href="https://explorerelite.com/support/" class="contact-link">Support Page</a> or contact us directly via <a href="https://wa.me/your-whatsapp-number" class="contact-link">WhatsApp</a>.
             </div>
             
             <div class="social-icons">

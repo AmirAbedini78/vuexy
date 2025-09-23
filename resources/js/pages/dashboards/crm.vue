@@ -282,7 +282,14 @@ const actionCards = [
           earnings, all in one place. And if you ever need help with anything,
           Just Contact support!
         </p>
-        <VBtn color="warning" size="large" class="support-btn" elevation="0">
+        <VBtn 
+          color="warning" 
+          size="large" 
+          class="support-btn" 
+          elevation="0"
+          href="https://explorerelite.com/support/"
+          target="_blank"
+        >
           Get Support
         </VBtn>
       </div>

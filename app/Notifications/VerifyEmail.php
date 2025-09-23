@@ -46,7 +46,7 @@ class VerifyEmail extends Notification
             'primary_text' => 'Verify me!',
             'primary_url' => $this->link,
             'note_text' => "This link is valid for 24 hours. If you didn’t request this, please ignore this email or contact our support team.",
-            'support_url' => $frontendUrl . '/support',
+            'support_url' => 'https://explorerelite.com/support/',
             'whatsapp_url' => 'https://wa.me/',
             'frontend_url' => $frontendUrl,
         ];

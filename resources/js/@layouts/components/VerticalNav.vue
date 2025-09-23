@@ -161,7 +161,8 @@ const hideTitleAndIcon = configStore.isVerticalNavMini(isHovered);
         variant="outlined"
         color="primary"
         class="get-beyond-button"
-        @click="() => $router.push('/get-support')"
+        href="https://explorerelite.com/support/"
+        target="_blank"
       >
         <VIcon icon="tabler-ship" color="warning" class="me-2" />
         <span

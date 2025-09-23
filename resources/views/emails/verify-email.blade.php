@@ -20,7 +20,7 @@
                     </td>
                     <td align="right" style="font-family:Inter,Arial,sans-serif;font-size:14px;">
                       <a href="{{ $login_url ?? ($frontend_url ?? config('app.frontend_url', url('/'))) }}" style="color:#111;text-decoration:none;border:1px solid #111;border-radius:10px;padding:8px 14px;display:inline-block;">🔒 Login</a>
-                      <a href="{{ $contact_url ?? ($support_url ?? 'https://explorerelite.com/support/') }}" style="color:#111;text-decoration:none;border:1px solid #111;border-radius:10px;padding:8px 14px;display:inline-block;margin-left:8px;">☎️ Contact</a>
+                      <a href="https://explorerelite.com/support/" style="color:#111;text-decoration:none;border:1px solid #111;border-radius:10px;padding:8px 14px;display:inline-block;margin-left:8px;">☎️ Contact</a>
                     </td>
                   </tr>
                 </table>
@@ -73,7 +73,7 @@
 
             <tr>
               <td style="padding:8px 24px 0;font-family:Inter,Arial,sans-serif;font-size:14px;line-height:1.6;color:#111;" align="center">
-                For questions, visit our <a href="{{ $support_url ?? 'https://explorerelite.com/support/' }}" style="color:#ec8d22;text-decoration:none;">Support Page</a>
+                For questions, visit our <a href="https://explorerelite.com/support/" style="color:#ec8d22;text-decoration:none;">Support Page</a>
                 or contact us directly via <a href="{{ $whatsapp_url ?? 'https://wa.me/' }}" style="color:#ec8d22;text-decoration:none;">WhatsApp</a>.
               </td>
             </tr>
