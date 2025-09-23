@@ -1884,7 +1884,7 @@ const handleListingUpdated = () => {
   h1 {
     color: #2c3e50;
     font-size: 2rem;
-    font-weight: 700;
+    font-weight: 300;
     margin: 0;
     font-family: "Anton", "Inter", "Segoe UI", Tahoma, Geneva, Verdana,
       sans-serif;
@@ -1895,7 +1895,7 @@ const handleListingUpdated = () => {
   h2 {
     color: #2c3e50;
     font-size: 1.5rem;
-    font-weight: 600;
+    font-weight: 300;
     margin: 0;
     font-family: "Anton", "Inter", "Segoe UI", Tahoma, Geneva, Verdana,
       sans-serif;
@@ -2038,7 +2038,7 @@ const handleListingUpdated = () => {
 .details-title {
   font-family: "Anton", "Inter", sans-serif;
   font-size: 1.25rem;
-  font-weight: 700;
+  font-weight: 300;
   color: #2c3e50;
 }
 .sub-line {

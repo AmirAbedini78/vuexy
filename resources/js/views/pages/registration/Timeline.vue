@@ -1618,7 +1618,7 @@ const sendEmailVerification = async () => {
 .welcome-title {
   font-family: "Anton", Arial, sans-serif;
   font-size: 2.5rem;
-  font-weight: 700;
+  font-weight: 300;
   color: #222;
   margin-bottom: 12px;
   direction: ltr;
@@ -1661,7 +1661,7 @@ const sendEmailVerification = async () => {
   margin: 40px 0 40px 0;
   position: relative;
   padding: 0 24px;
-  font-weight: 700;
+  font-weight: 300;
   font-family: "Anton", Arial, sans-serif;
 }
 
@@ -1824,7 +1824,7 @@ const sendEmailVerification = async () => {
 /* --- Step Number --- */
 .step-number {
   font-size: 2.2em;
-  font-weight: bold;
+  font-weight: 300;
   color: #666;
   line-height: 1;
   font-family: "Anton", Arial, sans-serif;

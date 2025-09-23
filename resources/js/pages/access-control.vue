@@ -98,7 +98,7 @@ function handleNext() {
 .access-control-radios .custom-radio-icon h6 {
   font-family: "Anton", sans-serif !important;
   font-size: 20px !important;
-  font-weight: 400 !important;
+  font-weight: 300 !important;
   color: #444151 !important;
 }
 

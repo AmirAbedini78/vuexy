@@ -464,7 +464,7 @@ const handlePrevious = () => {
         .modal-title {
           font-family: "Anton", sans-serif;
           font-size: 2rem;
-          font-weight: 400;
+          font-weight: 300;
           color: #2f2b3d;
           margin: 0 0 0.5rem 0;
           line-height: 1.2;
@@ -554,7 +554,7 @@ const handlePrevious = () => {
     h6 {
       font-family: "Anton", sans-serif;
       font-size: 1.25rem;
-      font-weight: 400;
+      font-weight: 300;
       color: #2f2b3d;
       margin-bottom: 0.75rem;
       line-height: 1.3;
@@ -610,7 +610,7 @@ const handlePrevious = () => {
       .modal-title {
         font-family: "Anton", sans-serif;
         font-size: 1.75rem;
-        font-weight: 400;
+        font-weight: 300;
         color: #2c3e50;
         margin: 0 0 0.5rem 0;
         line-height: 1.2;

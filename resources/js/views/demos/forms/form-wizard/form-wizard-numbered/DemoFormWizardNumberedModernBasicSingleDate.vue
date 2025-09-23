@@ -2668,7 +2668,7 @@ function removePackage(index) {
   font-family: "Anton", sans-serif;
   font-size: 24px;
   color: #2f2b3d;
-  font-weight: bold;
+  font-weight: 300;
   margin-left: 2px;
   flex-shrink: 0;
 }
@@ -3144,7 +3144,7 @@ function removePackage(index) {
 .help-title {
   font-family: "Anton", sans-serif;
   font-size: 28px;
-  font-weight: 700;
+  font-weight: 300;
   color: #2f2b3d;
   margin-bottom: 16px;
   line-height: 1.2;
@@ -3233,7 +3233,7 @@ function removePackage(index) {
 .itinerary-title {
   font-family: "Anton", sans-serif;
   font-size: 28px;
-  font-weight: 700;
+  font-weight: 300;
   color: #333333;
   margin: 0;
 }
@@ -3316,7 +3316,7 @@ function removePackage(index) {
 .special-addons-title {
   font-family: "Anton", sans-serif;
   font-size: 28px;
-  font-weight: 700;
+  font-weight: 300;
   color: #333333;
   margin: 0;
 }
@@ -3572,7 +3572,7 @@ function removePackage(index) {
 .confirmation-title {
   font-family: "Anton", sans-serif;
   font-size: 28px;
-  font-weight: 700;
+  font-weight: 300;
   color: #333;
   margin-bottom: 24px;
   line-height: 1.3;
@@ -3704,7 +3704,7 @@ function removePackage(index) {
 .packages-title {
   font-family: "Anton", sans-serif;
   font-size: 28px;
-  font-weight: 700;
+  font-weight: 300;
   color: #333333;
   margin: 0;
 }

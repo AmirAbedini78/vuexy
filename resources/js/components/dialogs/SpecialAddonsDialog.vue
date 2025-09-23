@@ -358,7 +358,7 @@ function handleModelValueUpdate(newValue) {
 
 .modal-title {
   font-size: 28px;
-  font-weight: 700;
+  font-weight: 300;
   color: var(--dark-grey);
   margin: 0 0 8px 0;
   font-family: "Anton", sans-serif;
@@ -532,7 +532,7 @@ function handleModelValueUpdate(newValue) {
 
 .content-title {
   font-size: 18px;
-  font-weight: 700;
+  font-weight: 300;
   color: var(--dark-grey);
   margin: 0;
   font-family: "Anton", sans-serif;

@@ -49,12 +49,14 @@ definePage({
 .ee-404-code {
   font-family: "Anton", sans-serif;
   font-size: 96px;
+  font-weight: 300;
   line-height: 1;
   color: #111;
 }
 .ee-404-title {
   font-family: "Anton", sans-serif;
   font-size: 28px;
+  font-weight: 300;
   color: #111;
 }
 .ee-404-desc {
