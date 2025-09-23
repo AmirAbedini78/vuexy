@@ -215,6 +215,7 @@ const hideTitleAndIcon = configStore.isVerticalNavMini(isHovered);
 
   .get-beyond-button {
     width: 100%;
+    max-width: 100%;
     justify-content: flex-start;
     border-radius: 8px;
     font-weight: 600;
@@ -222,10 +223,11 @@ const hideTitleAndIcon = configStore.isVerticalNavMini(isHovered);
     letter-spacing: 0.5px;
     background-color: #ffffff;
     border: 1px solid #d1d5db;
-    color: #111827;
+    color: #111827 !important;
     transition: all 0.3s ease;
     min-height: 40px;
     padding: 8px 12px;
+    box-sizing: border-box;
 
     &:hover {
       background-color: #f9fafb;
@@ -425,9 +427,11 @@ const hideTitleAndIcon = configStore.isVerticalNavMini(isHovered);
       
       .get-beyond-button {
         width: 100%;
+        max-width: 100%;
         justify-content: center;
         padding: 8px;
         min-height: 36px;
+        box-sizing: border-box;
         
         .button-text {
           display: none;

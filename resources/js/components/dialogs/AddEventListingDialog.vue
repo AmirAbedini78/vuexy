@@ -248,20 +248,6 @@ const handlePrevious = () => {
             <!-- Right Side - Form Content -->
             <VCol cols="12" md="8" class="wizard-form">
               <div class="form-content">
-                <!-- NOTE Card -->
-                <div class="note-card">
-                  <div class="note-header">
-                    <h6 class="note-title">NOTE</h6>
-                    <VBtn icon variant="text" size="small" class="note-close-btn">
-                      <VIcon icon="tabler-x" size="16" />
-                    </VBtn>
-                  </div>
-                  <p class="note-text">
-                    List your experience on Explorer Elite and connect with a global
-                    community of explorers
-                  </p>
-                  <a href="#" class="note-link">Learn more</a>
-                </div>
                 <VWindow
                   v-model="currentWizardStep"
                   class="disable-tab-transition"
@@ -426,6 +412,21 @@ const handlePrevious = () => {
                   <VBtn color="warning" variant="outlined" class="ml-2">
                     Add More Periods
                   </VBtn>
+                </div>
+
+                <!-- NOTE Card -->
+                <div class="note-card">
+                  <div class="note-header">
+                    <h6 class="note-title">NOTE</h6>
+                    <VBtn icon variant="text" size="small" class="note-close-btn">
+                      <VIcon icon="tabler-x" size="16" />
+                    </VBtn>
+                  </div>
+                  <p class="note-text">
+                    List your experience on Explorer Elite and connect with a global
+                    community of explorers
+                  </p>
+                  <a href="#" class="note-link">Learn more</a>
                 </div>
               </div>
             </VCol>
@@ -699,6 +700,7 @@ const handlePrevious = () => {
           justify-content: center;
           flex-shrink: 0;
           color: #6c757d;
+          transition: all 0.3s ease;
         }
 
         .step-content {
@@ -759,7 +761,7 @@ const handlePrevious = () => {
   border: 1px solid #f59e0b;
   border-radius: 12px;
   padding: 1.5rem;
-  margin-bottom: 2rem;
+  margin-top: 2rem;
   box-shadow: 0 2px 8px rgba(245, 158, 11, 0.1);
   position: relative;
   width: 66.66%;
