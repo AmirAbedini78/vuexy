@@ -639,11 +639,15 @@ const handlePrevious = () => {
 .wizard-content {
   padding: 0;
   background: #fff;
+  display: flex;
+  min-height: 500px;
 
   .wizard-sidebar {
     background: #f8f9fa;
     border-right: 1px solid #e0e0e0;
     padding: 2rem 1.5rem;
+    width: 300px;
+    flex-shrink: 0;
 
     .wizard-steps {
       .wizard-step {
@@ -657,17 +661,20 @@ const handlePrevious = () => {
         transition: all 0.3s ease;
         background: #fff;
         border: 2px solid #e0e0e0;
+        position: relative;
         min-height: 80px;
 
         &:hover {
           border-color: #d0d0d0;
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          transform: translateX(4px);
         }
 
         &.active {
-          background: #2c3e50;
-          border-color: #2c3e50;
-          box-shadow: 0 4px 12px rgba(44, 62, 80, 0.3);
+          background: #ec8d22;
+          border-color: #ec8d22;
+          box-shadow: 0 4px 16px rgba(236, 141, 34, 0.3);
+          transform: translateX(4px);
 
           .step-title {
             color: white;
@@ -679,8 +686,8 @@ const handlePrevious = () => {
           }
 
           .step-icon {
-            background: white;
-            color: #2c3e50;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
           }
         }
 
@@ -722,6 +729,7 @@ const handlePrevious = () => {
 
   .wizard-form {
     padding: 2rem;
+    flex: 1;
 
     .form-content {
       .step-header {
@@ -851,8 +859,12 @@ const handlePrevious = () => {
     }
 
     .wizard-content {
+      flex-direction: column;
+      
       .wizard-sidebar {
         padding: 1.5rem 1rem;
+        width: 100%;
+        flex-shrink: 0;
 
         .wizard-steps {
           .wizard-step {
@@ -880,6 +892,7 @@ const handlePrevious = () => {
 
       .wizard-form {
         padding: 1.5rem;
+        flex: 1;
 
         .form-content {
           .step-header {
