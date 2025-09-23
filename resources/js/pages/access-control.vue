@@ -128,6 +128,8 @@ function handleNext() {
   overflow: visible !important;
   width: auto !important;
   height: auto !important;
+  position: relative !important;
+  transform: translate(-4px, -4px) !important;
 }
 
 .access-control-radios ::deep(.v-radio .v-selection-control) {
@@ -136,6 +138,7 @@ function handleNext() {
   overflow: visible !important;
   width: auto !important;
   height: auto !important;
+  position: relative !important;
 }
 
 .access-control-radios ::deep(.v-radio .v-selection-control__wrapper) {
@@ -144,12 +147,14 @@ function handleNext() {
   padding: 0 !important;
   overflow: visible !important;
   margin: 0 !important;
+  position: relative !important;
 }
 
 .access-control-radios ::deep(.v-radio .v-selection-control__input) {
   width: 20px !important;
   height: 20px !important;
   overflow: visible !important;
+  position: relative !important;
 }
 
 .access-control-radios ::deep(.v-radio .v-selection-control__ripple) {
@@ -160,7 +165,7 @@ function handleNext() {
 .access-control-radios .custom-radio-icon {
   overflow: visible !important;
   position: relative;
-  padding-right: 20px !important;
+  padding: 8px 12px 8px 8px !important;
 }
 
 .access-control-radios .custom-radio-icon .v-radio {

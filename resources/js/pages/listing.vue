@@ -475,6 +475,8 @@ function contactSupport() {
   overflow: visible !important;
   width: auto !important;
   height: auto !important;
+  position: relative !important;
+  transform: translate(-4px, -4px) !important;
 }
 
 .listing-radios ::deep(.v-radio .v-selection-control) {
@@ -483,6 +485,7 @@ function contactSupport() {
   overflow: visible !important;
   width: auto !important;
   height: auto !important;
+  position: relative !important;
 }
 
 .listing-radios ::deep(.v-radio .v-selection-control__wrapper) {
@@ -491,12 +494,14 @@ function contactSupport() {
   padding: 0 !important;
   overflow: visible !important;
   margin: 0 !important;
+  position: relative !important;
 }
 
 .listing-radios ::deep(.v-radio .v-selection-control__input) {
   width: 20px !important;
   height: 20px !important;
   overflow: visible !important;
+  position: relative !important;
 }
 
 .listing-radios ::deep(.v-radio .v-selection-control__ripple) {
@@ -507,7 +512,7 @@ function contactSupport() {
 .listing-radios .custom-radio-icon {
   overflow: visible !important;
   position: relative;
-  padding-right: 20px !important;
+  padding: 8px 12px 8px 8px !important;
 }
 
 .listing-radios .custom-radio-icon .v-radio {

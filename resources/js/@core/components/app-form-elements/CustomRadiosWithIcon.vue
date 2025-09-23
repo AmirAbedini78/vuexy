@@ -176,6 +176,8 @@ const updateSelectedOption = (value) => {
   overflow: visible !important;
   width: auto !important;
   height: auto !important;
+  position: relative !important;
+  transform: translate(-4px, -4px) !important;
 }
 
 ::deep(.v-radio .v-selection-control) {
@@ -184,6 +186,7 @@ const updateSelectedOption = (value) => {
   overflow: visible !important;
   width: auto !important;
   height: auto !important;
+  position: relative !important;
 }
 
 ::deep(.v-radio .v-selection-control__wrapper) {
@@ -192,12 +195,14 @@ const updateSelectedOption = (value) => {
   padding: 0 !important;
   overflow: visible !important;
   margin: 0 !important;
+  position: relative !important;
 }
 
 ::deep(.v-radio .v-selection-control__input) {
   width: 20px !important;
   height: 20px !important;
   overflow: visible !important;
+  position: relative !important;
 }
 
 ::deep(.v-radio .v-selection-control__ripple) {
@@ -208,6 +213,7 @@ const updateSelectedOption = (value) => {
 .custom-radio-icon {
   overflow: visible !important;
   position: relative;
+  padding: 8px 12px 8px 8px !important;
 }
 
 .custom-radio-icon .v-radio {

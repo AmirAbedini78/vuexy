@@ -11,17 +11,22 @@
   
   // 👉 Fix radio button clipping
   overflow: visible !important;
+  position: relative !important;
+  transform: translate(-4px, -4px) !important;
   
   .v-selection-control {
     overflow: visible !important;
+    position: relative !important;
   }
   
   .v-selection-control__wrapper {
     overflow: visible !important;
+    position: relative !important;
   }
   
   .v-selection-control__input {
     overflow: visible !important;
+    position: relative !important;
   }
 
   &.v-selection-control--disabled {
