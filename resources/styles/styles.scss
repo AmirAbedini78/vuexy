@@ -1,1 +1,24 @@
 // Write your overrides
+
+/* Global fix for radio button clipping issues */
+.v-radio {
+  overflow: visible !important;
+}
+
+.v-radio .v-selection-control {
+  overflow: visible !important;
+}
+
+.v-radio .v-selection-control__wrapper {
+  overflow: visible !important;
+}
+
+.v-radio .v-selection-control__input {
+  overflow: visible !important;
+}
+
+/* Ensure radio button containers don't clip content */
+.custom-radio-icon,
+.custom-radio {
+  overflow: visible !important;
+}

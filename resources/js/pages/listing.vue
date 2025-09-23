@@ -472,29 +472,47 @@ function contactSupport() {
 
 /* Fix radio button sizing and clipping for listing page */
 .listing-radios ::deep(.v-radio) {
-  overflow: visible;
+  overflow: visible !important;
+  width: auto !important;
+  height: auto !important;
 }
 
 .listing-radios ::deep(.v-radio .v-selection-control) {
   min-height: 30px;
-  padding: 6px 4px;
-  overflow: visible;
+  padding: 8px 8px;
+  overflow: visible !important;
+  width: auto !important;
+  height: auto !important;
 }
 
 .listing-radios ::deep(.v-radio .v-selection-control__wrapper) {
-  width: 24px;
-  height: 24px;
-  padding: 2px;
-  overflow: visible;
+  width: 24px !important;
+  height: 24px !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  margin: 0 !important;
 }
 
 .listing-radios ::deep(.v-radio .v-selection-control__input) {
-  width: 20px;
-  height: 20px;
+  width: 20px !important;
+  height: 20px !important;
+  overflow: visible !important;
 }
 
 .listing-radios ::deep(.v-radio .v-selection-control__ripple) {
-  inset: -8px;
+  inset: -12px !important;
+}
+
+/* Ensure radio button containers have enough space */
+.listing-radios .custom-radio-icon {
+  overflow: visible !important;
+  position: relative;
+  padding-right: 20px !important;
+}
+
+.listing-radios .custom-radio-icon .v-radio {
+  position: relative;
+  z-index: 1;
 }
 
 .contact-support-buttons {

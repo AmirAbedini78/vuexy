@@ -8,6 +8,21 @@
   .v-selection-control__input > .v-icon {
     opacity: 1;
   }
+  
+  // 👉 Fix radio button clipping
+  overflow: visible !important;
+  
+  .v-selection-control {
+    overflow: visible !important;
+  }
+  
+  .v-selection-control__wrapper {
+    overflow: visible !important;
+  }
+  
+  .v-selection-control__input {
+    overflow: visible !important;
+  }
 
   &.v-selection-control--disabled {
     --v-disabled-opacity: 0.45;
