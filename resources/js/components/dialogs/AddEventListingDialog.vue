@@ -581,7 +581,7 @@ const handlePrevious = () => {
 
         .v-icon {
           color: #ec8d22;
-          font-size: 20px;
+          /* font-size: 20px; */
         }
       }
     }

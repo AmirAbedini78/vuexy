@@ -148,7 +148,7 @@ const updateSelectedOption = (value) => {
 
     .v-selection-control__input .v-icon {
       color: #ec8d22;
-      font-size: 20px;
+      /* font-size: 20px; */
     }
   }
 
