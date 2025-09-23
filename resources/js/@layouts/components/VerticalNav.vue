@@ -156,7 +156,7 @@ const hideTitleAndIcon = configStore.isVerticalNavMini(isHovered);
     <slot name="after-nav-items" />
 
     <!-- 👉 Bottom Button -->
-    <div class="nav-bottom-button">
+    <div class="nav-bottom-button" :class="{ collapsed: configStore.isVerticalNavCollapsed && !configStore.isLessThanOverlayNavBreakpoint }">
       <VBtn
         variant="outlined"
         color="primary"
@@ -169,7 +169,7 @@ const hideTitleAndIcon = configStore.isVerticalNavMini(isHovered);
           v-show="!configStore.isVerticalNavMini(isHovered)"
           class="button-text"
         >
-          Get Support
+          Get Beyond the Horizon
         </span>
       </VBtn>
     </div>
@@ -220,10 +220,29 @@ const hideTitleAndIcon = configStore.isVerticalNavMini(isHovered);
     font-weight: 600;
     text-transform: none;
     letter-spacing: 0.5px;
+    background-color: #ffffff;
+    border: 1px solid #d1d5db;
+    color: #111827;
+    transition: all 0.3s ease;
+    min-height: 40px;
+    padding: 8px 12px;
+
+    &:hover {
+      background-color: #f9fafb;
+      border-color: #9ca3af;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .v-icon {
+      color: #f59e0b;
+      font-size: 18px;
+    }
 
     .button-text {
       font-size: 0.875rem;
       font-weight: 600;
+      color: #111827;
     }
   }
 }
@@ -399,6 +418,27 @@ const hideTitleAndIcon = configStore.isVerticalNavMini(isHovered);
 
   .nav-bottom-button {
     flex-shrink: 0;
+    
+    // 👉 Collapsed state button positioning
+    &.collapsed {
+      padding: 0.5rem;
+      
+      .get-beyond-button {
+        width: 100%;
+        justify-content: center;
+        padding: 8px;
+        min-height: 36px;
+        
+        .button-text {
+          display: none;
+        }
+        
+        .v-icon {
+          margin: 0;
+          font-size: 16px;
+        }
+      }
+    }
   }
 }
 </style>
