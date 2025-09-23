@@ -1167,19 +1167,55 @@ const dropPeriod = (index, event) => {
                       label="Activities included*"
                       placeholder="Select the activities that are included in your adventure"
                       :items="[
-                        'Hiking',
-                        'Diving',
-                        'Rock Climbing',
+                        // Land-Based Activities
                         'Skiing',
-                        'Cycling',
+                        'Snowboarding',
+                        'Backcountry Skiing',
+                        'Snowshoeing',
+                        'Ice Climbing',
+                        'Heli‑Skiing',
+                        'Road Cycling',
+                        'Bikepacking',
+                        'Mountain Biking',
+                        'Rock Climbing',
+                        'Bouldering',
+                        'Mountaineering',
+                        'Hiking',
+                        'Wild Camping',
+                        'Trail Running',
+                        'Horseback Riding',
+                        'ATV/Quad Biking',
+                        'Glacier Hiking',
+                        'Sandboarding',
+                        'Avalanche Education',
+                        // Water-Based Activities
+                        'Windsurfing',
+                        'Kitesurfing',
                         'Kayaking',
+                        'Canoeing',
+                        'Rafting',
+                        'Canyoning',
+                        'Freediving',
+                        'Surfing',
+                        'Snorkeling',
+                        'Scuba Diving',
+                        'Stand‑Up Paddleboarding',
+                        'Sailing',
+                        // Air-Based Activities
+                        'Base Jumping',
+                        'Skydiving',
+                        'Bungee Jumping',
+                        'Hot Air Ballooning',
+                        'Parachuting',
+                        'Paragliding',
+                        'Snow Kiting',
+                        // Additional Activities
                         'Photography Tours',
                         'Cultural Tours',
                         'Wildlife Tours',
                         'Cooking Classes',
                         'Wine Tasting',
                         'Historical Tours',
-                        'Adventure Sports',
                         'Other',
                       ]"
                       class="mb-4"
@@ -2281,20 +2317,30 @@ const dropPeriod = (index, event) => {
 <style scoped>
 .auto-save-indicator {
   position: fixed;
-  top: 20px;
-  left: 20px;
-  z-index: 1000;
+  top: 80px;
+  right: 20px;
+  z-index: 9999;
   
   .save-status {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 14px;
-    font-weight: 500;
+    padding: 6px 10px;
+    background: rgba(255, 255, 255, 0.15);
+    color: #333;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 400;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     transition: all 0.3s ease;
+    animation: slideIn 0.3s ease-out;
     
     &.saving {
+      background: rgba(25, 118, 210, 0.1);
       color: #1976d2;
+      border-color: rgba(25, 118, 210, 0.2);
       
       .v-icon {
         color: #1976d2;
@@ -2302,20 +2348,33 @@ const dropPeriod = (index, event) => {
     }
     
     &.saved {
-      color: #000000;
+      background: rgba(76, 175, 80, 0.1);
+      color: #2e7d32;
+      border-color: rgba(76, 175, 80, 0.2);
       
       .v-icon {
-        color: #000000;
+        color: #4caf50;
       }
     }
     
     .v-icon {
-      font-size: 16px;
+      font-size: 12px;
       
       &.spinning {
         animation: spin 1s linear infinite;
       }
     }
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
   }
 }
 
