@@ -687,7 +687,7 @@ class AdminController extends Controller
      */
     public function listings(Request $request)
     {
-        $query = Listing::with(['user']);
+        $query = Listing::with(['user', 'itineraries', 'specialAddons']);
 
         // Search functionality
         if ($request->filled('search')) {

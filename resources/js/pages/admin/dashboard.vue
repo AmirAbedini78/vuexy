@@ -129,10 +129,10 @@
         <template #item.events="{ item }">
           <div>
             <div class="font-weight-medium">
-              {{ item.listing_title || item.eventTitle }}
+              {{ item.listing_title || item.eventTitle || item.title || `Event ${item.id}` }}
             </div>
             <div class="text-caption text-medium-emphasis">
-              {{ item.locations || item.location }}
+              {{ item.locations || item.location || item.address || "No location" }}
             </div>
           </div>
         </template>
@@ -780,65 +780,288 @@
 
       <VCardText v-if="selectedProvider">
         <VRow>
+          <!-- Basic Information -->
           <VCol cols="12">
-            <div class="details-header">
-              <div class="title-line">
-                <span class="details-title">{{
-                  selectedProvider.provider_name || "Provider"
-                }}</span>
-                <VChip
-                  :color="
-                    selectedProvider.provider_type === 'individual'
-                      ? 'primary'
-                      : 'secondary'
-                  "
-                  size="small"
-                  class="ml-2"
-                >
-                  {{
-                    selectedProvider.provider_type === "individual"
-                      ? "Individual"
-                      : "Company"
-                  }}
-                </VChip>
-                <VChip
-                  :color="getProviderStatusColor(selectedProvider.status)"
-                  size="small"
-                  class="ml-2 text-capitalize"
-                >
-                  {{ selectedProvider.status || "review" }}
-                </VChip>
-              </div>
-              <div class="sub-line">
-                Created: {{ formatDate(selectedProvider.created_at) }}
-              </div>
-            </div>
+            <h6 class="text-h6 font-weight-medium mb-3">Basic Information</h6>
           </VCol>
 
-          <VCol cols="12"><VDivider class="my-2" /></VCol>
+          <VCol cols="12" md="6">
+            <strong>Name:</strong> {{ selectedProvider.provider_name || "N/A" }}
+          </VCol>
 
-          <VCol cols="12">
-            <div class="details-grid">
-              <div
-                v-for="entry in getReadableEntries(selectedProvider).filter(
-                  (e) =>
-                    ![
-                      'provider_name',
-                      'provider_type',
-                      'status',
-                      'created_at',
-                      'id',
-                      'user_id',
-                    ].includes(e.key)
-                )"
-                :key="entry.key"
-                class="details-item"
+          <VCol cols="12" md="6">
+            <strong>Type:</strong>
+            <VChip
+              :color="
+                selectedProvider.provider_type === 'individual'
+                  ? 'primary'
+                  : 'secondary'
+              "
+              size="small"
+              class="ml-2"
+            >
+              {{
+                selectedProvider.provider_type === "individual"
+                  ? "Individual"
+                  : "Company"
+              }}
+            </VChip>
+          </VCol>
+
+          <VCol cols="12" md="6">
+            <strong>Status:</strong>
+            <VChip
+              :color="getProviderStatusColor(selectedProvider.status)"
+              size="small"
+              class="ml-2 text-capitalize"
+            >
+              {{ selectedProvider.status || "review" }}
+            </VChip>
+          </VCol>
+
+          <VCol cols="12" md="6">
+            <strong>Specialization:</strong>
+            {{ selectedProvider.activity_specialization || "N/A" }}
+          </VCol>
+
+          <VCol cols="12" md="6">
+            <strong>Country:</strong>
+            {{
+              selectedProvider.country_of_operation ||
+              selectedProvider.country ||
+              "N/A"
+            }}
+          </VCol>
+
+          <VCol cols="12" md="6">
+            <strong>Experience:</strong>
+            {{
+              selectedProvider.years_of_experience ||
+              selectedProvider.business_type ||
+              "N/A"
+            }}
+          </VCol>
+
+          <VCol cols="12" md="6">
+            <strong>Created:</strong>
+            {{ formatDate(selectedProvider.created_at) }}
+          </VCol>
+
+          <VCol cols="12" md="6">
+            <strong>Want to be listed:</strong>
+            {{ selectedProvider.want_to_be_listed || "N/A" }}
+          </VCol>
+
+          <!-- Individual Provider Information -->
+          <template v-if="selectedProvider.provider_type === 'individual'">
+            <VCol cols="12">
+              <h6 class="text-h6 font-weight-medium mb-3 mt-4">
+                Personal Information
+              </h6>
+            </VCol>
+
+            <VCol cols="12" md="6">
+              <strong>Nationality:</strong>
+              {{ selectedProvider.nationality || "N/A" }}
+            </VCol>
+
+            <VCol cols="12" md="6">
+              <strong>Address:</strong>
+              {{ selectedProvider.address1 || "N/A" }}
+            </VCol>
+
+            <VCol cols="12" md="6">
+              <strong>City:</strong>
+              {{ selectedProvider.city || "N/A" }}
+            </VCol>
+
+            <VCol cols="12" md="6">
+              <strong>State:</strong>
+              {{ selectedProvider.state || "N/A" }}
+            </VCol>
+
+            <VCol cols="12" md="6">
+              <strong>Postal Code:</strong>
+              {{ selectedProvider.postal_code || "N/A" }}
+            </VCol>
+
+            <VCol cols="12" md="6">
+              <strong>Date of Birth:</strong>
+              {{
+                selectedProvider.dob
+                  ? formatDate(selectedProvider.dob)
+                  : "N/A"
+              }}
+            </VCol>
+
+            <VCol cols="12" md="6">
+              <strong>Languages:</strong>
+              {{
+                Array.isArray(selectedProvider.languages)
+                  ? selectedProvider.languages.join(", ")
+                  : selectedProvider.languages || "N/A"
+              }}
+            </VCol>
+
+            <VCol cols="12">
+              <h6 class="text-h6 font-weight-medium mb-3 mt-4">
+                Business Details
+              </h6>
+            </VCol>
+
+            <VCol cols="12" md="6">
+              <strong>Years of Experience:</strong>
+              {{ selectedProvider.years_of_experience || "N/A" }}
+            </VCol>
+
+            <VCol cols="12" md="6">
+              <strong>Business Type:</strong>
+              {{ selectedProvider.business_type || "N/A" }}
+            </VCol>
+
+            <VCol cols="12">
+              <strong>Short Bio:</strong>
+              {{ selectedProvider.short_bio || "N/A" }}
+            </VCol>
+
+            <VCol cols="12">
+              <h6 class="text-h6 font-weight-medium mb-3 mt-4">
+                Terms & Conditions
+              </h6>
+            </VCol>
+
+            <VCol cols="12">
+              <strong>Terms Accepted:</strong>
+              <VChip
+                :color="selectedProvider.terms_accepted ? 'success' : 'error'"
+                size="small"
+                class="ml-2"
               >
-                <div class="details-label">{{ entry.label }}</div>
-                <div class="details-value">{{ entry.value }}</div>
-              </div>
-            </div>
-          </VCol>
+                {{ selectedProvider.terms_accepted ? "Yes" : "No" }}
+              </VChip>
+            </VCol>
+          </template>
+
+          <!-- Company Provider Information -->
+          <template v-else>
+            <VCol cols="12">
+              <h6 class="text-h6 font-weight-medium mb-3 mt-4">
+                Company Information
+              </h6>
+            </VCol>
+
+            <VCol cols="12" md="6">
+              <strong>VAT ID:</strong>
+              {{ selectedProvider.vat_id || "N/A" }}
+            </VCol>
+
+            <VCol cols="12" md="6">
+              <strong>Contact Person:</strong>
+              {{ selectedProvider.contact_person || "N/A" }}
+            </VCol>
+
+            <VCol cols="12" md="6">
+              <strong>Country of Registration:</strong>
+              {{ selectedProvider.country_of_registration || "N/A" }}
+            </VCol>
+
+            <VCol cols="12" md="6">
+              <strong>Address:</strong>
+              {{ selectedProvider.address1 || "N/A" }}
+            </VCol>
+
+            <VCol cols="12" md="6">
+              <strong>City:</strong>
+              {{ selectedProvider.city || "N/A" }}
+            </VCol>
+
+            <VCol cols="12" md="6">
+              <strong>State:</strong>
+              {{ selectedProvider.state || "N/A" }}
+            </VCol>
+
+            <VCol cols="12" md="6">
+              <strong>Postal Code:</strong>
+              {{ selectedProvider.postal_code || "N/A" }}
+            </VCol>
+
+            <VCol cols="12" md="6">
+              <strong>Business Type:</strong>
+              {{ selectedProvider.business_type || "N/A" }}
+            </VCol>
+
+            <VCol cols="12">
+              <h6 class="text-h6 font-weight-medium mb-3 mt-4">
+                Business Details
+              </h6>
+            </VCol>
+
+            <VCol cols="12" md="6">
+              <strong>Company Website:</strong>
+              {{ selectedProvider.company_website || "N/A" }}
+            </VCol>
+
+            <VCol cols="12">
+              <strong>Short Bio:</strong>
+              {{ selectedProvider.short_bio || "N/A" }}
+            </VCol>
+
+            <!-- Social Links -->
+            <VCol cols="12">
+              <h6 class="text-h6 font-weight-medium mb-3 mt-4">
+                Social Links
+              </h6>
+            </VCol>
+            <VCol cols="12" md="6">
+              <strong>Twitter:</strong>
+              {{
+                selectedProvider.social_media_links?.twitter ||
+                selectedProvider.twitter ||
+                "N/A"
+              }}
+            </VCol>
+            <VCol cols="12" md="6">
+              <strong>Facebook:</strong>
+              {{
+                selectedProvider.social_media_links?.facebook ||
+                selectedProvider.facebook ||
+                "N/A"
+              }}
+            </VCol>
+            <VCol cols="12" md="6">
+              <strong>LinkedIn:</strong>
+              {{
+                selectedProvider.social_media_links?.linkedIn ||
+                selectedProvider.linkedIn ||
+                "N/A"
+              }}
+            </VCol>
+            <VCol cols="12" md="6">
+              <strong>Instagram:</strong>
+              {{
+                selectedProvider.social_media_links?.instagram ||
+                selectedProvider.instagram ||
+                "N/A"
+              }}
+            </VCol>
+
+            <VCol cols="12">
+              <h6 class="text-h6 font-weight-medium mb-3 mt-4">
+                Terms & Conditions
+              </h6>
+            </VCol>
+
+            <VCol cols="12">
+              <strong>Terms Accepted:</strong>
+              <VChip
+                :color="selectedProvider.terms_accepted ? 'success' : 'error'"
+                size="small"
+                class="ml-2"
+              >
+                {{ selectedProvider.terms_accepted ? "Yes" : "No" }}
+              </VChip>
+            </VCol>
+          </template>
         </VRow>
       </VCardText>
 
@@ -894,62 +1117,184 @@
 
       <VCardText v-if="selectedListing">
         <VRow>
+          <!-- Basic Information -->
           <VCol cols="12">
-            <div class="details-header">
-              <div class="title-line">
-                <span class="details-title">{{
-                  selectedListing.listing_title || "Listing"
-                }}</span>
-                <VChip
-                  :color="getListingTypeColor(selectedListing.listing_type)"
-                  size="small"
-                  class="ml-2"
-                >
-                  {{ formatListingType(selectedListing.listing_type) }}
-                </VChip>
-                <VChip
-                  :color="getListingStatusColor(selectedListing.status)"
-                  size="small"
-                  class="ml-2 text-capitalize"
-                >
-                  {{ selectedListing.status || "draft" }}
-                </VChip>
+            <h6 class="text-h6 font-weight-medium mb-3">Basic Information</h6>
+          </VCol>
+
+          <VCol cols="12" md="6">
+            <strong>Title:</strong> {{ selectedListing.listing_title || "N/A" }}
+          </VCol>
+
+          <VCol cols="12" md="6">
+            <strong>Type:</strong>
+            <VChip
+              :color="getListingTypeColor(selectedListing.listing_type)"
+              size="small"
+              class="ml-2"
+            >
+              {{ formatListingType(selectedListing.listing_type) }}
+            </VChip>
+          </VCol>
+
+          <VCol cols="12" md="6">
+            <strong>Status:</strong>
+            <VChip
+              :color="getListingStatusColor(selectedListing.status)"
+              size="small"
+              class="ml-2 text-capitalize"
+            >
+              {{ selectedListing.status || "draft" }}
+            </VChip>
+          </VCol>
+
+          <VCol cols="12" md="6">
+            <strong>Price:</strong> €{{ formatCurrency(selectedListing.price || 0) }}
+          </VCol>
+
+          <VCol cols="12" md="6">
+            <strong>Capacity:</strong> {{ selectedListing.min_capacity || 0 }} - {{ selectedListing.max_capacity || 0 }}
+          </VCol>
+
+          <VCol cols="12" md="6">
+            <strong>Provider:</strong> {{ selectedListing.user?.name || "N/A" }}
+          </VCol>
+
+          <VCol cols="12" md="6">
+            <strong>Location:</strong> {{ selectedListing.locations || selectedListing.location || "N/A" }}
+          </VCol>
+
+          <VCol cols="12" md="6">
+            <strong>Created:</strong> {{ formatDate(selectedListing.created_at) }}
+          </VCol>
+
+          <!-- Package Information -->
+          <VCol cols="12">
+            <h6 class="text-h6 font-weight-medium mb-3 mt-4">Package Information</h6>
+          </VCol>
+
+          <VCol cols="12" v-if="selectedListing.packages && selectedListing.packages.length > 0">
+            <div v-for="(pkg, index) in selectedListing.packages" :key="index" class="mb-4 pa-4" style="border: 1px solid #e0e0e0; border-radius: 8px;">
+              <div class="d-flex align-center mb-2">
+                <VIcon icon="tabler-package" size="20" color="#ec8d22" class="me-2" />
+                <strong>Package {{ index + 1 }}</strong>
               </div>
-              <div class="sub-line">
-                Provider: {{ selectedListing.user?.name || "N/A" }} · Price: €{{
-                  formatCurrency(selectedListing.price || 0)
-                }}
-                · Capacity: {{ selectedListing.min_capacity || 0 }} -
-                {{ selectedListing.max_capacity || 0 }}
-              </div>
+              <VRow>
+                <VCol cols="12" md="6">
+                  <strong>Title:</strong> {{ pkg.title || "N/A" }}
+                </VCol>
+                <VCol cols="12" md="6">
+                  <strong>Price:</strong> €{{ formatCurrency(pkg.price || 0) }}
+                </VCol>
+                <VCol cols="12" md="6">
+                  <strong>Duration:</strong> {{ pkg.duration || "N/A" }}
+                </VCol>
+                <VCol cols="12" md="6">
+                  <strong>Capacity:</strong> {{ pkg.capacity || "N/A" }}
+                </VCol>
+                <VCol cols="12" v-if="pkg.description">
+                  <strong>Description:</strong> {{ pkg.description }}
+                </VCol>
+              </VRow>
             </div>
           </VCol>
 
-          <VCol cols="12"><VDivider class="my-2" /></VCol>
+          <VCol cols="12" v-else>
+            <div class="text-medium-emphasis">No package information available</div>
+          </VCol>
 
+          <!-- Special Addons Information -->
           <VCol cols="12">
-            <div class="details-grid">
-              <div
-                v-for="entry in getReadableEntries(selectedListing).filter(
-                  (e) =>
-                    ![
-                      'listing_title',
-                      'listing_type',
-                      'status',
-                      'price',
-                      'min_capacity',
-                      'max_capacity',
-                      'user',
-                      'id',
-                    ].includes(e.key)
-                )"
-                :key="entry.key"
-                class="details-item"
-              >
-                <div class="details-label">{{ entry.label }}</div>
-                <div class="details-value">{{ entry.value }}</div>
+            <h6 class="text-h6 font-weight-medium mb-3 mt-4">Special Addons</h6>
+          </VCol>
+
+          <VCol cols="12" v-if="selectedListing.special_addons && selectedListing.special_addons.length > 0">
+            <div v-for="(addon, index) in selectedListing.special_addons" :key="index" class="mb-3 pa-3" style="border: 1px solid #e0e0e0; border-radius: 8px;">
+              <div class="d-flex align-center mb-2">
+                <VIcon icon="tabler-star" size="20" color="#ec8d22" class="me-2" />
+                <strong>{{ addon.name || `Addon ${index + 1}` }}</strong>
               </div>
+              <VRow>
+                <VCol cols="12" md="6">
+                  <strong>Price:</strong> €{{ formatCurrency(addon.price || 0) }}
+                </VCol>
+                <VCol cols="12" md="6">
+                  <strong>Type:</strong> {{ addon.type || "N/A" }}
+                </VCol>
+                <VCol cols="12" v-if="addon.description">
+                  <strong>Description:</strong> {{ addon.description }}
+                </VCol>
+              </VRow>
             </div>
+          </VCol>
+
+          <VCol cols="12" v-else>
+            <div class="text-medium-emphasis">No special addons available</div>
+          </VCol>
+
+          <!-- Itinerary Information -->
+          <VCol cols="12">
+            <h6 class="text-h6 font-weight-medium mb-3 mt-4">Itinerary</h6>
+          </VCol>
+
+          <VCol cols="12" v-if="selectedListing.itinerary && selectedListing.itinerary.length > 0">
+            <div v-for="(day, index) in selectedListing.itinerary" :key="index" class="mb-3 pa-3" style="border: 1px solid #e0e0e0; border-radius: 8px;">
+              <div class="d-flex align-center mb-2">
+                <div class="itinerary-number me-3" style="background: #ec8d22; color: white; width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-family: 'Anton', sans-serif; font-size: 12px;">
+                  {{ String(index + 1).padStart(2, "0") }}
+                </div>
+                <strong>{{ day.title || `Day ${index + 1}` }}</strong>
+              </div>
+              <VRow>
+                <VCol cols="12" md="6">
+                  <strong>Date:</strong> {{ day.date || "N/A" }}
+                </VCol>
+                <VCol cols="12" md="6">
+                  <strong>Duration:</strong> {{ day.duration || "N/A" }}
+                </VCol>
+                <VCol cols="12" v-if="day.description">
+                  <strong>Description:</strong> {{ day.description }}
+                </VCol>
+                <VCol cols="12" v-if="day.activities && day.activities.length > 0">
+                  <strong>Activities:</strong> {{ day.activities.join(", ") }}
+                </VCol>
+              </VRow>
+            </div>
+          </VCol>
+
+          <VCol cols="12" v-else>
+            <div class="text-medium-emphasis">No itinerary information available</div>
+          </VCol>
+
+          <!-- Additional Information -->
+          <VCol cols="12">
+            <h6 class="text-h6 font-weight-medium mb-3 mt-4">Additional Information</h6>
+          </VCol>
+
+          <VCol cols="12" md="6">
+            <strong>Activities Included:</strong>
+            <div v-if="selectedListing.activitiesIncluded && selectedListing.activitiesIncluded.length > 0" class="mt-1">
+              <VChip
+                v-for="activity in selectedListing.activitiesIncluded"
+                :key="activity"
+                size="small"
+                class="me-1 mb-1"
+                color="primary"
+                variant="outlined"
+              >
+                {{ activity }}
+              </VChip>
+            </div>
+            <div v-else class="text-medium-emphasis">No activities specified</div>
+          </VCol>
+
+          <VCol cols="12" md="6">
+            <strong>Departure Capacity:</strong> {{ selectedListing.departure_capacity || "N/A" }}
+          </VCol>
+
+          <VCol cols="12" v-if="selectedListing.description">
+            <strong>Description:</strong>
+            <div class="mt-1">{{ selectedListing.description }}</div>
           </VCol>
         </VRow>
       </VCardText>
@@ -1291,7 +1636,10 @@ const loadDashboardData = async () => {
         method: "GET",
       });
       console.log("Admin listings response:", listingsResponse);
-      eventsData.value = listingsResponse.data || [];
+      
+      // Handle both paginated and non-paginated responses
+      const listings = listingsResponse.data || listingsResponse;
+      eventsData.value = Array.isArray(listings) ? listings : (listings.data || []);
 
       // Auto-determine status for each event
       eventsData.value = eventsData.value.map((event) => {
@@ -1436,11 +1784,30 @@ const viewEvent = async (item) => {
   try {
     console.log("Viewing event, fetching full details:", item.id);
     const res = await $api(`/admin/listings/${item.id}`, { method: "GET" });
-    selectedListing.value = res || item;
+    
+    // Merge the response data with the original item to ensure all fields are available
+    selectedListing.value = {
+      ...item,
+      ...res,
+      // Ensure modal data is properly structured
+      packages: res?.packages || item?.packages || [],
+      special_addons: res?.special_addons || item?.special_addons || [],
+      itinerary: res?.itinerary || item?.itinerary || [],
+      activitiesIncluded: res?.activitiesIncluded || item?.activitiesIncluded || []
+    };
+    
+    console.log("Selected listing data:", selectedListing.value);
     showListingViewDialog.value = true;
   } catch (e) {
     console.error("Failed to load listing details", e);
-    selectedListing.value = item;
+    // Fallback to original item data
+    selectedListing.value = {
+      ...item,
+      packages: item?.packages || [],
+      special_addons: item?.special_addons || [],
+      itinerary: item?.itinerary || [],
+      activitiesIncluded: item?.activitiesIncluded || []
+    };
     showListingViewDialog.value = true;
   }
 };

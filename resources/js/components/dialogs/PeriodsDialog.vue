@@ -93,25 +93,6 @@
                   </div>
                 </div>
               </div>
-              <!-- Vertical dotted line connecting departures -->
-              <div
-                v-if="index < localPeriods.length - 1"
-                class="vertical-dotted-line"
-                style="
-                  position: relative;
-                  left: 20px;
-                  top: 8px;
-                  width: 1px;
-                  height: 16px;
-                  background: repeating-linear-gradient(
-                    to bottom,
-                    #666 0,
-                    #666 2px,
-                    transparent 2px,
-                    transparent 4px
-                  );
-                "
-              ></div>
             </div>
           </div>
 
