@@ -26,10 +26,16 @@
       <div class="modal-content">
         <!-- Auto-save indicator -->
         <div class="auto-save-indicator" v-if="isSaving || showSavedIndicator">
-          <div class="save-status" :class="{ 'saving': isSaving, 'saved': showSavedIndicator && !isSaving }">
-            <VIcon 
-              :icon="isSaving ? 'tabler-loader-2' : 'tabler-check'" 
-              :class="{ 'spinning': isSaving }"
+          <div
+            class="save-status"
+            :class="{
+              saving: isSaving,
+              saved: showSavedIndicator && !isSaving,
+            }"
+          >
+            <VIcon
+              :icon="isSaving ? 'tabler-loader-2' : 'tabler-check'"
+              :class="{ spinning: isSaving }"
             />
             <span v-if="isSaving">Saving...</span>
             <span v-else-if="showSavedIndicator">Changes saved</span>
@@ -163,8 +169,8 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from "vue";
 import { useAutoSave } from "@/composables/useAutoSave";
+import { computed, ref, watch } from "vue";
 
 const props = defineProps({
   modelValue: {
@@ -190,27 +196,27 @@ const selectedAddonIndex = ref(0);
 const localAddons = ref([]);
 
 // Auto-save functionality for addons
-const { 
-  isSaving, 
-  lastSaved, 
-  hasUnsavedChanges, 
+const {
+  isSaving,
+  lastSaved,
+  hasUnsavedChanges,
   showSavedIndicator,
-  saveToStorage, 
-  loadFromStorage, 
+  saveToStorage,
+  loadFromStorage,
   clearSavedData,
   hasSavedData,
-  getSavedDataInfo 
-} = useAutoSave(localAddons, 'special-addons-dialog-data', {
+  getSavedDataInfo,
+} = useAutoSave(localAddons, "special-addons-dialog-data", {
   debounceMs: 300, // Save after 300ms of inactivity
   onSave: (data) => {
-    console.log('Special addons dialog data auto-saved:', data);
+    console.log("Special addons dialog data auto-saved:", data);
   },
   onLoad: (data, meta) => {
-    console.log('Special addons dialog data loaded from storage:', data);
+    console.log("Special addons dialog data loaded from storage:", data);
     if (meta) {
-      console.log('Last saved:', new Date(meta.timestamp).toLocaleString());
+      console.log("Last saved:", new Date(meta.timestamp).toLocaleString());
     }
-  }
+  },
 });
 
 // Computed property for dialog visibility
@@ -372,7 +378,7 @@ function handleModelValueUpdate(newValue) {
   top: 80px;
   right: 20px;
   z-index: 9999;
-  
+
   .save-status {
     display: flex;
     align-items: center;
@@ -388,30 +394,30 @@ function handleModelValueUpdate(newValue) {
     border: 1px solid rgba(255, 255, 255, 0.2);
     transition: all 0.3s ease;
     animation: slideIn 0.3s ease-out;
-    
+
     &.saving {
       background: rgba(25, 118, 210, 0.1);
       color: #1976d2;
       border-color: rgba(25, 118, 210, 0.2);
-      
+
       .v-icon {
         color: #1976d2;
       }
     }
-    
+
     &.saved {
       background: rgba(76, 175, 80, 0.1);
       color: #2e7d32;
       border-color: rgba(76, 175, 80, 0.2);
-      
+
       .v-icon {
         color: #4caf50;
       }
     }
-    
+
     .v-icon {
       font-size: 12px;
-      
+
       &.spinning {
         animation: spin 1s linear infinite;
       }
@@ -431,8 +437,12 @@ function handleModelValueUpdate(newValue) {
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 .special-addons-modal {
   --orange-color: #ec8d22;
@@ -466,7 +476,7 @@ function handleModelValueUpdate(newValue) {
 
 .modal-title {
   font-size: 28px;
-  font-weight: 300;
+  font-weight: unset;
   color: var(--dark-grey);
   margin: 0 0 8px 0;
   font-family: "Anton", sans-serif;
@@ -536,7 +546,7 @@ function handleModelValueUpdate(newValue) {
 
 .badge-number {
   color: white;
-  font-weight: 700;
+  font-weight: unset;
   font-size: 12px;
   font-family: "Anton", sans-serif;
 }
@@ -640,7 +650,7 @@ function handleModelValueUpdate(newValue) {
 
 .content-title {
   font-size: 18px;
-  font-weight: 300;
+  font-weight: unset;
   color: var(--dark-grey);
   margin: 0;
   font-family: "Anton", sans-serif;

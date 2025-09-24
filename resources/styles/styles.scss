@@ -22,3 +22,18 @@
 .custom-radio {
   overflow: visible !important;
 }
+
+/* Normalize font weight for Anton across the app */
+html {
+  /* Prevent browsers from faking bold when a weight isn't available (e.g., Anton) */
+  font-synthesis-weight: none;
+}
+
+/* If Anton is applied via inline style, ensure normal weight */
+[style*="font-family: Anton"],
+[style*="font-family:'Anton'"],
+[style*="font-family:\"Anton\""],
+[style*="font-family: 'Anton'"],
+[style*='font-family: "Anton"'] {
+  font-weight: unset !important;
+}

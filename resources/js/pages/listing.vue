@@ -353,7 +353,7 @@ function contactSupport() {
 .listing-header .listing-title {
   font-family: "Anton", sans-serif;
   font-size: 2rem;
-  font-weight: 300;
+  font-weight: unset;
   color: #222;
   margin-bottom: 16px;
 }
@@ -453,7 +453,7 @@ function contactSupport() {
 .contact-support-title {
   font-family: "Anton", sans-serif;
   font-size: 2.5rem;
-  font-weight: 300;
+  font-weight: unset;
   color: #333;
   margin-bottom: 16px;
   line-height: 1.2;

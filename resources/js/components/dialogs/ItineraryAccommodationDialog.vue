@@ -21,10 +21,16 @@
       <VCardText class="pa-6">
         <!-- Auto-save indicator -->
         <div class="auto-save-indicator" v-if="isSaving || showSavedIndicator">
-          <div class="save-status" :class="{ 'saving': isSaving, 'saved': showSavedIndicator && !isSaving }">
-            <VIcon 
-              :icon="isSaving ? 'tabler-loader-2' : 'tabler-check'" 
-              :class="{ 'spinning': isSaving }"
+          <div
+            class="save-status"
+            :class="{
+              saving: isSaving,
+              saved: showSavedIndicator && !isSaving,
+            }"
+          >
+            <VIcon
+              :icon="isSaving ? 'tabler-loader-2' : 'tabler-check'"
+              :class="{ spinning: isSaving }"
             />
             <span v-if="isSaving">Saving...</span>
             <span v-else-if="showSavedIndicator">Changes saved</span>
@@ -51,7 +57,7 @@
                     width: 40px;
                     height: 40px;
                     border-radius: 50%;
-                    font-weight: bold;
+                    font-weight: 400;
                     font-family: 'Anton', sans-serif;
                   "
                 >
@@ -64,7 +70,7 @@
                   <div
                     v-if="selectedDayIndex === index"
                     class="d-flex align-center mt-2"
-                    style="color: #00c853; font-weight: bold"
+                    style="color: #00c853; font-weight: unset"
                   >
                     <VIcon
                       icon="tabler-map-pin"
@@ -185,8 +191,8 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from "vue";
 import { useAutoSave } from "@/composables/useAutoSave";
+import { computed, ref, watch } from "vue";
 import {
   VBtn,
   VCard,
@@ -228,27 +234,30 @@ const selectedDayIndex = ref(0);
 const localDays = ref([]);
 
 // Auto-save functionality for days
-const { 
-  isSaving, 
-  lastSaved, 
-  hasUnsavedChanges, 
+const {
+  isSaving,
+  lastSaved,
+  hasUnsavedChanges,
   showSavedIndicator,
-  saveToStorage, 
-  loadFromStorage, 
+  saveToStorage,
+  loadFromStorage,
   clearSavedData,
   hasSavedData,
-  getSavedDataInfo 
-} = useAutoSave(localDays, 'itinerary-accommodation-dialog-data', {
+  getSavedDataInfo,
+} = useAutoSave(localDays, "itinerary-accommodation-dialog-data", {
   debounceMs: 300, // Save after 300ms of inactivity
   onSave: (data) => {
-    console.log('Itinerary accommodation dialog data auto-saved:', data);
+    console.log("Itinerary accommodation dialog data auto-saved:", data);
   },
   onLoad: (data, meta) => {
-    console.log('Itinerary accommodation dialog data loaded from storage:', data);
+    console.log(
+      "Itinerary accommodation dialog data loaded from storage:",
+      data
+    );
     if (meta) {
-      console.log('Last saved:', new Date(meta.timestamp).toLocaleString());
+      console.log("Last saved:", new Date(meta.timestamp).toLocaleString());
     }
-  }
+  },
 });
 
 // Computed property for dialog visibility
@@ -423,7 +432,7 @@ async function handleDone() {
   top: 80px;
   right: 20px;
   z-index: 9999;
-  
+
   .save-status {
     display: flex;
     align-items: center;
@@ -439,30 +448,30 @@ async function handleDone() {
     border: 1px solid rgba(255, 255, 255, 0.2);
     transition: all 0.3s ease;
     animation: slideIn 0.3s ease-out;
-    
+
     &.saving {
       background: rgba(25, 118, 210, 0.1);
       color: #1976d2;
       border-color: rgba(25, 118, 210, 0.2);
-      
+
       .v-icon {
         color: #1976d2;
       }
     }
-    
+
     &.saved {
       background: rgba(76, 175, 80, 0.1);
       color: #2e7d32;
       border-color: rgba(76, 175, 80, 0.2);
-      
+
       .v-icon {
         color: #4caf50;
       }
     }
-    
+
     .v-icon {
       font-size: 12px;
-      
+
       &.spinning {
         animation: spin 1s linear infinite;
       }
@@ -482,7 +491,11 @@ async function handleDone() {
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

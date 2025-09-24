@@ -282,10 +282,10 @@ const actionCards = [
           earnings, all in one place. And if you ever need help with anything,
           Just Contact support!
         </p>
-        <VBtn 
-          color="warning" 
-          size="large" 
-          class="support-btn" 
+        <VBtn
+          color="warning"
+          size="large"
+          class="support-btn"
           elevation="0"
           href="https://explorerelite.com/support/"
           target="_blank"
@@ -429,7 +429,7 @@ const actionCards = [
     font-family: "Anton", "Inter", "Segoe UI", Tahoma, Geneva, Verdana,
       sans-serif;
     font-size: 1.5rem;
-    font-weight: 300;
+    font-weight: unset;
     line-height: 1.2;
     margin-bottom: 1.5rem;
     color: #000000;

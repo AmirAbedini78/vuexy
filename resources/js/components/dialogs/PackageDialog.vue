@@ -26,10 +26,16 @@
       <div class="modal-content">
         <!-- Auto-save indicator -->
         <div class="auto-save-indicator" v-if="isSaving || showSavedIndicator">
-          <div class="save-status" :class="{ 'saving': isSaving, 'saved': showSavedIndicator && !isSaving }">
-            <VIcon 
-              :icon="isSaving ? 'tabler-loader-2' : 'tabler-check'" 
-              :class="{ 'spinning': isSaving }"
+          <div
+            class="save-status"
+            :class="{
+              saving: isSaving,
+              saved: showSavedIndicator && !isSaving,
+            }"
+          >
+            <VIcon
+              :icon="isSaving ? 'tabler-loader-2' : 'tabler-check'"
+              :class="{ spinning: isSaving }"
             />
             <span v-if="isSaving">Saving...</span>
             <span v-else-if="showSavedIndicator">Changes saved</span>
@@ -176,8 +182,8 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from "vue";
 import { useAutoSave } from "@/composables/useAutoSave";
+import { computed, ref, watch } from "vue";
 
 const props = defineProps({
   modelValue: {
@@ -204,27 +210,27 @@ const samePriceForAll = ref(false);
 const localPackages = ref([]);
 
 // Auto-save functionality for packages
-const { 
-  isSaving, 
-  lastSaved, 
-  hasUnsavedChanges, 
+const {
+  isSaving,
+  lastSaved,
+  hasUnsavedChanges,
   showSavedIndicator,
-  saveToStorage, 
-  loadFromStorage, 
+  saveToStorage,
+  loadFromStorage,
   clearSavedData,
   hasSavedData,
-  getSavedDataInfo 
-} = useAutoSave(localPackages, 'package-dialog-data', {
+  getSavedDataInfo,
+} = useAutoSave(localPackages, "package-dialog-data", {
   debounceMs: 300, // Save after 300ms of inactivity
   onSave: (data) => {
-    console.log('Package dialog data auto-saved:', data);
+    console.log("Package dialog data auto-saved:", data);
   },
   onLoad: (data, meta) => {
-    console.log('Package dialog data loaded from storage:', data);
+    console.log("Package dialog data loaded from storage:", data);
     if (meta) {
-      console.log('Last saved:', new Date(meta.timestamp).toLocaleString());
+      console.log("Last saved:", new Date(meta.timestamp).toLocaleString());
     }
-  }
+  },
 });
 
 // Computed property for dialog visibility
@@ -422,7 +428,7 @@ function handleModelValueUpdate(newValue) {
   top: 80px;
   right: 20px;
   z-index: 9999;
-  
+
   .save-status {
     display: flex;
     align-items: center;
@@ -438,30 +444,30 @@ function handleModelValueUpdate(newValue) {
     border: 1px solid rgba(255, 255, 255, 0.2);
     transition: all 0.3s ease;
     animation: slideIn 0.3s ease-out;
-    
+
     &.saving {
       background: rgba(25, 118, 210, 0.1);
       color: #1976d2;
       border-color: rgba(25, 118, 210, 0.2);
-      
+
       .v-icon {
         color: #1976d2;
       }
     }
-    
+
     &.saved {
       background: rgba(76, 175, 80, 0.1);
       color: #2e7d32;
       border-color: rgba(76, 175, 80, 0.2);
-      
+
       .v-icon {
         color: #4caf50;
       }
     }
-    
+
     .v-icon {
       font-size: 12px;
-      
+
       &.spinning {
         animation: spin 1s linear infinite;
       }
@@ -481,8 +487,12 @@ function handleModelValueUpdate(newValue) {
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 .package-modal {
   z-index: 1000;
@@ -510,7 +520,7 @@ function handleModelValueUpdate(newValue) {
 .modal-title {
   font-family: "Anton", sans-serif;
   font-size: 32px;
-  font-weight: 300;
+  font-weight: unset;
   margin: 0 0 12px 0;
   color: #333;
   line-height: 1.2;
@@ -592,7 +602,7 @@ function handleModelValueUpdate(newValue) {
 
 .badge-number {
   color: white;
-  font-weight: 700;
+  font-weight: unset;
   font-size: 12px;
   font-family: "Anton", sans-serif;
 }
@@ -676,7 +686,7 @@ function handleModelValueUpdate(newValue) {
 .content-title {
   font-family: "Anton", sans-serif;
   font-size: 28px;
-  font-weight: 300;
+  font-weight: unset;
   color: #333333;
   margin: 0;
   line-height: 1.2;
