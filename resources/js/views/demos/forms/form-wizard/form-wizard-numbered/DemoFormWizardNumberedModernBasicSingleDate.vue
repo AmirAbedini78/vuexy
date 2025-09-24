@@ -2095,7 +2095,7 @@ function removePackage(index) {
                           <div
                             class="d-flex justify-space-between align-center"
                           >
-                            <div class="d-flex align-center">
+                            <div class="d-flex align-center" style="padding-left: 20px;">
                               <div
                                 class="itinerary-number"
                                 style="
