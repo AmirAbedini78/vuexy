@@ -105,8 +105,8 @@
 </template>
 
 <script setup>
-import { $api } from '@/plugins/1.router/guards'
-import { computed, onMounted, ref } from 'vue'
+import { $api } from '@/utils/api'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
