@@ -314,9 +314,31 @@ const actionCards = [
     icon: "/images/4svg/creating list.png",
     color: "primary",
     action: () => {
-      console.log("Create Listing clicked - navigating to /listing");
-      // Navigate to listing page using Vue Router
-      router.push("/listing");
+      console.log("Create Listing clicked - navigating to listing page");
+      // Navigate to listing page using route name
+      try {
+        console.log("Current route:", router.currentRoute.value);
+        console.log("Available routes:", router.getRoutes().filter(r => r.name?.includes('listing')));
+        
+        // Try to navigate to listing page
+        router.push({ name: 'listing' }).then(() => {
+          console.log("Navigation successful");
+        }).catch((error) => {
+          console.error("Navigation failed:", error);
+          // Try alternative navigation
+          router.push('/listing').then(() => {
+            console.log("Alternative navigation successful");
+          }).catch((altError) => {
+            console.error("Alternative navigation failed:", altError);
+            // Final fallback
+            window.location.href = '/listing';
+          });
+        });
+      } catch (error) {
+        console.error("Navigation failed:", error);
+        // Fallback to direct URL
+        window.location.href = '/listing';
+      }
     },
   },
   {
