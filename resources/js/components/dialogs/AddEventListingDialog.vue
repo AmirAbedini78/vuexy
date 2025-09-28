@@ -418,13 +418,18 @@ const handlePrevious = () => {
                 <div class="note-card">
                   <div class="note-header">
                     <h6 class="note-title">NOTE</h6>
-                    <VBtn icon variant="text" size="small" class="note-close-btn">
+                    <VBtn
+                      icon
+                      variant="text"
+                      size="small"
+                      class="note-close-btn"
+                    >
                       <VIcon icon="tabler-x" size="16" />
                     </VBtn>
                   </div>
                   <p class="note-text">
-                    List your experience on Explorer Elite and connect with a global
-                    community of explorers
+                    List your experience on Explorer Elite and connect with a
+                    global community of explorers
                   </p>
                   <a href="#" class="note-link">Learn more</a>
                 </div>
@@ -432,7 +437,6 @@ const handlePrevious = () => {
             </VCol>
           </VRow>
         </div>
-
       </template>
     </VCard>
   </VDialog>
@@ -464,7 +468,7 @@ const handlePrevious = () => {
           font-family: "Anton", sans-serif;
           font-size: 2rem;
           font-weight: 300;
-          color: #2f2b3d;
+          color: #000;
           margin: 0 0 0.5rem 0;
           line-height: 1.2;
         }
@@ -554,7 +558,7 @@ const handlePrevious = () => {
       font-family: "Anton", sans-serif;
       font-size: 1.25rem;
       font-weight: 300;
-      color: #2f2b3d;
+      color: #000;
       margin-bottom: 0.75rem;
       line-height: 1.3;
     }
@@ -610,7 +614,7 @@ const handlePrevious = () => {
         font-family: "Anton", sans-serif;
         font-size: 1.75rem;
         font-weight: 300;
-        color: #2c3e50;
+        color: #000;
         margin: 0 0 0.5rem 0;
         line-height: 1.2;
       }
@@ -710,7 +714,7 @@ const handlePrevious = () => {
             font-family: "Karla", sans-serif;
             font-size: 1rem;
             font-weight: 500;
-            color: #2c3e50;
+            color: #000;
             margin: 0 0 0.25rem 0;
             line-height: 1.3;
           }
@@ -739,7 +743,7 @@ const handlePrevious = () => {
           font-family: "Karla", sans-serif;
           font-size: 1.25rem;
           font-weight: 600;
-          color: #2c3e50;
+          color: #000;
           margin: 0;
         }
       }
@@ -867,7 +871,7 @@ const handlePrevious = () => {
 
     .wizard-content {
       flex-direction: column;
-      
+
       .wizard-sidebar {
         padding: 1.5rem 1rem;
         width: 100%;

@@ -1619,7 +1619,7 @@ const sendEmailVerification = async () => {
   font-family: "Anton", Arial, sans-serif;
   font-size: 2.5rem;
   font-weight: 300;
-  color: #222;
+  color: #000;
   margin-bottom: 12px;
   direction: ltr;
   text-align: left;
@@ -1657,7 +1657,7 @@ const sendEmailVerification = async () => {
 .section-title {
   text-align: center;
   font-size: 2.2em;
-  color: #333;
+  color: #000;
   margin: 40px 0 40px 0;
   position: relative;
   padding: 0 24px;
@@ -1910,7 +1910,7 @@ const sendEmailVerification = async () => {
 .card-title {
   font-size: 1.1em;
   font-weight: bold;
-  color: #444;
+  color: #000;
   margin-bottom: 8px;
 }
 
@@ -2010,7 +2010,7 @@ const sendEmailVerification = async () => {
 
 .current-status h5 {
   font-size: 1em;
-  color: #444;
+  color: #000;
   margin-bottom: 10px;
 }
 

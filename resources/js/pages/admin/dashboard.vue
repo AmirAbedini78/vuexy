@@ -129,10 +129,17 @@
         <template #item.events="{ item }">
           <div>
             <div class="font-weight-medium">
-              {{ item.listing_title || item.eventTitle || item.title || `Event ${item.id}` }}
+              {{
+                item.listing_title ||
+                item.eventTitle ||
+                item.title ||
+                `Event ${item.id}`
+              }}
             </div>
             <div class="text-caption text-medium-emphasis">
-              {{ item.locations || item.location || item.address || "No location" }}
+              {{
+                item.locations || item.location || item.address || "No location"
+              }}
             </div>
           </div>
         </template>
@@ -888,9 +895,7 @@
             <VCol cols="12" md="6">
               <strong>Date of Birth:</strong>
               {{
-                selectedProvider.dob
-                  ? formatDate(selectedProvider.dob)
-                  : "N/A"
+                selectedProvider.dob ? formatDate(selectedProvider.dob) : "N/A"
               }}
             </VCol>
 
@@ -1008,9 +1013,7 @@
 
             <!-- Social Links -->
             <VCol cols="12">
-              <h6 class="text-h6 font-weight-medium mb-3 mt-4">
-                Social Links
-              </h6>
+              <h6 class="text-h6 font-weight-medium mb-3 mt-4">Social Links</h6>
             </VCol>
             <VCol cols="12" md="6">
               <strong>Twitter:</strong>
@@ -1149,11 +1152,14 @@
           </VCol>
 
           <VCol cols="12" md="6">
-            <strong>Price:</strong> €{{ formatCurrency(selectedListing.price || 0) }}
+            <strong>Price:</strong> €{{
+              formatCurrency(selectedListing.price || 0)
+            }}
           </VCol>
 
           <VCol cols="12" md="6">
-            <strong>Capacity:</strong> {{ selectedListing.min_capacity || 0 }} - {{ selectedListing.max_capacity || 0 }}
+            <strong>Capacity:</strong> {{ selectedListing.min_capacity || 0 }} -
+            {{ selectedListing.max_capacity || 0 }}
           </VCol>
 
           <VCol cols="12" md="6">
@@ -1161,22 +1167,41 @@
           </VCol>
 
           <VCol cols="12" md="6">
-            <strong>Location:</strong> {{ selectedListing.locations || selectedListing.location || "N/A" }}
+            <strong>Location:</strong>
+            {{ selectedListing.locations || selectedListing.location || "N/A" }}
           </VCol>
 
           <VCol cols="12" md="6">
-            <strong>Created:</strong> {{ formatDate(selectedListing.created_at) }}
+            <strong>Created:</strong>
+            {{ formatDate(selectedListing.created_at) }}
           </VCol>
 
           <!-- Package Information -->
           <VCol cols="12">
-            <h6 class="text-h6 font-weight-medium mb-3 mt-4">Package Information</h6>
+            <h6 class="text-h6 font-weight-medium mb-3 mt-4">
+              Package Information
+            </h6>
           </VCol>
 
-          <VCol cols="12" v-if="selectedListing.packages && selectedListing.packages.length > 0">
-            <div v-for="(pkg, index) in selectedListing.packages" :key="index" class="mb-4 pa-4" style="border: 1px solid #e0e0e0; border-radius: 8px;">
+          <VCol
+            cols="12"
+            v-if="
+              selectedListing.packages && selectedListing.packages.length > 0
+            "
+          >
+            <div
+              v-for="(pkg, index) in selectedListing.packages"
+              :key="index"
+              class="mb-4 pa-4"
+              style="border: 1px solid #e0e0e0; border-radius: 8px"
+            >
               <div class="d-flex align-center mb-2">
-                <VIcon icon="tabler-package" size="20" color="#ec8d22" class="me-2" />
+                <VIcon
+                  icon="tabler-package"
+                  size="20"
+                  color="#ec8d22"
+                  class="me-2"
+                />
                 <strong>Package {{ index + 1 }}</strong>
               </div>
               <VRow>
@@ -1200,7 +1225,9 @@
           </VCol>
 
           <VCol cols="12" v-else>
-            <div class="text-medium-emphasis">No package information available</div>
+            <div class="text-medium-emphasis">
+              No package information available
+            </div>
           </VCol>
 
           <!-- Special Addons Information -->
@@ -1208,15 +1235,33 @@
             <h6 class="text-h6 font-weight-medium mb-3 mt-4">Special Addons</h6>
           </VCol>
 
-          <VCol cols="12" v-if="selectedListing.special_addons && selectedListing.special_addons.length > 0">
-            <div v-for="(addon, index) in selectedListing.special_addons" :key="index" class="mb-3 pa-3" style="border: 1px solid #e0e0e0; border-radius: 8px;">
+          <VCol
+            cols="12"
+            v-if="
+              selectedListing.special_addons &&
+              selectedListing.special_addons.length > 0
+            "
+          >
+            <div
+              v-for="(addon, index) in selectedListing.special_addons"
+              :key="index"
+              class="mb-3 pa-3"
+              style="border: 1px solid #e0e0e0; border-radius: 8px"
+            >
               <div class="d-flex align-center mb-2">
-                <VIcon icon="tabler-star" size="20" color="#ec8d22" class="me-2" />
+                <VIcon
+                  icon="tabler-star"
+                  size="20"
+                  color="#ec8d22"
+                  class="me-2"
+                />
                 <strong>{{ addon.name || `Addon ${index + 1}` }}</strong>
               </div>
               <VRow>
                 <VCol cols="12" md="6">
-                  <strong>Price:</strong> €{{ formatCurrency(addon.price || 0) }}
+                  <strong>Price:</strong> €{{
+                    formatCurrency(addon.price || 0)
+                  }}
                 </VCol>
                 <VCol cols="12" md="6">
                   <strong>Type:</strong> {{ addon.type || "N/A" }}
@@ -1237,10 +1282,35 @@
             <h6 class="text-h6 font-weight-medium mb-3 mt-4">Itinerary</h6>
           </VCol>
 
-          <VCol cols="12" v-if="selectedListing.itinerary && selectedListing.itinerary.length > 0">
-            <div v-for="(day, index) in selectedListing.itinerary" :key="index" class="mb-3 pa-3" style="border: 1px solid #e0e0e0; border-radius: 8px;">
+          <VCol
+            cols="12"
+            v-if="
+              selectedListing.itinerary && selectedListing.itinerary.length > 0
+            "
+          >
+            <div
+              v-for="(day, index) in selectedListing.itinerary"
+              :key="index"
+              class="mb-3 pa-3"
+              style="border: 1px solid #e0e0e0; border-radius: 8px"
+            >
               <div class="d-flex align-center mb-2">
-                <div class="itinerary-number me-3" style="background: #ec8d22; color: white; width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-family: 'Anton', sans-serif; font-size: 12px;">
+                <div
+                  class="itinerary-number me-3"
+                  style="
+                    background: #ec8d22;
+                    color: white;
+                    width: 32px;
+                    height: 32px;
+                    border-radius: 6px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: bold;
+                    font-family: 'Anton', sans-serif;
+                    font-size: 12px;
+                  "
+                >
                   {{ String(index + 1).padStart(2, "0") }}
                 </div>
                 <strong>{{ day.title || `Day ${index + 1}` }}</strong>
@@ -1255,7 +1325,10 @@
                 <VCol cols="12" v-if="day.description">
                   <strong>Description:</strong> {{ day.description }}
                 </VCol>
-                <VCol cols="12" v-if="day.activities && day.activities.length > 0">
+                <VCol
+                  cols="12"
+                  v-if="day.activities && day.activities.length > 0"
+                >
                   <strong>Activities:</strong> {{ day.activities.join(", ") }}
                 </VCol>
               </VRow>
@@ -1263,17 +1336,27 @@
           </VCol>
 
           <VCol cols="12" v-else>
-            <div class="text-medium-emphasis">No itinerary information available</div>
+            <div class="text-medium-emphasis">
+              No itinerary information available
+            </div>
           </VCol>
 
           <!-- Additional Information -->
           <VCol cols="12">
-            <h6 class="text-h6 font-weight-medium mb-3 mt-4">Additional Information</h6>
+            <h6 class="text-h6 font-weight-medium mb-3 mt-4">
+              Additional Information
+            </h6>
           </VCol>
 
           <VCol cols="12" md="6">
             <strong>Activities Included:</strong>
-            <div v-if="selectedListing.activitiesIncluded && selectedListing.activitiesIncluded.length > 0" class="mt-1">
+            <div
+              v-if="
+                selectedListing.activitiesIncluded &&
+                selectedListing.activitiesIncluded.length > 0
+              "
+              class="mt-1"
+            >
               <VChip
                 v-for="activity in selectedListing.activitiesIncluded"
                 :key="activity"
@@ -1285,11 +1368,14 @@
                 {{ activity }}
               </VChip>
             </div>
-            <div v-else class="text-medium-emphasis">No activities specified</div>
+            <div v-else class="text-medium-emphasis">
+              No activities specified
+            </div>
           </VCol>
 
           <VCol cols="12" md="6">
-            <strong>Departure Capacity:</strong> {{ selectedListing.departure_capacity || "N/A" }}
+            <strong>Departure Capacity:</strong>
+            {{ selectedListing.departure_capacity || "N/A" }}
           </VCol>
 
           <VCol cols="12" v-if="selectedListing.description">
@@ -1636,10 +1722,12 @@ const loadDashboardData = async () => {
         method: "GET",
       });
       console.log("Admin listings response:", listingsResponse);
-      
+
       // Handle both paginated and non-paginated responses
       const listings = listingsResponse.data || listingsResponse;
-      eventsData.value = Array.isArray(listings) ? listings : (listings.data || []);
+      eventsData.value = Array.isArray(listings)
+        ? listings
+        : listings.data || [];
 
       // Auto-determine status for each event
       eventsData.value = eventsData.value.map((event) => {
@@ -1784,7 +1872,7 @@ const viewEvent = async (item) => {
   try {
     console.log("Viewing event, fetching full details:", item.id);
     const res = await $api(`/admin/listings/${item.id}`, { method: "GET" });
-    
+
     // Merge the response data with the original item to ensure all fields are available
     selectedListing.value = {
       ...item,
@@ -1793,9 +1881,10 @@ const viewEvent = async (item) => {
       packages: res?.packages || item?.packages || [],
       special_addons: res?.special_addons || item?.special_addons || [],
       itinerary: res?.itinerary || item?.itinerary || [],
-      activitiesIncluded: res?.activitiesIncluded || item?.activitiesIncluded || []
+      activitiesIncluded:
+        res?.activitiesIncluded || item?.activitiesIncluded || [],
     };
-    
+
     console.log("Selected listing data:", selectedListing.value);
     showListingViewDialog.value = true;
   } catch (e) {
@@ -1806,7 +1895,7 @@ const viewEvent = async (item) => {
       packages: item?.packages || [],
       special_addons: item?.special_addons || [],
       itinerary: item?.itinerary || [],
-      activitiesIncluded: item?.activitiesIncluded || []
+      activitiesIncluded: item?.activitiesIncluded || [],
     };
     showListingViewDialog.value = true;
   }
@@ -2249,7 +2338,7 @@ const handleListingUpdated = () => {
 
 .admin-panel-title {
   h1 {
-    color: #2c3e50;
+    color: #000;
     font-size: 2rem;
     font-weight: unset;
     margin: 0;
@@ -2260,7 +2349,7 @@ const handleListingUpdated = () => {
 
 .section-title {
   h2 {
-    color: #2c3e50;
+    color: #000;
     font-size: 1.5rem;
     font-weight: unset;
     margin: 0;
@@ -2406,7 +2495,7 @@ const handleListingUpdated = () => {
   font-family: "Anton", "Inter", sans-serif;
   font-size: 1.25rem;
   font-weight: unset;
-  color: #2c3e50;
+  color: #000;
 }
 .sub-line {
   color: #6b7280;

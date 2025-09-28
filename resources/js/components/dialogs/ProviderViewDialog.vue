@@ -259,7 +259,7 @@ const formatDate = (date) => {
   border: 1px solid #e9ecef;
 
   h6 {
-    color: #2c3e50;
+    color: #000;
     margin-bottom: 16px;
   }
 }

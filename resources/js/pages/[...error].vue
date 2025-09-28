@@ -16,14 +16,11 @@ definePage({
 
 <template>
   <div class="ee-404">
-    <div class="ee-404-icon">⚠️</div>
-    <div class="ee-404-code">404</div>
-    <div class="ee-404-title">Page Not Found!</div>
-    <div class="ee-404-desc">we couldn't find the page you are looking for</div>
+    <img class="ee-404-img" src="/images/4svg/404.png" alt="404 Not Found" />
     <div class="ee-404-actions">
-      <VBtn variant="outlined" to="/">Back To Dashboard</VBtn>
+      <VBtn color="warning" to="/admin/dashboard">Dashboard</VBtn>
       <VBtn
-        color="warning"
+        variant="outlined"
         href="https://explorerelite.com/support/"
         target="_blank"
         >Get Support</VBtn
@@ -40,31 +37,17 @@ definePage({
   align-items: center;
   justify-content: center;
   text-align: center;
-  gap: 12px;
+  gap: 16px;
 }
-.ee-404-icon {
-  font-size: 56px;
-  margin-bottom: 8px;
-}
-.ee-404-code {
-  font-family: "Anton", sans-serif;
-  font-size: 96px;
-  font-weight: unset;
-  line-height: 1;
-  color: #111;
-}
-.ee-404-title {
-  font-family: "Anton", sans-serif;
-  font-size: 28px;
-  font-weight: unset;
-  color: #111;
-}
-.ee-404-desc {
-  color: #6b7280;
-  margin: 6px 0 18px;
+.ee-404-img {
+  max-width: 420px;
+  width: 90%;
+  height: auto;
+  display: block;
 }
 .ee-404-actions {
   display: flex;
   gap: 12px;
+  margin-top: 8px;
 }
 </style>

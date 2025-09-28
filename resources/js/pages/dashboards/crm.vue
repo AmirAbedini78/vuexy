@@ -499,7 +499,7 @@ const actionCards = [
     .event-title {
       font-size: 0.875rem;
       font-weight: 600;
-      color: #2c3e50;
+      color: #000;
       line-height: 1.3;
       margin-bottom: 4px;
       word-wrap: break-word;
@@ -581,7 +581,7 @@ const actionCards = [
   .action-title {
     font-size: 1rem;
     font-weight: 700;
-    color: #2c3e50;
+    color: #000;
     line-height: 1.3;
     text-align: center;
   }
