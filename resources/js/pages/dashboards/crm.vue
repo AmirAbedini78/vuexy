@@ -187,22 +187,62 @@ const statusToColor = (s) =>
 const loadMyEvents = async () => {
   loading.value = true;
   try {
-    const res = await $api("/admin/listings", { method: "GET" });
-    const all = Array.isArray(res?.data) ? res.data : [];
-    const uid = useCookie("userData").value?.id;
-    const mine = all.filter((l) => !uid || l.user_id === uid);
-    events.value = mine.map((l) => ({
-      id: l.id,
-      eventTitle: l.listing_title || "—",
-      location: l.locations || "—",
-      advId: String(l.id).padStart(5, "0"),
-      status: (l.status || "submitted")
+    console.log("Loading user's events...");
+    
+    // Get user ID from cookies
+    const userDataCookie = useCookie("userData");
+    const userId = userDataCookie.value?.id || userDataCookie.value?.user_id;
+    
+    if (!userId) {
+      console.error("User ID not found");
+      events.value = [];
+      return;
+    }
+    
+    console.log("Loading events for user ID:", userId);
+    
+    // Try to get user's listings from the listings API
+    const res = await $api("/listings", { method: "GET" });
+    console.log("Listings API response:", res);
+    
+    // Handle different response formats
+    let allListings = [];
+    if (Array.isArray(res)) {
+      allListings = res;
+    } else if (res?.data && Array.isArray(res.data)) {
+      allListings = res.data;
+    } else if (res?.data?.data && Array.isArray(res.data.data)) {
+      allListings = res.data.data;
+    }
+    
+    console.log("All listings:", allListings);
+    
+    // Filter listings for current user
+    const userListings = allListings.filter((listing) => {
+      return listing.user_id === userId || listing.user?.id === userId;
+    });
+    
+    console.log("User's listings:", userListings);
+    
+    // Map to events format
+    events.value = userListings.map((listing) => ({
+      id: listing.id,
+      eventTitle: listing.listing_title || listing.title || "Untitled Event",
+      location: listing.locations || listing.location || "No location",
+      advId: String(listing.id).padStart(5, "0"),
+      status: (listing.status || "draft")
         .replace("other_events", "Other Events")
         .replace("edit_review", "Edit Review Pending")
         .replace("_", " "),
-      participants: `${l.min_capacity || 0}/${l.max_capacity || 0}`,
-      statusColor: statusToColor(l.status),
+      participants: `${listing.min_capacity || 0}/${listing.max_capacity || 0}`,
+      statusColor: statusToColor(listing.status),
+      price: listing.price || 0,
+      listing_type: listing.listing_type || "single-date",
+      created_at: listing.created_at,
+      updated_at: listing.updated_at,
     }));
+    
+    console.log("Mapped events:", events.value);
   } catch (e) {
     console.error("Failed to load my events", e);
     events.value = [];
@@ -213,13 +253,49 @@ const loadMyEvents = async () => {
 
 onMounted(loadMyEvents);
 
+// Helper functions for listing type
+const getListingTypeColor = (type) => {
+  const colors = {
+    'single-date': 'primary',
+    'multi-date': 'success', 
+    'open-date': 'warning',
+    'other': 'secondary'
+  };
+  return colors[type] || 'secondary';
+};
+
+const formatListingType = (type) => {
+  const types = {
+    'single-date': 'Single Date',
+    'multi-date': 'Multi Date',
+    'open-date': 'Open Date',
+    'other': 'Other'
+  };
+  return types[type] || 'Unknown';
+};
+
+// Event actions
+const editEvent = (item) => {
+  console.log('Edit event:', item);
+  // Navigate to edit page or open edit modal
+  router.push(`/listing/${item.id}/edit`);
+};
+
+const viewEvent = (item) => {
+  console.log('View event:', item);
+  // Navigate to view page or open view modal
+  router.push(`/listing/${item.id}`);
+};
+
 // Table headers
 const headers = [
-  { title: "EVENT TITLE", key: "eventTitle", width: "35%" },
-  { title: "ADV. ID", key: "advId", width: "15%" },
-  { title: "STATUS", key: "status", width: "20%" },
-  { title: "PARTICIPANTS", key: "participants", width: "15%" },
-  { title: "ACTION", key: "actions", sortable: false, width: "15%" },
+  { title: "EVENT TITLE", key: "eventTitle", width: "30%" },
+  { title: "ADV. ID", key: "advId", width: "12%" },
+  { title: "STATUS", key: "status", width: "18%" },
+  { title: "PARTICIPANTS", key: "participants", width: "12%" },
+  { title: "PRICE", key: "price", width: "10%" },
+  { title: "TYPE", key: "listing_type", width: "8%" },
+  { title: "ACTION", key: "actions", sortable: false, width: "10%" },
 ];
 
 // Pagination options
@@ -238,9 +314,31 @@ const actionCards = [
     icon: "/images/4svg/creating list.png",
     color: "primary",
     action: () => {
-      console.log("Create Listing clicked - navigating to /listing");
-      // Navigate to listing page using Vue Router
-      router.push("/listing");
+      console.log("Create Listing clicked - navigating to listing page");
+      // Navigate to listing page using route name
+      try {
+        console.log("Current route:", router.currentRoute.value);
+        console.log("Available routes:", router.getRoutes().filter(r => r.name?.includes('listing')));
+        
+        // Try to navigate to listing page
+        router.push({ name: 'listing' }).then(() => {
+          console.log("Navigation successful");
+        }).catch((error) => {
+          console.error("Navigation failed:", error);
+          // Try alternative navigation
+          router.push('/listing').then(() => {
+            console.log("Alternative navigation successful");
+          }).catch((altError) => {
+            console.error("Alternative navigation failed:", altError);
+            // Final fallback
+            window.location.href = '/listing';
+          });
+        });
+      } catch (error) {
+        console.error("Navigation failed:", error);
+        // Fallback to direct URL
+        window.location.href = '/listing';
+      }
     },
   },
   {
@@ -339,11 +437,32 @@ const actionCards = [
             </VChip>
           </template>
 
+          <!-- Price -->
+          <template #item.price="{ item }">
+            <span class="font-weight-medium">
+              €{{ item.price ? item.price.toFixed(2) : '0.00' }}
+            </span>
+          </template>
+
+          <!-- Listing Type -->
+          <template #item.listing_type="{ item }">
+            <VChip
+              :color="getListingTypeColor(item.listing_type)"
+              size="small"
+              variant="outlined"
+            >
+              {{ formatListingType(item.listing_type) }}
+            </VChip>
+          </template>
+
           <!-- Actions -->
           <template #item.actions="{ item }">
             <div class="d-flex gap-2">
-              <IconBtn size="small">
+              <IconBtn size="small" @click="editEvent(item)">
                 <VIcon icon="tabler-edit" size="18" />
+              </IconBtn>
+              <IconBtn size="small" @click="viewEvent(item)">
+                <VIcon icon="tabler-eye" size="18" />
               </IconBtn>
               <IconBtn size="small">
                 <VIcon icon="tabler-dots-vertical" size="18" />
@@ -353,8 +472,21 @@ const actionCards = [
 
           <!-- Empty state -->
           <template #no-data>
-            <div class="text-center w-100 pa-6 text-medium-emphasis">
-              Note: You have no events or Listings
+            <div class="text-center w-100 pa-6">
+              <div class="mb-4">
+                <VIcon icon="tabler-calendar-off" size="48" color="grey" />
+              </div>
+              <h6 class="text-h6 mb-2">No Events Found</h6>
+              <p class="text-medium-emphasis mb-4">
+                You haven't created any events yet. Start by adding your first adventure!
+              </p>
+              <VBtn 
+                color="primary" 
+                @click="showAddEventListingModal = true"
+                prepend-icon="tabler-plus"
+              >
+                Add Your First Event
+              </VBtn>
             </div>
           </template>
 

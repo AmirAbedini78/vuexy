@@ -1,8 +1,8 @@
 <script setup>
+import { useAutoSave } from "@/composables/useAutoSave";
 import { ALL_COUNTRIES } from "@/constants/countries";
 import { ALL_LANGUAGES } from "@/constants/languages";
 import { individualUserService } from "@/services/api";
-import { useAutoSave } from "@/composables/useAutoSave";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 
@@ -1508,7 +1508,7 @@ const closeSuccessDialog = () => {
 .step-number {
   font-family: "Anton", sans-serif;
   font-size: 24px;
-  color: #2f2b3d;
+  color: #000000;
   font-weight: bold;
   margin-left: 2px;
   flex-shrink: 0;

@@ -1,4 +1,5 @@
 <script setup>
+import AllAdventuresDialog from "@/components/dialogs/AllAdventuresDialog.vue";
 import ItineraryAccommodationDialog from "@/components/dialogs/ItineraryAccommodationDialog.vue";
 import PackageDialog from "@/components/dialogs/PackageDialog.vue";
 import SpecialAddonsDialog from "@/components/dialogs/SpecialAddonsDialog.vue";
@@ -182,6 +183,8 @@ const {
 const showItineraryDialog = ref(false);
 const showSpecialAddonsDialog = ref(false);
 const showPackageDialog = ref(false);
+const showAllAdventuresDialog = ref(false);
+const showComingSoonPopup = ref(false);
 
 // Handle certifications upload
 const handleCertificationsUpload = (event) => {
@@ -922,22 +925,11 @@ function removePackage(index) {
         <!-- Icon -->
         <div class="confirmation-icon">
           <div class="icon-container">
-            <div class="icon-left">
-              <div class="icon-lines">
-                <div class="line"></div>
-                <div class="line"></div>
-                <div class="line"></div>
-              </div>
-              <div class="checkmark">✓</div>
-            </div>
-            <div class="icon-right">
-              <div class="icon-lines">
-                <div class="line"></div>
-                <div class="line"></div>
-                <div class="line"></div>
-              </div>
-              <div class="cross">✗</div>
-            </div>
+            <img 
+              src="/images/4svg/listingend.png" 
+              alt="Listing End Icon"
+              style="width: 120px; height: 120px; object-fit: contain;"
+            />
           </div>
         </div>
 
@@ -968,7 +960,7 @@ function removePackage(index) {
             color="dark"
             variant="elevated"
             class="see-adventures-btn"
-            @click="router.push({ name: 'listing' })"
+            @click="showAllAdventuresDialog = true"
           >
             See All Your Adventures
           </VBtn>
@@ -2620,7 +2612,11 @@ function removePackage(index) {
                           border-radius: 8px;
                           font-weight: 500;
                           margin-right: 12px;
+                          filter: blur(1px);
+                          position: relative;
+                          cursor: not-allowed;
                         "
+                        @click="showComingSoonPopup = true"
                       >
                         Watch The Tutorial Video
                       </VBtn>
@@ -2642,15 +2638,40 @@ function removePackage(index) {
                 </VCol>
                 <VCol cols="12" md="4">
                   <div class="help-video">
-                    <iframe
-                      src="https://www.youtube.com/embed/dQw4w9WgXcQ"
-                      title="Tutorial Video"
-                      frameborder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowfullscreen
-                      class="youtube-video"
-                      style="width: 100%; height: 200px; border-radius: 8px"
-                    ></iframe>
+                    <div class="video-container" style="position: relative;">
+                      <iframe
+                        src="https://www.youtube.com/embed/gwztooshVlQ"
+                        title="Tutorial Video"
+                        frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen
+                        class="youtube-video"
+                        style="width: 100%; height: 200px; border-radius: 8px; filter: blur(5px); pointer-events: none;"
+                      ></iframe>
+                      <div class="video-overlay" style="
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        background: rgba(0, 0, 0, 0.5);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        border-radius: 8px;
+                        pointer-events: none;
+                        z-index: 10;
+                      ">
+                        <div class="coming-soon-text" style="
+                          color: white;
+                          font-size: 18px;
+                          font-weight: bold;
+                          text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+                        ">
+                          Coming Soon
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </VCol>
               </VRow>
@@ -2683,6 +2704,36 @@ function removePackage(index) {
     @close="showPackageDialog = false"
     @done="handlePackageDone"
   />
+
+  <!-- All Adventures Dialog -->
+  <AllAdventuresDialog v-model="showAllAdventuresDialog" />
+
+  <!-- Coming Soon Popup -->
+  <VDialog v-model="showComingSoonPopup" max-width="400">
+    <VCard>
+      <VCardTitle class="text-center">
+        <VIcon icon="tabler-clock" size="24" class="mr-2" />
+        Coming Soon
+      </VCardTitle>
+      <VDivider />
+      <VCardText class="text-center pa-6">
+        <VIcon icon="tabler-video" size="48" color="primary" class="mb-4" />
+        <h6 class="text-h6 mb-2">Tutorial Video</h6>
+        <p class="text-medium-emphasis">
+          We're working on creating an amazing tutorial video for you. 
+          It will be available soon!
+        </p>
+      </VCardText>
+      <VCardActions class="justify-center pb-4">
+        <VBtn 
+          color="primary" 
+          @click="showComingSoonPopup = false"
+        >
+          Got it!
+        </VBtn>
+      </VCardActions>
+    </VCard>
+  </VDialog>
 </template>
 
 <style scoped>
@@ -2808,7 +2859,7 @@ function removePackage(index) {
 .step-number {
   font-family: "Anton", sans-serif;
   font-size: 24px;
-  color: #2f2b3d;
+  color: #000000;
   font-weight: 300;
   margin-left: 2px;
   flex-shrink: 0;
@@ -3286,7 +3337,7 @@ function removePackage(index) {
   font-family: "Anton", sans-serif;
   font-size: 28px;
   font-weight: 300;
-  color: #2f2b3d;
+  color: #000000;
   margin-bottom: 16px;
   line-height: 1.2;
 }

@@ -1,5 +1,6 @@
 <script setup>
 // remove invalid Nuxt alias; useCookie is available globally via @vueuse/integrations in this project
+import AllAdventuresDialog from "@/components/dialogs/AllAdventuresDialog.vue";
 import { useAutoSave } from "@/composables/useAutoSave";
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
@@ -36,6 +37,7 @@ const submissionData = ref({
 const showItineraryDialog = ref(false);
 const showSpecialAddonsDialog = ref(false);
 const showPeriodsDialog = ref(false);
+const showAllAdventuresDialog = ref(false);
 const formValidationErrors = ref({});
 
 const formData = ref({
@@ -654,22 +656,11 @@ const dropPeriod = (index, event) => {
         <!-- Icon -->
         <div class="confirmation-icon">
           <div class="icon-container">
-            <div class="icon-left">
-              <div class="icon-lines">
-                <div class="line"></div>
-                <div class="line"></div>
-                <div class="line"></div>
-              </div>
-              <div class="checkmark">✓</div>
-            </div>
-            <div class="icon-right">
-              <div class="icon-lines">
-                <div class="line"></div>
-                <div class="line"></div>
-                <div class="line"></div>
-              </div>
-              <div class="cross">✗</div>
-            </div>
+            <img 
+              src="/images/4svg/listingend.png" 
+              alt="Listing End Icon"
+              style="width: 120px; height: 120px; object-fit: contain;"
+            />
           </div>
         </div>
 
@@ -700,7 +691,7 @@ const dropPeriod = (index, event) => {
             color="dark"
             variant="elevated"
             class="see-adventures-btn"
-            @click="router.push({ name: 'listing' })"
+            @click="showAllAdventuresDialog = true"
           >
             See All Your Adventures
           </VBtn>
@@ -2312,6 +2303,9 @@ const dropPeriod = (index, event) => {
     @close="showPeriodsDialog = false"
     @done="handlePeriodsDone"
   />
+
+  <!-- All Adventures Dialog -->
+  <AllAdventuresDialog v-model="showAllAdventuresDialog" />
 </template>
 
 <style scoped>
@@ -2437,7 +2431,7 @@ const dropPeriod = (index, event) => {
 .step-number {
   font-family: "Anton", sans-serif;
   font-size: 24px;
-  color: #2f2b3d;
+  color: #000000;
   font-weight: bold;
   margin-left: 2px;
   flex-shrink: 0;
