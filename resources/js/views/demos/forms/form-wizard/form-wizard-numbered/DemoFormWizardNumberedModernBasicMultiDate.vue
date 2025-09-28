@@ -1,5 +1,6 @@
 <script setup>
 // remove invalid Nuxt alias; useCookie is available globally via @vueuse/integrations in this project
+import AllAdventuresDialog from "@/components/dialogs/AllAdventuresDialog.vue";
 import { useAutoSave } from "@/composables/useAutoSave";
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
@@ -24,6 +25,7 @@ const loading = ref(false);
 const showItineraryDialog = ref(false);
 const showSpecialAddonsDialog = ref(false);
 const showPeriodsDialog = ref(false);
+const showAllAdventuresDialog = ref(false);
 const formValidationErrors = ref({});
 const showConfirmation = ref(false);
 const submissionData = ref({
@@ -663,22 +665,11 @@ const createNewAdventure = () => {
       <div class="confirmation-card">
         <div class="confirmation-icon">
           <div class="icon-container">
-            <div class="icon-left">
-              <div class="icon-lines">
-                <div class="line"></div>
-                <div class="line"></div>
-                <div class="line"></div>
-              </div>
-              <div class="checkmark">✓</div>
-            </div>
-            <div class="icon-right">
-              <div class="icon-lines">
-                <div class="line"></div>
-                <div class="line"></div>
-                <div class="line"></div>
-              </div>
-              <div class="cross">✗</div>
-            </div>
+            <img 
+              src="/images/4svg/listingend.png" 
+              alt="Listing End Icon"
+              style="width: 120px; height: 120px; object-fit: contain;"
+            />
           </div>
         </div>
 
@@ -705,7 +696,7 @@ const createNewAdventure = () => {
             color="dark"
             variant="elevated"
             class="see-adventures-btn"
-            @click="router.push({ name: 'listing' })"
+            @click="showAllAdventuresDialog = true"
           >
             See All Your Adventures
           </VBtn>
@@ -2338,8 +2329,23 @@ const createNewAdventure = () => {
                           border-radius: 8px;
                           font-weight: 500;
                           margin-right: 12px;
+                          filter: blur(2px);
+                          pointer-events: none;
+                          position: relative;
                         "
                       >
+                        <span style="
+                          position: absolute;
+                          top: 50%;
+                          left: 50%;
+                          transform: translate(-50%, -50%);
+                          color: #fff;
+                          font-weight: bold;
+                          font-size: 12px;
+                          text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+                        ">
+                          Coming Soon
+                        </span>
                         Watch The Tutorial Video
                       </VBtn>
                       <VBtn
@@ -2360,15 +2366,39 @@ const createNewAdventure = () => {
                 </VCol>
                 <VCol cols="12" md="4">
                   <div class="help-video">
-                    <iframe
-                      src="https://www.youtube.com/embed/dQw4w9WgXcQ"
-                      title="Tutorial Video"
-                      frameborder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowfullscreen
-                      class="youtube-video"
-                      style="width: 100%; height: 200px; border-radius: 8px"
-                    ></iframe>
+                    <div class="video-container" style="position: relative;">
+                      <iframe
+                        src="https://www.youtube.com/embed/gwztooshVlQ"
+                        title="Tutorial Video"
+                        frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen
+                        class="youtube-video"
+                        style="width: 100%; height: 200px; border-radius: 8px; filter: blur(3px);"
+                      ></iframe>
+                      <div class="video-overlay" style="
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        background: rgba(0, 0, 0, 0.3);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        border-radius: 8px;
+                        pointer-events: none;
+                      ">
+                        <div class="coming-soon-text" style="
+                          color: white;
+                          font-size: 18px;
+                          font-weight: bold;
+                          text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+                        ">
+                          Coming Soon
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </VCol>
               </VRow>
@@ -2410,6 +2440,9 @@ const createNewAdventure = () => {
       @close="showConfirmation = false"
       @create-new-adventure="createNewAdventure"
     />
+
+    <!-- All Adventures Dialog -->
+    <AllAdventuresDialog v-model="showAllAdventuresDialog" />
   </div>
 </template>
 
@@ -2536,7 +2569,7 @@ const createNewAdventure = () => {
 .step-number {
   font-family: "Anton", sans-serif;
   font-size: 24px;
-  color: #2f2b3d;
+  color: #000000;
   font-weight: bold;
   margin-left: 2px;
   flex-shrink: 0;
@@ -2744,7 +2777,7 @@ const createNewAdventure = () => {
   font-family: "Anton", sans-serif;
   font-size: 28px;
   font-weight: 700;
-  color: #2f2b3d;
+  color: #000000;
   margin-bottom: 16px;
   line-height: 1.2;
 }

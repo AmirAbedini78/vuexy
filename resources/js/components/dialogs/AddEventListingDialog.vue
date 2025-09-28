@@ -464,7 +464,7 @@ const handlePrevious = () => {
           font-family: "Anton", sans-serif;
           font-size: 2rem;
           font-weight: 300;
-          color: #2f2b3d;
+          color: #000000;
           margin: 0 0 0.5rem 0;
           line-height: 1.2;
         }
@@ -554,7 +554,7 @@ const handlePrevious = () => {
       font-family: "Anton", sans-serif;
       font-size: 1.25rem;
       font-weight: 300;
-      color: #2f2b3d;
+      color: #000000;
       margin-bottom: 0.75rem;
       line-height: 1.3;
     }
