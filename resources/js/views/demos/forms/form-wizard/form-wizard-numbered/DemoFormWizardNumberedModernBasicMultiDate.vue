@@ -26,6 +26,7 @@ const showItineraryDialog = ref(false);
 const showSpecialAddonsDialog = ref(false);
 const showPeriodsDialog = ref(false);
 const showAllAdventuresDialog = ref(false);
+const showComingSoonPopup = ref(false);
 const formValidationErrors = ref({});
 const showConfirmation = ref(false);
 const submissionData = ref({
@@ -2329,23 +2330,12 @@ const createNewAdventure = () => {
                           border-radius: 8px;
                           font-weight: 500;
                           margin-right: 12px;
-                          filter: blur(2px);
-                          pointer-events: none;
+                          filter: blur(1px);
                           position: relative;
+                          cursor: not-allowed;
                         "
+                        @click="showComingSoonPopup = true"
                       >
-                        <span style="
-                          position: absolute;
-                          top: 50%;
-                          left: 50%;
-                          transform: translate(-50%, -50%);
-                          color: #fff;
-                          font-weight: bold;
-                          font-size: 12px;
-                          text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-                        ">
-                          Coming Soon
-                        </span>
                         Watch The Tutorial Video
                       </VBtn>
                       <VBtn
@@ -2374,7 +2364,7 @@ const createNewAdventure = () => {
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowfullscreen
                         class="youtube-video"
-                        style="width: 100%; height: 200px; border-radius: 8px; filter: blur(3px);"
+                        style="width: 100%; height: 200px; border-radius: 8px; filter: blur(5px); pointer-events: none;"
                       ></iframe>
                       <div class="video-overlay" style="
                         position: absolute;
@@ -2382,12 +2372,13 @@ const createNewAdventure = () => {
                         left: 0;
                         right: 0;
                         bottom: 0;
-                        background: rgba(0, 0, 0, 0.3);
+                        background: rgba(0, 0, 0, 0.5);
                         display: flex;
                         align-items: center;
                         justify-content: center;
                         border-radius: 8px;
                         pointer-events: none;
+                        z-index: 10;
                       ">
                         <div class="coming-soon-text" style="
                           color: white;
@@ -2443,6 +2434,33 @@ const createNewAdventure = () => {
 
     <!-- All Adventures Dialog -->
     <AllAdventuresDialog v-model="showAllAdventuresDialog" />
+
+    <!-- Coming Soon Popup -->
+    <VDialog v-model="showComingSoonPopup" max-width="400">
+      <VCard>
+        <VCardTitle class="text-center">
+          <VIcon icon="tabler-clock" size="24" class="mr-2" />
+          Coming Soon
+        </VCardTitle>
+        <VDivider />
+        <VCardText class="text-center pa-6">
+          <VIcon icon="tabler-video" size="48" color="primary" class="mb-4" />
+          <h6 class="text-h6 mb-2">Tutorial Video</h6>
+          <p class="text-medium-emphasis">
+            We're working on creating an amazing tutorial video for you. 
+            It will be available soon!
+          </p>
+        </VCardText>
+        <VCardActions class="justify-center pb-4">
+          <VBtn 
+            color="primary" 
+            @click="showComingSoonPopup = false"
+          >
+            Got it!
+          </VBtn>
+        </VCardActions>
+      </VCard>
+    </VDialog>
   </div>
 </template>
 
