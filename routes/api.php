@@ -10,6 +10,7 @@ use App\Http\Middleware\ApiMiddleware;
 use App\Http\Controllers\Api\ListingController;
 use App\Http\Controllers\Api\ItineraryAccommodationController;
 use App\Http\Controllers\Api\SpecialAddonController;
+use App\Http\Controllers\Api\AutoSaveListingController;
 use App\Http\Controllers\AdminController;
 use App\Http\Middleware\AdminMiddleware;
 
@@ -140,6 +141,14 @@ Route::middleware([ApiMiddleware::class])->group(function () {
         Route::post('/account/change-password', [\App\Http\Controllers\AccountController::class, 'changePassword']);
         Route::post('/account/avatar', [\App\Http\Controllers\AccountController::class, 'uploadAvatar']);
         Route::put('/account/profile', [\App\Http\Controllers\AccountController::class, 'updateProfile']);
+
+        // Auto-save listings endpoints
+        Route::get('/auto-save-listings', [AutoSaveListingController::class, 'index']);
+        Route::post('/auto-save-listings', [AutoSaveListingController::class, 'store']);
+        Route::get('/auto-save-listings/{id}', [AutoSaveListingController::class, 'show']);
+        Route::put('/auto-save-listings/{id}', [AutoSaveListingController::class, 'update']);
+        Route::delete('/auto-save-listings/{id}', [AutoSaveListingController::class, 'destroy']);
+        Route::post('/auto-save-listings/{id}/convert', [AutoSaveListingController::class, 'convertToListing']);
     });
 
     // Temporary test route for providers (without authentication)

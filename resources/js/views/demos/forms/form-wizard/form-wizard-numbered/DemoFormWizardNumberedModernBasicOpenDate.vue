@@ -83,6 +83,9 @@ const {
   getSavedDataInfo 
 } = useAutoSave(formData, 'listing-form-open-date', {
   debounceMs: 300, // Save after 300ms of inactivity
+  saveToDatabase: true,
+  listingType: 'open-date',
+  apiEndpoint: '/auto-save-listings',
   onSave: (data) => {
     console.log('Open-date form data auto-saved:', data);
   },

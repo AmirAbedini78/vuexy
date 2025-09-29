@@ -201,31 +201,50 @@ const loadMyEvents = async () => {
     
     console.log("Loading events for user ID:", userId);
     
-    // Try to get user's listings from the listings API
-    const res = await $api("/listings", { method: "GET" });
-    console.log("Listings API response:", res);
+    // Load both regular listings and auto-save listings
+    const [listingsRes, autoSaveRes] = await Promise.all([
+      $api("/listings", { method: "GET" }),
+      $api("/auto-save-listings", { method: "GET" })
+    ]);
     
-    // Handle different response formats
+    console.log("Listings API response:", listingsRes);
+    console.log("Auto-save listings API response:", autoSaveRes);
+    
+    // Handle different response formats for regular listings
     let allListings = [];
-    if (Array.isArray(res)) {
-      allListings = res;
-    } else if (res?.data && Array.isArray(res.data)) {
-      allListings = res.data;
-    } else if (res?.data?.data && Array.isArray(res.data.data)) {
-      allListings = res.data.data;
+    if (Array.isArray(listingsRes)) {
+      allListings = listingsRes;
+    } else if (listingsRes?.data && Array.isArray(listingsRes.data)) {
+      allListings = listingsRes.data;
+    } else if (listingsRes?.data?.data && Array.isArray(listingsRes.data.data)) {
+      allListings = listingsRes.data.data;
+    }
+
+    // Handle different response formats for auto-save listings
+    let autoSaveListings = [];
+    if (Array.isArray(autoSaveRes)) {
+      autoSaveListings = autoSaveRes;
+    } else if (autoSaveRes?.data && Array.isArray(autoSaveRes.data)) {
+      autoSaveListings = autoSaveRes.data;
     }
     
     console.log("All listings:", allListings);
+    console.log("Auto-save listings:", autoSaveListings);
     
     // Filter listings for current user
     const userListings = allListings.filter((listing) => {
       return listing.user_id === userId || listing.user?.id === userId;
     });
     
-    console.log("User's listings:", userListings);
+    const userAutoSaveListings = autoSaveListings.filter((listing) => {
+      return listing.user_id === userId;
+    });
     
-    // Map to events format
-    events.value = userListings.map((listing) => ({
+    console.log("User's listings:", userListings);
+    console.log("User's auto-save listings:", userAutoSaveListings);
+    
+    // Map regular listings
+    const regularEvents = userListings.map((listing) => ({
       id: listing.id,
       eventTitle: listing.listing_title || listing.title || "Untitled Event",
       location: listing.locations || listing.location || "No location",
@@ -240,7 +259,30 @@ const loadMyEvents = async () => {
       listing_type: listing.listing_type || "single-date",
       created_at: listing.created_at,
       updated_at: listing.updated_at,
+      isAutoSave: false
     }));
+
+    // Map auto-save listings
+    const autoSaveEvents = userAutoSaveListings.map((listing) => ({
+      id: `auto-${listing.id}`,
+      eventTitle: listing.adventure_title || "Untitled Event (Auto-saved)",
+      location: listing.location || "No location",
+      advId: `AUTO-${String(listing.id).padStart(5, "0")}`,
+      status: "On Process",
+      participants: `${listing.min_capacity || 0}/${listing.max_capacity || 0}`,
+      statusColor: "orange",
+      price: listing.price || 0,
+      listing_type: listing.listing_type || "single-date",
+      created_at: listing.created_at,
+      updated_at: listing.updated_at,
+      isAutoSave: true,
+      autoSaveId: listing.id
+    }));
+
+    // Combine and sort by updated_at
+    events.value = [...regularEvents, ...autoSaveEvents].sort((a, b) => 
+      new Date(b.updated_at) - new Date(a.updated_at)
+    );
     
     console.log("Mapped events:", events.value);
   } catch (e) {
@@ -277,14 +319,25 @@ const formatListingType = (type) => {
 // Event actions
 const editEvent = (item) => {
   console.log('Edit event:', item);
-  // Navigate to edit page or open edit modal
-  router.push(`/listing/${item.id}/edit`);
+  if (item.isAutoSave) {
+    // For auto-save events, navigate to listing page with auto-save ID
+    router.push({ name: 'listing', query: { autoSave: item.autoSaveId } });
+  } else {
+    // For regular events, navigate to event edit page
+    router.push({ name: 'listing', query: { edit: item.id } });
+  }
 };
 
 const viewEvent = (item) => {
   console.log('View event:', item);
-  // Navigate to view page or open view modal
-  router.push(`/listing/${item.id}`);
+  if (item.isAutoSave) {
+    // For auto-save events, show auto-save data
+    console.log("Viewing auto-save event:", item);
+    // You can implement a modal or different view for auto-save events
+  } else {
+    // For regular events, navigate to event view page
+    router.push({ name: 'listing', query: { view: item.id } });
+  }
 };
 
 // Table headers

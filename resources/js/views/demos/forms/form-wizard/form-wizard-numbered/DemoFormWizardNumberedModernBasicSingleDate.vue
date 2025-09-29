@@ -154,6 +154,7 @@ const formData = ref({
   personalPoliciesText: "",
   specialAddons: "",
   termsAccepted: false,
+  autoSaveId: null, // Add auto-save ID field
 });
 
 // Auto-save functionality
@@ -169,6 +170,9 @@ const {
   getSavedDataInfo 
 } = useAutoSave(formData, 'listing-form-single-date', {
   debounceMs: 300, // Save after 300ms of inactivity
+  saveToDatabase: true,
+  listingType: 'single-date',
+  apiEndpoint: '/auto-save-listings',
   onSave: (data) => {
     console.log('Form data auto-saved:', data);
   },
@@ -324,7 +328,8 @@ async function updateListing() {
       personal_policies: formData.value.personalPolicies,
       personal_policies_text: formData.value.personalPoliciesText,
       terms_accepted: formData.value.termsAccepted,
-      status: "draft",
+      status: "submitted", // Change to submitted when form is submitted
+      auto_save_id: formData.value.autoSaveId || null, // Include auto-save ID if exists
     };
 
     console.log("Updating listing with data:", updateData);

@@ -1,3 +1,4 @@
+import { $api } from '@/utils/api'
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 
 /**
@@ -14,7 +15,10 @@ export function useAutoSave(formData, storageKey, options = {}) {
     onSave = null,
     onLoad = null,
     excludeFields = [],
-    includeFields = null
+    includeFields = null,
+    saveToDatabase = false,
+    listingType = 'single-date',
+    apiEndpoint = '/auto-save-listings'
   } = options
 
   const isSaving = ref(false)
@@ -35,8 +39,8 @@ export function useAutoSave(formData, storageKey, options = {}) {
     }, debounceMs)
   }
 
-  // Save data to localStorage
-  const saveToStorage = () => {
+  // Save data to localStorage and optionally to database
+  const saveToStorage = async () => {
     try {
       isSaving.value = true
       
@@ -65,7 +69,61 @@ export function useAutoSave(formData, storageKey, options = {}) {
         }
       }
 
+      // Save to localStorage
       localStorage.setItem(storageKey, JSON.stringify(dataWithMeta))
+      
+      // Save to database if enabled
+      if (saveToDatabase) {
+        try {
+          const apiData = {
+            listing_type: listingType,
+            form_data: dataToSave,
+            adventure_title: dataToSave.listingTitle || dataToSave.adventure_title || '',
+            description: dataToSave.description || dataToSave.listingDescription || '',
+            location: dataToSave.location || dataToSave.locations || '',
+            price: dataToSave.price || 0,
+            min_capacity: dataToSave.min_capacity || dataToSave.minCapacity || null,
+            max_capacity: dataToSave.max_capacity || dataToSave.maxCapacity || null,
+            group_language: dataToSave.groupLanguage || '',
+            experience_level: dataToSave.experienceLevel || '',
+            fitness_level: dataToSave.fitnessLevel || '',
+            activities_included: dataToSave.activitiesIncluded || '',
+            maps_and_routes: dataToSave.mapsAndRoutes || [],
+            listing_media: dataToSave.listingMedia || [],
+            promotional_video: dataToSave.promotionalVideo || [],
+            whats_included: dataToSave.whatsIncluded || '',
+            whats_not_included: dataToSave.whatsNotIncluded || '',
+            additional_notes: dataToSave.additionalNotes || '',
+            providers_faq: dataToSave.providersFAQ || '',
+            personal_policies: dataToSave.personalPolicies || '',
+            starting_date: dataToSave.startingDate || '',
+            finishing_date: dataToSave.finishingDate || '',
+            min_advance_notice: dataToSave.minAdvanceNotice || '',
+            max_advance_booking: dataToSave.maxAdvanceBooking || '',
+            available_days: dataToSave.availableDays || [],
+            packages: dataToSave.packages || [],
+            special_addons: dataToSave.specialAddons || [],
+            itinerary: dataToSave.itinerary || [],
+            periods: dataToSave.periods || []
+          }
+
+          const response = await $api(apiEndpoint, {
+            method: 'POST',
+            body: apiData
+          })
+          
+          // Store auto-save ID in form data
+          if (response && response.data && response.data.id) {
+            formData.value.autoSaveId = response.data.id
+          }
+          
+          console.log('Auto-save data saved to database')
+        } catch (dbError) {
+          console.error('Error saving to database:', dbError)
+          // Continue with localStorage save even if database save fails
+        }
+      }
+      
       lastSaved.value = new Date()
       hasUnsavedChanges.value = false
       

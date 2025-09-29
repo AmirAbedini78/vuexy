@@ -76,6 +76,9 @@ const {
   getSavedDataInfo 
 } = useAutoSave(formData, 'listing-form-multi-date', {
   debounceMs: 300, // Save after 300ms of inactivity
+  saveToDatabase: true,
+  listingType: 'multi-date',
+  apiEndpoint: '/auto-save-listings',
   onSave: (data) => {
     console.log('Multi-date form data auto-saved:', data);
   },

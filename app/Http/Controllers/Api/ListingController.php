@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Listing;
+use App\Models\AutoSaveListing;
 use App\Http\Resources\ListingResource;
 use Illuminate\Http\Request;
 
@@ -43,14 +44,28 @@ class ListingController extends Controller
             'personal_policies_text' => 'nullable|string',
             'terms_accepted' => 'nullable|boolean',
             'status' => 'nullable|string',
+            'auto_save_id' => 'nullable|integer|exists:auto_save_listings,id', // New field for auto-save conversion
         ]);
+        
         // تبدیل آرایه‌ها به json
         foreach(['maps_and_routes','listing_media','promotional_video'] as $jsonField) {
             if(isset($data[$jsonField])) {
                 $data[$jsonField] = json_encode($data[$jsonField]);
             }
         }
+        
+        // Set default status to 'submitted' for new listings
+        $data['status'] = $data['status'] ?? 'submitted';
+        
         $listing = Listing::create($data);
+        
+        // If this is a conversion from auto-save, delete the auto-save record
+        if (isset($data['auto_save_id']) && $data['auto_save_id']) {
+            AutoSaveListing::where('id', $data['auto_save_id'])
+                ->where('user_id', $data['user_id'])
+                ->delete();
+        }
+        
         return new ListingResource($listing->load(['itineraries', 'specialAddons']));
     }
 
