@@ -181,10 +181,10 @@
     </VCardText>
 
     <!-- Provider View Dialog -->
-    <VDialog v-model="showProviderViewDialog" max-width="800" persistent>
+    <VDialog v-model="showProviderViewDialog" max-width="1200" persistent>
       <VCard>
         <VCardTitle class="d-flex align-center justify-space-between">
-          <span>Provider Details</span>
+          <span>Provider Details - {{ selectedProvider?.provider_name || 'N/A' }}</span>
           <VBtn
             icon
             variant="text"
@@ -196,338 +196,533 @@
         </VCardTitle>
 
         <VCardText v-if="selectedProvider">
-          <VRow>
-            <!-- Basic Information -->
-            <VCol cols="12">
-              <h6 class="text-h6 font-weight-medium mb-3">Basic Information</h6>
-            </VCol>
+          <VTabs v-model="activeProviderTab" class="mb-4">
+            <VTab value="basic">Basic Information</VTab>
+            <VTab value="personal">Personal Details</VTab>
+            <VTab value="business">Business Details</VTab>
+            <VTab value="social">Social Links</VTab>
+            <VTab value="listings">Listings</VTab>
+            <VTab value="verification">Verification</VTab>
+          </VTabs>
 
-            <VCol cols="12" md="6">
-              <strong>Name:</strong> {{ selectedProvider.provider_name }}
-            </VCol>
+          <VTabsWindow v-model="activeProviderTab">
+            <!-- Basic Information Tab -->
+            <VTabsWindowItem value="basic">
+              <VRow>
+                <VCol cols="12">
+                  <h6 class="text-h6 font-weight-medium mb-3">Basic Information</h6>
+                </VCol>
 
-            <VCol cols="12" md="6">
-              <strong>Type:</strong>
-              <VChip
-                :color="
-                  selectedProvider.provider_type === 'individual'
-                    ? 'primary'
-                    : 'secondary'
-                "
-                size="small"
-                class="ml-2"
-              >
-                {{
-                  selectedProvider.provider_type === "individual"
-                    ? "Individual"
-                    : "Company"
-                }}
-              </VChip>
-            </VCol>
+                <VCol cols="12" md="6">
+                  <strong>Name:</strong> {{ selectedProvider.provider_name }}
+                </VCol>
 
-            <VCol cols="12" md="6">
-              <strong>Specialization:</strong>
-              {{ selectedProvider.activity_specialization || "N/A" }}
-            </VCol>
+                <VCol cols="12" md="6">
+                  <strong>Type:</strong>
+                  <VChip
+                    :color="
+                      selectedProvider.provider_type === 'individual'
+                        ? 'primary'
+                        : 'secondary'
+                    "
+                    size="small"
+                    class="ml-2"
+                  >
+                    {{
+                      selectedProvider.provider_type === "individual"
+                        ? "Individual"
+                        : "Company"
+                    }}
+                  </VChip>
+                </VCol>
 
-            <VCol cols="12" md="6">
-              <strong>Country:</strong>
-              {{
-                selectedProvider.country_of_operation ||
-                selectedProvider.country ||
-                "N/A"
-              }}
-            </VCol>
+                <VCol cols="12" md="6">
+                  <strong>Provider ID:</strong>
+                  {{ selectedProvider.id }}
+                </VCol>
 
-            <VCol cols="12" md="6">
-              <strong>Experience:</strong>
-              {{
-                selectedProvider.years_of_experience ||
-                selectedProvider.business_type ||
-                "N/A"
-              }}
-            </VCol>
+                <VCol cols="12" md="6">
+                  <strong>User ID:</strong>
+                  {{ selectedProvider.user_id || "N/A" }}
+                </VCol>
 
-            <VCol cols="12" md="6">
-              <strong>Status:</strong>
-              <VChip
-                :color="getStatusColor(selectedProvider.status)"
-                size="small"
-                class="ml-2"
-              >
-                {{ selectedProvider.status }}
-              </VChip>
-            </VCol>
+                <VCol cols="12" md="6">
+                  <strong>Specialization:</strong>
+                  {{ selectedProvider.activity_specialization || "N/A" }}
+                </VCol>
 
-            <VCol cols="12" md="6">
-              <strong>Want to be listed:</strong>
-              {{ selectedProvider.want_to_be_listed || "N/A" }}
-            </VCol>
+                <VCol cols="12" md="6">
+                  <strong>Country:</strong>
+                  {{
+                    selectedProvider.country_of_operation ||
+                    selectedProvider.country ||
+                    "N/A"
+                  }}
+                </VCol>
 
-            <VCol cols="12" md="6">
-              <strong>Created:</strong>
-              {{ formatDate(selectedProvider.created_at) }}
-            </VCol>
+                <VCol cols="12" md="6">
+                  <strong>Experience:</strong>
+                  {{
+                    selectedProvider.years_of_experience ||
+                    selectedProvider.business_type ||
+                    "N/A"
+                  }}
+                </VCol>
 
-            <!-- Additional fields based on provider type -->
-            <template v-if="selectedProvider.provider_type === 'individual'">
-              <VCol cols="12">
-                <h6 class="text-h6 font-weight-medium mb-3 mt-4">
-                  Personal Information
-                </h6>
-              </VCol>
+                <VCol cols="12" md="6">
+                  <strong>Status:</strong>
+                  <VChip
+                    :color="getStatusColor(selectedProvider.status)"
+                    size="small"
+                    class="ml-2"
+                  >
+                    {{ selectedProvider.status }}
+                  </VChip>
+                </VCol>
 
-              <VCol cols="12" md="6">
-                <strong>Nationality:</strong>
-                {{ selectedProvider.nationality || "N/A" }}
-              </VCol>
+                <VCol cols="12" md="6">
+                  <strong>Want to be listed:</strong>
+                  <VChip
+                    :color="selectedProvider.want_to_be_listed === 'yes' ? 'success' : selectedProvider.want_to_be_listed === 'no' ? 'error' : 'warning'"
+                    size="small"
+                    class="ml-2"
+                  >
+                    {{ selectedProvider.want_to_be_listed || "N/A" }}
+                  </VChip>
+                </VCol>
 
-              <VCol cols="12" md="6">
-                <strong>Address:</strong>
-                {{ selectedProvider.address1 || "N/A" }}
-              </VCol>
+                <VCol cols="12" md="6">
+                  <strong>Created:</strong>
+                  {{ formatDate(selectedProvider.created_at) }}
+                </VCol>
 
-              <VCol cols="12" md="6">
-                <strong>City:</strong>
-                {{ selectedProvider.city || "N/A" }}
-              </VCol>
+                <VCol cols="12" md="6">
+                  <strong>Updated:</strong>
+                  {{ formatDate(selectedProvider.updated_at) }}
+                </VCol>
 
-              <VCol cols="12" md="6">
-                <strong>State:</strong>
-                {{ selectedProvider.state || "N/A" }}
-              </VCol>
+                <VCol cols="12" md="6">
+                  <strong>Terms Accepted:</strong>
+                  <VChip
+                    :color="selectedProvider.terms_accepted ? 'success' : 'error'"
+                    size="small"
+                    class="ml-2"
+                  >
+                    {{ selectedProvider.terms_accepted ? "Yes" : "No" }}
+                  </VChip>
+                </VCol>
+              </VRow>
+            </VTabsWindowItem>
 
-              <VCol cols="12" md="6">
-                <strong>Postal Code:</strong>
-                {{ selectedProvider.postal_code || "N/A" }}
-              </VCol>
+            <!-- Personal Details Tab -->
+            <VTabsWindowItem value="personal">
+              <VRow>
+                <template v-if="selectedProvider.provider_type === 'individual'">
+                  <VCol cols="12">
+                    <h6 class="text-h6 font-weight-medium mb-3">Personal Information</h6>
+                  </VCol>
 
-              <VCol cols="12" md="6">
-                <strong>Date of Birth:</strong>
-                {{
-                  selectedProvider.dob
-                    ? formatDate(selectedProvider.dob)
-                    : "N/A"
-                }}
-              </VCol>
+                  <VCol cols="12" md="6">
+                    <strong>Full Name:</strong>
+                    {{ selectedProvider.full_name || selectedProvider.provider_name || "N/A" }}
+                  </VCol>
 
-              <VCol cols="12" md="6">
-                <strong>Languages:</strong>
-                {{
-                  Array.isArray(selectedProvider.languages)
-                    ? selectedProvider.languages.join(", ")
-                    : selectedProvider.languages || "N/A"
-                }}
-              </VCol>
+                  <VCol cols="12" md="6">
+                    <strong>Nationality:</strong>
+                    {{ selectedProvider.nationality || "N/A" }}
+                  </VCol>
 
-              <VCol cols="12">
-                <h6 class="text-h6 font-weight-medium mb-3 mt-4">
-                  Business Details
-                </h6>
-              </VCol>
+                  <VCol cols="12" md="6">
+                    <strong>Date of Birth:</strong>
+                    {{
+                      selectedProvider.dob
+                        ? formatDate(selectedProvider.dob)
+                        : "N/A"
+                    }}
+                  </VCol>
 
-              <VCol cols="12" md="6">
-                <strong>Years of Experience:</strong>
-                {{ selectedProvider.years_of_experience || "N/A" }}
-              </VCol>
+                  <VCol cols="12" md="6">
+                    <strong>Languages:</strong>
+                    {{
+                      Array.isArray(selectedProvider.languages)
+                        ? selectedProvider.languages.join(", ")
+                        : selectedProvider.languages || "N/A"
+                    }}
+                  </VCol>
 
-              <VCol cols="12" md="6">
-                <strong>Country of Operation:</strong>
-                {{ selectedProvider.country_of_operation || "N/A" }}
-              </VCol>
+                  <VCol cols="12">
+                    <strong>Address:</strong>
+                    {{ selectedProvider.address1 || "N/A" }}
+                    <span v-if="selectedProvider.address2">, {{ selectedProvider.address2 }}</span>
+                  </VCol>
 
-              <VCol cols="12" md="6">
-                <strong>Emergency Contact:</strong>
-                {{ selectedProvider.emergency_contact_name || "N/A" }}
-              </VCol>
+                  <VCol cols="12" md="4">
+                    <strong>City:</strong>
+                    {{ selectedProvider.city || "N/A" }}
+                  </VCol>
 
-              <VCol cols="12" md="6">
-                <strong>Emergency Phone:</strong>
-                {{ selectedProvider.emergency_contact_phone || "N/A" }}
-              </VCol>
+                  <VCol cols="12" md="4">
+                    <strong>State:</strong>
+                    {{ selectedProvider.state || "N/A" }}
+                  </VCol>
 
-              <VCol cols="12">
-                <strong>Short Bio:</strong>
-                {{ selectedProvider.short_bio || "N/A" }}
-              </VCol>
+                  <VCol cols="12" md="4">
+                    <strong>Postal Code:</strong>
+                    {{ selectedProvider.postal_code || "N/A" }}
+                  </VCol>
 
-              <!-- Social Links -->
-              <VCol cols="12">
-                <h6 class="text-h6 font-weight-medium mb-3 mt-4">
-                  Social Links
-                </h6>
-              </VCol>
-              <VCol cols="12" md="6"
-                ><strong>Twitter:</strong>
-                {{
-                  selectedProvider.social_media_links?.twitter ||
-                  selectedProvider.twitter ||
-                  "N/A"
-                }}</VCol
-              >
-              <VCol cols="12" md="6"
-                ><strong>Facebook:</strong>
-                {{
-                  selectedProvider.social_media_links?.facebook ||
-                  selectedProvider.facebook ||
-                  "N/A"
-                }}</VCol
-              >
-              <VCol cols="12" md="6"
-                ><strong>LinkedIn:</strong>
-                {{
-                  selectedProvider.social_media_links?.linkedIn ||
-                  selectedProvider.linkedIn ||
-                  "N/A"
-                }}</VCol
-              >
-              <VCol cols="12" md="6"
-                ><strong>Instagram:</strong>
-                {{
-                  selectedProvider.social_media_links?.instagram ||
-                  selectedProvider.instagram ||
-                  "N/A"
-                }}</VCol
-              >
+                  <VCol cols="12" md="6">
+                    <strong>Country:</strong>
+                    {{ selectedProvider.country || "N/A" }}
+                  </VCol>
 
-              <VCol cols="12">
-                <h6 class="text-h6 font-weight-medium mb-3 mt-4">
-                  Terms & Conditions
-                </h6>
-              </VCol>
+                  <VCol cols="12" md="6">
+                    <strong>Country of Operation:</strong>
+                    {{ selectedProvider.country_of_operation || "N/A" }}
+                  </VCol>
 
-              <VCol cols="12">
-                <strong>Terms Accepted:</strong>
-                <VChip
-                  :color="selectedProvider.terms_accepted ? 'success' : 'error'"
-                  size="small"
-                  class="ml-2"
-                >
-                  {{ selectedProvider.terms_accepted ? "Yes" : "No" }}
-                </VChip>
-              </VCol>
-            </template>
+                  <VCol cols="12" md="6">
+                    <strong>Emergency Contact:</strong>
+                    {{ selectedProvider.emergency_contact_name || "N/A" }}
+                  </VCol>
 
-            <template v-else>
-              <VCol cols="12">
-                <h6 class="text-h6 font-weight-medium mb-3 mt-4">
-                  Company Information
-                </h6>
-              </VCol>
+                  <VCol cols="12" md="6">
+                    <strong>Emergency Phone:</strong>
+                    {{ selectedProvider.emergency_contact_phone || "N/A" }}
+                  </VCol>
 
-              <VCol cols="12" md="6">
-                <strong>VAT ID:</strong>
-                {{ selectedProvider.vat_id || "N/A" }}
-              </VCol>
+                  <VCol cols="12">
+                    <strong>Short Bio:</strong>
+                    <div class="mt-1">{{ selectedProvider.short_bio || "N/A" }}</div>
+                  </VCol>
 
-              <VCol cols="12" md="6">
-                <strong>Contact Person:</strong>
-                {{ selectedProvider.contact_person || "N/A" }}
-              </VCol>
+                  <VCol cols="12">
+                    <strong>Certifications:</strong>
+                    <div class="mt-1">{{ selectedProvider.certifications || "N/A" }}</div>
+                  </VCol>
+                </template>
 
-              <VCol cols="12" md="6">
-                <strong>Country of Registration:</strong>
-                {{ selectedProvider.country_of_registration || "N/A" }}
-              </VCol>
+                <template v-else>
+                  <VCol cols="12">
+                    <h6 class="text-h6 font-weight-medium mb-3">Company Information</h6>
+                  </VCol>
 
-              <VCol cols="12" md="6">
-                <strong>Address:</strong>
-                {{ selectedProvider.address1 || "N/A" }}
-              </VCol>
+                  <VCol cols="12" md="6">
+                    <strong>Company Name:</strong>
+                    {{ selectedProvider.company_name || selectedProvider.provider_name || "N/A" }}
+                  </VCol>
 
-              <VCol cols="12" md="6">
-                <strong>City:</strong>
-                {{ selectedProvider.city || "N/A" }}
-              </VCol>
+                  <VCol cols="12" md="6">
+                    <strong>VAT ID:</strong>
+                    {{ selectedProvider.vat_id || "N/A" }}
+                  </VCol>
 
-              <VCol cols="12" md="6">
-                <strong>State:</strong>
-                {{ selectedProvider.state || "N/A" }}
-              </VCol>
+                  <VCol cols="12" md="6">
+                    <strong>Contact Person:</strong>
+                    {{ selectedProvider.contact_person || "N/A" }}
+                  </VCol>
 
-              <VCol cols="12" md="6">
-                <strong>Postal Code:</strong>
-                {{ selectedProvider.postal_code || "N/A" }}
-              </VCol>
+                  <VCol cols="12" md="6">
+                    <strong>Country of Registration:</strong>
+                    {{ selectedProvider.country_of_registration || "N/A" }}
+                  </VCol>
 
-              <VCol cols="12" md="6">
-                <strong>Business Type:</strong>
-                {{ selectedProvider.business_type || "N/A" }}
-              </VCol>
+                  <VCol cols="12" md="6">
+                    <strong>Business Type:</strong>
+                    {{ selectedProvider.business_type || "N/A" }}
+                  </VCol>
 
-              <VCol cols="12">
-                <h6 class="text-h6 font-weight-medium mb-3 mt-4">
-                  Business Details
-                </h6>
-              </VCol>
+                  <VCol cols="12" md="6">
+                    <strong>Company Website:</strong>
+                    <a v-if="selectedProvider.company_website" :href="selectedProvider.company_website" target="_blank" class="text-primary">
+                      {{ selectedProvider.company_website }}
+                    </a>
+                    <span v-else>N/A</span>
+                  </VCol>
 
-              <VCol cols="12" md="6">
-                <strong>Company Website:</strong>
-                {{ selectedProvider.company_website || "N/A" }}
-              </VCol>
+                  <VCol cols="12">
+                    <strong>Address:</strong>
+                    {{ selectedProvider.address1 || "N/A" }}
+                    <span v-if="selectedProvider.address2">, {{ selectedProvider.address2 }}</span>
+                  </VCol>
 
-              <VCol cols="12">
-                <strong>Short Bio:</strong>
-                {{ selectedProvider.short_bio || "N/A" }}
-              </VCol>
+                  <VCol cols="12" md="4">
+                    <strong>City:</strong>
+                    {{ selectedProvider.city || "N/A" }}
+                  </VCol>
 
-              <!-- Social Links -->
-              <VCol cols="12">
-                <h6 class="text-h6 font-weight-medium mb-3 mt-4">
-                  Social Links
-                </h6>
-              </VCol>
-              <VCol cols="12" md="6"
-                ><strong>Twitter:</strong>
-                {{
-                  selectedProvider.social_media_links?.twitter ||
-                  selectedProvider.twitter ||
-                  "N/A"
-                }}</VCol
-              >
-              <VCol cols="12" md="6"
-                ><strong>Facebook:</strong>
-                {{
-                  selectedProvider.social_media_links?.facebook ||
-                  selectedProvider.facebook ||
-                  "N/A"
-                }}</VCol
-              >
-              <VCol cols="12" md="6"
-                ><strong>LinkedIn:</strong>
-                {{
-                  selectedProvider.social_media_links?.linkedIn ||
-                  selectedProvider.linkedIn ||
-                  "N/A"
-                }}</VCol
-              >
-              <VCol cols="12" md="6"
-                ><strong>Instagram:</strong>
-                {{
-                  selectedProvider.social_media_links?.instagram ||
-                  selectedProvider.instagram ||
-                  "N/A"
-                }}</VCol
-              >
+                  <VCol cols="12" md="4">
+                    <strong>State:</strong>
+                    {{ selectedProvider.state || "N/A" }}
+                  </VCol>
 
-              <VCol cols="12">
-                <h6 class="text-h6 font-weight-medium mb-3 mt-4">
-                  Terms & Conditions
-                </h6>
-              </VCol>
+                  <VCol cols="12" md="4">
+                    <strong>Postal Code:</strong>
+                    {{ selectedProvider.postal_code || "N/A" }}
+                  </VCol>
 
-              <VCol cols="12">
-                <strong>Terms Accepted:</strong>
-                <VChip
-                  :color="selectedProvider.terms_accepted ? 'success' : 'error'"
-                  size="small"
-                  class="ml-2"
-                >
-                  {{ selectedProvider.terms_accepted ? "Yes" : "No" }}
-                </VChip>
-              </VCol>
-            </template>
-          </VRow>
+                  <VCol cols="12" md="6">
+                    <strong>Country:</strong>
+                    {{ selectedProvider.country || "N/A" }}
+                  </VCol>
+
+                  <VCol cols="12">
+                    <strong>Short Bio:</strong>
+                    <div class="mt-1">{{ selectedProvider.short_bio || "N/A" }}</div>
+                  </VCol>
+
+                  <VCol cols="12">
+                    <strong>Certifications:</strong>
+                    <div class="mt-1">{{ selectedProvider.certifications || "N/A" }}</div>
+                  </VCol>
+                </template>
+              </VRow>
+            </VTabsWindowItem>
+
+            <!-- Business Details Tab -->
+            <VTabsWindowItem value="business">
+              <VRow>
+                <VCol cols="12">
+                  <h6 class="text-h6 font-weight-medium mb-3">Business Details</h6>
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <strong>Activity Specialization:</strong>
+                  {{ selectedProvider.activity_specialization || "N/A" }}
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <strong>Years of Experience:</strong>
+                  {{ selectedProvider.years_of_experience || "N/A" }}
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <strong>Country of Operation:</strong>
+                  {{ selectedProvider.country_of_operation || "N/A" }}
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <strong>Want to be Listed:</strong>
+                  <VChip
+                    :color="selectedProvider.want_to_be_listed === 'yes' ? 'success' : selectedProvider.want_to_be_listed === 'no' ? 'error' : 'warning'"
+                    size="small"
+                    class="ml-2"
+                  >
+                    {{ selectedProvider.want_to_be_listed || "N/A" }}
+                  </VChip>
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <strong>Status:</strong>
+                  <VChip
+                    :color="getStatusColor(selectedProvider.status)"
+                    size="small"
+                    class="ml-2"
+                  >
+                    {{ selectedProvider.status }}
+                  </VChip>
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <strong>Terms Accepted:</strong>
+                  <VChip
+                    :color="selectedProvider.terms_accepted ? 'success' : 'error'"
+                    size="small"
+                    class="ml-2"
+                  >
+                    {{ selectedProvider.terms_accepted ? "Yes" : "No" }}
+                  </VChip>
+                </VCol>
+
+                <VCol cols="12">
+                  <strong>Short Bio:</strong>
+                  <div class="mt-1">{{ selectedProvider.short_bio || "N/A" }}</div>
+                </VCol>
+
+                <VCol cols="12">
+                  <strong>Certifications:</strong>
+                  <div class="mt-1">{{ selectedProvider.certifications || "N/A" }}</div>
+                </VCol>
+
+                <template v-if="selectedProvider.provider_type === 'individual'">
+                  <VCol cols="12" md="6">
+                    <strong>Emergency Contact Name:</strong>
+                    {{ selectedProvider.emergency_contact_name || "N/A" }}
+                  </VCol>
+
+                  <VCol cols="12" md="6">
+                    <strong>Emergency Contact Phone:</strong>
+                    {{ selectedProvider.emergency_contact_phone || "N/A" }}
+                  </VCol>
+                </template>
+
+                <template v-else>
+                  <VCol cols="12" md="6">
+                    <strong>Business Type:</strong>
+                    {{ selectedProvider.business_type || "N/A" }}
+                  </VCol>
+
+                  <VCol cols="12" md="6">
+                    <strong>Company Website:</strong>
+                    <a v-if="selectedProvider.company_website" :href="selectedProvider.company_website" target="_blank" class="text-primary">
+                      {{ selectedProvider.company_website }}
+                    </a>
+                    <span v-else>N/A</span>
+                  </VCol>
+                </template>
+              </VRow>
+            </VTabsWindowItem>
+
+            <!-- Social Links Tab -->
+            <VTabsWindowItem value="social">
+              <VRow>
+                <VCol cols="12">
+                  <h6 class="text-h6 font-weight-medium mb-3">Social Media Links</h6>
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <strong>Twitter:</strong>
+                  <div class="mt-1">
+                    <a v-if="selectedProvider.social_media_links?.twitter" :href="selectedProvider.social_media_links.twitter" target="_blank" class="text-primary">
+                      {{ selectedProvider.social_media_links.twitter }}
+                    </a>
+                    <span v-else>N/A</span>
+                  </div>
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <strong>Facebook:</strong>
+                  <div class="mt-1">
+                    <a v-if="selectedProvider.social_media_links?.facebook" :href="selectedProvider.social_media_links.facebook" target="_blank" class="text-primary">
+                      {{ selectedProvider.social_media_links.facebook }}
+                    </a>
+                    <span v-else>N/A</span>
+                  </div>
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <strong>LinkedIn:</strong>
+                  <div class="mt-1">
+                    <a v-if="selectedProvider.social_media_links?.linkedIn" :href="selectedProvider.social_media_links.linkedIn" target="_blank" class="text-primary">
+                      {{ selectedProvider.social_media_links.linkedIn }}
+                    </a>
+                    <span v-else>N/A</span>
+                  </div>
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <strong>Instagram:</strong>
+                  <div class="mt-1">
+                    <a v-if="selectedProvider.social_media_links?.instagram" :href="selectedProvider.social_media_links.instagram" target="_blank" class="text-primary">
+                      {{ selectedProvider.social_media_links.instagram }}
+                    </a>
+                    <span v-else>N/A</span>
+                  </div>
+                </VCol>
+
+                <VCol cols="12">
+                  <h6 class="text-h6 font-weight-medium mb-3 mt-4">Social Proof Links</h6>
+                </VCol>
+
+                <VCol cols="12">
+                  <strong>Social Proof Links:</strong>
+                  <div class="mt-1">
+                    <template v-if="selectedProvider.social_proof_links && Array.isArray(selectedProvider.social_proof_links) && selectedProvider.social_proof_links.length > 0">
+                      <div v-for="(link, index) in selectedProvider.social_proof_links" :key="index" class="mb-2">
+                        <a :href="link" target="_blank" class="text-primary">{{ link }}</a>
+                      </div>
+                    </template>
+                    <span v-else>N/A</span>
+                  </div>
+                </VCol>
+              </VRow>
+            </VTabsWindowItem>
+
+            <!-- Listings Tab -->
+            <VTabsWindowItem value="listings">
+              <VRow>
+                <VCol cols="12">
+                  <h6 class="text-h6 font-weight-medium mb-3">Provider Listings</h6>
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <strong>Total Listings:</strong>
+                  {{ selectedProvider.total_listings || 0 }}
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <strong>Total Bookings:</strong>
+                  {{ selectedProvider.total_bookings || 0 }}
+                </VCol>
+
+                <VCol cols="12">
+                  <VAlert type="info" variant="tonal">
+                    <strong>Note:</strong> Detailed listing information would be loaded from the listings table based on the provider's user_id.
+                    This would show all listings created by this provider with their status, dates, and other details.
+                  </VAlert>
+                </VCol>
+              </VRow>
+            </VTabsWindowItem>
+
+            <!-- Verification Tab -->
+            <VTabsWindowItem value="verification">
+              <VRow>
+                <VCol cols="12">
+                  <h6 class="text-h6 font-weight-medium mb-3">Verification & Compliance</h6>
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <strong>Terms Accepted:</strong>
+                  <VChip
+                    :color="selectedProvider.terms_accepted ? 'success' : 'error'"
+                    size="small"
+                    class="ml-2"
+                  >
+                    {{ selectedProvider.terms_accepted ? "Yes" : "No" }}
+                  </VChip>
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <strong>Want to be Listed:</strong>
+                  <VChip
+                    :color="selectedProvider.want_to_be_listed === 'yes' ? 'success' : selectedProvider.want_to_be_listed === 'no' ? 'error' : 'warning'"
+                    size="small"
+                    class="ml-2"
+                  >
+                    {{ selectedProvider.want_to_be_listed || "N/A" }}
+                  </VChip>
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <strong>Status:</strong>
+                  <VChip
+                    :color="getStatusColor(selectedProvider.status)"
+                    size="small"
+                    class="ml-2"
+                  >
+                    {{ selectedProvider.status }}
+                  </VChip>
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <strong>Created At:</strong>
+                  {{ formatDate(selectedProvider.created_at) }}
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <strong>Updated At:</strong>
+                  {{ formatDate(selectedProvider.updated_at) }}
+                </VCol>
+
+                <VCol cols="12">
+                  <VAlert type="info" variant="tonal">
+                    <strong>Note:</strong> Additional verification details such as document uploads, identity verification status, 
+                    and compliance checks would be displayed here if available in the system.
+                  </VAlert>
+                </VCol>
+              </VRow>
+            </VTabsWindowItem>
+          </VTabsWindow>
         </VCardText>
 
         <VCardActions>
@@ -627,6 +822,7 @@ const showProviderViewDialog = ref(false);
 const showProviderEditDialog = ref(false);
 const showDeleteDialog = ref(false);
 const selectedProvider = ref(null);
+const activeProviderTab = ref('basic');
 
 const headers = [
   { title: "PROVIDER", key: "provider", sortable: true },

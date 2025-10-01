@@ -687,7 +687,12 @@ class AdminController extends Controller
      */
     public function listings(Request $request)
     {
-        $query = Listing::with(['user', 'itineraries', 'specialAddons']);
+        $query = Listing::with([
+            'user.individualUser', 
+            'user.companyUser', 
+            'itineraries', 
+            'specialAddons'
+        ]);
 
         // Search functionality
         if ($request->filled('search')) {
@@ -719,7 +724,12 @@ class AdminController extends Controller
      */
     public function listing($id)
     {
-        $listing = Listing::with(['user', 'itineraries', 'specialAddons'])->findOrFail($id);
+        $listing = Listing::with([
+            'user.individualUser', 
+            'user.companyUser', 
+            'itineraries', 
+            'specialAddons'
+        ])->findOrFail($id);
         return response()->json($listing);
     }
 

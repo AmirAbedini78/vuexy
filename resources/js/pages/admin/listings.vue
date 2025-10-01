@@ -173,10 +173,10 @@
   </VCard>
 
   <!-- Listing View Dialog -->
-  <VDialog v-model="showListingViewDialog" max-width="800" persistent>
+  <VDialog v-model="showListingViewDialog" max-width="1200" persistent>
     <VCard>
       <VCardTitle class="d-flex align-center justify-space-between">
-        <span>Listing Details</span>
+        <span>Listing Details - {{ selectedListing?.listing_title || 'N/A' }}</span>
         <VBtn
           icon
           variant="text"
@@ -188,160 +188,618 @@
       </VCardTitle>
 
       <VCardText v-if="selectedListing">
-        <VRow>
-          <!-- Basic Information -->
-          <VCol cols="12">
-            <h6 class="text-h6 font-weight-medium mb-3">Basic Information</h6>
-          </VCol>
+        <VTabs v-model="activeTab" class="mb-4">
+          <VTab value="basic">Basic Information</VTab>
+          <VTab value="provider">Provider Details</VTab>
+          <VTab value="itinerary">Itinerary</VTab>
+          <VTab value="addons">Special Addons</VTab>
+          <VTab value="media">Media & Files</VTab>
+          <VTab value="policies">Policies & Terms</VTab>
+        </VTabs>
 
-          <VCol cols="12" md="6">
-            <strong>Title:</strong>
-            {{ selectedListing.listing_title || "N/A" }}
-          </VCol>
+        <VTabsWindow v-model="activeTab">
+          <!-- Basic Information Tab -->
+          <VTabsWindowItem value="basic">
+            <VRow>
+              <VCol cols="12">
+                <h6 class="text-h6 font-weight-medium mb-3">Basic Information</h6>
+              </VCol>
 
-          <VCol cols="12" md="6">
-            <strong>Subtitle:</strong>
-            {{ selectedListing.subtitle || "N/A" }}
-          </VCol>
+              <VCol cols="12" md="6">
+                <strong>Title:</strong>
+                {{ selectedListing.listing_title || "N/A" }}
+              </VCol>
 
-          <VCol cols="12" md="6">
-            <strong>Type:</strong>
-            <VChip
-              :color="getListingTypeColor(selectedListing.listing_type)"
-              size="small"
-              class="ml-2"
-            >
-              {{ formatListingType(selectedListing.listing_type) }}
-            </VChip>
-          </VCol>
+              <VCol cols="12" md="6">
+                <strong>Subtitle:</strong>
+                {{ selectedListing.subtitle || "N/A" }}
+              </VCol>
 
-          <VCol cols="12" md="6">
-            <strong>Status:</strong>
-            <VChip
-              :color="getListingStatusColor(selectedListing.status)"
-              size="small"
-              class="ml-2"
-            >
-              {{ selectedListing.status || "Draft" }}
-            </VChip>
-          </VCol>
+              <VCol cols="12" md="6">
+                <strong>Type:</strong>
+                <VChip
+                  :color="getListingTypeColor(selectedListing.listing_type)"
+                  size="small"
+                  class="ml-2"
+                >
+                  {{ formatListingType(selectedListing.listing_type) }}
+                </VChip>
+              </VCol>
 
-          <VCol cols="12" md="6">
-            <strong>Starting Date:</strong>
-            {{ selectedListing.starting_date || "N/A" }}
-          </VCol>
+              <VCol cols="12" md="6">
+                <strong>Status:</strong>
+                <VChip
+                  :color="getListingStatusColor(selectedListing.status)"
+                  size="small"
+                  class="ml-2"
+                >
+                  {{ selectedListing.status || "Draft" }}
+                </VChip>
+              </VCol>
 
-          <VCol cols="12" md="6">
-            <strong>Finishing Date:</strong>
-            {{ selectedListing.finishing_date || "N/A" }}
-          </VCol>
+              <VCol cols="12" md="6">
+                <strong>Starting Date:</strong>
+                {{ selectedListing.starting_date || "N/A" }}
+              </VCol>
 
-          <VCol cols="12" md="6">
-            <strong>Price:</strong>
-            €{{ formatCurrency(selectedListing.price || 0) }}
-          </VCol>
+              <VCol cols="12" md="6">
+                <strong>Finishing Date:</strong>
+                {{ selectedListing.finishing_date || "N/A" }}
+              </VCol>
 
-          <VCol cols="12" md="6">
-            <strong>Capacity:</strong>
-            {{ selectedListing.min_capacity || 0 }} -
-            {{ selectedListing.max_capacity || 0 }}
-          </VCol>
+              <VCol cols="12" md="6">
+                <strong>Price:</strong>
+                €{{ formatCurrency(selectedListing.price || 0) }}
+              </VCol>
 
-          <VCol cols="12">
-            <strong>Description:</strong>
-            {{ selectedListing.listing_description || "N/A" }}
-          </VCol>
+              <VCol cols="12" md="6">
+                <strong>Capacity:</strong>
+                {{ selectedListing.min_capacity || 0 }} -
+                {{ selectedListing.max_capacity || 0 }}
+              </VCol>
 
-          <!-- Provider Information -->
-          <VCol cols="12">
-            <h6 class="text-h6 font-weight-medium mb-3 mt-4">
-              Provider Information
-            </h6>
-          </VCol>
+              <VCol cols="12" md="6">
+                <strong>Experience Level:</strong>
+                {{ selectedListing.experience_level || "N/A" }}
+              </VCol>
 
-          <VCol cols="12" md="6">
-            <strong>Provider Name:</strong>
-            {{ selectedListing.user?.name || "N/A" }}
-          </VCol>
+              <VCol cols="12" md="6">
+                <strong>Fitness Level:</strong>
+                {{ selectedListing.fitness_level || "N/A" }}
+              </VCol>
 
-          <VCol cols="12" md="6">
-            <strong>Provider Email:</strong>
-            {{ selectedListing.user?.email || "N/A" }}
-          </VCol>
+              <VCol cols="12" md="6">
+                <strong>Group Language:</strong>
+                {{ selectedListing.group_language || "N/A" }}
+              </VCol>
 
-          <!-- Additional Details -->
-          <VCol cols="12">
-            <h6 class="text-h6 font-weight-medium mb-3 mt-4">
-              Additional Details
-            </h6>
-          </VCol>
+              <VCol cols="12" md="6">
+                <strong>Locations:</strong>
+                {{ selectedListing.locations || "N/A" }}
+              </VCol>
 
-          <VCol cols="12" md="6">
-            <strong>Experience Level:</strong>
-            {{ selectedListing.user?.experience_level || "N/A" }}
-          </VCol>
+              <VCol cols="12">
+                <strong>Description:</strong>
+                <div class="mt-1">{{ selectedListing.listing_description || "N/A" }}</div>
+              </VCol>
 
-          <VCol cols="12" md="6">
-            <strong>Fitness Level:</strong>
-            {{ selectedListing.fitness_level || "N/A" }}
-          </VCol>
+              <VCol cols="12">
+                <strong>Activities Included:</strong>
+                <div class="mt-1">{{ selectedListing.activities_included || "N/A" }}</div>
+              </VCol>
 
-          <VCol cols="12" md="6">
-            <strong>Group Language:</strong>
-            {{ selectedListing.group_language || "N/A" }}
-          </VCol>
+              <VCol cols="12">
+                <strong>What's Included:</strong>
+                <div class="mt-1">{{ selectedListing.whats_included || "N/A" }}</div>
+              </VCol>
 
-          <VCol cols="12" md="6">
-            <strong>Locations:</strong>
-            {{ selectedListing.locations || "N/A" }}
-          </VCol>
+              <VCol cols="12">
+                <strong>What's Not Included:</strong>
+                <div class="mt-1">{{ selectedListing.whats_not_included || "N/A" }}</div>
+              </VCol>
 
-          <VCol cols="12">
-            <strong>Activities Included:</strong>
-            {{ selectedListing.activities_included || "N/A" }}
-          </VCol>
+              <VCol cols="12">
+                <strong>Additional Notes:</strong>
+                <div class="mt-1">{{ selectedListing.additional_notes || "N/A" }}</div>
+              </VCol>
 
-          <VCol cols="12">
-            <strong>What's Included:</strong>
-            {{ selectedListing.whats_included || "N/A" }}
-          </VCol>
+              <VCol cols="12">
+                <strong>Provider's FAQ:</strong>
+                <div class="mt-1">{{ selectedListing.providers_faq || "N/A" }}</div>
+              </VCol>
+            </VRow>
+          </VTabsWindowItem>
 
-          <VCol cols="12">
-            <strong>What's Not Included:</strong>
-            {{ selectedListing.whats_not_included || "N/A" }}
-          </VCol>
+          <!-- Provider Details Tab -->
+          <VTabsWindowItem value="provider">
+            <VRow>
+              <VCol cols="12">
+                <h6 class="text-h6 font-weight-medium mb-3">Provider Information</h6>
+              </VCol>
 
-          <VCol cols="12">
-            <strong>Additional Notes:</strong>
-            {{ selectedListing.additional_notes || "N/A" }}
-          </VCol>
+              <VCol cols="12" md="6">
+                <strong>Provider Name:</strong>
+                {{ selectedListing.user?.name || "N/A" }}
+              </VCol>
 
-          <VCol cols="12">
-            <strong>Provider's FAQ:</strong>
-            {{ selectedListing.providers_faq || "N/A" }}
-          </VCol>
+              <VCol cols="12" md="6">
+                <strong>Provider Email:</strong>
+                {{ selectedListing.user?.email || "N/A" }}
+              </VCol>
 
-          <VCol cols="12">
-            <strong>Personal Policies:</strong>
-            {{ selectedListing.personal_policies || "N/A" }}
-          </VCol>
+              <VCol cols="12" md="6">
+                <strong>User ID:</strong>
+                {{ selectedListing.user?.id || "N/A" }}
+              </VCol>
 
-          <VCol cols="12">
-            <strong>Personal Policies Text:</strong>
-            {{ selectedListing.personal_policies_text || "N/A" }}
-          </VCol>
+              <VCol cols="12" md="6">
+                <strong>User Role:</strong>
+                {{ selectedListing.user?.role || "N/A" }}
+              </VCol>
 
-          <VCol cols="12">
-            <strong>Terms Accepted:</strong>
-            <VChip
-              :color="selectedListing.terms_accepted ? 'success' : 'error'"
-              size="small"
-              class="ml-2"
-            >
-              {{ selectedListing.terms_accepted ? "Yes" : "No" }}
-            </VChip>
-          </VCol>
-        </VRow>
+              <VCol cols="12" md="6">
+                <strong>User Status:</strong>
+                <VChip
+                  :color="selectedListing.user?.status === 'active' ? 'success' : 'error'"
+                  size="small"
+                  class="ml-2"
+                >
+                  {{ selectedListing.user?.status || "N/A" }}
+                </VChip>
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Email Verified:</strong>
+                <VChip
+                  :color="selectedListing.user?.email_verified_at ? 'success' : 'error'"
+                  size="small"
+                  class="ml-2"
+                >
+                  {{ selectedListing.user?.email_verified_at ? "Yes" : "No" }}
+                </VChip>
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Created At:</strong>
+                {{ selectedListing.user?.created_at ? formatDate(selectedListing.user.created_at) : "N/A" }}
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Updated At:</strong>
+                {{ selectedListing.user?.updated_at ? formatDate(selectedListing.user.updated_at) : "N/A" }}
+              </VCol>
+
+              <!-- Individual User Details -->
+              <template v-if="selectedListing.user?.individualUser">
+                <VCol cols="12">
+                  <h6 class="text-h6 font-weight-medium mb-3 mt-4">Individual Provider Details</h6>
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <strong>Full Name:</strong>
+                  {{ selectedListing.user.individualUser.full_name || "N/A" }}
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <strong>Nationality:</strong>
+                  {{ selectedListing.user.individualUser.nationality || "N/A" }}
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <strong>Date of Birth:</strong>
+                  {{ selectedListing.user.individualUser.dob ? formatDate(selectedListing.user.individualUser.dob) : "N/A" }}
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <strong>Languages:</strong>
+                  {{ Array.isArray(selectedListing.user.individualUser.languages) ? selectedListing.user.individualUser.languages.join(", ") : selectedListing.user.individualUser.languages || "N/A" }}
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <strong>Activity Specialization:</strong>
+                  {{ selectedListing.user.individualUser.activity_specialization || "N/A" }}
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <strong>Years of Experience:</strong>
+                  {{ selectedListing.user.individualUser.years_of_experience || "N/A" }}
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <strong>Country of Operation:</strong>
+                  {{ selectedListing.user.individualUser.country_of_operation || "N/A" }}
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <strong>Emergency Contact:</strong>
+                  {{ selectedListing.user.individualUser.emergency_contact_name || "N/A" }}
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <strong>Emergency Phone:</strong>
+                  {{ selectedListing.user.individualUser.emergency_contact_phone || "N/A" }}
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <strong>Want to be Listed:</strong>
+                  <VChip
+                    :color="selectedListing.user.individualUser.want_to_be_listed === 'yes' ? 'success' : selectedListing.user.individualUser.want_to_be_listed === 'no' ? 'error' : 'warning'"
+                    size="small"
+                    class="ml-2"
+                  >
+                    {{ selectedListing.user.individualUser.want_to_be_listed || "N/A" }}
+                  </VChip>
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <strong>Terms Accepted:</strong>
+                  <VChip
+                    :color="selectedListing.user.individualUser.terms_accepted ? 'success' : 'error'"
+                    size="small"
+                    class="ml-2"
+                  >
+                    {{ selectedListing.user.individualUser.terms_accepted ? "Yes" : "No" }}
+                  </VChip>
+                </VCol>
+
+                <VCol cols="12">
+                  <strong>Address:</strong>
+                  {{ selectedListing.user.individualUser.address1 || "N/A" }}
+                  <span v-if="selectedListing.user.individualUser.address2">, {{ selectedListing.user.individualUser.address2 }}</span>
+                </VCol>
+
+                <VCol cols="12" md="4">
+                  <strong>City:</strong>
+                  {{ selectedListing.user.individualUser.city || "N/A" }}
+                </VCol>
+
+                <VCol cols="12" md="4">
+                  <strong>State:</strong>
+                  {{ selectedListing.user.individualUser.state || "N/A" }}
+                </VCol>
+
+                <VCol cols="12" md="4">
+                  <strong>Postal Code:</strong>
+                  {{ selectedListing.user.individualUser.postal_code || "N/A" }}
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <strong>Country:</strong>
+                  {{ selectedListing.user.individualUser.country || "N/A" }}
+                </VCol>
+
+                <VCol cols="12">
+                  <strong>Short Bio:</strong>
+                  <div class="mt-1">{{ selectedListing.user.individualUser.short_bio || "N/A" }}</div>
+                </VCol>
+
+                <VCol cols="12">
+                  <strong>Certifications:</strong>
+                  <div class="mt-1">{{ selectedListing.user.individualUser.certifications || "N/A" }}</div>
+                </VCol>
+              </template>
+
+              <!-- Company User Details -->
+              <template v-if="selectedListing.user?.companyUser">
+                <VCol cols="12">
+                  <h6 class="text-h6 font-weight-medium mb-3 mt-4">Company Provider Details</h6>
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <strong>Company Name:</strong>
+                  {{ selectedListing.user.companyUser.company_name || "N/A" }}
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <strong>VAT ID:</strong>
+                  {{ selectedListing.user.companyUser.vat_id || "N/A" }}
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <strong>Contact Person:</strong>
+                  {{ selectedListing.user.companyUser.contact_person || "N/A" }}
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <strong>Country of Registration:</strong>
+                  {{ selectedListing.user.companyUser.country_of_registration || "N/A" }}
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <strong>Business Type:</strong>
+                  {{ selectedListing.user.companyUser.business_type || "N/A" }}
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <strong>Activity Specialization:</strong>
+                  {{ selectedListing.user.companyUser.activity_specialization || "N/A" }}
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <strong>Company Website:</strong>
+                  <a v-if="selectedListing.user.companyUser.company_website" :href="selectedListing.user.companyUser.company_website" target="_blank" class="text-primary">
+                    {{ selectedListing.user.companyUser.company_website }}
+                  </a>
+                  <span v-else>N/A</span>
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <strong>Want to be Listed:</strong>
+                  <VChip
+                    :color="selectedListing.user.companyUser.want_to_be_listed === 'yes' ? 'success' : selectedListing.user.companyUser.want_to_be_listed === 'no' ? 'error' : 'warning'"
+                    size="small"
+                    class="ml-2"
+                  >
+                    {{ selectedListing.user.companyUser.want_to_be_listed || "N/A" }}
+                  </VChip>
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <strong>Terms Accepted:</strong>
+                  <VChip
+                    :color="selectedListing.user.companyUser.terms_accepted ? 'success' : 'error'"
+                    size="small"
+                    class="ml-2"
+                  >
+                    {{ selectedListing.user.companyUser.terms_accepted ? "Yes" : "No" }}
+                  </VChip>
+                </VCol>
+
+                <VCol cols="12">
+                  <strong>Address:</strong>
+                  {{ selectedListing.user.companyUser.address1 || "N/A" }}
+                  <span v-if="selectedListing.user.companyUser.address2">, {{ selectedListing.user.companyUser.address2 }}</span>
+                </VCol>
+
+                <VCol cols="12" md="4">
+                  <strong>City:</strong>
+                  {{ selectedListing.user.companyUser.city || "N/A" }}
+                </VCol>
+
+                <VCol cols="12" md="4">
+                  <strong>State:</strong>
+                  {{ selectedListing.user.companyUser.state || "N/A" }}
+                </VCol>
+
+                <VCol cols="12" md="4">
+                  <strong>Postal Code:</strong>
+                  {{ selectedListing.user.companyUser.postal_code || "N/A" }}
+                </VCol>
+
+                <VCol cols="12" md="6">
+                  <strong>Country:</strong>
+                  {{ selectedListing.user.companyUser.country || "N/A" }}
+                </VCol>
+
+                <VCol cols="12">
+                  <strong>Short Bio:</strong>
+                  <div class="mt-1">{{ selectedListing.user.companyUser.short_bio || "N/A" }}</div>
+                </VCol>
+
+                <VCol cols="12">
+                  <strong>Certifications:</strong>
+                  <div class="mt-1">{{ selectedListing.user.companyUser.certifications || "N/A" }}</div>
+                </VCol>
+              </template>
+            </VRow>
+          </VTabsWindowItem>
+
+          <!-- Itinerary Tab -->
+          <VTabsWindowItem value="itinerary">
+            <VRow>
+              <VCol cols="12">
+                <h6 class="text-h6 font-weight-medium mb-3">Itinerary Details</h6>
+              </VCol>
+
+              <template v-if="selectedListing.itineraries && selectedListing.itineraries.length > 0">
+                <VCol cols="12" v-for="(day, index) in selectedListing.itineraries" :key="index">
+                  <VCard variant="outlined" class="mb-3">
+                    <VCardTitle class="text-h6">
+                      Day {{ day.day_number }}: {{ day.title || 'Untitled' }}
+                    </VCardTitle>
+                    <VCardText>
+                      <VRow>
+                        <VCol cols="12" md="6">
+                          <strong>Accommodation:</strong>
+                          {{ day.accommodation || "N/A" }}
+                        </VCol>
+                        <VCol cols="12" md="6">
+                          <strong>Location:</strong>
+                          {{ day.location || "N/A" }}
+                        </VCol>
+                        <VCol cols="12" v-if="day.link">
+                          <strong>Link:</strong>
+                          <a :href="day.link" target="_blank" class="text-primary">{{ day.link }}</a>
+                        </VCol>
+                        <VCol cols="12">
+                          <strong>Description:</strong>
+                          <div class="mt-1">{{ day.description || "N/A" }}</div>
+                        </VCol>
+                      </VRow>
+                    </VCardText>
+                  </VCard>
+                </VCol>
+              </template>
+              <template v-else>
+                <VCol cols="12">
+                  <VAlert type="info" variant="tonal">
+                    No itinerary details available for this listing.
+                  </VAlert>
+                </VCol>
+              </template>
+            </VRow>
+          </VTabsWindowItem>
+
+          <!-- Special Addons Tab -->
+          <VTabsWindowItem value="addons">
+            <VRow>
+              <VCol cols="12">
+                <h6 class="text-h6 font-weight-medium mb-3">Special Addons</h6>
+              </VCol>
+
+              <template v-if="selectedListing.special_addons && selectedListing.special_addons.length > 0">
+                <VCol cols="12" v-for="(addon, index) in selectedListing.special_addons" :key="index">
+                  <VCard variant="outlined" class="mb-3">
+                    <VCardTitle class="text-h6">
+                      {{ addon.title || 'Untitled Addon' }}
+                      <VChip
+                        :color="addon.is_active ? 'success' : 'error'"
+                        size="small"
+                        class="ml-2"
+                      >
+                        {{ addon.is_active ? 'Active' : 'Inactive' }}
+                      </VChip>
+                    </VCardTitle>
+                    <VCardText>
+                      <VRow>
+                        <VCol cols="12" md="6">
+                          <strong>Number:</strong>
+                          {{ addon.number || "N/A" }}
+                        </VCol>
+                        <VCol cols="12" md="6">
+                          <strong>Price:</strong>
+                          €{{ formatCurrency(addon.price || 0) }}
+                        </VCol>
+                        <VCol cols="12" md="6">
+                          <strong>Order:</strong>
+                          {{ addon.order || "N/A" }}
+                        </VCol>
+                        <VCol cols="12">
+                          <strong>Description:</strong>
+                          <div class="mt-1">{{ addon.description || "N/A" }}</div>
+                        </VCol>
+                      </VRow>
+                    </VCardText>
+                  </VCard>
+                </VCol>
+              </template>
+              <template v-else>
+                <VCol cols="12">
+                  <VAlert type="info" variant="tonal">
+                    No special addons available for this listing.
+                  </VAlert>
+                </VCol>
+              </template>
+            </VRow>
+          </VTabsWindowItem>
+
+          <!-- Media & Files Tab -->
+          <VTabsWindowItem value="media">
+            <VRow>
+              <VCol cols="12">
+                <h6 class="text-h6 font-weight-medium mb-3">Media & Files</h6>
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Listing Media:</strong>
+                <div class="mt-1">
+                  <template v-if="selectedListing.listing_media && Array.isArray(selectedListing.listing_media) && selectedListing.listing_media.length > 0">
+                    <VChip
+                      v-for="(media, index) in selectedListing.listing_media"
+                      :key="index"
+                      size="small"
+                      class="mr-2 mb-2"
+                    >
+                      {{ media.name || media.filename || `Media ${index + 1}` }}
+                    </VChip>
+                  </template>
+                  <span v-else>N/A</span>
+                </div>
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Promotional Video:</strong>
+                <div class="mt-1">
+                  <template v-if="selectedListing.promotional_video && Array.isArray(selectedListing.promotional_video) && selectedListing.promotional_video.length > 0">
+                    <VChip
+                      v-for="(video, index) in selectedListing.promotional_video"
+                      :key="index"
+                      size="small"
+                      class="mr-2 mb-2"
+                    >
+                      {{ video.name || video.filename || `Video ${index + 1}` }}
+                    </VChip>
+                  </template>
+                  <span v-else>N/A</span>
+                </div>
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Maps and Routes:</strong>
+                <div class="mt-1">
+                  <template v-if="selectedListing.maps_and_routes && Array.isArray(selectedListing.maps_and_routes) && selectedListing.maps_and_routes.length > 0">
+                    <VChip
+                      v-for="(route, index) in selectedListing.maps_and_routes"
+                      :key="index"
+                      size="small"
+                      class="mr-2 mb-2"
+                    >
+                      {{ route.name || route.filename || `Route ${index + 1}` }}
+                    </VChip>
+                  </template>
+                  <span v-else>N/A</span>
+                </div>
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Activities Included (JSON):</strong>
+                <div class="mt-1">
+                  <template v-if="selectedListing.activities_included && Array.isArray(selectedListing.activities_included) && selectedListing.activities_included.length > 0">
+                    <VChip
+                      v-for="(activity, index) in selectedListing.activities_included"
+                      :key="index"
+                      size="small"
+                      class="mr-2 mb-2"
+                    >
+                      {{ activity.name || activity || `Activity ${index + 1}` }}
+                    </VChip>
+                  </template>
+                  <span v-else>N/A</span>
+                </div>
+              </VCol>
+            </VRow>
+          </VTabsWindowItem>
+
+          <!-- Policies & Terms Tab -->
+          <VTabsWindowItem value="policies">
+            <VRow>
+              <VCol cols="12">
+                <h6 class="text-h6 font-weight-medium mb-3">Policies & Terms</h6>
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Personal Policies:</strong>
+                {{ selectedListing.personal_policies || "N/A" }}
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Terms Accepted:</strong>
+                <VChip
+                  :color="selectedListing.terms_accepted ? 'success' : 'error'"
+                  size="small"
+                  class="ml-2"
+                >
+                  {{ selectedListing.terms_accepted ? "Yes" : "No" }}
+                </VChip>
+              </VCol>
+
+              <VCol cols="12">
+                <strong>Personal Policies Text:</strong>
+                <div class="mt-1">{{ selectedListing.personal_policies_text || "N/A" }}</div>
+              </VCol>
+
+              <VCol cols="12">
+                <strong>Created At:</strong>
+                {{ formatDate(selectedListing.created_at) }}
+              </VCol>
+
+              <VCol cols="12">
+                <strong>Updated At:</strong>
+                {{ formatDate(selectedListing.updated_at) }}
+              </VCol>
+            </VRow>
+          </VTabsWindowItem>
+        </VTabsWindow>
       </VCardText>
 
       <VCardActions>
@@ -406,6 +864,7 @@ const paginationInfo = ref({
 const showListingViewDialog = ref(false);
 const showListingEditDialog = ref(false);
 const selectedListing = ref(null);
+const activeTab = ref('basic');
 
 const headers = [
   { title: "Title", key: "listing_title", sortable: true },
