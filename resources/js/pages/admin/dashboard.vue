@@ -774,7 +774,10 @@
   <VDialog v-model="showProviderViewDialog" max-width="1200" persistent>
     <VCard>
       <VCardTitle class="d-flex align-center justify-space-between">
-        <span>Provider Details - {{ selectedProvider?.provider_name || 'Provider' }}</span>
+        <span
+          >Provider Details -
+          {{ selectedProvider?.provider_name || "Provider" }}</span
+        >
         <VBtn
           icon
           variant="text"
@@ -800,21 +803,32 @@
           <VTabsWindowItem value="basic">
             <VRow>
               <VCol cols="12">
-                <h6 class="text-h6 font-weight-medium mb-3">Basic Information</h6>
+                <h6 class="text-h6 font-weight-medium mb-3">
+                  Basic Information
+                </h6>
               </VCol>
 
               <VCol cols="12" md="6">
-                <strong>Name:</strong> {{ selectedProvider.provider_name || "N/A" }}
+                <strong>Name:</strong>
+                {{ selectedProvider.provider_name || "N/A" }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Type:</strong>
                 <VChip
-                  :color="selectedProvider.provider_type === 'individual' ? 'primary' : 'secondary'"
+                  :color="
+                    selectedProvider.provider_type === 'individual'
+                      ? 'primary'
+                      : 'secondary'
+                  "
                   size="small"
                   class="ml-2"
                 >
-                  {{ selectedProvider.provider_type === "individual" ? "Individual" : "Company" }}
+                  {{
+                    selectedProvider.provider_type === "individual"
+                      ? "Individual"
+                      : "Company"
+                  }}
                 </VChip>
               </VCol>
 
@@ -838,17 +852,21 @@
               </VCol>
 
               <VCol cols="12" md="6">
-                <strong>Created:</strong> {{ formatDate(selectedProvider.created_at) }}
+                <strong>Created:</strong>
+                {{ formatDate(selectedProvider.created_at) }}
               </VCol>
 
               <VCol cols="12" md="6">
-                <strong>Updated:</strong> {{ formatDate(selectedProvider.updated_at) }}
+                <strong>Updated:</strong>
+                {{ formatDate(selectedProvider.updated_at) }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Want to be listed:</strong>
                 <VChip
-                  :color="selectedProvider.want_to_be_listed ? 'success' : 'warning'"
+                  :color="
+                    selectedProvider.want_to_be_listed ? 'success' : 'warning'
+                  "
                   size="small"
                   class="ml-2"
                 >
@@ -862,24 +880,33 @@
           <VTabsWindowItem value="personal">
             <VRow>
               <VCol cols="12">
-                <h6 class="text-h6 font-weight-medium mb-3">Personal Information</h6>
+                <h6 class="text-h6 font-weight-medium mb-3">
+                  Personal Information
+                </h6>
               </VCol>
 
               <VCol cols="12" md="6">
-                <strong>First Name:</strong> {{ selectedProvider.first_name || "N/A" }}
+                <strong>First Name:</strong>
+                {{ selectedProvider.first_name || "N/A" }}
               </VCol>
 
               <VCol cols="12" md="6">
-                <strong>Last Name:</strong> {{ selectedProvider.last_name || "N/A" }}
+                <strong>Last Name:</strong>
+                {{ selectedProvider.last_name || "N/A" }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Date of Birth:</strong>
-                {{ selectedProvider.dob ? formatDate(selectedProvider.dob) : "N/A" }}
+                {{
+                  selectedProvider.dob
+                    ? formatDate(selectedProvider.dob)
+                    : "N/A"
+                }}
               </VCol>
 
               <VCol cols="12" md="6">
-                <strong>Nationality:</strong> {{ selectedProvider.nationality || "N/A" }}
+                <strong>Nationality:</strong>
+                {{ selectedProvider.nationality || "N/A" }}
               </VCol>
 
               <VCol cols="12" md="6">
@@ -888,7 +915,11 @@
 
               <VCol cols="12" md="6">
                 <strong>Languages:</strong>
-                {{ Array.isArray(selectedProvider.languages) ? selectedProvider.languages.join(", ") : selectedProvider.languages || "N/A" }}
+                {{
+                  Array.isArray(selectedProvider.languages)
+                    ? selectedProvider.languages.join(", ")
+                    : selectedProvider.languages || "N/A"
+                }}
               </VCol>
 
               <VCol cols="12" v-if="selectedProvider.short_bio">
@@ -902,44 +933,71 @@
           <VTabsWindowItem value="business">
             <VRow>
               <VCol cols="12">
-                <h6 class="text-h6 font-weight-medium mb-3">Business Information</h6>
+                <h6 class="text-h6 font-weight-medium mb-3">
+                  Business Information
+                </h6>
               </VCol>
 
               <VCol cols="12" md="6">
-                <strong>Business Type:</strong> {{ selectedProvider.business_type || "N/A" }}
+                <strong>Business Type:</strong>
+                {{ selectedProvider.business_type || "N/A" }}
               </VCol>
 
               <VCol cols="12" md="6">
-                <strong>Years of Experience:</strong> {{ selectedProvider.years_of_experience || "N/A" }}
+                <strong>Years of Experience:</strong>
+                {{ selectedProvider.years_of_experience || "N/A" }}
               </VCol>
 
               <VCol cols="12" md="6">
-                <strong>Activity Specialization:</strong> {{ selectedProvider.activity_specialization || "N/A" }}
+                <strong>Activity Specialization:</strong>
+                {{ selectedProvider.activity_specialization || "N/A" }}
               </VCol>
 
               <VCol cols="12" md="6">
-                <strong>Country of Operation:</strong> {{ selectedProvider.country_of_operation || "N/A" }}
+                <strong>Country of Operation:</strong>
+                {{ selectedProvider.country_of_operation || "N/A" }}
               </VCol>
 
-              <VCol cols="12" md="6" v-if="selectedProvider.provider_type === 'company'">
+              <VCol
+                cols="12"
+                md="6"
+                v-if="selectedProvider.provider_type === 'company'"
+              >
                 <strong>VAT ID:</strong> {{ selectedProvider.vat_id || "N/A" }}
               </VCol>
 
-              <VCol cols="12" md="6" v-if="selectedProvider.provider_type === 'company'">
-                <strong>Company Website:</strong> {{ selectedProvider.company_website || "N/A" }}
+              <VCol
+                cols="12"
+                md="6"
+                v-if="selectedProvider.provider_type === 'company'"
+              >
+                <strong>Company Website:</strong>
+                {{ selectedProvider.company_website || "N/A" }}
               </VCol>
 
-              <VCol cols="12" md="6" v-if="selectedProvider.provider_type === 'company'">
-                <strong>Country of Registration:</strong> {{ selectedProvider.country_of_registration || "N/A" }}
+              <VCol
+                cols="12"
+                md="6"
+                v-if="selectedProvider.provider_type === 'company'"
+              >
+                <strong>Country of Registration:</strong>
+                {{ selectedProvider.country_of_registration || "N/A" }}
               </VCol>
 
-              <VCol cols="12" md="6" v-if="selectedProvider.provider_type === 'company'">
-                <strong>Contact Person:</strong> {{ selectedProvider.contact_person || "N/A" }}
+              <VCol
+                cols="12"
+                md="6"
+                v-if="selectedProvider.provider_type === 'company'"
+              >
+                <strong>Contact Person:</strong>
+                {{ selectedProvider.contact_person || "N/A" }}
               </VCol>
 
               <VCol cols="12" v-if="selectedProvider.business_description">
                 <strong>Business Description:</strong>
-                <div class="mt-1">{{ selectedProvider.business_description }}</div>
+                <div class="mt-1">
+                  {{ selectedProvider.business_description }}
+                </div>
               </VCol>
             </VRow>
           </VTabsWindowItem>
@@ -948,15 +1006,19 @@
           <VTabsWindowItem value="contact">
             <VRow>
               <VCol cols="12">
-                <h6 class="text-h6 font-weight-medium mb-3">Contact & Location</h6>
+                <h6 class="text-h6 font-weight-medium mb-3">
+                  Contact & Location
+                </h6>
               </VCol>
 
               <VCol cols="12" md="6">
-                <strong>Address Line 1:</strong> {{ selectedProvider.address1 || "N/A" }}
+                <strong>Address Line 1:</strong>
+                {{ selectedProvider.address1 || "N/A" }}
               </VCol>
 
               <VCol cols="12" md="6">
-                <strong>Address Line 2:</strong> {{ selectedProvider.address2 || "N/A" }}
+                <strong>Address Line 2:</strong>
+                {{ selectedProvider.address2 || "N/A" }}
               </VCol>
 
               <VCol cols="12" md="6">
@@ -964,15 +1026,18 @@
               </VCol>
 
               <VCol cols="12" md="6">
-                <strong>State/Province:</strong> {{ selectedProvider.state || "N/A" }}
+                <strong>State/Province:</strong>
+                {{ selectedProvider.state || "N/A" }}
               </VCol>
 
               <VCol cols="12" md="6">
-                <strong>Postal Code:</strong> {{ selectedProvider.postal_code || "N/A" }}
+                <strong>Postal Code:</strong>
+                {{ selectedProvider.postal_code || "N/A" }}
               </VCol>
 
               <VCol cols="12" md="6">
-                <strong>Country:</strong> {{ selectedProvider.country || "N/A" }}
+                <strong>Country:</strong>
+                {{ selectedProvider.country || "N/A" }}
               </VCol>
 
               <VCol cols="12" md="6">
@@ -988,7 +1053,8 @@
               </VCol>
 
               <VCol cols="12" md="6">
-                <strong>Alternative Email:</strong> {{ selectedProvider.alternative_email || "N/A" }}
+                <strong>Alternative Email:</strong>
+                {{ selectedProvider.alternative_email || "N/A" }}
               </VCol>
             </VRow>
           </VTabsWindowItem>
@@ -997,46 +1063,77 @@
           <VTabsWindowItem value="social">
             <VRow>
               <VCol cols="12">
-                <h6 class="text-h6 font-weight-medium mb-3">Social Media Links</h6>
+                <h6 class="text-h6 font-weight-medium mb-3">
+                  Social Media Links
+                </h6>
               </VCol>
 
               <VCol cols="12" md="6">
-                <strong>Website:</strong> {{ selectedProvider.website || "N/A" }}
+                <strong>Website:</strong>
+                {{ selectedProvider.website || "N/A" }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Facebook:</strong>
-                {{ selectedProvider.social_media_links?.facebook || selectedProvider.facebook || "N/A" }}
+                {{
+                  selectedProvider.social_media_links?.facebook ||
+                  selectedProvider.facebook ||
+                  "N/A"
+                }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Twitter:</strong>
-                {{ selectedProvider.social_media_links?.twitter || selectedProvider.twitter || "N/A" }}
+                {{
+                  selectedProvider.social_media_links?.twitter ||
+                  selectedProvider.twitter ||
+                  "N/A"
+                }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>LinkedIn:</strong>
-                {{ selectedProvider.social_media_links?.linkedIn || selectedProvider.linkedIn || "N/A" }}
+                {{
+                  selectedProvider.social_media_links?.linkedIn ||
+                  selectedProvider.linkedIn ||
+                  "N/A"
+                }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Instagram:</strong>
-                {{ selectedProvider.social_media_links?.instagram || selectedProvider.instagram || "N/A" }}
+                {{
+                  selectedProvider.social_media_links?.instagram ||
+                  selectedProvider.instagram ||
+                  "N/A"
+                }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>YouTube:</strong>
-                {{ selectedProvider.social_media_links?.youtube || selectedProvider.youtube || "N/A" }}
+                {{
+                  selectedProvider.social_media_links?.youtube ||
+                  selectedProvider.youtube ||
+                  "N/A"
+                }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>TikTok:</strong>
-                {{ selectedProvider.social_media_links?.tiktok || selectedProvider.tiktok || "N/A" }}
+                {{
+                  selectedProvider.social_media_links?.tiktok ||
+                  selectedProvider.tiktok ||
+                  "N/A"
+                }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>WhatsApp:</strong>
-                {{ selectedProvider.social_media_links?.whatsapp || selectedProvider.whatsapp || "N/A" }}
+                {{
+                  selectedProvider.social_media_links?.whatsapp ||
+                  selectedProvider.whatsapp ||
+                  "N/A"
+                }}
               </VCol>
             </VRow>
           </VTabsWindowItem>
@@ -1045,7 +1142,9 @@
           <VTabsWindowItem value="terms">
             <VRow>
               <VCol cols="12">
-                <h6 class="text-h6 font-weight-medium mb-3">Terms & Conditions</h6>
+                <h6 class="text-h6 font-weight-medium mb-3">
+                  Terms & Conditions
+                </h6>
               </VCol>
 
               <VCol cols="12" md="6">
@@ -1061,13 +1160,21 @@
 
               <VCol cols="12" md="6">
                 <strong>Terms Accepted Date:</strong>
-                {{ selectedProvider.terms_accepted_date ? formatDate(selectedProvider.terms_accepted_date) : "N/A" }}
+                {{
+                  selectedProvider.terms_accepted_date
+                    ? formatDate(selectedProvider.terms_accepted_date)
+                    : "N/A"
+                }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Privacy Policy Accepted:</strong>
                 <VChip
-                  :color="selectedProvider.privacy_policy_accepted ? 'success' : 'error'"
+                  :color="
+                    selectedProvider.privacy_policy_accepted
+                      ? 'success'
+                      : 'error'
+                  "
                   size="small"
                   class="ml-2"
                 >
@@ -1078,7 +1185,9 @@
               <VCol cols="12" md="6">
                 <strong>Marketing Consent:</strong>
                 <VChip
-                  :color="selectedProvider.marketing_consent ? 'success' : 'warning'"
+                  :color="
+                    selectedProvider.marketing_consent ? 'success' : 'warning'
+                  "
                   size="small"
                   class="ml-2"
                 >
@@ -1139,7 +1248,10 @@
   <VDialog v-model="showListingViewDialog" max-width="1200" persistent>
     <VCard>
       <VCardTitle class="d-flex align-center justify-space-between">
-        <span>Listing Details - {{ selectedListing?.listing_title || 'Event' }}</span>
+        <span
+          >Listing Details -
+          {{ selectedListing?.listing_title || "Event" }}</span
+        >
         <VBtn
           icon
           variant="text"
@@ -1164,15 +1276,19 @@
           <VTabsWindowItem value="basic">
             <VRow>
               <VCol cols="12">
-                <h6 class="text-h6 font-weight-medium mb-3">Basic Information</h6>
+                <h6 class="text-h6 font-weight-medium mb-3">
+                  Basic Information
+                </h6>
               </VCol>
 
               <VCol cols="12" md="6">
-                <strong>Title:</strong> {{ selectedListing.listing_title || "N/A" }}
+                <strong>Title:</strong>
+                {{ selectedListing.listing_title || "N/A" }}
               </VCol>
 
               <VCol cols="12" md="6">
-                <strong>Subtitle:</strong> {{ selectedListing.listing_subtitle || "N/A" }}
+                <strong>Subtitle:</strong>
+                {{ selectedListing.listing_subtitle || "N/A" }}
               </VCol>
 
               <VCol cols="12" md="6">
@@ -1198,32 +1314,41 @@
               </VCol>
 
               <VCol cols="12" md="6">
-                <strong>Price:</strong> €{{ formatCurrency(selectedListing.price || 0) }}
+                <strong>Price:</strong> €{{
+                  formatCurrency(selectedListing.price || 0)
+                }}
               </VCol>
 
               <VCol cols="12" md="6">
-                <strong>Currency:</strong> {{ selectedListing.currency || "EUR" }}
+                <strong>Currency:</strong>
+                {{ selectedListing.currency || "EUR" }}
               </VCol>
 
               <VCol cols="12" md="6">
-                <strong>Min Capacity:</strong> {{ selectedListing.min_capacity || 0 }}
+                <strong>Min Capacity:</strong>
+                {{ selectedListing.min_capacity || 0 }}
               </VCol>
 
               <VCol cols="12" md="6">
-                <strong>Max Capacity:</strong> {{ selectedListing.max_capacity || 0 }}
+                <strong>Max Capacity:</strong>
+                {{ selectedListing.max_capacity || 0 }}
               </VCol>
 
               <VCol cols="12" md="6">
-                <strong>Provider:</strong> {{ selectedListing.user?.name || "N/A" }}
+                <strong>Provider:</strong>
+                {{ selectedListing.user?.name || "N/A" }}
               </VCol>
 
               <VCol cols="12" md="6">
-                <strong>Provider Email:</strong> {{ selectedListing.user?.email || "N/A" }}
+                <strong>Provider Email:</strong>
+                {{ selectedListing.user?.email || "N/A" }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Location:</strong>
-                {{ selectedListing.locations || selectedListing.location || "N/A" }}
+                {{
+                  selectedListing.locations || selectedListing.location || "N/A"
+                }}
               </VCol>
 
               <VCol cols="12" md="6">
@@ -1232,12 +1357,20 @@
 
               <VCol cols="12" md="6">
                 <strong>Starting Date:</strong>
-                {{ selectedListing.starting_date ? formatDate(selectedListing.starting_date) : "N/A" }}
+                {{
+                  selectedListing.starting_date
+                    ? formatDate(selectedListing.starting_date)
+                    : "N/A"
+                }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Finishing Date:</strong>
-                {{ selectedListing.finishing_date ? formatDate(selectedListing.finishing_date) : "N/A" }}
+                {{
+                  selectedListing.finishing_date
+                    ? formatDate(selectedListing.finishing_date)
+                    : "N/A"
+                }}
               </VCol>
 
               <VCol cols="12" md="6">
@@ -1252,7 +1385,9 @@
 
               <VCol cols="12" v-if="selectedListing.listing_description">
                 <strong>Description:</strong>
-                <div class="mt-1">{{ selectedListing.listing_description }}</div>
+                <div class="mt-1">
+                  {{ selectedListing.listing_description }}
+                </div>
               </VCol>
             </VRow>
           </VTabsWindowItem>
@@ -1261,12 +1396,17 @@
           <VTabsWindowItem value="itinerary">
             <VRow>
               <VCol cols="12">
-                <h6 class="text-h6 font-weight-medium mb-3">Itinerary Details</h6>
+                <h6 class="text-h6 font-weight-medium mb-3">
+                  Itinerary Details
+                </h6>
               </VCol>
 
               <VCol
                 cols="12"
-                v-if="selectedListing.itineraries && selectedListing.itineraries.length > 0"
+                v-if="
+                  selectedListing.itineraries &&
+                  selectedListing.itineraries.length > 0
+                "
               >
                 <div
                   v-for="(itinerary, index) in selectedListing.itineraries"
@@ -1281,26 +1421,53 @@
                       color="#ec8d22"
                       class="me-2"
                     />
-                    <strong>Day {{ index + 1 }}: {{ itinerary.day_title || `Day ${index + 1}` }}</strong>
+                    <strong>
+                      Day {{ index + 1 }}:
+                      {{
+                        itinerary.day_title ||
+                        itinerary.title ||
+                        `Day ${index + 1}`
+                      }}
+                    </strong>
                   </div>
                   <VRow>
                     <VCol cols="12" md="6">
-                      <strong>Date:</strong> {{ itinerary.day_date || "N/A" }}
+                      <strong>Date:</strong>
+                      {{ itinerary.day_date || itinerary.date || "N/A" }}
                     </VCol>
                     <VCol cols="12" md="6">
-                      <strong>Duration:</strong> {{ itinerary.day_duration || "N/A" }}
+                      <strong>Duration:</strong>
+                      {{
+                        itinerary.day_duration || itinerary.duration || "N/A"
+                      }}
                     </VCol>
                     <VCol cols="12" md="6">
-                      <strong>Location:</strong> {{ itinerary.day_location || "N/A" }}
+                      <strong>Location:</strong>
+                      {{
+                        itinerary.day_location || itinerary.location || "N/A"
+                      }}
                     </VCol>
                     <VCol cols="12" md="6">
-                      <strong>Accommodation:</strong> {{ itinerary.day_accommodation || "N/A" }}
+                      <strong>Accommodation:</strong>
+                      {{
+                        itinerary.day_accommodation ||
+                        itinerary.accommodation ||
+                        "N/A"
+                      }}
                     </VCol>
-                    <VCol cols="12" v-if="itinerary.day_description">
-                      <strong>Description:</strong> {{ itinerary.day_description }}
+                    <VCol
+                      cols="12"
+                      v-if="itinerary.day_description || itinerary.description"
+                    >
+                      <strong>Description:</strong>
+                      {{ itinerary.day_description || itinerary.description }}
                     </VCol>
-                    <VCol cols="12" v-if="itinerary.day_activities">
-                      <strong>Activities:</strong> {{ itinerary.day_activities }}
+                    <VCol
+                      cols="12"
+                      v-if="itinerary.day_activities || itinerary.activities"
+                    >
+                      <strong>Activities:</strong>
+                      {{ itinerary.day_activities || itinerary.activities }}
                     </VCol>
                   </VRow>
                 </div>
@@ -1323,7 +1490,10 @@
 
               <VCol
                 cols="12"
-                v-if="selectedListing.specialAddons && selectedListing.specialAddons.length > 0"
+                v-if="
+                  selectedListing.specialAddons &&
+                  selectedListing.specialAddons.length > 0
+                "
               >
                 <div
                   v-for="(addon, index) in selectedListing.specialAddons"
@@ -1338,30 +1508,44 @@
                       color="#ec8d22"
                       class="me-2"
                     />
-                    <strong>{{ addon.addon_name || `Addon ${index + 1}` }}</strong>
+                    <strong>{{
+                      addon.addon_name || addon.title || `Addon ${index + 1}`
+                    }}</strong>
                   </div>
                   <VRow>
                     <VCol cols="12" md="6">
-                      <strong>Price:</strong> €{{ formatCurrency(addon.addon_price || 0) }}
+                      <strong>Price:</strong>
+                      €{{
+                        formatCurrency(addon.addon_price || addon.price || 0)
+                      }}
                     </VCol>
                     <VCol cols="12" md="6">
-                      <strong>Type:</strong> {{ addon.addon_type || "N/A" }}
+                      <strong>Type:</strong>
+                      {{ addon.addon_type || addon.type || "N/A" }}
                     </VCol>
                     <VCol cols="12" md="6">
-                      <strong>Duration:</strong> {{ addon.addon_duration || "N/A" }}
+                      <strong>Duration:</strong>
+                      {{ addon.addon_duration || addon.duration || "N/A" }}
                     </VCol>
                     <VCol cols="12" md="6">
-                      <strong>Capacity:</strong> {{ addon.addon_capacity || "N/A" }}
+                      <strong>Capacity:</strong>
+                      {{ addon.addon_capacity || addon.capacity || "N/A" }}
                     </VCol>
-                    <VCol cols="12" v-if="addon.addon_description">
-                      <strong>Description:</strong> {{ addon.addon_description }}
+                    <VCol
+                      cols="12"
+                      v-if="addon.addon_description || addon.description"
+                    >
+                      <strong>Description:</strong>
+                      {{ addon.addon_description || addon.description }}
                     </VCol>
                   </VRow>
                 </div>
               </VCol>
 
               <VCol cols="12" v-else>
-                <div class="text-medium-emphasis">No special addons available</div>
+                <div class="text-medium-emphasis">
+                  No special addons available
+                </div>
               </VCol>
             </VRow>
           </VTabsWindowItem>
@@ -1370,12 +1554,17 @@
           <VTabsWindowItem value="packages">
             <VRow>
               <VCol cols="12">
-                <h6 class="text-h6 font-weight-medium mb-3">Package Information</h6>
+                <h6 class="text-h6 font-weight-medium mb-3">
+                  Package Information
+                </h6>
               </VCol>
 
               <VCol
                 cols="12"
-                v-if="selectedListing.packages && selectedListing.packages.length > 0"
+                v-if="
+                  selectedListing.packages &&
+                  selectedListing.packages.length > 0
+                "
               >
                 <div
                   v-for="(pkg, index) in selectedListing.packages"
@@ -1397,7 +1586,9 @@
                       <strong>Title:</strong> {{ pkg.title || "N/A" }}
                     </VCol>
                     <VCol cols="12" md="6">
-                      <strong>Price:</strong> €{{ formatCurrency(pkg.price || 0) }}
+                      <strong>Price:</strong> €{{
+                        formatCurrency(pkg.price || 0)
+                      }}
                     </VCol>
                     <VCol cols="12" md="6">
                       <strong>Duration:</strong> {{ pkg.duration || "N/A" }}
@@ -1424,28 +1615,187 @@
           <VTabsWindowItem value="additional">
             <VRow>
               <VCol cols="12">
-                <h6 class="text-h6 font-weight-medium mb-3">Additional Information</h6>
+                <h6 class="text-h6 font-weight-medium mb-3">
+                  Additional Information
+                </h6>
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Group Languages:</strong>
+                <div class="mt-1">
+                  <template
+                    v-if="
+                      ensureArray(
+                        selectedListing.group_language ||
+                          selectedListing.groupLanguage
+                      ).length
+                    "
+                  >
+                    <VChip
+                      v-for="lang in ensureArray(
+                        selectedListing.group_language ||
+                          selectedListing.groupLanguage
+                      )"
+                      :key="lang"
+                      size="small"
+                      class="me-1 mb-1"
+                      color="primary"
+                      variant="outlined"
+                    >
+                      {{ lang }}
+                    </VChip>
+                  </template>
+                  <span v-else class="text-medium-emphasis">N/A</span>
+                </div>
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Activities Included:</strong>
-                <div
-                  v-if="selectedListing.activities_included && selectedListing.activities_included.length > 0"
-                  class="mt-1"
-                >
-                  <VChip
-                    v-for="activity in selectedListing.activities_included"
-                    :key="activity"
-                    size="small"
-                    class="me-1 mb-1"
-                    color="primary"
-                    variant="outlined"
-                  >
-                    {{ activity }}
-                  </VChip>
+                <div class="mt-1">
+                  {{
+                    formatDisplayValue(
+                      selectedListing.activities_included ||
+                        selectedListing.activitiesIncluded
+                    ) || "N/A"
+                  }}
                 </div>
-                <div v-else class="text-medium-emphasis">
-                  No activities specified
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>What's Included:</strong>
+                <div class="mt-1">
+                  {{
+                    formatDisplayValue(
+                      selectedListing.whats_included ||
+                        selectedListing.whatsIncluded
+                    ) || "N/A"
+                  }}
+                </div>
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>What's Not Included:</strong>
+                <div class="mt-1">
+                  {{
+                    formatDisplayValue(
+                      selectedListing.whats_not_included ||
+                        selectedListing.whatsNotIncluded
+                    ) || "N/A"
+                  }}
+                </div>
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Maps & Routes:</strong>
+                <div class="mt-1">
+                  <template
+                    v-if="
+                      ensureArray(
+                        selectedListing.maps_and_routes ||
+                          selectedListing.mapsAndRoutes
+                      ).length
+                    "
+                  >
+                    <div
+                      v-for="(route, index) in ensureArray(
+                        selectedListing.maps_and_routes ||
+                          selectedListing.mapsAndRoutes
+                      )"
+                      :key="index"
+                      class="mb-1"
+                    >
+                      <template v-if="isValidUrl(getDisplayValue(route))">
+                        <a
+                          :href="getDisplayValue(route)"
+                          target="_blank"
+                          rel="noopener"
+                          class="text-primary"
+                        >
+                          {{ getDisplayValue(route) }}
+                        </a>
+                      </template>
+                      <template v-else>
+                        {{ getDisplayValue(route) }}
+                      </template>
+                    </div>
+                  </template>
+                  <span v-else class="text-medium-emphasis">N/A</span>
+                </div>
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Listing Media:</strong>
+                <div class="mt-1">
+                  <template
+                    v-if="
+                      ensureArray(
+                        selectedListing.listing_media ||
+                          selectedListing.listingMedia
+                      ).length
+                    "
+                  >
+                    <div
+                      v-for="(media, index) in ensureArray(
+                        selectedListing.listing_media ||
+                          selectedListing.listingMedia
+                      )"
+                      :key="index"
+                      class="mb-1"
+                    >
+                      <template v-if="isValidUrl(getDisplayValue(media))">
+                        <a
+                          :href="getDisplayValue(media)"
+                          target="_blank"
+                          rel="noopener"
+                          class="text-primary"
+                        >
+                          {{ getDisplayValue(media) }}
+                        </a>
+                      </template>
+                      <template v-else>
+                        {{ getDisplayValue(media) }}
+                      </template>
+                    </div>
+                  </template>
+                  <span v-else class="text-medium-emphasis">N/A</span>
+                </div>
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Promotional Videos:</strong>
+                <div class="mt-1">
+                  <template
+                    v-if="
+                      ensureArray(
+                        selectedListing.promotional_video ||
+                          selectedListing.promotionalVideo
+                      ).length
+                    "
+                  >
+                    <div
+                      v-for="(video, index) in ensureArray(
+                        selectedListing.promotional_video ||
+                          selectedListing.promotionalVideo
+                      )"
+                      :key="index"
+                      class="mb-1"
+                    >
+                      <template v-if="isValidUrl(getDisplayValue(video))">
+                        <a
+                          :href="getDisplayValue(video)"
+                          target="_blank"
+                          rel="noopener"
+                          class="text-primary"
+                        >
+                          {{ getDisplayValue(video) }}
+                        </a>
+                      </template>
+                      <template v-else>
+                        {{ getDisplayValue(video) }}
+                      </template>
+                    </div>
+                  </template>
+                  <span v-else class="text-medium-emphasis">N/A</span>
                 </div>
               </VCol>
 
@@ -1455,20 +1805,84 @@
               </VCol>
 
               <VCol cols="12" md="6">
-                <strong>Language:</strong> {{ selectedListing.language || "N/A" }}
-              </VCol>
-
-              <VCol cols="12" md="6">
-                <strong>Difficulty Level:</strong> {{ selectedListing.difficulty_level || "N/A" }}
-              </VCol>
-
-              <VCol cols="12" md="6">
-                <strong>Age Group:</strong> {{ selectedListing.age_group || "N/A" }}
+                <strong>Difficulty Level:</strong>
+                {{ selectedListing.difficulty_level || "N/A" }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Equipment Included:</strong>
                 {{ selectedListing.equipment_included || "N/A" }}
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Primary Language:</strong>
+                {{ selectedListing.language || "N/A" }}
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Age Group:</strong>
+                {{ selectedListing.age_group || "N/A" }}
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Personal Policies:</strong>
+                <div class="mt-1">
+                  {{
+                    formatDisplayValue(
+                      selectedListing.personal_policies ||
+                        selectedListing.personalPolicies
+                    ) || "N/A"
+                  }}
+                </div>
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Policy Details:</strong>
+                <div class="mt-1">
+                  {{
+                    formatDisplayValue(
+                      selectedListing.personal_policies_text ||
+                        selectedListing.personalPoliciesText
+                    ) || "N/A"
+                  }}
+                </div>
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Terms Accepted:</strong>
+                <VChip
+                  size="small"
+                  class="ml-2"
+                  :color="
+                    selectedListing.terms_accepted ? 'success' : 'warning'
+                  "
+                >
+                  {{ selectedListing.terms_accepted ? "Yes" : "No" }}
+                </VChip>
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Provider's FAQ:</strong>
+                <div class="mt-1">
+                  {{
+                    formatDisplayValue(
+                      selectedListing.providers_faq ||
+                        selectedListing.providersFaq
+                    ) || "N/A"
+                  }}
+                </div>
+              </VCol>
+
+              <VCol cols="12">
+                <strong>Additional Notes:</strong>
+                <div class="mt-1">
+                  {{
+                    formatDisplayValue(
+                      selectedListing.additional_notes ||
+                        selectedListing.additionalNotes
+                    ) || "N/A"
+                  }}
+                </div>
               </VCol>
 
               <VCol cols="12" v-if="selectedListing.terms_conditions">
@@ -1478,7 +1892,9 @@
 
               <VCol cols="12" v-if="selectedListing.cancellation_policy">
                 <strong>Cancellation Policy:</strong>
-                <div class="mt-1">{{ selectedListing.cancellation_policy }}</div>
+                <div class="mt-1">
+                  {{ selectedListing.cancellation_policy }}
+                </div>
               </VCol>
             </VRow>
           </VTabsWindowItem>
@@ -1558,8 +1974,8 @@ const selectedProvider = ref(null);
 const showListingViewDialog = ref(false);
 const showListingEditDialog = ref(false);
 const selectedListing = ref(null);
-const activeListingTab = ref('basic');
-const activeProviderTab = ref('basic');
+const activeListingTab = ref("basic");
+const activeProviderTab = ref("basic");
 
 // Get user data from cookies
 const userDataCookie = useCookie("userData");
@@ -1975,29 +2391,98 @@ const viewEvent = async (item) => {
     console.log("Viewing event, fetching full details:", item.id);
     const res = await $api(`/admin/listings/${item.id}`, { method: "GET" });
 
-    // Merge the response data with the original item to ensure all fields are available
-    selectedListing.value = {
+    // Merge and normalize response data with fallbacks so UI tabs render consistently
+    const normalized = {
       ...item,
       ...res,
-      // Ensure modal data is properly structured
       packages: res?.packages || item?.packages || [],
-      special_addons: res?.special_addons || item?.special_addons || [],
-      itinerary: res?.itinerary || item?.itinerary || [],
+      // Normalize special addons to camelCase property used by the template
+      specialAddons:
+        res?.specialAddons ||
+        res?.special_addons ||
+        item?.specialAddons ||
+        item?.special_addons ||
+        [],
+      // Normalize itineraries to plural camelCase used by the template
+      itineraries:
+        res?.itineraries ||
+        res?.itinerary ||
+        item?.itineraries ||
+        item?.itinerary ||
+        [],
       activitiesIncluded:
-        res?.activitiesIncluded || item?.activitiesIncluded || [],
+        res?.activitiesIncluded ||
+        res?.activities_included ||
+        item?.activitiesIncluded ||
+        item?.activities_included ||
+        [],
+      personalPolicies:
+        res?.personal_policies ||
+        res?.personalPolicies ||
+        item?.personal_policies ||
+        item?.personalPolicies ||
+        null,
+      personalPoliciesText:
+        res?.personal_policies_text ||
+        res?.personalPoliciesText ||
+        item?.personal_policies_text ||
+        item?.personalPoliciesText ||
+        null,
+      additionalNotes:
+        res?.additional_notes ||
+        res?.additionalNotes ||
+        item?.additional_notes ||
+        item?.additionalNotes ||
+        null,
+      providersFaq:
+        res?.providers_faq ||
+        res?.providersFaq ||
+        item?.providers_faq ||
+        item?.providersFaq ||
+        null,
+      mapsAndRoutes:
+        res?.maps_and_routes ||
+        res?.mapsAndRoutes ||
+        item?.maps_and_routes ||
+        item?.mapsAndRoutes ||
+        [],
+      listingMedia:
+        res?.listing_media ||
+        res?.listingMedia ||
+        item?.listing_media ||
+        item?.listingMedia ||
+        [],
+      promotionalVideo:
+        res?.promotional_video ||
+        res?.promotionalVideo ||
+        item?.promotional_video ||
+        item?.promotionalVideo ||
+        [],
     };
+
+    selectedListing.value = normalized;
 
     console.log("Selected listing data:", selectedListing.value);
     showListingViewDialog.value = true;
   } catch (e) {
     console.error("Failed to load listing details", e);
-    // Fallback to original item data
+    // Fallback to original item data with normalized keys
     selectedListing.value = {
       ...item,
       packages: item?.packages || [],
-      special_addons: item?.special_addons || [],
-      itinerary: item?.itinerary || [],
-      activitiesIncluded: item?.activitiesIncluded || [],
+      specialAddons: item?.specialAddons || item?.special_addons || [],
+      itineraries: item?.itineraries || item?.itinerary || [],
+      activitiesIncluded:
+        item?.activitiesIncluded || item?.activities_included || [],
+      personalPolicies:
+        item?.personal_policies || item?.personalPolicies || null,
+      personalPoliciesText:
+        item?.personal_policies_text || item?.personalPoliciesText || null,
+      additionalNotes: item?.additional_notes || item?.additionalNotes || null,
+      providersFaq: item?.providers_faq || item?.providersFaq || null,
+      mapsAndRoutes: item?.maps_and_routes || item?.mapsAndRoutes || [],
+      listingMedia: item?.listing_media || item?.listingMedia || [],
+      promotionalVideo: item?.promotional_video || item?.promotionalVideo || [],
     };
     showListingViewDialog.value = true;
   }
