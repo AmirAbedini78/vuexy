@@ -51,6 +51,11 @@ class Listing extends Model
         return $this->hasMany(Package::class);
     }
 
+    public function periods()
+    {
+        return $this->hasMany(Period::class);
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

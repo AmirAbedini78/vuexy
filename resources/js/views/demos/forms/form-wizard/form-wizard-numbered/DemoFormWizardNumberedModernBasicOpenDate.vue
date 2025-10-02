@@ -389,6 +389,87 @@ async function updateListing() {
 
     const data = await res.json();
     console.log("Open-date listing updated successfully:", data);
+
+    // Save itineraries data if itineraries exist
+    if (itineraries.value && itineraries.value.length > 0) {
+      try {
+        console.log("Saving itineraries data:", itineraries.value);
+        const itinerariesResponse = await fetch(`/api/listings/${listingId.value}/itineraries`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ itineraries: itineraries.value }),
+        });
+
+        if (!itinerariesResponse.ok) {
+          const errorText = await itinerariesResponse.text();
+          console.error("Failed to save itineraries:", itinerariesResponse.status, errorText);
+          throw new Error(`Failed to save itineraries: ${itinerariesResponse.status} ${errorText}`);
+        }
+
+        const itinerariesData = await itinerariesResponse.json();
+        console.log("Itineraries saved successfully:", itinerariesData);
+      } catch (itinerariesError) {
+        console.error("Error saving itineraries:", itinerariesError);
+        alert("خطا در ذخیره برنامه سفر: " + itinerariesError.message);
+        throw itinerariesError;
+      }
+    }
+
+    // Save special addons data if special addons exist
+    if (specialAddons.value && specialAddons.value.length > 0) {
+      try {
+        // Ensure number field is string for all addons
+        const addonsToSave = specialAddons.value.map(addon => ({
+          ...addon,
+          number: addon.number ? addon.number.toString() : "1"
+        }));
+        
+        console.log("Saving special addons data:", addonsToSave);
+        const specialAddonsResponse = await fetch(`/api/listings/${listingId.value}/special-addons`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ special_addons: addonsToSave }),
+        });
+
+        if (!specialAddonsResponse.ok) {
+          const errorText = await specialAddonsResponse.text();
+          console.error("Failed to save special addons:", specialAddonsResponse.status, errorText);
+          throw new Error(`Failed to save special addons: ${specialAddonsResponse.status} ${errorText}`);
+        }
+
+        const specialAddonsData = await specialAddonsResponse.json();
+        console.log("Special addons saved successfully:", specialAddonsData);
+      } catch (specialAddonsError) {
+        console.error("Error saving special addons:", specialAddonsError);
+        alert("خطا در ذخیره افزونه‌های ویژه: " + specialAddonsError.message);
+        throw specialAddonsError;
+      }
+    }
+
+    // Save periods data if periods exist
+    if (periods.value && periods.value.length > 0) {
+      try {
+        console.log("Saving periods data:", periods.value);
+        const periodsResponse = await fetch(`/api/listings/${listingId.value}/periods`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ periods: periods.value }),
+        });
+
+        if (!periodsResponse.ok) {
+          const errorText = await periodsResponse.text();
+          console.error("Failed to save periods:", periodsResponse.status, errorText);
+          throw new Error(`Failed to save periods: ${periodsResponse.status} ${errorText}`);
+        }
+
+        const periodsData = await periodsResponse.json();
+        console.log("Periods saved successfully:", periodsData);
+      } catch (periodsError) {
+        console.error("Error saving periods:", periodsError);
+        alert("خطا در ذخیره دوره‌ها: " + periodsError.message);
+        throw periodsError;
+      }
+    }
   } catch (e) {
     console.error("Error updating listing:", e);
     alert("خطا در ذخیره لیستینگ: " + e.message);

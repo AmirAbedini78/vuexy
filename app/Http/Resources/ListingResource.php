@@ -41,6 +41,7 @@ class ListingResource extends JsonResource
             'itineraries' => $this->itineraries,
             'special_addons' => $this->specialAddons,
             'packages' => $this->packages,
+            'periods' => $this->periods,
         ];
     }
 }

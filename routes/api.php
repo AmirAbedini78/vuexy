@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\ListingController;
 use App\Http\Controllers\Api\ItineraryAccommodationController;
 use App\Http\Controllers\Api\SpecialAddonController;
 use App\Http\Controllers\Api\PackageController;
+use App\Http\Controllers\Api\PeriodController;
 use App\Http\Controllers\Api\AutoSaveListingController;
 use App\Http\Controllers\AdminController;
 use App\Http\Middleware\AdminMiddleware;
@@ -71,6 +72,10 @@ Route::middleware([ApiMiddleware::class])->group(function () {
     // Package CRUD (nested under listing)
     Route::apiResource('listings.packages', PackageController::class);
     Route::put('listings/{listing}/packages', [PackageController::class, 'updateMultiple']);
+
+    // Period CRUD (nested under listing)
+    Route::apiResource('listings.periods', PeriodController::class);
+    Route::put('listings/{listing}/periods', [PeriodController::class, 'updateMultiple']);
 
     // User Verification API
     Route::prefix('verification')->group(function () {
