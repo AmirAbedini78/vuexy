@@ -343,6 +343,19 @@
 
                     <VCol cols="12" md="6">
                       <VTextField
+                        v-model="formData.minParticipants"
+                        label="Minimum Participants"
+                        type="number"
+                        placeholder="Enter minimum participants"
+                        variant="outlined"
+                        density="comfortable"
+                        :error-messages="formValidationErrors.minParticipants"
+                        @blur="validateField('minParticipants')"
+                      />
+                    </VCol>
+
+                    <VCol cols="12" md="6">
+                      <VTextField
                         v-model="formData.maxParticipants"
                         label="Maximum Participants *"
                         type="number"
@@ -518,6 +531,7 @@ const formData = ref({
   promotionalVideoString: "",
   mapsAndRoutesString: "",
   price: "",
+  minParticipants: "",
   maxParticipants: "",
   requirements: "",
   personalPolicies: "",
@@ -599,6 +613,7 @@ onMounted(() => {
         props.listing.maps_and_routes
       ),
       price: props.listing.price || "",
+      minParticipants: props.listing.min_capacity || "",
       maxParticipants: props.listing.max_participants || "",
       requirements: props.listing.requirements || "",
       personalPolicies: props.listing.personal_policies || "",
@@ -667,6 +682,14 @@ const validateField = (fieldName) => {
   } else if (fieldName === "price" && (!value || isNaN(value))) {
     formValidationErrors.value[fieldName] =
       "Price is required and must be a valid number";
+  } else if (
+    fieldName === "minParticipants" &&
+    value !== "" &&
+    value !== null &&
+    isNaN(value)
+  ) {
+    formValidationErrors.value[fieldName] =
+      "Minimum participants must be numeric";
   } else if (fieldName === "maxParticipants" && (!value || isNaN(value))) {
     formValidationErrors.value[fieldName] =
       "Maximum participants is required and must be a valid number";
@@ -686,6 +709,7 @@ const validateForm = () => {
   validateField("startDate");
   validateField("endDate");
   validateField("price");
+  validateField("minParticipants");
   validateField("maxParticipants");
 
   return Object.keys(formValidationErrors.value).length === 0;
@@ -705,41 +729,112 @@ const saveListing = async () => {
       listing_title: formData.value.listingTitle,
       subtitle: formData.value.subtitle,
       listing_description: formData.value.listingDescription,
-      locations: formData.value.locations,
-      group_language: formData.value.groupLanguage,
-      activities_included: formData.value.activitiesIncluded,
+      locations: normalizeToArray(formData.value.locations),
+      group_language: normalizeToArray(formData.value.groupLanguage),
+      activities_included: normalizeToArray(formData.value.activitiesIncluded, {
+        delimiter: "\n",
+      }),
       experience_level: formData.value.experienceLevel,
       fitness_level: formData.value.fitnessLevel,
-      start_date: formData.value.startDate,
-      end_date: formData.value.endDate,
-      available_days: formData.value.availableDays,
-      whats_included: formData.value.whatsIncluded,
-      whats_not_included: formData.value.whatsNotIncluded,
-      additional_notes: formData.value.additionalNotes,
-      providers_faq: formData.value.providersFAQ,
-      listing_media: safeParseJson(formData.value.listingMediaString),
-      promotional_video: safeParseJson(formData.value.promotionalVideoString),
-      maps_and_routes: safeParseJson(formData.value.mapsAndRoutesString),
+      starting_date: formData.value.startDate,
+      finishing_date: formData.value.endDate,
+      available_days: normalizeToArray(formData.value.availableDays),
+      whats_included: normalizeToArray(formData.value.whatsIncluded, {
+        delimiter: "\n",
+      }),
+      whats_not_included: normalizeToArray(formData.value.whatsNotIncluded, {
+        delimiter: "\n",
+      }),
+      additional_notes: normalizeToArray(formData.value.additionalNotes, {
+        delimiter: "\n",
+      }),
+      providers_faq: normalizeToArray(formData.value.providersFAQ, {
+        delimiter: "\n",
+      }),
+      listing_media: normalizeToArray(formData.value.listingMediaString, {
+        attemptJson: true,
+      }),
+      promotional_video: normalizeToArray(
+        formData.value.promotionalVideoString,
+        {
+          attemptJson: true,
+        }
+      ),
+      maps_and_routes: normalizeToArray(formData.value.mapsAndRoutesString, {
+        attemptJson: true,
+      }),
       price: formData.value.price ? parseFloat(formData.value.price) : null,
-      max_participants: formData.value.maxParticipants
+      min_capacity: formData.value.minParticipants
+        ? parseInt(formData.value.minParticipants)
+        : props.listing.min_capacity || null,
+      max_capacity: formData.value.maxParticipants
         ? parseInt(formData.value.maxParticipants)
-        : null,
-      requirements: formData.value.requirements,
-      personal_policies: formData.value.personalPolicies,
+        : props.listing.max_capacity || null,
+      requirements: normalizeToArray(formData.value.requirements, {
+        delimiter: "\n",
+      }),
+      personal_policies: normalizeToArray(formData.value.personalPolicies),
       terms_accepted: formData.value.termsAccepted,
     };
 
     // Call API to update listing
-    const response = await $api(`/admin/listings/${props.listing.id}`, {
+    const res = await $api(`/api/listings/${props.listing.id}`, {
       method: "PUT",
       body: updateData,
     });
 
-    if (response.success) {
-      emit("updated", response.data);
-    } else {
-      console.error("Failed to update listing:", response.message);
+    const syncedListing = res?.data || res || {};
+
+    const formatCollectionPayload = (items) =>
+      items.map(({ id, ...rest }) => ({ id, ...rest }));
+
+    if (Array.isArray(itineraries.value)) {
+      for (const itinerary of formatCollectionPayload(itineraries.value)) {
+        const method = itinerary.id ? "PUT" : "POST";
+        const endpoint = itinerary.id
+          ? `/api/listings/${props.listing.id}/itineraries/${itinerary.id}`
+          : `/api/listings/${props.listing.id}/itineraries`;
+        await $api(endpoint, {
+          method,
+          body: { itinerary },
+        }).catch(() => {});
+      }
     }
+
+    if (Array.isArray(specialAddons.value)) {
+      for (const addon of formatCollectionPayload(specialAddons.value)) {
+        const method = addon.id ? "PUT" : "POST";
+        const endpoint = addon.id
+          ? `/api/listings/${props.listing.id}/special-addons/${addon.id}`
+          : `/api/listings/${props.listing.id}/special-addons`;
+        await $api(endpoint, {
+          method,
+          body: { special_addon: addon },
+        }).catch(() => {});
+      }
+    }
+
+    if (Array.isArray(periods.value)) {
+      for (const period of formatCollectionPayload(periods.value)) {
+        const method = period.id ? "PUT" : "POST";
+        const endpoint = period.id
+          ? `/api/listings/${props.listing.id}/periods/${period.id}`
+          : `/api/listings/${props.listing.id}/periods`;
+        await $api(endpoint, {
+          method,
+          body: { period },
+        }).catch(() => {});
+      }
+    }
+
+    emit("updated", {
+      ...props.listing,
+      ...syncedListing,
+      ...updateData,
+      itineraries: itineraries.value,
+      special_addons: specialAddons.value,
+      periods: periods.value,
+    });
   } catch (error) {
     console.error("Error updating listing:", error);
   } finally {
@@ -832,6 +927,62 @@ function normalizeToStringArray(value) {
     return "";
   }
 }
+
+function normalizeToArray(value, options = {}) {
+  const {
+    delimiter = ",",
+    newlineDelimiter = "\n",
+    attemptJson = false,
+  } = options;
+
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => (typeof item === "string" ? item.trim() : item))
+      .filter((item) => item !== undefined && item !== null && item !== "");
+  }
+
+  if (value === null || value === undefined || value === "") {
+    return [];
+  }
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) return [];
+
+    if (attemptJson) {
+      const parsed = safeParseJson(trimmed);
+      if (Array.isArray(parsed)) {
+        return parsed
+          .map((item) => (typeof item === "string" ? item.trim() : item))
+          .filter((item) => item !== undefined && item !== null && item !== "");
+      }
+    }
+
+    if (trimmed.includes(newlineDelimiter)) {
+      return trimmed
+        .split(newlineDelimiter)
+        .map((item) => item.trim())
+        .filter(Boolean);
+    }
+
+    if (delimiter && trimmed.includes(delimiter)) {
+      return trimmed
+        .split(delimiter)
+        .map((item) => item.trim())
+        .filter(Boolean);
+    }
+
+    return [trimmed];
+  }
+
+  if (typeof value === "object") {
+    return Object.values(value)
+      .map((item) => (typeof item === "string" ? item.trim() : item))
+      .filter((item) => item !== undefined && item !== null && item !== "");
+  }
+
+  return [value];
+}
 </script>
 
 <style lang="scss" scoped>
@@ -866,24 +1017,3 @@ function normalizeToStringArray(value) {
   }
 }
 </style>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

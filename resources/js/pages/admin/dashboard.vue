@@ -1268,6 +1268,9 @@
           <VTab value="itinerary">Itinerary Details</VTab>
           <VTab value="addons">Special Addons</VTab>
           <VTab value="packages">Packages</VTab>
+          <VTab value="periods" v-if="selectedListing?.periods?.length">
+            Availability Periods
+          </VTab>
           <VTab value="additional">Additional Info</VTab>
         </VTabs>
 
@@ -1288,7 +1291,11 @@
 
               <VCol cols="12" md="6">
                 <strong>Subtitle:</strong>
-                {{ selectedListing.listing_subtitle || "N/A" }}
+                {{
+                  selectedListing.subtitle ||
+                  selectedListing.listing_subtitle ||
+                  "N/A"
+                }}
               </VCol>
 
               <VCol cols="12" md="6">
@@ -1347,12 +1354,23 @@
               <VCol cols="12" md="6">
                 <strong>Location:</strong>
                 {{
-                  selectedListing.locations || selectedListing.location || "N/A"
+                  formatDisplayValue(
+                    selectedListing.locations ||
+                      selectedListing.location ||
+                      selectedListing.address
+                  ) || "N/A"
                 }}
               </VCol>
 
               <VCol cols="12" md="6">
-                <strong>Country:</strong> {{ selectedListing.country || "N/A" }}
+                <strong>Country:</strong>
+                {{
+                  selectedListing.country ||
+                  ensureArray(selectedListing.locations)[
+                    ensureArray(selectedListing.locations).length - 1
+                  ] ||
+                  "N/A"
+                }}
               </VCol>
 
               <VCol cols="12" md="6">
@@ -1611,6 +1629,88 @@
             </VRow>
           </VTabsWindowItem>
 
+          <!-- Availability Periods Tab (Multi Date listings) -->
+          <VTabsWindowItem value="periods" v-if="selectedListing?.periods">
+            <VRow>
+              <VCol cols="12">
+                <h6 class="text-h6 font-weight-medium mb-3">
+                  Availability Periods
+                </h6>
+              </VCol>
+
+              <VCol
+                cols="12"
+                v-if="selectedListing.periods && selectedListing.periods.length"
+              >
+                <div
+                  v-for="(period, index) in selectedListing.periods"
+                  :key="index"
+                  class="mb-4 pa-4"
+                  style="border: 1px solid #e0e0e0; border-radius: 8px"
+                >
+                  <div class="d-flex align-center mb-2">
+                    <VIcon
+                      icon="tabler-calendar"
+                      size="20"
+                      color="#ec8d22"
+                      class="me-2"
+                    />
+                    <strong>
+                      Period {{ index + 1 }}:
+                      {{ period.title || period.name || period.label || "N/A" }}
+                    </strong>
+                  </div>
+                  <VRow>
+                    <VCol cols="12" md="6">
+                      <strong>Start Date:</strong>
+                      {{
+                        formatDate(
+                          period.start_date || period.start || period.from
+                        )
+                      }}
+                    </VCol>
+                    <VCol cols="12" md="6">
+                      <strong>End Date:</strong>
+                      {{
+                        formatDate(period.end_date || period.end || period.to)
+                      }}
+                    </VCol>
+                    <VCol cols="12" md="6">
+                      <strong>Price:</strong>
+                      €{{
+                        formatCurrency(period.price || period.period_price || 0)
+                      }}
+                    </VCol>
+                    <VCol cols="12" md="6">
+                      <strong>Capacity:</strong>
+                      {{ period.capacity || period.max_participants || "N/A" }}
+                    </VCol>
+                    <VCol cols="12" v-if="period.available_days">
+                      <strong>Available Days:</strong>
+                      {{
+                        formatDisplayValue(
+                          period.available_days ||
+                            period.days ||
+                            period.availability
+                        ) || "N/A"
+                      }}
+                    </VCol>
+                    <VCol cols="12" v-if="period.description">
+                      <strong>Description:</strong>
+                      {{ period.description }}
+                    </VCol>
+                  </VRow>
+                </div>
+              </VCol>
+
+              <VCol cols="12" v-else>
+                <div class="text-medium-emphasis">
+                  No availability periods defined
+                </div>
+              </VCol>
+            </VRow>
+          </VTabsWindowItem>
+
           <!-- Additional Information Tab -->
           <VTabsWindowItem value="additional">
             <VRow>
@@ -1801,27 +1901,58 @@
 
               <VCol cols="12" md="6">
                 <strong>Departure Capacity:</strong>
-                {{ selectedListing.departure_capacity || "N/A" }}
+                {{
+                  selectedListing.departure_capacity ||
+                  selectedListing.max_capacity ||
+                  "N/A"
+                }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Difficulty Level:</strong>
-                {{ selectedListing.difficulty_level || "N/A" }}
+                {{
+                  selectedListing.difficulty_level ||
+                  selectedListing.experience_level ||
+                  "N/A"
+                }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Equipment Included:</strong>
-                {{ selectedListing.equipment_included || "N/A" }}
+                {{
+                  selectedListing.equipment_included ||
+                  ensureArray(selectedListing.activities_included).join(", ") ||
+                  "N/A"
+                }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Primary Language:</strong>
-                {{ selectedListing.language || "N/A" }}
+                {{
+                  selectedListing.language ||
+                  ensureArray(selectedListing.group_language).join(", ") ||
+                  "N/A"
+                }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Age Group:</strong>
-                {{ selectedListing.age_group || "N/A" }}
+                {{
+                  formatDisplayValue(
+                    selectedListing.age_group ||
+                      selectedListing.target_age_group
+                  ) || "N/A"
+                }}
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Available Days:</strong>
+                {{
+                  formatDisplayValue(
+                    selectedListing.available_days ||
+                      selectedListing.availableDays
+                  ) || "N/A"
+                }}
               </VCol>
 
               <VCol cols="12" md="6">
@@ -1868,6 +1999,18 @@
                     formatDisplayValue(
                       selectedListing.providers_faq ||
                         selectedListing.providersFaq
+                    ) || "N/A"
+                  }}
+                </div>
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Requirements:</strong>
+                <div class="mt-1">
+                  {{
+                    formatDisplayValue(
+                      selectedListing.requirements ||
+                        selectedListing.special_requirements
                     ) || "N/A"
                   }}
                 </div>
@@ -1976,6 +2119,111 @@ const showListingEditDialog = ref(false);
 const selectedListing = ref(null);
 const activeListingTab = ref("basic");
 const activeProviderTab = ref("basic");
+
+const isPlainObject = (value) =>
+  value !== null && typeof value === "object" && !Array.isArray(value);
+
+const parseJsonSafely = (value) => {
+  if (typeof value !== "string") return null;
+  try {
+    return JSON.parse(value);
+  } catch (error) {
+    return null;
+  }
+};
+
+const ensureArray = (value) => {
+  if (value === null || value === undefined || value === "") {
+    return [];
+  }
+
+  if (Array.isArray(value)) {
+    return value
+      .flatMap((entry) => ensureArray(entry))
+      .map((entry) => (typeof entry === "string" ? entry.trim() : entry))
+      .filter((entry) => entry !== null && entry !== undefined && entry !== "");
+  }
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) return [];
+
+    const parsed = parseJsonSafely(trimmed);
+    if (Array.isArray(parsed) || isPlainObject(parsed)) {
+      return ensureArray(parsed);
+    }
+
+    const segments = trimmed.includes("\n")
+      ? trimmed.split(/\r?\n/)
+      : trimmed.includes(",")
+      ? trimmed.split(",")
+      : [trimmed];
+
+    return segments.map((segment) => segment.trim()).filter(Boolean);
+  }
+
+  if (isPlainObject(value)) {
+    if ("value" in value && value.value !== undefined) {
+      return ensureArray(value.value);
+    }
+    if ("label" in value && value.label !== undefined) {
+      return ensureArray(value.label);
+    }
+    if ("title" in value && value.title !== undefined) {
+      return ensureArray(value.title);
+    }
+    if ("name" in value && value.name !== undefined) {
+      return ensureArray(value.name);
+    }
+
+    const collected = Object.values(value)
+      .flatMap((entry) => ensureArray(entry))
+      .filter(Boolean);
+
+    if (collected.length) {
+      return [
+        Object.entries(value)
+          .map(([key, entry]) => {
+            const formatted = formatDisplayValue(entry);
+            return formatted ? `${key}: ${formatted}` : "";
+          })
+          .filter(Boolean)
+          .join("; "),
+      ].filter(Boolean);
+    }
+
+    return collected;
+  }
+
+  const asString = String(value).trim();
+  return asString ? [asString] : [];
+};
+
+const getDisplayValue = (value) => {
+  const arrayValue = ensureArray(value);
+  if (arrayValue.length) return arrayValue[0];
+  if (typeof value === "string") return value.trim();
+  return "";
+};
+
+const formatDisplayValue = (value) => {
+  const arrayValue = ensureArray(value);
+  if (arrayValue.length) return arrayValue.join(", ");
+  if (typeof value === "string") return value.trim();
+  return "";
+};
+
+const isValidUrl = (value) => {
+  const candidate = getDisplayValue(value);
+  if (!candidate) return false;
+
+  try {
+    const url = new URL(candidate);
+    return Boolean(url.protocol && url.host);
+  } catch (error) {
+    return false;
+  }
+};
 
 // Get user data from cookies
 const userDataCookie = useCookie("userData");
@@ -2293,10 +2541,15 @@ const formatCurrency = (amount) => {
   }).format(amount);
 };
 
-const formatDate = (dateString) => {
-  if (!dateString) return "N/A";
-  const date = new Date(dateString);
-  return date.toLocaleDateString("en-US", {
+const formatDate = (value) => {
+  const candidate = getDisplayValue(value);
+  if (!candidate) return "N/A";
+
+  const parsed = Date.parse(candidate);
+  if (Number.isNaN(parsed)) return candidate;
+
+  const date = new Date(parsed);
+  return date.toLocaleString("en-US", {
     month: "numeric",
     day: "numeric",
     hour: "numeric",
@@ -2392,98 +2645,160 @@ const viewEvent = async (item) => {
     const res = await $api(`/admin/listings/${item.id}`, { method: "GET" });
 
     // Merge and normalize response data with fallbacks so UI tabs render consistently
+    const combined = { ...item, ...res };
+
+    const periodsData = (() => {
+      if (Array.isArray(combined.periods)) return combined.periods;
+      if (typeof combined.periods === "string") {
+        const parsed = parseJsonSafely(combined.periods);
+        if (Array.isArray(parsed)) return parsed;
+        if (parsed && isPlainObject(parsed)) return [parsed];
+        return ensureArray(combined.periods);
+      }
+      if (combined.periods && isPlainObject(combined.periods)) {
+        return [combined.periods];
+      }
+      return [];
+    })();
+
     const normalized = {
-      ...item,
-      ...res,
-      packages: res?.packages || item?.packages || [],
-      // Normalize special addons to camelCase property used by the template
-      specialAddons:
-        res?.specialAddons ||
-        res?.special_addons ||
-        item?.specialAddons ||
-        item?.special_addons ||
-        [],
-      // Normalize itineraries to plural camelCase used by the template
-      itineraries:
-        res?.itineraries ||
-        res?.itinerary ||
-        item?.itineraries ||
-        item?.itinerary ||
-        [],
-      activitiesIncluded:
-        res?.activitiesIncluded ||
-        res?.activities_included ||
-        item?.activitiesIncluded ||
-        item?.activities_included ||
-        [],
-      personalPolicies:
-        res?.personal_policies ||
-        res?.personalPolicies ||
-        item?.personal_policies ||
-        item?.personalPolicies ||
+      ...combined,
+      locations: ensureArray(
+        combined.locations || combined.location || combined.address || []
+      ).join(", "),
+      departure_capacity:
+        combined.departure_capacity ||
+        combined.max_capacity ||
+        combined.capacity ||
         null,
-      personalPoliciesText:
-        res?.personal_policies_text ||
-        res?.personalPoliciesText ||
-        item?.personal_policies_text ||
-        item?.personalPoliciesText ||
+      difficulty_level: combined.difficulty_level || combined.experience_level,
+      equipment_included:
+        combined.equipment_included || combined.activities_included,
+      language:
+        combined.language ||
+        ensureArray(combined.group_language).join(", ") ||
         null,
-      additionalNotes:
-        res?.additional_notes ||
-        res?.additionalNotes ||
-        item?.additional_notes ||
-        item?.additionalNotes ||
+      age_group: combined.age_group || combined.target_age_group,
+      activities_included: ensureArray(combined.activities_included),
+      whats_included: ensureArray(combined.whats_included),
+      whats_not_included: ensureArray(combined.whats_not_included),
+      maps_and_routes: ensureArray(combined.maps_and_routes),
+      listing_media: ensureArray(combined.listing_media),
+      promotional_video: ensureArray(combined.promotional_video),
+      additional_notes: ensureArray(combined.additional_notes),
+      providers_faq: ensureArray(combined.providers_faq),
+      personal_policies: ensureArray(combined.personal_policies),
+      group_language: ensureArray(combined.group_language),
+      available_days: ensureArray(combined.available_days),
+      requirements:
+        combined.requirements ||
+        combined.special_requirements ||
+        combined.requirement ||
         null,
-      providersFaq:
-        res?.providers_faq ||
-        res?.providersFaq ||
-        item?.providers_faq ||
-        item?.providersFaq ||
+      starting_date:
+        combined.starting_date ||
+        combined.start_date ||
+        combined.startDate ||
         null,
-      mapsAndRoutes:
-        res?.maps_and_routes ||
-        res?.mapsAndRoutes ||
-        item?.maps_and_routes ||
-        item?.mapsAndRoutes ||
-        [],
-      listingMedia:
-        res?.listing_media ||
-        res?.listingMedia ||
-        item?.listing_media ||
-        item?.listingMedia ||
-        [],
-      promotionalVideo:
-        res?.promotional_video ||
-        res?.promotionalVideo ||
-        item?.promotional_video ||
-        item?.promotionalVideo ||
-        [],
+      finishing_date:
+        combined.finishing_date ||
+        combined.end_date ||
+        combined.endDate ||
+        null,
+      min_capacity:
+        combined.min_capacity ??
+        combined.min_participants ??
+        combined.capacity_min ??
+        null,
+      max_capacity:
+        combined.max_capacity ??
+        combined.max_participants ??
+        combined.capacity_max ??
+        null,
+      periods: periodsData,
+      packages: ensureArray(combined.packages),
+      specialAddons: ensureArray(
+        combined.specialAddons || combined.special_addons
+      )
+        .filter(Boolean)
+        .map((addon) => ({
+          ...addon,
+          price: addon.price ?? addon.addon_price ?? null,
+        })),
+      itineraries: ensureArray(combined.itineraries || combined.itinerary).map(
+        (entry, index) => ({
+          ...entry,
+          title:
+            entry.day_title || entry.title || entry.name || `Day ${index + 1}`,
+        })
+      ),
     };
 
     selectedListing.value = normalized;
 
     console.log("Selected listing data:", selectedListing.value);
     showListingViewDialog.value = true;
-  } catch (e) {
-    console.error("Failed to load listing details", e);
-    // Fallback to original item data with normalized keys
-    selectedListing.value = {
-      ...item,
-      packages: item?.packages || [],
-      specialAddons: item?.specialAddons || item?.special_addons || [],
-      itineraries: item?.itineraries || item?.itinerary || [],
-      activitiesIncluded:
-        item?.activitiesIncluded || item?.activities_included || [],
-      personalPolicies:
-        item?.personal_policies || item?.personalPolicies || null,
-      personalPoliciesText:
-        item?.personal_policies_text || item?.personalPoliciesText || null,
-      additionalNotes: item?.additional_notes || item?.additionalNotes || null,
-      providersFaq: item?.providers_faq || item?.providersFaq || null,
-      mapsAndRoutes: item?.maps_and_routes || item?.mapsAndRoutes || [],
-      listingMedia: item?.listing_media || item?.listingMedia || [],
-      promotionalVideo: item?.promotional_video || item?.promotionalVideo || [],
-    };
+  } catch (error) {
+    console.error("Failed to load listing details", error);
+
+    const fallback = { ...item };
+    fallback.locations = ensureArray(
+      item.locations || item.location || item.address || []
+    ).join(", ");
+    fallback.departure_capacity =
+      item.departure_capacity || item.max_capacity || item.capacity || null;
+    fallback.difficulty_level =
+      item.difficulty_level || item.experience_level || null;
+    fallback.equipment_included =
+      item.equipment_included || item.activities_included || null;
+    fallback.language =
+      item.language || ensureArray(item.group_language).join(", ") || null;
+    fallback.age_group = item.age_group || item.target_age_group || null;
+    fallback.activities_included = ensureArray(item.activities_included);
+    fallback.whats_included = ensureArray(item.whats_included);
+    fallback.whats_not_included = ensureArray(item.whats_not_included);
+    fallback.maps_and_routes = ensureArray(item.maps_and_routes);
+    fallback.listing_media = ensureArray(item.listing_media);
+    fallback.promotional_video = ensureArray(item.promotional_video);
+    fallback.additional_notes = ensureArray(item.additional_notes);
+    fallback.providers_faq = ensureArray(item.providers_faq);
+    fallback.personal_policies = ensureArray(item.personal_policies);
+    fallback.group_language = ensureArray(item.group_language);
+    fallback.available_days = ensureArray(item.available_days);
+    fallback.requirements =
+      item.requirements ||
+      item.special_requirements ||
+      item.requirement ||
+      null;
+    fallback.starting_date =
+      item.starting_date || item.start_date || item.startDate || null;
+    fallback.finishing_date =
+      item.finishing_date || item.end_date || item.endDate || null;
+    fallback.min_capacity =
+      item.min_capacity ?? item.min_participants ?? item.capacity_min ?? null;
+    fallback.max_capacity =
+      item.max_capacity ?? item.max_participants ?? item.capacity_max ?? null;
+    fallback.periods = Array.isArray(item.periods)
+      ? item.periods
+      : ensureArray(item.periods);
+    fallback.packages = ensureArray(item.packages);
+    fallback.specialAddons = ensureArray(
+      item.specialAddons || item.special_addons
+    )
+      .filter(Boolean)
+      .map((addon) => ({
+        ...addon,
+        price: addon.price ?? addon.addon_price ?? null,
+      }));
+    fallback.itineraries = ensureArray(item.itineraries || item.itinerary).map(
+      (entry, index) => ({
+        ...entry,
+        title:
+          entry.day_title || entry.title || entry.name || `Day ${index + 1}`,
+      })
+    );
+
+    selectedListing.value = fallback;
     showListingViewDialog.value = true;
   }
 };
