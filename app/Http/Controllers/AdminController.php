@@ -691,7 +691,9 @@ class AdminController extends Controller
             'user.individualUser', 
             'user.companyUser', 
             'itineraries', 
-            'specialAddons'
+            'specialAddons',
+            'packages',
+            'periods'
         ]);
 
         // Search functionality

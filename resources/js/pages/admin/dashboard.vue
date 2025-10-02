@@ -1450,42 +1450,35 @@
                   </div>
                   <VRow>
                     <VCol cols="12" md="6">
-                      <strong>Date:</strong>
-                      {{ itinerary.day_date || itinerary.date || "N/A" }}
-                    </VCol>
-                    <VCol cols="12" md="6">
-                      <strong>Duration:</strong>
-                      {{
-                        itinerary.day_duration || itinerary.duration || "N/A"
-                      }}
+                      <strong>Day Number:</strong>
+                      {{ itinerary.day_number || (index + 1) }}
                     </VCol>
                     <VCol cols="12" md="6">
                       <strong>Location:</strong>
-                      {{
-                        itinerary.day_location || itinerary.location || "N/A"
-                      }}
+                      {{ itinerary.location || "N/A" }}
                     </VCol>
                     <VCol cols="12" md="6">
                       <strong>Accommodation:</strong>
-                      {{
-                        itinerary.day_accommodation ||
-                        itinerary.accommodation ||
-                        "N/A"
-                      }}
+                      {{ itinerary.accommodation || "N/A" }}
+                    </VCol>
+                    <VCol cols="12" md="6">
+                      <strong>Link:</strong>
+                      <a 
+                        v-if="itinerary.link" 
+                        :href="itinerary.link" 
+                        target="_blank"
+                        class="text-primary"
+                      >
+                        {{ itinerary.link }}
+                      </a>
+                      <span v-else>N/A</span>
                     </VCol>
                     <VCol
                       cols="12"
-                      v-if="itinerary.day_description || itinerary.description"
+                      v-if="itinerary.description"
                     >
                       <strong>Description:</strong>
-                      {{ itinerary.day_description || itinerary.description }}
-                    </VCol>
-                    <VCol
-                      cols="12"
-                      v-if="itinerary.day_activities || itinerary.activities"
-                    >
-                      <strong>Activities:</strong>
-                      {{ itinerary.day_activities || itinerary.activities }}
+                      {{ itinerary.description }}
                     </VCol>
                   </VRow>
                 </div>
@@ -1527,34 +1520,37 @@
                       class="me-2"
                     />
                     <strong>{{
-                      addon.addon_name || addon.title || `Addon ${index + 1}`
+                      addon.title || `Addon ${index + 1}`
                     }}</strong>
                   </div>
                   <VRow>
                     <VCol cols="12" md="6">
+                      <strong>Number:</strong>
+                      {{ addon.number || (index + 1) }}
+                    </VCol>
+                    <VCol cols="12" md="6">
                       <strong>Price:</strong>
-                      €{{
-                        formatCurrency(addon.addon_price || addon.price || 0)
-                      }}
+                      €{{ formatCurrency(addon.price || 0) }}
                     </VCol>
                     <VCol cols="12" md="6">
-                      <strong>Type:</strong>
-                      {{ addon.addon_type || addon.type || "N/A" }}
+                      <strong>Active:</strong>
+                      <VChip
+                        :color="addon.is_active ? 'success' : 'error'"
+                        size="small"
+                      >
+                        {{ addon.is_active ? 'Yes' : 'No' }}
+                      </VChip>
                     </VCol>
                     <VCol cols="12" md="6">
-                      <strong>Duration:</strong>
-                      {{ addon.addon_duration || addon.duration || "N/A" }}
-                    </VCol>
-                    <VCol cols="12" md="6">
-                      <strong>Capacity:</strong>
-                      {{ addon.addon_capacity || addon.capacity || "N/A" }}
+                      <strong>Order:</strong>
+                      {{ addon.order || 0 }}
                     </VCol>
                     <VCol
                       cols="12"
-                      v-if="addon.addon_description || addon.description"
+                      v-if="addon.description"
                     >
                       <strong>Description:</strong>
-                      {{ addon.addon_description || addon.description }}
+                      {{ addon.description }}
                     </VCol>
                   </VRow>
                 </div>
