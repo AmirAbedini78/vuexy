@@ -10,6 +10,7 @@ use App\Http\Middleware\ApiMiddleware;
 use App\Http\Controllers\Api\ListingController;
 use App\Http\Controllers\Api\ItineraryAccommodationController;
 use App\Http\Controllers\Api\SpecialAddonController;
+use App\Http\Controllers\Api\PackageController;
 use App\Http\Controllers\Api\AutoSaveListingController;
 use App\Http\Controllers\AdminController;
 use App\Http\Middleware\AdminMiddleware;
@@ -61,9 +62,15 @@ Route::middleware([ApiMiddleware::class])->group(function () {
 
     // ItineraryAccommodation CRUD (nested under listing)
     Route::apiResource('listings.itineraries', ItineraryAccommodationController::class);
+    Route::put('listings/{listing}/itineraries', [ItineraryAccommodationController::class, 'updateMultiple']);
 
     // SpecialAddon CRUD (nested under listing)
     Route::apiResource('listings.special-addons', SpecialAddonController::class);
+    Route::put('listings/{listing}/special-addons', [SpecialAddonController::class, 'updateMultiple']);
+
+    // Package CRUD (nested under listing)
+    Route::apiResource('listings.packages', PackageController::class);
+    Route::put('listings/{listing}/packages', [PackageController::class, 'updateMultiple']);
 
     // User Verification API
     Route::prefix('verification')->group(function () {

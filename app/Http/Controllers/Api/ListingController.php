@@ -12,7 +12,7 @@ class ListingController extends Controller
 {
     public function index()
     {
-        return ListingResource::collection(Listing::with(['itineraries', 'specialAddons'])->get());
+        return ListingResource::collection(Listing::with(['itineraries', 'specialAddons', 'packages'])->get());
     }
 
     public function store(Request $request)

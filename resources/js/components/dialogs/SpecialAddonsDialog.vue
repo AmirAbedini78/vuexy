@@ -280,7 +280,7 @@ function createEmptyAddon() {
     title: "",
     description: "",
     price: 0,
-    number: 1,
+    number: "1",
     is_active: true,
   };
 }
@@ -295,7 +295,7 @@ function addNewAddon() {
   console.log("addNewAddon called");
   console.log("localAddons before adding:", localAddons.value);
 
-  const newNumber = localAddons.value.length + 1;
+  const newNumber = (localAddons.value.length + 1).toString();
   const newAddon = {
     ...createEmptyAddon(),
     number: newNumber,

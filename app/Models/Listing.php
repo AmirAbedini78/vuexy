@@ -46,6 +46,11 @@ class Listing extends Model
         return $this->hasMany(SpecialAddon::class);
     }
 
+    public function packages()
+    {
+        return $this->hasMany(Package::class);
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

@@ -1305,7 +1305,7 @@
                   size="small"
                   class="ml-2"
                 >
-                  {{ formatListingType(selectedListing.listing_type) }}
+                  {{ formatListingType(selectedListing.listing_type) || 'Open Date' }}
                 </VChip>
               </VCol>
 
@@ -1376,8 +1376,8 @@
               <VCol cols="12" md="6">
                 <strong>Starting Date:</strong>
                 {{
-                  selectedListing.starting_date
-                    ? formatDate(selectedListing.starting_date)
+                  selectedListing.starting_date || selectedListing.start_date || selectedListing.startDate
+                    ? formatDate(selectedListing.starting_date || selectedListing.start_date || selectedListing.startDate)
                     : "N/A"
                 }}
               </VCol>
@@ -1385,8 +1385,8 @@
               <VCol cols="12" md="6">
                 <strong>Finishing Date:</strong>
                 {{
-                  selectedListing.finishing_date
-                    ? formatDate(selectedListing.finishing_date)
+                  selectedListing.finishing_date || selectedListing.end_date || selectedListing.endDate
+                    ? formatDate(selectedListing.finishing_date || selectedListing.end_date || selectedListing.endDate)
                     : "N/A"
                 }}
               </VCol>
@@ -1904,6 +1904,7 @@
                 {{
                   selectedListing.departure_capacity ||
                   selectedListing.max_capacity ||
+                  selectedListing.capacity ||
                   "N/A"
                 }}
               </VCol>
@@ -1940,7 +1941,9 @@
                 {{
                   formatDisplayValue(
                     selectedListing.age_group ||
-                      selectedListing.target_age_group
+                      selectedListing.target_age_group ||
+                      selectedListing.age_range ||
+                      selectedListing.age
                   ) || "N/A"
                 }}
               </VCol>
@@ -1950,7 +1953,9 @@
                 {{
                   formatDisplayValue(
                     selectedListing.available_days ||
-                      selectedListing.availableDays
+                      selectedListing.availableDays ||
+                      selectedListing.days_available ||
+                      selectedListing.operating_days
                   ) || "N/A"
                 }}
               </VCol>
@@ -1973,7 +1978,10 @@
                   {{
                     formatDisplayValue(
                       selectedListing.personal_policies_text ||
-                        selectedListing.personalPoliciesText
+                        selectedListing.personalPoliciesText ||
+                        selectedListing.policy_details ||
+                        selectedListing.policies_text ||
+                        selectedListing.terms_conditions
                     ) || "N/A"
                   }}
                 </div>
@@ -2010,7 +2018,10 @@
                   {{
                     formatDisplayValue(
                       selectedListing.requirements ||
-                        selectedListing.special_requirements
+                        selectedListing.special_requirements ||
+                        selectedListing.requirement ||
+                        selectedListing.participant_requirements ||
+                        selectedListing.booking_requirements
                     ) || "N/A"
                   }}
                 </div>
@@ -2678,7 +2689,7 @@ const viewEvent = async (item) => {
         combined.language ||
         ensureArray(combined.group_language).join(", ") ||
         null,
-      age_group: combined.age_group || combined.target_age_group,
+      age_group: combined.age_group || combined.target_age_group || combined.age_range || combined.age,
       activities_included: ensureArray(combined.activities_included),
       whats_included: ensureArray(combined.whats_included),
       whats_not_included: ensureArray(combined.whats_not_included),
@@ -2689,11 +2700,13 @@ const viewEvent = async (item) => {
       providers_faq: ensureArray(combined.providers_faq),
       personal_policies: ensureArray(combined.personal_policies),
       group_language: ensureArray(combined.group_language),
-      available_days: ensureArray(combined.available_days),
+      available_days: ensureArray(combined.available_days || combined.days_available || combined.operating_days),
       requirements:
         combined.requirements ||
         combined.special_requirements ||
         combined.requirement ||
+        combined.participant_requirements ||
+        combined.booking_requirements ||
         null,
       starting_date:
         combined.starting_date ||
@@ -2732,6 +2745,8 @@ const viewEvent = async (item) => {
             entry.day_title || entry.title || entry.name || `Day ${index + 1}`,
         })
       ),
+      // Add policy details mapping
+      personal_policies_text: combined.personal_policies_text || combined.policy_details || combined.policies_text || combined.terms_conditions,
     };
 
     selectedListing.value = normalized;
@@ -2753,7 +2768,7 @@ const viewEvent = async (item) => {
       item.equipment_included || item.activities_included || null;
     fallback.language =
       item.language || ensureArray(item.group_language).join(", ") || null;
-    fallback.age_group = item.age_group || item.target_age_group || null;
+    fallback.age_group = item.age_group || item.target_age_group || item.age_range || item.age || null;
     fallback.activities_included = ensureArray(item.activities_included);
     fallback.whats_included = ensureArray(item.whats_included);
     fallback.whats_not_included = ensureArray(item.whats_not_included);
@@ -2764,11 +2779,13 @@ const viewEvent = async (item) => {
     fallback.providers_faq = ensureArray(item.providers_faq);
     fallback.personal_policies = ensureArray(item.personal_policies);
     fallback.group_language = ensureArray(item.group_language);
-    fallback.available_days = ensureArray(item.available_days);
+    fallback.available_days = ensureArray(item.available_days || item.days_available || item.operating_days);
     fallback.requirements =
       item.requirements ||
       item.special_requirements ||
       item.requirement ||
+      item.participant_requirements ||
+      item.booking_requirements ||
       null;
     fallback.starting_date =
       item.starting_date || item.start_date || item.startDate || null;
@@ -2797,6 +2814,9 @@ const viewEvent = async (item) => {
           entry.day_title || entry.title || entry.name || `Day ${index + 1}`,
       })
     );
+    
+    // Add policy details mapping
+    fallback.personal_policies_text = item.personal_policies_text || item.policy_details || item.policies_text || item.terms_conditions;
 
     selectedListing.value = fallback;
     showListingViewDialog.value = true;

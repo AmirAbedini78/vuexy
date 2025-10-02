@@ -59,4 +59,34 @@ class ItineraryAccommodationController extends Controller
         $item->delete();
         return response()->json(['message' => 'ItineraryAccommodation deleted successfully']);
     }
+
+    /**
+     * Update multiple itineraries at once
+     */
+    public function updateMultiple(Request $request, $listingId)
+    {
+        $data = $request->validate([
+            'itineraries' => 'required|array',
+            'itineraries.*.day_number' => 'required|integer',
+            'itineraries.*.title' => 'nullable|string',
+            'itineraries.*.accommodation' => 'nullable|string',
+            'itineraries.*.location' => 'nullable|string',
+            'itineraries.*.description' => 'nullable|string',
+            'itineraries.*.link' => 'nullable|string',
+            'itineraries.*.order' => 'nullable|integer',
+        ]);
+
+        // Delete existing itineraries for this listing
+        ItineraryAccommodation::where('listing_id', $listingId)->delete();
+
+        // Create new itineraries
+        $itineraries = [];
+        foreach ($data['itineraries'] as $index => $itineraryData) {
+            $itineraryData['listing_id'] = $listingId;
+            $itineraryData['order'] = $itineraryData['order'] ?? $index;
+            $itineraries[] = ItineraryAccommodation::create($itineraryData);
+        }
+
+        return ItineraryAccommodationResource::collection($itineraries);
+    }
 }

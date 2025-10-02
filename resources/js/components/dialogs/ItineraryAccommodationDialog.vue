@@ -194,16 +194,16 @@
 import { useAutoSave } from "@/composables/useAutoSave";
 import { computed, ref, watch } from "vue";
 import {
-  VBtn,
-  VCard,
-  VCardActions,
-  VCardText,
-  VCardTitle,
-  VDialog,
-  VIcon,
-  VSpacer,
-  VTextField,
-  VTextarea,
+    VBtn,
+    VCard,
+    VCardActions,
+    VCardText,
+    VCardTitle,
+    VDialog,
+    VIcon,
+    VSpacer,
+    VTextField,
+    VTextarea,
 } from "vuetify/components";
 
 const props = defineProps({
@@ -323,6 +323,7 @@ function createEmptyDay() {
   return {
     id: Date.now(),
     number: 1,
+    day_number: 1,
     title: "",
     description: "",
     accommodation: "",
@@ -345,6 +346,7 @@ function addNewDay() {
   localDays.value.push({
     id: Date.now(),
     number: newDayNumber,
+    day_number: newDayNumber,
     title: "",
     description: "",
     accommodation: "",
@@ -360,6 +362,7 @@ function removeDay(index) {
     // Update numbers
     localDays.value.forEach((day, idx) => {
       day.number = idx + 1;
+      day.day_number = idx + 1;
     });
     if (selectedDayIndex.value >= localDays.value.length) {
       selectedDayIndex.value = localDays.value.length - 1;
@@ -375,9 +378,8 @@ function addLink() {
   day.link += " "; // Add a space to allow adding more links
 }
 
-async function handleDone() {
+function handleDone() {
   try {
-    loading.value = true;
     console.log("handleDone called");
     console.log("localDays before filtering:", localDays.value);
     console.log("editingIndex:", props.editingIndex);
@@ -400,11 +402,17 @@ async function handleDone() {
       return hasTitle;
     });
 
+    // Ensure day_number is set for all valid itineraries
+    validItineraries.forEach((day, index) => {
+      if (!day.day_number) {
+        day.day_number = day.number || (index + 1);
+      }
+    });
+
     console.log("validItineraries after filtering:", validItineraries);
 
     if (validItineraries.length === 0) {
       alert("Please add at least one day with a title");
-      loading.value = false;
       return;
     }
 
@@ -413,15 +421,10 @@ async function handleDone() {
 
     // Emit the data to parent with editing info
     emit("done", validItineraries, props.editingIndex);
-
-    // Close dialog
-    emit("update:modelValue", false);
-    emit("close");
+    closeDialog();
   } catch (error) {
-    console.error("Error saving itinerary:", error);
-    alert("Error saving itinerary data");
-  } finally {
-    loading.value = false;
+    console.error("Error in handleDone:", error);
+    alert("Error saving data");
   }
 }
 </script>

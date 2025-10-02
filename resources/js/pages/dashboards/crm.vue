@@ -17,6 +17,9 @@ const error = ref(null);
 
 // Modal state
 const showAddEventListingModal = ref(false);
+const showEventViewDialog = ref(false);
+const selectedEvent = ref(null);
+const activeEventTab = ref('basic');
 
 // Get logged-in user data from cookies
 const getLoggedInUser = () => {
@@ -182,6 +185,15 @@ const statusToColor = (s) =>
     inactive: "secondary",
     other_events: "secondary",
     edit_review: "warning",
+    draft: "grey",
+    pending: "orange",
+    rejected: "red",
+    published: "success",
+    unpublished: "grey",
+    archived: "secondary",
+    "on process": "orange",
+    "edit review pending": "warning",
+    "other events": "secondary"
   }[s] || "warning");
 
 const loadMyEvents = async () => {
@@ -246,8 +258,8 @@ const loadMyEvents = async () => {
     // Map regular listings
     const regularEvents = userListings.map((listing) => ({
       id: listing.id,
-      eventTitle: listing.listing_title || listing.title || "Untitled Event",
-      location: listing.locations || listing.location || "No location",
+      eventTitle: listing.listing_title || listing.title || listing.event_title || "Untitled Event",
+      location: listing.locations || listing.location || listing.address || "No location",
       advId: String(listing.id).padStart(5, "0"),
       status: (listing.status || "draft")
         .replace("other_events", "Other Events")
@@ -259,14 +271,39 @@ const loadMyEvents = async () => {
       listing_type: listing.listing_type || "single-date",
       created_at: listing.created_at,
       updated_at: listing.updated_at,
-      isAutoSave: false
+      isAutoSave: false,
+      // Add additional fields for better display
+      subtitle: listing.subtitle || listing.listing_subtitle,
+      description: listing.listing_description || listing.description,
+      currency: listing.currency || "EUR",
+      starting_date: listing.starting_date || listing.start_date,
+      finishing_date: listing.finishing_date || listing.end_date,
+      difficulty_level: listing.difficulty_level,
+      age_group: listing.age_group || listing.target_age_group,
+      available_days: listing.available_days,
+      requirements: listing.requirements || listing.special_requirements,
+      personal_policies: listing.personal_policies,
+      activities_included: listing.activities_included,
+      whats_included: listing.whats_included,
+      whats_not_included: listing.whats_not_included,
+      maps_and_routes: listing.maps_and_routes,
+      listing_media: listing.listing_media,
+      promotional_video: listing.promotional_video,
+      additional_notes: listing.additional_notes,
+      providers_faq: listing.providers_faq,
+      group_language: listing.group_language,
+      equipment_included: listing.equipment_included,
+      language: listing.language,
+      departure_capacity: listing.departure_capacity || listing.max_capacity,
+      terms_accepted: listing.terms_accepted,
+      user: listing.user
     }));
 
     // Map auto-save listings
     const autoSaveEvents = userAutoSaveListings.map((listing) => ({
       id: `auto-${listing.id}`,
-      eventTitle: listing.adventure_title || "Untitled Event (Auto-saved)",
-      location: listing.location || "No location",
+      eventTitle: listing.adventure_title || listing.title || "Untitled Event (Auto-saved)",
+      location: listing.location || listing.locations || "No location",
       advId: `AUTO-${String(listing.id).padStart(5, "0")}`,
       status: "On Process",
       participants: `${listing.min_capacity || 0}/${listing.max_capacity || 0}`,
@@ -276,7 +313,32 @@ const loadMyEvents = async () => {
       created_at: listing.created_at,
       updated_at: listing.updated_at,
       isAutoSave: true,
-      autoSaveId: listing.id
+      autoSaveId: listing.id,
+      // Add additional fields for better display
+      subtitle: listing.subtitle,
+      description: listing.description,
+      currency: listing.currency || "EUR",
+      starting_date: listing.starting_date || listing.start_date,
+      finishing_date: listing.finishing_date || listing.end_date,
+      difficulty_level: listing.difficulty_level,
+      age_group: listing.age_group || listing.target_age_group,
+      available_days: listing.available_days,
+      requirements: listing.requirements || listing.special_requirements,
+      personal_policies: listing.personal_policies,
+      activities_included: listing.activities_included,
+      whats_included: listing.whats_included,
+      whats_not_included: listing.whats_not_included,
+      maps_and_routes: listing.maps_and_routes,
+      listing_media: listing.listing_media,
+      promotional_video: listing.promotional_video,
+      additional_notes: listing.additional_notes,
+      providers_faq: listing.providers_faq,
+      group_language: listing.group_language,
+      equipment_included: listing.equipment_included,
+      language: listing.language,
+      departure_capacity: listing.departure_capacity || listing.max_capacity,
+      terms_accepted: listing.terms_accepted,
+      user: listing.user
     }));
 
     // Combine and sort by updated_at
@@ -316,6 +378,21 @@ const formatListingType = (type) => {
   return types[type] || 'Unknown';
 };
 
+const formatDate = (value) => {
+  if (!value) return "N/A";
+  
+  const parsed = Date.parse(value);
+  if (Number.isNaN(parsed)) return value;
+  
+  const date = new Date(parsed);
+  return date.toLocaleString("en-US", {
+    month: "numeric",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+  });
+};
+
 // Event actions
 const editEvent = (item) => {
   console.log('Edit event:', item);
@@ -330,14 +407,9 @@ const editEvent = (item) => {
 
 const viewEvent = (item) => {
   console.log('View event:', item);
-  if (item.isAutoSave) {
-    // For auto-save events, show auto-save data
-    console.log("Viewing auto-save event:", item);
-    // You can implement a modal or different view for auto-save events
-  } else {
-    // For regular events, navigate to event view page
-    router.push({ name: 'listing', query: { view: item.id } });
-  }
+  // Set the selected event for the modal
+  selectedEvent.value = item;
+  showEventViewDialog.value = true;
 };
 
 // Table headers
@@ -476,6 +548,9 @@ const actionCards = [
             <div class="event-title-cell">
               <div class="event-title">{{ item.eventTitle }}</div>
               <div class="event-location">{{ item.location }}</div>
+              <div v-if="item.subtitle" class="event-subtitle text-caption text-medium-emphasis">
+                {{ item.subtitle }}
+              </div>
             </div>
           </template>
 
@@ -493,7 +568,7 @@ const actionCards = [
           <!-- Price -->
           <template #item.price="{ item }">
             <span class="font-weight-medium">
-              €{{ item.price ? item.price.toFixed(2) : '0.00' }}
+              {{ item.currency || '€' }}{{ item.price ? item.price.toFixed(2) : '0.00' }}
             </span>
           </template>
 
@@ -508,16 +583,26 @@ const actionCards = [
             </VChip>
           </template>
 
+          <!-- Participants -->
+          <template #item.participants="{ item }">
+            <div class="participants-cell">
+              <div class="font-weight-medium">{{ item.participants }}</div>
+              <div v-if="item.departure_capacity" class="text-caption text-medium-emphasis">
+                Max: {{ item.departure_capacity }}
+              </div>
+            </div>
+          </template>
+
           <!-- Actions -->
           <template #item.actions="{ item }">
             <div class="d-flex gap-2">
-              <IconBtn size="small" @click="editEvent(item)">
+              <IconBtn size="small" @click="editEvent(item)" title="Edit Event">
                 <VIcon icon="tabler-edit" size="18" />
               </IconBtn>
-              <IconBtn size="small" @click="viewEvent(item)">
+              <IconBtn size="small" @click="viewEvent(item)" title="View Event">
                 <VIcon icon="tabler-eye" size="18" />
               </IconBtn>
-              <IconBtn size="small">
+              <IconBtn size="small" title="More Options">
                 <VIcon icon="tabler-dots-vertical" size="18" />
               </IconBtn>
             </div>
@@ -604,6 +689,241 @@ const actionCards = [
     v-model:is-dialog-visible="showAddEventListingModal"
     @submit="handleModalSubmit"
   />
+
+  <!-- Event View Dialog -->
+  <VDialog v-model="showEventViewDialog" max-width="1200" persistent>
+    <VCard>
+      <VCardTitle class="d-flex align-center justify-space-between">
+        <span>Event Details - {{ selectedEvent?.eventTitle || "Event" }}</span>
+        <VBtn
+          icon
+          variant="text"
+          size="small"
+          @click="showEventViewDialog = false"
+        >
+          <VIcon icon="tabler-x" />
+        </VBtn>
+      </VCardTitle>
+
+      <VCardText v-if="selectedEvent">
+        <VTabs v-model="activeEventTab" class="mb-4">
+          <VTab value="basic">Basic Information</VTab>
+          <VTab value="additional">Additional Info</VTab>
+        </VTabs>
+
+        <VTabsWindow v-model="activeEventTab">
+          <!-- Basic Information Tab -->
+          <VTabsWindowItem value="basic">
+            <VRow>
+              <VCol cols="12">
+                <h6 class="text-h6 font-weight-medium mb-3">Basic Information</h6>
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Title:</strong>
+                {{ selectedEvent.eventTitle || "N/A" }}
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Subtitle:</strong>
+                {{ selectedEvent.subtitle || "N/A" }}
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Type:</strong>
+                <VChip
+                  :color="getListingTypeColor(selectedEvent.listing_type)"
+                  size="small"
+                  class="ml-2"
+                >
+                  {{ formatListingType(selectedEvent.listing_type) }}
+                </VChip>
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Status:</strong>
+                <VChip
+                  :color="selectedEvent.statusColor"
+                  size="small"
+                  class="ml-2"
+                >
+                  {{ selectedEvent.status }}
+                </VChip>
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Price:</strong>
+                {{ selectedEvent.currency || '€' }}{{ selectedEvent.price ? selectedEvent.price.toFixed(2) : '0.00' }}
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Currency:</strong>
+                {{ selectedEvent.currency || "EUR" }}
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Min Capacity:</strong>
+                {{ selectedEvent.participants?.split('/')[0] || 0 }}
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Max Capacity:</strong>
+                {{ selectedEvent.participants?.split('/')[1] || 0 }}
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Location:</strong>
+                {{ selectedEvent.location || "N/A" }}
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Starting Date:</strong>
+                {{ selectedEvent.starting_date || "N/A" }}
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Finishing Date:</strong>
+                {{ selectedEvent.finishing_date || "N/A" }}
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Created:</strong>
+                {{ formatDate(selectedEvent.created_at) }}
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Updated:</strong>
+                {{ formatDate(selectedEvent.updated_at) }}
+              </VCol>
+
+              <VCol cols="12" v-if="selectedEvent.description">
+                <strong>Description:</strong>
+                <div class="mt-1">
+                  {{ selectedEvent.description }}
+                </div>
+              </VCol>
+            </VRow>
+          </VTabsWindowItem>
+
+          <!-- Additional Information Tab -->
+          <VTabsWindowItem value="additional">
+            <VRow>
+              <VCol cols="12">
+                <h6 class="text-h6 font-weight-medium mb-3">Additional Information</h6>
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Difficulty Level:</strong>
+                {{ selectedEvent.difficulty_level || "N/A" }}
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Age Group:</strong>
+                {{ selectedEvent.age_group || "N/A" }}
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Available Days:</strong>
+                {{ selectedEvent.available_days || "N/A" }}
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Equipment Included:</strong>
+                {{ selectedEvent.equipment_included || "N/A" }}
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Primary Language:</strong>
+                {{ selectedEvent.language || "N/A" }}
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Departure Capacity:</strong>
+                {{ selectedEvent.departure_capacity || "N/A" }}
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Requirements:</strong>
+                <div class="mt-1">
+                  {{ selectedEvent.requirements || "N/A" }}
+                </div>
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Personal Policies:</strong>
+                <div class="mt-1">
+                  {{ selectedEvent.personal_policies || "N/A" }}
+                </div>
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Activities Included:</strong>
+                <div class="mt-1">
+                  {{ selectedEvent.activities_included || "N/A" }}
+                </div>
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>What's Included:</strong>
+                <div class="mt-1">
+                  {{ selectedEvent.whats_included || "N/A" }}
+                </div>
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>What's Not Included:</strong>
+                <div class="mt-1">
+                  {{ selectedEvent.whats_not_included || "N/A" }}
+                </div>
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Maps & Routes:</strong>
+                <div class="mt-1">
+                  {{ selectedEvent.maps_and_routes || "N/A" }}
+                </div>
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Listing Media:</strong>
+                <div class="mt-1">
+                  {{ selectedEvent.listing_media || "N/A" }}
+                </div>
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Promotional Videos:</strong>
+                <div class="mt-1">
+                  {{ selectedEvent.promotional_video || "N/A" }}
+                </div>
+              </VCol>
+
+              <VCol cols="12" md="6">
+                <strong>Provider's FAQ:</strong>
+                <div class="mt-1">
+                  {{ selectedEvent.providers_faq || "N/A" }}
+                </div>
+              </VCol>
+
+              <VCol cols="12">
+                <strong>Additional Notes:</strong>
+                <div class="mt-1">
+                  {{ selectedEvent.additional_notes || "N/A" }}
+                </div>
+              </VCol>
+            </VRow>
+          </VTabsWindowItem>
+        </VTabsWindow>
+      </VCardText>
+
+      <VCardActions>
+        <VSpacer />
+        <VBtn color="primary" @click="showEventViewDialog = false">
+          Close
+        </VBtn>
+      </VCardActions>
+    </VCard>
+  </VDialog>
 </template>
 
 <style lang="scss" scoped>
@@ -696,6 +1016,23 @@ const actionCards = [
       color: #6c757d;
       line-height: 1.2;
       font-style: italic;
+    }
+
+    .event-subtitle {
+      font-size: 0.7rem;
+      color: #8e8e8e;
+      margin-top: 2px;
+      line-height: 1.2;
+    }
+  }
+
+  .participants-cell {
+    padding: 8px 0;
+
+    .font-weight-medium {
+      font-weight: 600;
+      color: #2c3e50;
+      font-size: 0.875rem;
     }
   }
 

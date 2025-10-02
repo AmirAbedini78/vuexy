@@ -57,4 +57,33 @@ class SpecialAddonController extends Controller
         $item->delete();
         return response()->json(['message' => 'SpecialAddon deleted successfully']);
     }
+
+    /**
+     * Update multiple special addons at once
+     */
+    public function updateMultiple(Request $request, $listingId)
+    {
+        $data = $request->validate([
+            'special_addons' => 'required|array',
+            'special_addons.*.number' => 'nullable|string',
+            'special_addons.*.title' => 'nullable|string',
+            'special_addons.*.description' => 'nullable|string',
+            'special_addons.*.price' => 'nullable|numeric',
+            'special_addons.*.is_active' => 'nullable|boolean',
+            'special_addons.*.order' => 'nullable|integer',
+        ]);
+
+        // Delete existing special addons for this listing
+        SpecialAddon::where('listing_id', $listingId)->delete();
+
+        // Create new special addons
+        $specialAddons = [];
+        foreach ($data['special_addons'] as $index => $addonData) {
+            $addonData['listing_id'] = $listingId;
+            $addonData['order'] = $addonData['order'] ?? $index;
+            $specialAddons[] = SpecialAddon::create($addonData);
+        }
+
+        return SpecialAddonResource::collection($specialAddons);
+    }
 }

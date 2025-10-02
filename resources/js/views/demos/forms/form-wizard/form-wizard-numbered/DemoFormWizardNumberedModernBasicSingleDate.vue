@@ -349,6 +349,87 @@ async function updateListing() {
     const data = await res.json();
     console.log("Listing updated successfully:", data);
 
+    // Save packages data if packages exist
+    if (packages.value && packages.value.length > 0) {
+      try {
+        console.log("Saving packages data:", packages.value);
+        const packagesResponse = await fetch(`/api/listings/${listingId.value}/packages`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ packages: packages.value }),
+        });
+
+        if (!packagesResponse.ok) {
+          const errorText = await packagesResponse.text();
+          console.error("Failed to save packages:", packagesResponse.status, errorText);
+          throw new Error(`Failed to save packages: ${packagesResponse.status} ${errorText}`);
+        }
+
+        const packagesData = await packagesResponse.json();
+        console.log("Packages saved successfully:", packagesData);
+      } catch (packagesError) {
+        console.error("Error saving packages:", packagesError);
+        alert("خطا در ذخیره پکیج‌ها: " + packagesError.message);
+        throw packagesError;
+      }
+    }
+
+    // Save itineraries data if itineraries exist
+    if (itineraries.value && itineraries.value.length > 0) {
+      try {
+        console.log("Saving itineraries data:", itineraries.value);
+        const itinerariesResponse = await fetch(`/api/listings/${listingId.value}/itineraries`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ itineraries: itineraries.value }),
+        });
+
+        if (!itinerariesResponse.ok) {
+          const errorText = await itinerariesResponse.text();
+          console.error("Failed to save itineraries:", itinerariesResponse.status, errorText);
+          throw new Error(`Failed to save itineraries: ${itinerariesResponse.status} ${errorText}`);
+        }
+
+        const itinerariesData = await itinerariesResponse.json();
+        console.log("Itineraries saved successfully:", itinerariesData);
+      } catch (itinerariesError) {
+        console.error("Error saving itineraries:", itinerariesError);
+        alert("خطا در ذخیره برنامه سفر: " + itinerariesError.message);
+        throw itinerariesError;
+      }
+    }
+
+    // Save special addons data if special addons exist
+    if (specialAddons.value && specialAddons.value.length > 0) {
+      try {
+        // Ensure number field is string for all addons
+        const addonsToSave = specialAddons.value.map(addon => ({
+          ...addon,
+          number: addon.number ? addon.number.toString() : "1"
+        }));
+        
+        console.log("Saving special addons data:", addonsToSave);
+        const specialAddonsResponse = await fetch(`/api/listings/${listingId.value}/special-addons`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ special_addons: addonsToSave }),
+        });
+
+        if (!specialAddonsResponse.ok) {
+          const errorText = await specialAddonsResponse.text();
+          console.error("Failed to save special addons:", specialAddonsResponse.status, errorText);
+          throw new Error(`Failed to save special addons: ${specialAddonsResponse.status} ${errorText}`);
+        }
+
+        const specialAddonsData = await specialAddonsResponse.json();
+        console.log("Special addons saved successfully:", specialAddonsData);
+      } catch (specialAddonsError) {
+        console.error("Error saving special addons:", specialAddonsError);
+        alert("خطا در ذخیره افزونه‌های ویژه: " + specialAddonsError.message);
+        throw specialAddonsError;
+      }
+    }
+
     // مقداردهی مجدد فرم با داده دریافتی (در صورت نیاز)
   } catch (e) {
     console.error("Error updating listing:", e);
@@ -489,6 +570,30 @@ async function handleItineraryDone(itineraryData, editingIndex = -1) {
 
     console.log("Itineraries after update:", itineraries.value);
     console.log("Total itineraries count:", itineraries.value.length);
+
+    // Save to database if listingId exists
+    if (listingId.value && itineraries.value.length > 0) {
+      try {
+        console.log("Saving itineraries to database:", itineraries.value);
+        const response = await fetch(`/api/listings/${listingId.value}/itineraries`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ itineraries: itineraries.value }),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Failed to save itineraries:", response.status, errorText);
+          throw new Error(`Failed to save itineraries: ${response.status} ${errorText}`);
+        }
+
+        const data = await response.json();
+        console.log("Itineraries saved successfully:", data);
+      } catch (saveError) {
+        console.error("Error saving itineraries:", saveError);
+        alert("خطا در ذخیره برنامه سفر: " + saveError.message);
+      }
+    }
   } catch (error) {
     console.error("Error in handleItineraryDone:", error);
     alert("خطا در ذخیره اطلاعات");
@@ -566,6 +671,36 @@ async function handleSpecialAddonDone(addonsData, editingIndex = -1) {
 
     console.log("Special addons after update:", specialAddons.value);
     console.log("Total addons count:", specialAddons.value.length);
+
+    // Save to database if listingId exists
+    if (listingId.value && specialAddons.value.length > 0) {
+      try {
+        // Ensure number field is string for all addons
+        const addonsToSave = specialAddons.value.map(addon => ({
+          ...addon,
+          number: addon.number ? addon.number.toString() : "1"
+        }));
+        
+        console.log("Saving special addons to database:", addonsToSave);
+        const response = await fetch(`/api/listings/${listingId.value}/special-addons`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ special_addons: addonsToSave }),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Failed to save special addons:", response.status, errorText);
+          throw new Error(`Failed to save special addons: ${response.status} ${errorText}`);
+        }
+
+        const data = await response.json();
+        console.log("Special addons saved successfully:", data);
+      } catch (saveError) {
+        console.error("Error saving special addons:", saveError);
+        alert("خطا در ذخیره افزونه‌های ویژه: " + saveError.message);
+      }
+    }
   } catch (error) {
     console.error("Error in handleSpecialAddonDone:", error);
     alert("خطا در ذخیره اطلاعات");
@@ -628,6 +763,30 @@ async function handlePackageDone(packagesData, editingIndex = -1) {
 
     console.log("Packages after update:", packages.value);
     console.log("Total packages count:", packages.value.length);
+
+    // Save to database if listingId exists
+    if (listingId.value && packages.value.length > 0) {
+      try {
+        console.log("Saving packages to database:", packages.value);
+        const response = await fetch(`/api/listings/${listingId.value}/packages`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ packages: packages.value }),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Failed to save packages:", response.status, errorText);
+          throw new Error(`Failed to save packages: ${response.status} ${errorText}`);
+        }
+
+        const data = await response.json();
+        console.log("Packages saved successfully:", data);
+      } catch (saveError) {
+        console.error("Error saving packages:", saveError);
+        alert("خطا در ذخیره پکیج‌ها: " + saveError.message);
+      }
+    }
   } catch (error) {
     console.error("Error in handlePackageDone:", error);
     alert("خطا در ذخیره اطلاعات");
