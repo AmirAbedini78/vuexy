@@ -516,8 +516,20 @@ const closeDialog = () => {
 };
 
 const handleDone = () => {
+  // Map the data to match backend expectations
+  const mappedPeriods = localPeriods.value.map(period => ({
+    title: period.title,
+    start_date: period.startingDate,
+    end_date: period.finishingDate,
+    price: period.price,
+    min_capacity: period.minCapacity,
+    max_capacity: period.maxCapacity,
+    is_active: true,
+    order: 0
+  }));
+
   // First emit the done event
-  emit("done", localPeriods.value, props.editingIndex);
+  emit("done", mappedPeriods, props.editingIndex);
 
   // Close modal by updating the model value
   emit("update:modelValue", false);
