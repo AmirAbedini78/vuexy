@@ -40,7 +40,7 @@
         <template #item.listing_title="{ item }">
           <div>
             <div class="font-weight-medium">
-              {{ item.listing_title || "N/A" }}
+              {{ item.listing_title || "Not specified" }}
             </div>
             <div class="text-caption text-medium-emphasis">
               {{ item.subtitle || "No subtitle" }}
@@ -113,9 +113,9 @@
         <!-- Provider Column -->
         <template #item.provider="{ item }">
           <div>
-            <div class="font-weight-medium">{{ item.user?.name || "N/A" }}</div>
+            <div class="font-weight-medium">{{ item.user?.name || "Not specified" }}</div>
             <div class="text-caption text-medium-emphasis">
-              {{ item.user?.email || "N/A" }}
+              {{ item.user?.email || "Not specified" }}
             </div>
           </div>
         </template>
@@ -176,7 +176,7 @@
   <VDialog v-model="showListingViewDialog" max-width="1200" persistent>
     <VCard>
       <VCardTitle class="d-flex align-center justify-space-between">
-        <span>Listing Details - {{ selectedListing?.listing_title || 'N/A' }}</span>
+        <span>Listing Details - {{ selectedListing?.listing_title || 'No title' }}</span>
         <VBtn
           icon
           variant="text"
@@ -207,12 +207,12 @@
 
               <VCol cols="12" md="6">
                 <strong>Title:</strong>
-                {{ selectedListing.listing_title || "N/A" }}
+                {{ selectedListing.listing_title || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Subtitle:</strong>
-                {{ selectedListing.subtitle || "N/A" }}
+                {{ selectedListing.subtitle || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
@@ -239,12 +239,12 @@
 
               <VCol cols="12" md="6">
                 <strong>Starting Date:</strong>
-                {{ selectedListing.starting_date || "N/A" }}
+                {{ selectedListing.starting_date || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Finishing Date:</strong>
-                {{ selectedListing.finishing_date || "N/A" }}
+                {{ selectedListing.finishing_date || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
@@ -260,52 +260,52 @@
 
               <VCol cols="12" md="6">
                 <strong>Experience Level:</strong>
-                {{ selectedListing.experience_level || "N/A" }}
+                {{ selectedListing.experience_level || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Fitness Level:</strong>
-                {{ selectedListing.fitness_level || "N/A" }}
+                {{ selectedListing.fitness_level || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Group Language:</strong>
-                {{ selectedListing.group_language || "N/A" }}
+                {{ selectedListing.group_language || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Locations:</strong>
-                {{ selectedListing.locations || "N/A" }}
+                {{ selectedListing.locations || "Not specified" }}
               </VCol>
 
               <VCol cols="12">
                 <strong>Description:</strong>
-                <div class="mt-1">{{ selectedListing.listing_description || "N/A" }}</div>
+                <div class="mt-1">{{ selectedListing.listing_description || "Not specified" }}</div>
               </VCol>
 
               <VCol cols="12">
                 <strong>Activities Included:</strong>
-                <div class="mt-1">{{ selectedListing.activities_included || "N/A" }}</div>
+                <div class="mt-1">{{ selectedListing.activities_included || "Not specified" }}</div>
               </VCol>
 
               <VCol cols="12">
                 <strong>What's Included:</strong>
-                <div class="mt-1">{{ selectedListing.whats_included || "N/A" }}</div>
+                <div class="mt-1">{{ selectedListing.whats_included || "Not specified" }}</div>
               </VCol>
 
               <VCol cols="12">
                 <strong>What's Not Included:</strong>
-                <div class="mt-1">{{ selectedListing.whats_not_included || "N/A" }}</div>
+                <div class="mt-1">{{ selectedListing.whats_not_included || "Not specified" }}</div>
               </VCol>
 
               <VCol cols="12">
                 <strong>Additional Notes:</strong>
-                <div class="mt-1">{{ selectedListing.additional_notes || "N/A" }}</div>
+                <div class="mt-1">{{ selectedListing.additional_notes || "Not specified" }}</div>
               </VCol>
 
               <VCol cols="12">
                 <strong>Provider's FAQ:</strong>
-                <div class="mt-1">{{ selectedListing.providers_faq || "N/A" }}</div>
+                <div class="mt-1">{{ selectedListing.providers_faq || "Not specified" }}</div>
               </VCol>
             </VRow>
           </VTabsWindowItem>
@@ -319,22 +319,22 @@
 
               <VCol cols="12" md="6">
                 <strong>Provider Name:</strong>
-                {{ selectedListing.user?.name || "N/A" }}
+                {{ selectedListing.user?.name || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Provider Email:</strong>
-                {{ selectedListing.user?.email || "N/A" }}
+                {{ selectedListing.user?.email || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>User ID:</strong>
-                {{ selectedListing.user?.id || "N/A" }}
+                {{ selectedListing.user?.id || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>User Role:</strong>
-                {{ selectedListing.user?.role || "N/A" }}
+                {{ selectedListing.user?.role || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
@@ -344,7 +344,7 @@
                   size="small"
                   class="ml-2"
                 >
-                  {{ selectedListing.user?.status || "N/A" }}
+                  {{ selectedListing.user?.status || "Not specified" }}
                 </VChip>
               </VCol>
 
@@ -361,12 +361,12 @@
 
               <VCol cols="12" md="6">
                 <strong>Created At:</strong>
-                {{ selectedListing.user?.created_at ? formatDate(selectedListing.user.created_at) : "N/A" }}
+                {{ selectedListing.user?.created_at ? formatDate(selectedListing.user.created_at) : "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Updated At:</strong>
-                {{ selectedListing.user?.updated_at ? formatDate(selectedListing.user.updated_at) : "N/A" }}
+                {{ selectedListing.user?.updated_at ? formatDate(selectedListing.user.updated_at) : "Not specified" }}
               </VCol>
 
               <!-- Individual User Details -->
@@ -377,47 +377,47 @@
 
                 <VCol cols="12" md="6">
                   <strong>Full Name:</strong>
-                  {{ selectedListing.user.individualUser.full_name || "N/A" }}
+                  {{ selectedListing.user.individualUser.full_name || "Not specified" }}
                 </VCol>
 
                 <VCol cols="12" md="6">
                   <strong>Nationality:</strong>
-                  {{ selectedListing.user.individualUser.nationality || "N/A" }}
+                  {{ selectedListing.user.individualUser.nationality || "Not specified" }}
                 </VCol>
 
                 <VCol cols="12" md="6">
                   <strong>Date of Birth:</strong>
-                  {{ selectedListing.user.individualUser.dob ? formatDate(selectedListing.user.individualUser.dob) : "N/A" }}
+                  {{ selectedListing.user.individualUser.dob ? formatDate(selectedListing.user.individualUser.dob) : "Not specified" }}
                 </VCol>
 
                 <VCol cols="12" md="6">
                   <strong>Languages:</strong>
-                  {{ Array.isArray(selectedListing.user.individualUser.languages) ? selectedListing.user.individualUser.languages.join(", ") : selectedListing.user.individualUser.languages || "N/A" }}
+                  {{ Array.isArray(selectedListing.user.individualUser.languages) ? selectedListing.user.individualUser.languages.join(", ") : selectedListing.user.individualUser.languages || "Not specified" }}
                 </VCol>
 
                 <VCol cols="12" md="6">
                   <strong>Activity Specialization:</strong>
-                  {{ selectedListing.user.individualUser.activity_specialization || "N/A" }}
+                  {{ selectedListing.user.individualUser.activity_specialization || "Not specified" }}
                 </VCol>
 
                 <VCol cols="12" md="6">
                   <strong>Years of Experience:</strong>
-                  {{ selectedListing.user.individualUser.years_of_experience || "N/A" }}
+                  {{ selectedListing.user.individualUser.years_of_experience || "Not specified" }}
                 </VCol>
 
                 <VCol cols="12" md="6">
                   <strong>Country of Operation:</strong>
-                  {{ selectedListing.user.individualUser.country_of_operation || "N/A" }}
+                  {{ selectedListing.user.individualUser.country_of_operation || "Not specified" }}
                 </VCol>
 
                 <VCol cols="12" md="6">
                   <strong>Emergency Contact:</strong>
-                  {{ selectedListing.user.individualUser.emergency_contact_name || "N/A" }}
+                  {{ selectedListing.user.individualUser.emergency_contact_name || "Not specified" }}
                 </VCol>
 
                 <VCol cols="12" md="6">
                   <strong>Emergency Phone:</strong>
-                  {{ selectedListing.user.individualUser.emergency_contact_phone || "N/A" }}
+                  {{ selectedListing.user.individualUser.emergency_contact_phone || "Not specified" }}
                 </VCol>
 
                 <VCol cols="12" md="6">
@@ -427,7 +427,7 @@
                     size="small"
                     class="ml-2"
                   >
-                    {{ selectedListing.user.individualUser.want_to_be_listed || "N/A" }}
+                    {{ selectedListing.user.individualUser.want_to_be_listed || "Not specified" }}
                   </VChip>
                 </VCol>
 
@@ -444,38 +444,38 @@
 
                 <VCol cols="12">
                   <strong>Address:</strong>
-                  {{ selectedListing.user.individualUser.address1 || "N/A" }}
+                  {{ selectedListing.user.individualUser.address1 || "Not specified" }}
                   <span v-if="selectedListing.user.individualUser.address2">, {{ selectedListing.user.individualUser.address2 }}</span>
                 </VCol>
 
                 <VCol cols="12" md="4">
                   <strong>City:</strong>
-                  {{ selectedListing.user.individualUser.city || "N/A" }}
+                  {{ selectedListing.user.individualUser.city || "Not specified" }}
                 </VCol>
 
                 <VCol cols="12" md="4">
                   <strong>State:</strong>
-                  {{ selectedListing.user.individualUser.state || "N/A" }}
+                  {{ selectedListing.user.individualUser.state || "Not specified" }}
                 </VCol>
 
                 <VCol cols="12" md="4">
                   <strong>Postal Code:</strong>
-                  {{ selectedListing.user.individualUser.postal_code || "N/A" }}
+                  {{ selectedListing.user.individualUser.postal_code || "Not specified" }}
                 </VCol>
 
                 <VCol cols="12" md="6">
                   <strong>Country:</strong>
-                  {{ selectedListing.user.individualUser.country || "N/A" }}
+                  {{ selectedListing.user.individualUser.country || "Not specified" }}
                 </VCol>
 
                 <VCol cols="12">
                   <strong>Short Bio:</strong>
-                  <div class="mt-1">{{ selectedListing.user.individualUser.short_bio || "N/A" }}</div>
+                  <div class="mt-1">{{ selectedListing.user.individualUser.short_bio || "Not specified" }}</div>
                 </VCol>
 
                 <VCol cols="12">
                   <strong>Certifications:</strong>
-                  <div class="mt-1">{{ selectedListing.user.individualUser.certifications || "N/A" }}</div>
+                  <div class="mt-1">{{ selectedListing.user.individualUser.certifications || "Not specified" }}</div>
                 </VCol>
               </template>
 
@@ -487,32 +487,32 @@
 
                 <VCol cols="12" md="6">
                   <strong>Company Name:</strong>
-                  {{ selectedListing.user.companyUser.company_name || "N/A" }}
+                  {{ selectedListing.user.companyUser.company_name || "Not specified" }}
                 </VCol>
 
                 <VCol cols="12" md="6">
                   <strong>VAT ID:</strong>
-                  {{ selectedListing.user.companyUser.vat_id || "N/A" }}
+                  {{ selectedListing.user.companyUser.vat_id || "Not specified" }}
                 </VCol>
 
                 <VCol cols="12" md="6">
                   <strong>Contact Person:</strong>
-                  {{ selectedListing.user.companyUser.contact_person || "N/A" }}
+                  {{ selectedListing.user.companyUser.contact_person || "Not specified" }}
                 </VCol>
 
                 <VCol cols="12" md="6">
                   <strong>Country of Registration:</strong>
-                  {{ selectedListing.user.companyUser.country_of_registration || "N/A" }}
+                  {{ selectedListing.user.companyUser.country_of_registration || "Not specified" }}
                 </VCol>
 
                 <VCol cols="12" md="6">
                   <strong>Business Type:</strong>
-                  {{ selectedListing.user.companyUser.business_type || "N/A" }}
+                  {{ selectedListing.user.companyUser.business_type || "Not specified" }}
                 </VCol>
 
                 <VCol cols="12" md="6">
                   <strong>Activity Specialization:</strong>
-                  {{ selectedListing.user.companyUser.activity_specialization || "N/A" }}
+                  {{ selectedListing.user.companyUser.activity_specialization || "Not specified" }}
                 </VCol>
 
                 <VCol cols="12" md="6">
@@ -520,7 +520,7 @@
                   <a v-if="selectedListing.user.companyUser.company_website" :href="selectedListing.user.companyUser.company_website" target="_blank" class="text-primary">
                     {{ selectedListing.user.companyUser.company_website }}
                   </a>
-                  <span v-else>N/A</span>
+                  <span v-else>Not available</span>
                 </VCol>
 
                 <VCol cols="12" md="6">
@@ -530,7 +530,7 @@
                     size="small"
                     class="ml-2"
                   >
-                    {{ selectedListing.user.companyUser.want_to_be_listed || "N/A" }}
+                    {{ selectedListing.user.companyUser.want_to_be_listed || "Not specified" }}
                   </VChip>
                 </VCol>
 
@@ -547,38 +547,38 @@
 
                 <VCol cols="12">
                   <strong>Address:</strong>
-                  {{ selectedListing.user.companyUser.address1 || "N/A" }}
+                  {{ selectedListing.user.companyUser.address1 || "Not specified" }}
                   <span v-if="selectedListing.user.companyUser.address2">, {{ selectedListing.user.companyUser.address2 }}</span>
                 </VCol>
 
                 <VCol cols="12" md="4">
                   <strong>City:</strong>
-                  {{ selectedListing.user.companyUser.city || "N/A" }}
+                  {{ selectedListing.user.companyUser.city || "Not specified" }}
                 </VCol>
 
                 <VCol cols="12" md="4">
                   <strong>State:</strong>
-                  {{ selectedListing.user.companyUser.state || "N/A" }}
+                  {{ selectedListing.user.companyUser.state || "Not specified" }}
                 </VCol>
 
                 <VCol cols="12" md="4">
                   <strong>Postal Code:</strong>
-                  {{ selectedListing.user.companyUser.postal_code || "N/A" }}
+                  {{ selectedListing.user.companyUser.postal_code || "Not specified" }}
                 </VCol>
 
                 <VCol cols="12" md="6">
                   <strong>Country:</strong>
-                  {{ selectedListing.user.companyUser.country || "N/A" }}
+                  {{ selectedListing.user.companyUser.country || "Not specified" }}
                 </VCol>
 
                 <VCol cols="12">
                   <strong>Short Bio:</strong>
-                  <div class="mt-1">{{ selectedListing.user.companyUser.short_bio || "N/A" }}</div>
+                  <div class="mt-1">{{ selectedListing.user.companyUser.short_bio || "Not specified" }}</div>
                 </VCol>
 
                 <VCol cols="12">
                   <strong>Certifications:</strong>
-                  <div class="mt-1">{{ selectedListing.user.companyUser.certifications || "N/A" }}</div>
+                  <div class="mt-1">{{ selectedListing.user.companyUser.certifications || "Not specified" }}</div>
                 </VCol>
               </template>
             </VRow>
@@ -601,11 +601,11 @@
                       <VRow>
                         <VCol cols="12" md="6">
                           <strong>Accommodation:</strong>
-                          {{ day.accommodation || "N/A" }}
+                          {{ day.accommodation || "Not specified" }}
                         </VCol>
                         <VCol cols="12" md="6">
                           <strong>Location:</strong>
-                          {{ day.location || "N/A" }}
+                          {{ day.location || "Not specified" }}
                         </VCol>
                         <VCol cols="12" v-if="day.link">
                           <strong>Link:</strong>
@@ -613,7 +613,7 @@
                         </VCol>
                         <VCol cols="12">
                           <strong>Description:</strong>
-                          <div class="mt-1">{{ day.description || "N/A" }}</div>
+                          <div class="mt-1">{{ day.description || "Not specified" }}</div>
                         </VCol>
                       </VRow>
                     </VCardText>
@@ -654,7 +654,7 @@
                       <VRow>
                         <VCol cols="12" md="6">
                           <strong>Number:</strong>
-                          {{ addon.number || "N/A" }}
+                          {{ addon.number || "Not specified" }}
                         </VCol>
                         <VCol cols="12" md="6">
                           <strong>Price:</strong>
@@ -662,11 +662,11 @@
                         </VCol>
                         <VCol cols="12" md="6">
                           <strong>Order:</strong>
-                          {{ addon.order || "N/A" }}
+                          {{ addon.order || "Not specified" }}
                         </VCol>
                         <VCol cols="12">
                           <strong>Description:</strong>
-                          <div class="mt-1">{{ addon.description || "N/A" }}</div>
+                          <div class="mt-1">{{ addon.description || "Not specified" }}</div>
                         </VCol>
                       </VRow>
                     </VCardText>
@@ -703,7 +703,7 @@
                       {{ media.name || media.filename || `Media ${index + 1}` }}
                     </VChip>
                   </template>
-                  <span v-else>N/A</span>
+                  <span v-else>Not available</span>
                 </div>
               </VCol>
 
@@ -720,7 +720,7 @@
                       {{ video.name || video.filename || `Video ${index + 1}` }}
                     </VChip>
                   </template>
-                  <span v-else>N/A</span>
+                  <span v-else>Not available</span>
                 </div>
               </VCol>
 
@@ -737,7 +737,7 @@
                       {{ route.name || route.filename || `Route ${index + 1}` }}
                     </VChip>
                   </template>
-                  <span v-else>N/A</span>
+                  <span v-else>Not available</span>
                 </div>
               </VCol>
 
@@ -754,7 +754,7 @@
                       {{ activity.name || activity || `Activity ${index + 1}` }}
                     </VChip>
                   </template>
-                  <span v-else>N/A</span>
+                  <span v-else>Not available</span>
                 </div>
               </VCol>
             </VRow>
@@ -769,7 +769,7 @@
 
               <VCol cols="12" md="6">
                 <strong>Personal Policies:</strong>
-                {{ selectedListing.personal_policies || "N/A" }}
+                {{ selectedListing.personal_policies || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
@@ -785,7 +785,7 @@
 
               <VCol cols="12">
                 <strong>Personal Policies Text:</strong>
-                <div class="mt-1">{{ selectedListing.personal_policies_text || "N/A" }}</div>
+                <div class="mt-1">{{ selectedListing.personal_policies_text || "Not specified" }}</div>
               </VCol>
 
               <VCol cols="12">
@@ -995,7 +995,7 @@ const formatListingType = (type) => {
     "open-date": "Open Date",
     other: "Other",
   };
-  return types[type] || type || "N/A";
+  return types[type] || type || "Not specified";
 };
 
 const viewListing = (listing) => {

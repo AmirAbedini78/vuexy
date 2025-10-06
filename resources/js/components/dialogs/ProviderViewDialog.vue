@@ -40,18 +40,18 @@
 
           <VCol cols="12" md="6">
             <strong>Specialization:</strong>
-            {{ provider.activity_specialization || "N/A" }}
+            {{ provider.activity_specialization || "Not specified" }}
           </VCol>
 
           <VCol cols="12" md="6">
             <strong>Country:</strong>
-            {{ provider.country_of_operation || provider.country || "N/A" }}
+            {{ provider.country_of_operation || provider.country || "Not specified" }}
           </VCol>
 
           <VCol cols="12" md="6">
             <strong>Experience:</strong>
             {{
-              provider.years_of_experience || provider.business_type || "N/A"
+              provider.years_of_experience || provider.business_type || "Not specified"
             }}
           </VCol>
 
@@ -91,42 +91,42 @@
 
             <VCol cols="12" md="6">
               <strong>Nationality:</strong>
-              {{ provider.nationality || "N/A" }}
+              {{ provider.nationality || "Not specified" }}
             </VCol>
 
             <VCol cols="12" md="6">
               <strong>Address:</strong>
-              {{ provider.address1 || "N/A" }}
+              {{ provider.address1 || "Not specified" }}
             </VCol>
 
             <VCol cols="12" md="6">
               <strong>City:</strong>
-              {{ provider.city || "N/A" }}
+              {{ provider.city || "Not specified" }}
             </VCol>
 
             <VCol cols="12" md="6">
               <strong>State:</strong>
-              {{ provider.state || "N/A" }}
+              {{ provider.state || "Not specified" }}
             </VCol>
 
             <VCol cols="12" md="6">
               <strong>Postal Code:</strong>
-              {{ provider.postal_code || "N/A" }}
+              {{ provider.postal_code || "Not specified" }}
             </VCol>
 
             <VCol cols="12" md="6">
               <strong>Emergency Contact:</strong>
-              {{ provider.emergency_contact_name || "N/A" }}
+              {{ provider.emergency_contact_name || "Not specified" }}
             </VCol>
 
             <VCol cols="12" md="6">
               <strong>Emergency Phone:</strong>
-              {{ provider.emergency_contact_phone || "N/A" }}
+              {{ provider.emergency_contact_phone || "Not specified" }}
             </VCol>
 
             <VCol cols="12" md="6">
               <strong>Date of Birth:</strong>
-              {{ provider.dob ? formatDate(provider.dob) : "N/A" }}
+              {{ provider.dob ? formatDate(provider.dob) : "Not specified" }}
             </VCol>
 
             <VCol cols="12" md="6">
@@ -134,13 +134,13 @@
               {{
                 Array.isArray(provider.languages)
                   ? provider.languages.join(", ")
-                  : "N/A"
+                  : "Not specified"
               }}
             </VCol>
 
             <VCol cols="12">
               <strong>Short Bio:</strong>
-              <p class="mt-1">{{ provider.short_bio || "N/A" }}</p>
+              <p class="mt-1">{{ provider.short_bio || "Not specified" }}</p>
             </VCol>
           </template>
 
@@ -154,22 +154,22 @@
 
             <VCol cols="12" md="6">
               <strong>VAT ID:</strong>
-              {{ provider.vat_id || "N/A" }}
+              {{ provider.vat_id || "Not specified" }}
             </VCol>
 
             <VCol cols="12" md="6">
               <strong>Contact Person:</strong>
-              {{ provider.contact_person || "N/A" }}
+              {{ provider.contact_person || "Not specified" }}
             </VCol>
 
             <VCol cols="12" md="6">
               <strong>Country of Registration:</strong>
-              {{ provider.country_of_registration || "N/A" }}
+              {{ provider.country_of_registration || "Not specified" }}
             </VCol>
 
             <VCol cols="12" md="6">
               <strong>Business Type:</strong>
-              {{ provider.business_type || "N/A" }}
+              {{ provider.business_type || "Not specified" }}
             </VCol>
 
             <VCol cols="12" md="6">
@@ -182,12 +182,12 @@
               >
                 {{ provider.company_website }}
               </a>
-              <span v-else>N/A</span>
+              <span v-else>Not available</span>
             </VCol>
 
             <VCol cols="12">
               <strong>Short Bio:</strong>
-              <p class="mt-1">{{ provider.short_bio || "N/A" }}</p>
+              <p class="mt-1">{{ provider.short_bio || "Not specified" }}</p>
             </VCol>
           </template>
         </VRow>

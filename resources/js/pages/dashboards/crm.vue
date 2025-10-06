@@ -379,7 +379,7 @@ const formatListingType = (type) => {
 };
 
 const formatDate = (value) => {
-  if (!value) return "N/A";
+  if (!value) return "Not specified";
   
   const parsed = Date.parse(value);
   if (Number.isNaN(parsed)) return value;
@@ -721,12 +721,12 @@ const actionCards = [
 
               <VCol cols="12" md="6">
                 <strong>Title:</strong>
-                {{ selectedEvent.eventTitle || "N/A" }}
+                {{ selectedEvent.eventTitle || "No title" }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Subtitle:</strong>
-                {{ selectedEvent.subtitle || "N/A" }}
+                {{ selectedEvent.subtitle || "No subtitle" }}
               </VCol>
 
               <VCol cols="12" md="6">
@@ -773,17 +773,17 @@ const actionCards = [
 
               <VCol cols="12" md="6">
                 <strong>Location:</strong>
-                {{ selectedEvent.location || "N/A" }}
+                {{ selectedEvent.location || "No location" }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Starting Date:</strong>
-                {{ selectedEvent.starting_date || "N/A" }}
+                {{ selectedEvent.starting_date || "No start date" }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Finishing Date:</strong>
-                {{ selectedEvent.finishing_date || "N/A" }}
+                {{ selectedEvent.finishing_date || "No end date" }}
               </VCol>
 
               <VCol cols="12" md="6">
@@ -814,101 +814,101 @@ const actionCards = [
 
               <VCol cols="12" md="6">
                 <strong>Difficulty Level:</strong>
-                {{ selectedEvent.difficulty_level || "N/A" }}
+                {{ selectedEvent.difficulty_level || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Age Group:</strong>
-                {{ selectedEvent.age_group || "N/A" }}
+                {{ selectedEvent.age_group || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Available Days:</strong>
-                {{ selectedEvent.available_days || "N/A" }}
+                {{ selectedEvent.available_days || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Equipment Included:</strong>
-                {{ selectedEvent.equipment_included || "N/A" }}
+                {{ selectedEvent.equipment_included || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Primary Language:</strong>
-                {{ selectedEvent.language || "N/A" }}
+                {{ selectedEvent.language || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Departure Capacity:</strong>
-                {{ selectedEvent.departure_capacity || "N/A" }}
+                {{ selectedEvent.departure_capacity || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Requirements:</strong>
                 <div class="mt-1">
-                  {{ selectedEvent.requirements || "N/A" }}
+                  {{ selectedEvent.requirements || "Not specified" }}
                 </div>
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Personal Policies:</strong>
                 <div class="mt-1">
-                  {{ selectedEvent.personal_policies || "N/A" }}
+                  {{ selectedEvent.personal_policies || "Not specified" }}
                 </div>
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Activities Included:</strong>
                 <div class="mt-1">
-                  {{ selectedEvent.activities_included || "N/A" }}
+                  {{ selectedEvent.activities_included || "Not specified" }}
                 </div>
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>What's Included:</strong>
                 <div class="mt-1">
-                  {{ selectedEvent.whats_included || "N/A" }}
+                  {{ selectedEvent.whats_included || "Not specified" }}
                 </div>
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>What's Not Included:</strong>
                 <div class="mt-1">
-                  {{ selectedEvent.whats_not_included || "N/A" }}
+                  {{ selectedEvent.whats_not_included || "Not specified" }}
                 </div>
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Maps & Routes:</strong>
                 <div class="mt-1">
-                  {{ selectedEvent.maps_and_routes || "N/A" }}
+                  {{ selectedEvent.maps_and_routes || "Not specified" }}
                 </div>
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Listing Media:</strong>
                 <div class="mt-1">
-                  {{ selectedEvent.listing_media || "N/A" }}
+                  {{ selectedEvent.listing_media || "Not specified" }}
                 </div>
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Promotional Videos:</strong>
                 <div class="mt-1">
-                  {{ selectedEvent.promotional_video || "N/A" }}
+                  {{ selectedEvent.promotional_video || "Not specified" }}
                 </div>
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Provider's FAQ:</strong>
                 <div class="mt-1">
-                  {{ selectedEvent.providers_faq || "N/A" }}
+                  {{ selectedEvent.providers_faq || "Not specified" }}
                 </div>
               </VCol>
 
               <VCol cols="12">
                 <strong>Additional Notes:</strong>
                 <div class="mt-1">
-                  {{ selectedEvent.additional_notes || "N/A" }}
+                  {{ selectedEvent.additional_notes || "Not specified" }}
                 </div>
               </VCol>
             </VRow>

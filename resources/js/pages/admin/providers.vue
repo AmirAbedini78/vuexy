@@ -184,7 +184,7 @@
     <VDialog v-model="showProviderViewDialog" max-width="1200" persistent>
       <VCard>
         <VCardTitle class="d-flex align-center justify-space-between">
-          <span>Provider Details - {{ selectedProvider?.provider_name || 'N/A' }}</span>
+          <span>Provider Details - {{ selectedProvider?.provider_name || 'No name' }}</span>
           <VBtn
             icon
             variant="text"
@@ -243,12 +243,12 @@
 
                 <VCol cols="12" md="6">
                   <strong>User ID:</strong>
-                  {{ selectedProvider.user_id || "N/A" }}
+                  {{ selectedProvider.user_id || "Not specified" }}
                 </VCol>
 
                 <VCol cols="12" md="6">
                   <strong>Specialization:</strong>
-                  {{ selectedProvider.activity_specialization || "N/A" }}
+                  {{ selectedProvider.activity_specialization || "Not specified" }}
                 </VCol>
 
                 <VCol cols="12" md="6">
@@ -256,7 +256,7 @@
                   {{
                     selectedProvider.country_of_operation ||
                     selectedProvider.country ||
-                    "N/A"
+                    "Not specified"
                   }}
                 </VCol>
 
@@ -265,7 +265,7 @@
                   {{
                     selectedProvider.years_of_experience ||
                     selectedProvider.business_type ||
-                    "N/A"
+                    "Not specified"
                   }}
                 </VCol>
 
@@ -287,7 +287,7 @@
                     size="small"
                     class="ml-2"
                   >
-                    {{ selectedProvider.want_to_be_listed || "N/A" }}
+                    {{ selectedProvider.want_to_be_listed || "Not specified" }}
                   </VChip>
                 </VCol>
 
@@ -324,12 +324,12 @@
 
                   <VCol cols="12" md="6">
                     <strong>Full Name:</strong>
-                    {{ selectedProvider.full_name || selectedProvider.provider_name || "N/A" }}
+                    {{ selectedProvider.full_name || selectedProvider.provider_name || "Not specified" }}
                   </VCol>
 
                   <VCol cols="12" md="6">
                     <strong>Nationality:</strong>
-                    {{ selectedProvider.nationality || "N/A" }}
+                    {{ selectedProvider.nationality || "Not specified" }}
                   </VCol>
 
                   <VCol cols="12" md="6">
@@ -337,7 +337,7 @@
                     {{
                       selectedProvider.dob
                         ? formatDate(selectedProvider.dob)
-                        : "N/A"
+                        : "Not specified"
                     }}
                   </VCol>
 
@@ -346,59 +346,59 @@
                     {{
                       Array.isArray(selectedProvider.languages)
                         ? selectedProvider.languages.join(", ")
-                        : selectedProvider.languages || "N/A"
+                        : selectedProvider.languages || "Not specified"
                     }}
                   </VCol>
 
                   <VCol cols="12">
                     <strong>Address:</strong>
-                    {{ selectedProvider.address1 || "N/A" }}
+                    {{ selectedProvider.address1 || "Not specified" }}
                     <span v-if="selectedProvider.address2">, {{ selectedProvider.address2 }}</span>
                   </VCol>
 
                   <VCol cols="12" md="4">
                     <strong>City:</strong>
-                    {{ selectedProvider.city || "N/A" }}
+                    {{ selectedProvider.city || "Not specified" }}
                   </VCol>
 
                   <VCol cols="12" md="4">
                     <strong>State:</strong>
-                    {{ selectedProvider.state || "N/A" }}
+                    {{ selectedProvider.state || "Not specified" }}
                   </VCol>
 
                   <VCol cols="12" md="4">
                     <strong>Postal Code:</strong>
-                    {{ selectedProvider.postal_code || "N/A" }}
+                    {{ selectedProvider.postal_code || "Not specified" }}
                   </VCol>
 
                   <VCol cols="12" md="6">
                     <strong>Country:</strong>
-                    {{ selectedProvider.country || "N/A" }}
+                    {{ selectedProvider.country || "Not specified" }}
                   </VCol>
 
                   <VCol cols="12" md="6">
                     <strong>Country of Operation:</strong>
-                    {{ selectedProvider.country_of_operation || "N/A" }}
+                    {{ selectedProvider.country_of_operation || "Not specified" }}
                   </VCol>
 
                   <VCol cols="12" md="6">
                     <strong>Emergency Contact:</strong>
-                    {{ selectedProvider.emergency_contact_name || "N/A" }}
+                    {{ selectedProvider.emergency_contact_name || "Not specified" }}
                   </VCol>
 
                   <VCol cols="12" md="6">
                     <strong>Emergency Phone:</strong>
-                    {{ selectedProvider.emergency_contact_phone || "N/A" }}
+                    {{ selectedProvider.emergency_contact_phone || "Not specified" }}
                   </VCol>
 
                   <VCol cols="12">
                     <strong>Short Bio:</strong>
-                    <div class="mt-1">{{ selectedProvider.short_bio || "N/A" }}</div>
+                    <div class="mt-1">{{ selectedProvider.short_bio || "Not specified" }}</div>
                   </VCol>
 
                   <VCol cols="12">
                     <strong>Certifications:</strong>
-                    <div class="mt-1">{{ selectedProvider.certifications || "N/A" }}</div>
+                    <div class="mt-1">{{ selectedProvider.certifications || "Not specified" }}</div>
                   </VCol>
                 </template>
 
@@ -409,27 +409,27 @@
 
                   <VCol cols="12" md="6">
                     <strong>Company Name:</strong>
-                    {{ selectedProvider.company_name || selectedProvider.provider_name || "N/A" }}
+                    {{ selectedProvider.company_name || selectedProvider.provider_name || "Not specified" }}
                   </VCol>
 
                   <VCol cols="12" md="6">
                     <strong>VAT ID:</strong>
-                    {{ selectedProvider.vat_id || "N/A" }}
+                    {{ selectedProvider.vat_id || "Not specified" }}
                   </VCol>
 
                   <VCol cols="12" md="6">
                     <strong>Contact Person:</strong>
-                    {{ selectedProvider.contact_person || "N/A" }}
+                    {{ selectedProvider.contact_person || "Not specified" }}
                   </VCol>
 
                   <VCol cols="12" md="6">
                     <strong>Country of Registration:</strong>
-                    {{ selectedProvider.country_of_registration || "N/A" }}
+                    {{ selectedProvider.country_of_registration || "Not specified" }}
                   </VCol>
 
                   <VCol cols="12" md="6">
                     <strong>Business Type:</strong>
-                    {{ selectedProvider.business_type || "N/A" }}
+                    {{ selectedProvider.business_type || "Not specified" }}
                   </VCol>
 
                   <VCol cols="12" md="6">
@@ -437,43 +437,43 @@
                     <a v-if="selectedProvider.company_website" :href="selectedProvider.company_website" target="_blank" class="text-primary">
                       {{ selectedProvider.company_website }}
                     </a>
-                    <span v-else>N/A</span>
+                    <span v-else>Not available</span>
                   </VCol>
 
                   <VCol cols="12">
                     <strong>Address:</strong>
-                    {{ selectedProvider.address1 || "N/A" }}
+                    {{ selectedProvider.address1 || "Not specified" }}
                     <span v-if="selectedProvider.address2">, {{ selectedProvider.address2 }}</span>
                   </VCol>
 
                   <VCol cols="12" md="4">
                     <strong>City:</strong>
-                    {{ selectedProvider.city || "N/A" }}
+                    {{ selectedProvider.city || "Not specified" }}
                   </VCol>
 
                   <VCol cols="12" md="4">
                     <strong>State:</strong>
-                    {{ selectedProvider.state || "N/A" }}
+                    {{ selectedProvider.state || "Not specified" }}
                   </VCol>
 
                   <VCol cols="12" md="4">
                     <strong>Postal Code:</strong>
-                    {{ selectedProvider.postal_code || "N/A" }}
+                    {{ selectedProvider.postal_code || "Not specified" }}
                   </VCol>
 
                   <VCol cols="12" md="6">
                     <strong>Country:</strong>
-                    {{ selectedProvider.country || "N/A" }}
+                    {{ selectedProvider.country || "Not specified" }}
                   </VCol>
 
                   <VCol cols="12">
                     <strong>Short Bio:</strong>
-                    <div class="mt-1">{{ selectedProvider.short_bio || "N/A" }}</div>
+                    <div class="mt-1">{{ selectedProvider.short_bio || "Not specified" }}</div>
                   </VCol>
 
                   <VCol cols="12">
                     <strong>Certifications:</strong>
-                    <div class="mt-1">{{ selectedProvider.certifications || "N/A" }}</div>
+                    <div class="mt-1">{{ selectedProvider.certifications || "Not specified" }}</div>
                   </VCol>
                 </template>
               </VRow>
@@ -488,17 +488,17 @@
 
                 <VCol cols="12" md="6">
                   <strong>Activity Specialization:</strong>
-                  {{ selectedProvider.activity_specialization || "N/A" }}
+                  {{ selectedProvider.activity_specialization || "Not specified" }}
                 </VCol>
 
                 <VCol cols="12" md="6">
                   <strong>Years of Experience:</strong>
-                  {{ selectedProvider.years_of_experience || "N/A" }}
+                  {{ selectedProvider.years_of_experience || "Not specified" }}
                 </VCol>
 
                 <VCol cols="12" md="6">
                   <strong>Country of Operation:</strong>
-                  {{ selectedProvider.country_of_operation || "N/A" }}
+                  {{ selectedProvider.country_of_operation || "Not specified" }}
                 </VCol>
 
                 <VCol cols="12" md="6">
@@ -508,7 +508,7 @@
                     size="small"
                     class="ml-2"
                   >
-                    {{ selectedProvider.want_to_be_listed || "N/A" }}
+                    {{ selectedProvider.want_to_be_listed || "Not specified" }}
                   </VChip>
                 </VCol>
 
@@ -536,30 +536,30 @@
 
                 <VCol cols="12">
                   <strong>Short Bio:</strong>
-                  <div class="mt-1">{{ selectedProvider.short_bio || "N/A" }}</div>
+                  <div class="mt-1">{{ selectedProvider.short_bio || "Not specified" }}</div>
                 </VCol>
 
                 <VCol cols="12">
                   <strong>Certifications:</strong>
-                  <div class="mt-1">{{ selectedProvider.certifications || "N/A" }}</div>
+                  <div class="mt-1">{{ selectedProvider.certifications || "Not specified" }}</div>
                 </VCol>
 
                 <template v-if="selectedProvider.provider_type === 'individual'">
                   <VCol cols="12" md="6">
                     <strong>Emergency Contact Name:</strong>
-                    {{ selectedProvider.emergency_contact_name || "N/A" }}
+                    {{ selectedProvider.emergency_contact_name || "Not specified" }}
                   </VCol>
 
                   <VCol cols="12" md="6">
                     <strong>Emergency Contact Phone:</strong>
-                    {{ selectedProvider.emergency_contact_phone || "N/A" }}
+                    {{ selectedProvider.emergency_contact_phone || "Not specified" }}
                   </VCol>
                 </template>
 
                 <template v-else>
                   <VCol cols="12" md="6">
                     <strong>Business Type:</strong>
-                    {{ selectedProvider.business_type || "N/A" }}
+                    {{ selectedProvider.business_type || "Not specified" }}
                   </VCol>
 
                   <VCol cols="12" md="6">
@@ -567,7 +567,7 @@
                     <a v-if="selectedProvider.company_website" :href="selectedProvider.company_website" target="_blank" class="text-primary">
                       {{ selectedProvider.company_website }}
                     </a>
-                    <span v-else>N/A</span>
+                    <span v-else>Not available</span>
                   </VCol>
                 </template>
               </VRow>
@@ -586,7 +586,7 @@
                     <a v-if="selectedProvider.social_media_links?.twitter" :href="selectedProvider.social_media_links.twitter" target="_blank" class="text-primary">
                       {{ selectedProvider.social_media_links.twitter }}
                     </a>
-                    <span v-else>N/A</span>
+                    <span v-else>Not available</span>
                   </div>
                 </VCol>
 
@@ -596,7 +596,7 @@
                     <a v-if="selectedProvider.social_media_links?.facebook" :href="selectedProvider.social_media_links.facebook" target="_blank" class="text-primary">
                       {{ selectedProvider.social_media_links.facebook }}
                     </a>
-                    <span v-else>N/A</span>
+                    <span v-else>Not available</span>
                   </div>
                 </VCol>
 
@@ -606,7 +606,7 @@
                     <a v-if="selectedProvider.social_media_links?.linkedIn" :href="selectedProvider.social_media_links.linkedIn" target="_blank" class="text-primary">
                       {{ selectedProvider.social_media_links.linkedIn }}
                     </a>
-                    <span v-else>N/A</span>
+                    <span v-else>Not available</span>
                   </div>
                 </VCol>
 
@@ -616,7 +616,7 @@
                     <a v-if="selectedProvider.social_media_links?.instagram" :href="selectedProvider.social_media_links.instagram" target="_blank" class="text-primary">
                       {{ selectedProvider.social_media_links.instagram }}
                     </a>
-                    <span v-else>N/A</span>
+                    <span v-else>Not available</span>
                   </div>
                 </VCol>
 
@@ -632,7 +632,7 @@
                         <a :href="link" target="_blank" class="text-primary">{{ link }}</a>
                       </div>
                     </template>
-                    <span v-else>N/A</span>
+                    <span v-else>Not available</span>
                   </div>
                 </VCol>
               </VRow>
@@ -689,7 +689,7 @@
                     size="small"
                     class="ml-2"
                   >
-                    {{ selectedProvider.want_to_be_listed || "N/A" }}
+                    {{ selectedProvider.want_to_be_listed || "Not specified" }}
                   </VChip>
                 </VCol>
 

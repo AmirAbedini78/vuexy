@@ -147,9 +147,9 @@
         <!-- Provider Column -->
         <template #item.provider="{ item }">
           <div>
-            <div class="font-weight-medium">{{ item.user?.name || "N/A" }}</div>
+            <div class="font-weight-medium">{{ item.user?.name || "Unknown" }}</div>
             <div class="text-caption text-medium-emphasis">
-              {{ item.user?.email || "N/A" }}
+              {{ item.user?.email || "No email provided" }}
             </div>
           </div>
         </template>
@@ -810,7 +810,7 @@
 
               <VCol cols="12" md="6">
                 <strong>Name:</strong>
-                {{ selectedProvider.provider_name || "N/A" }}
+                {{ selectedProvider.provider_name || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
@@ -844,11 +844,11 @@
               </VCol>
 
               <VCol cols="12" md="6">
-                <strong>Email:</strong> {{ selectedProvider.email || "N/A" }}
+                <strong>Email:</strong> {{ selectedProvider.email || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
-                <strong>Phone:</strong> {{ selectedProvider.phone || "N/A" }}
+                <strong>Phone:</strong> {{ selectedProvider.phone || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
@@ -887,12 +887,12 @@
 
               <VCol cols="12" md="6">
                 <strong>First Name:</strong>
-                {{ selectedProvider.first_name || "N/A" }}
+                {{ selectedProvider.first_name || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Last Name:</strong>
-                {{ selectedProvider.last_name || "N/A" }}
+                {{ selectedProvider.last_name || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
@@ -900,17 +900,17 @@
                 {{
                   selectedProvider.dob
                     ? formatDate(selectedProvider.dob)
-                    : "N/A"
+                    : "Not specified"
                 }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Nationality:</strong>
-                {{ selectedProvider.nationality || "N/A" }}
+                {{ selectedProvider.nationality || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
-                <strong>Gender:</strong> {{ selectedProvider.gender || "N/A" }}
+                <strong>Gender:</strong> {{ selectedProvider.gender || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
@@ -918,7 +918,7 @@
                 {{
                   Array.isArray(selectedProvider.languages)
                     ? selectedProvider.languages.join(", ")
-                    : selectedProvider.languages || "N/A"
+                    : selectedProvider.languages || "Not specified"
                 }}
               </VCol>
 
@@ -940,22 +940,22 @@
 
               <VCol cols="12" md="6">
                 <strong>Business Type:</strong>
-                {{ selectedProvider.business_type || "N/A" }}
+                {{ selectedProvider.business_type || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Years of Experience:</strong>
-                {{ selectedProvider.years_of_experience || "N/A" }}
+                {{ selectedProvider.years_of_experience || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Activity Specialization:</strong>
-                {{ selectedProvider.activity_specialization || "N/A" }}
+                {{ selectedProvider.activity_specialization || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Country of Operation:</strong>
-                {{ selectedProvider.country_of_operation || "N/A" }}
+                {{ selectedProvider.country_of_operation || "Not specified" }}
               </VCol>
 
               <VCol
@@ -963,7 +963,7 @@
                 md="6"
                 v-if="selectedProvider.provider_type === 'company'"
               >
-                <strong>VAT ID:</strong> {{ selectedProvider.vat_id || "N/A" }}
+                <strong>VAT ID:</strong> {{ selectedProvider.vat_id || "Not specified" }}
               </VCol>
 
               <VCol
@@ -972,7 +972,7 @@
                 v-if="selectedProvider.provider_type === 'company'"
               >
                 <strong>Company Website:</strong>
-                {{ selectedProvider.company_website || "N/A" }}
+                {{ selectedProvider.company_website || "Not specified" }}
               </VCol>
 
               <VCol
@@ -981,7 +981,7 @@
                 v-if="selectedProvider.provider_type === 'company'"
               >
                 <strong>Country of Registration:</strong>
-                {{ selectedProvider.country_of_registration || "N/A" }}
+                {{ selectedProvider.country_of_registration || "Not specified" }}
               </VCol>
 
               <VCol
@@ -990,7 +990,7 @@
                 v-if="selectedProvider.provider_type === 'company'"
               >
                 <strong>Contact Person:</strong>
-                {{ selectedProvider.contact_person || "N/A" }}
+                {{ selectedProvider.contact_person || "Not specified" }}
               </VCol>
 
               <VCol cols="12" v-if="selectedProvider.business_description">
@@ -1013,48 +1013,48 @@
 
               <VCol cols="12" md="6">
                 <strong>Address Line 1:</strong>
-                {{ selectedProvider.address1 || "N/A" }}
+                {{ selectedProvider.address1 || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Address Line 2:</strong>
-                {{ selectedProvider.address2 || "N/A" }}
+                {{ selectedProvider.address2 || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
-                <strong>City:</strong> {{ selectedProvider.city || "N/A" }}
+                <strong>City:</strong> {{ selectedProvider.city || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>State/Province:</strong>
-                {{ selectedProvider.state || "N/A" }}
+                {{ selectedProvider.state || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Postal Code:</strong>
-                {{ selectedProvider.postal_code || "N/A" }}
+                {{ selectedProvider.postal_code || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Country:</strong>
-                {{ selectedProvider.country || "N/A" }}
+                {{ selectedProvider.country || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
-                <strong>Phone:</strong> {{ selectedProvider.phone || "N/A" }}
+                <strong>Phone:</strong> {{ selectedProvider.phone || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
-                <strong>Mobile:</strong> {{ selectedProvider.mobile || "N/A" }}
+                <strong>Mobile:</strong> {{ selectedProvider.mobile || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
-                <strong>Email:</strong> {{ selectedProvider.email || "N/A" }}
+                <strong>Email:</strong> {{ selectedProvider.email || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Alternative Email:</strong>
-                {{ selectedProvider.alternative_email || "N/A" }}
+                {{ selectedProvider.alternative_email || "Not specified" }}
               </VCol>
             </VRow>
           </VTabsWindowItem>
@@ -1070,7 +1070,7 @@
 
               <VCol cols="12" md="6">
                 <strong>Website:</strong>
-                {{ selectedProvider.website || "N/A" }}
+                {{ selectedProvider.website || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
@@ -1078,7 +1078,7 @@
                 {{
                   selectedProvider.social_media_links?.facebook ||
                   selectedProvider.facebook ||
-                  "N/A"
+                  "Not specified"
                 }}
               </VCol>
 
@@ -1087,7 +1087,7 @@
                 {{
                   selectedProvider.social_media_links?.twitter ||
                   selectedProvider.twitter ||
-                  "N/A"
+                  "Not specified"
                 }}
               </VCol>
 
@@ -1096,7 +1096,7 @@
                 {{
                   selectedProvider.social_media_links?.linkedIn ||
                   selectedProvider.linkedIn ||
-                  "N/A"
+                  "Not specified"
                 }}
               </VCol>
 
@@ -1105,7 +1105,7 @@
                 {{
                   selectedProvider.social_media_links?.instagram ||
                   selectedProvider.instagram ||
-                  "N/A"
+                  "Not specified"
                 }}
               </VCol>
 
@@ -1114,7 +1114,7 @@
                 {{
                   selectedProvider.social_media_links?.youtube ||
                   selectedProvider.youtube ||
-                  "N/A"
+                  "Not specified"
                 }}
               </VCol>
 
@@ -1123,7 +1123,7 @@
                 {{
                   selectedProvider.social_media_links?.tiktok ||
                   selectedProvider.tiktok ||
-                  "N/A"
+                  "Not specified"
                 }}
               </VCol>
 
@@ -1132,7 +1132,7 @@
                 {{
                   selectedProvider.social_media_links?.whatsapp ||
                   selectedProvider.whatsapp ||
-                  "N/A"
+                  "Not specified"
                 }}
               </VCol>
             </VRow>
@@ -1163,7 +1163,7 @@
                 {{
                   selectedProvider.terms_accepted_date
                     ? formatDate(selectedProvider.terms_accepted_date)
-                    : "N/A"
+                    : "Not specified"
                 }}
               </VCol>
 
@@ -1286,7 +1286,7 @@
 
               <VCol cols="12" md="6">
                 <strong>Title:</strong>
-                {{ selectedListing.listing_title || "N/A" }}
+                {{ selectedListing.listing_title || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
@@ -1294,7 +1294,7 @@
                 {{
                   selectedListing.subtitle ||
                   selectedListing.listing_subtitle ||
-                  "N/A"
+                  "Not specified"
                 }}
               </VCol>
 
@@ -1343,12 +1343,12 @@
 
               <VCol cols="12" md="6">
                 <strong>Provider:</strong>
-                {{ selectedListing.user?.name || "N/A" }}
+                {{ selectedListing.user?.name || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
                 <strong>Provider Email:</strong>
-                {{ selectedListing.user?.email || "N/A" }}
+                {{ selectedListing.user?.email || "Not specified" }}
               </VCol>
 
               <VCol cols="12" md="6">
@@ -1358,7 +1358,7 @@
                     selectedListing.locations ||
                       selectedListing.location ||
                       selectedListing.address
-                  ) || "N/A"
+                  ) || "Not specified"
                 }}
               </VCol>
 
@@ -1369,7 +1369,7 @@
                   ensureArray(selectedListing.locations)[
                     ensureArray(selectedListing.locations).length - 1
                   ] ||
-                  "N/A"
+                  "Not specified"
                 }}
               </VCol>
 
@@ -1378,7 +1378,7 @@
                 {{
                   selectedListing.starting_date || selectedListing.start_date || selectedListing.startDate
                     ? formatDate(selectedListing.starting_date || selectedListing.start_date || selectedListing.startDate)
-                    : "N/A"
+                    : "Not specified"
                 }}
               </VCol>
 
@@ -1387,7 +1387,7 @@
                 {{
                   selectedListing.finishing_date || selectedListing.end_date || selectedListing.endDate
                     ? formatDate(selectedListing.finishing_date || selectedListing.end_date || selectedListing.endDate)
-                    : "N/A"
+                    : "Not specified"
                 }}
               </VCol>
 
@@ -1455,11 +1455,11 @@
                     </VCol>
                     <VCol cols="12" md="6">
                       <strong>Location:</strong>
-                      {{ itinerary.location || "N/A" }}
+                      {{ itinerary.location || "Not specified" }}
                     </VCol>
                     <VCol cols="12" md="6">
                       <strong>Accommodation:</strong>
-                      {{ itinerary.accommodation || "N/A" }}
+                      {{ itinerary.accommodation || "Not specified" }}
                     </VCol>
                     <VCol cols="12" md="6">
                       <strong>Link:</strong>
@@ -1471,7 +1471,7 @@
                       >
                         {{ itinerary.link }}
                       </a>
-                      <span v-else>N/A</span>
+                      <span v-else>Not available</span>
                     </VCol>
                     <VCol
                       cols="12"
@@ -1597,7 +1597,7 @@
                   </div>
                   <VRow>
                     <VCol cols="12" md="6">
-                      <strong>Title:</strong> {{ pkg.title || "N/A" }}
+                      <strong>Title:</strong> {{ pkg.title || "Not specified" }}
                     </VCol>
                     <VCol cols="12" md="6">
                       <strong>Price:</strong> €{{
@@ -1605,10 +1605,10 @@
                       }}
                     </VCol>
                     <VCol cols="12" md="6">
-                      <strong>Duration:</strong> {{ pkg.duration || "N/A" }}
+                      <strong>Duration:</strong> {{ pkg.duration || "Not specified" }}
                     </VCol>
                     <VCol cols="12" md="6">
-                      <strong>Capacity:</strong> {{ pkg.capacity || "N/A" }}
+                      <strong>Capacity:</strong> {{ pkg.capacity || "Not specified" }}
                     </VCol>
                     <VCol cols="12" v-if="pkg.description">
                       <strong>Description:</strong> {{ pkg.description }}
@@ -1653,7 +1653,7 @@
                     />
                     <strong>
                       Period {{ index + 1 }}:
-                      {{ period.title || period.name || period.label || "N/A" }}
+                      {{ period.title || period.name || period.label || "Not specified" }}
                     </strong>
                   </div>
                   <VRow>
@@ -1679,7 +1679,7 @@
                     </VCol>
                     <VCol cols="12" md="6">
                       <strong>Capacity:</strong>
-                      {{ period.capacity || period.max_participants || "N/A" }}
+                      {{ period.capacity || period.max_participants || "Not specified" }}
                     </VCol>
                     <VCol cols="12" v-if="period.available_days">
                       <strong>Available Days:</strong>
@@ -1688,7 +1688,7 @@
                           period.available_days ||
                             period.days ||
                             period.availability
-                        ) || "N/A"
+                        ) || "Not specified"
                       }}
                     </VCol>
                     <VCol cols="12" v-if="period.description">
@@ -1741,7 +1741,7 @@
                       {{ lang }}
                     </VChip>
                   </template>
-                  <span v-else class="text-medium-emphasis">N/A</span>
+                  <span v-else class="text-medium-emphasis">Not available</span>
                 </div>
               </VCol>
 
@@ -1752,7 +1752,7 @@
                     formatDisplayValue(
                       selectedListing.activities_included ||
                         selectedListing.activitiesIncluded
-                    ) || "N/A"
+                    ) || "Not specified"
                   }}
                 </div>
               </VCol>
@@ -1764,7 +1764,7 @@
                     formatDisplayValue(
                       selectedListing.whats_included ||
                         selectedListing.whatsIncluded
-                    ) || "N/A"
+                    ) || "Not specified"
                   }}
                 </div>
               </VCol>
@@ -1776,7 +1776,7 @@
                     formatDisplayValue(
                       selectedListing.whats_not_included ||
                         selectedListing.whatsNotIncluded
-                    ) || "N/A"
+                    ) || "Not specified"
                   }}
                 </div>
               </VCol>
@@ -1815,7 +1815,7 @@
                       </template>
                     </div>
                   </template>
-                  <span v-else class="text-medium-emphasis">N/A</span>
+                  <span v-else class="text-medium-emphasis">Not available</span>
                 </div>
               </VCol>
 
@@ -1853,7 +1853,7 @@
                       </template>
                     </div>
                   </template>
-                  <span v-else class="text-medium-emphasis">N/A</span>
+                  <span v-else class="text-medium-emphasis">Not available</span>
                 </div>
               </VCol>
 
@@ -1891,7 +1891,7 @@
                       </template>
                     </div>
                   </template>
-                  <span v-else class="text-medium-emphasis">N/A</span>
+                  <span v-else class="text-medium-emphasis">Not available</span>
                 </div>
               </VCol>
 
@@ -1901,7 +1901,7 @@
                   selectedListing.departure_capacity ||
                   selectedListing.max_capacity ||
                   selectedListing.capacity ||
-                  "N/A"
+                  "Not specified"
                 }}
               </VCol>
 
@@ -1910,7 +1910,7 @@
                 {{
                   selectedListing.difficulty_level ||
                   selectedListing.experience_level ||
-                  "N/A"
+                  "Not specified"
                 }}
               </VCol>
 
@@ -1919,7 +1919,7 @@
                 {{
                   selectedListing.equipment_included ||
                   ensureArray(selectedListing.activities_included).join(", ") ||
-                  "N/A"
+                  "Not specified"
                 }}
               </VCol>
 
@@ -1928,7 +1928,7 @@
                 {{
                   selectedListing.language ||
                   ensureArray(selectedListing.group_language).join(", ") ||
-                  "N/A"
+                  "Not specified"
                 }}
               </VCol>
 
@@ -1940,7 +1940,7 @@
                       selectedListing.target_age_group ||
                       selectedListing.age_range ||
                       selectedListing.age
-                  ) || "N/A"
+                  ) || "Not specified"
                 }}
               </VCol>
 
@@ -1952,7 +1952,7 @@
                       selectedListing.availableDays ||
                       selectedListing.days_available ||
                       selectedListing.operating_days
-                  ) || "N/A"
+                  ) || "Not specified"
                 }}
               </VCol>
 
@@ -1963,7 +1963,7 @@
                     formatDisplayValue(
                       selectedListing.personal_policies ||
                         selectedListing.personalPolicies
-                    ) || "N/A"
+                    ) || "Not specified"
                   }}
                 </div>
               </VCol>
@@ -1978,7 +1978,7 @@
                         selectedListing.policy_details ||
                         selectedListing.policies_text ||
                         selectedListing.terms_conditions
-                    ) || "N/A"
+                    ) || "Not specified"
                   }}
                 </div>
               </VCol>
@@ -2003,7 +2003,7 @@
                     formatDisplayValue(
                       selectedListing.providers_faq ||
                         selectedListing.providersFaq
-                    ) || "N/A"
+                    ) || "Not specified"
                   }}
                 </div>
               </VCol>
@@ -2018,7 +2018,7 @@
                         selectedListing.requirement ||
                         selectedListing.participant_requirements ||
                         selectedListing.booking_requirements
-                    ) || "N/A"
+                    ) || "Not specified"
                   }}
                 </div>
               </VCol>
@@ -2030,7 +2030,7 @@
                     formatDisplayValue(
                       selectedListing.additional_notes ||
                         selectedListing.additionalNotes
-                    ) || "N/A"
+                    ) || "Not specified"
                   }}
                 </div>
               </VCol>
@@ -2550,7 +2550,7 @@ const formatCurrency = (amount) => {
 
 const formatDate = (value) => {
   const candidate = getDisplayValue(value);
-  if (!candidate) return "N/A";
+  if (!candidate) return "Not specified";
 
   const parsed = Date.parse(candidate);
   if (Number.isNaN(parsed)) return candidate;
@@ -2992,7 +2992,7 @@ const showProviderMenu = (item) => {
 const toTitle = (key) =>
   (key || "").replace(/_/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
 const formatValue = (val) => {
-  if (val === null || val === undefined || val === "") return "N/A";
+  if (val === null || val === undefined || val === "") return "Not specified";
   if (typeof val === "string") {
     // Try JSON parse for stringified arrays/objects
     try {
@@ -3002,7 +3002,7 @@ const formatValue = (val) => {
     } catch (_) {}
     return val;
   }
-  if (Array.isArray(val)) return val.length ? JSON.stringify(val) : "N/A";
+  if (Array.isArray(val)) return val.length ? JSON.stringify(val) : "Not specified";
   if (typeof val === "object") return JSON.stringify(val);
   return String(val);
 };
@@ -3201,7 +3201,7 @@ const formatListingType = (type) => {
     "open-date": "Open Date",
     other: "Other",
   };
-  return types[type] || type || "N/A";
+  return types[type] || type || "Not specified";
 };
 
 // Event status (for All Events table) — shared map with listings page
