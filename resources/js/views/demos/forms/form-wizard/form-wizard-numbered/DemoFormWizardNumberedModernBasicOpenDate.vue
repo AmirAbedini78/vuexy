@@ -294,6 +294,9 @@ async function createListing() {
       .querySelector('meta[name="csrf-token"]')
       ?.getAttribute("content");
 
+    // Get authentication token
+    const accessToken = useCookie("accessToken").value;
+
     // Get user ID from cookies or session
     const userDataCookie = useCookie("userData");
     const userData = userDataCookie.value;
@@ -306,6 +309,7 @@ async function createListing() {
       headers: {
         "Content-Type": "application/json",
         "X-CSRF-TOKEN": token || "",
+        "Authorization": accessToken ? `Bearer ${accessToken}` : "",
         Accept: "application/json",
       },
       body: JSON.stringify({
