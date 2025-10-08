@@ -1025,4 +1025,69 @@ class AdminController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Create a new listing
+     */
+    public function createListing(Request $request)
+    {
+        try {
+            $validatedData = $request->validate([
+                'user_id' => 'required|exists:users,id',
+                'listing_type' => 'nullable|string',
+                'starting_date' => 'nullable|date',
+                'finishing_date' => 'nullable|date',
+                'listing_title' => 'nullable|string',
+                'listing_description' => 'nullable|string',
+                'price' => 'nullable|numeric',
+                'min_capacity' => 'nullable|integer',
+                'max_capacity' => 'nullable|integer',
+                'subtitle' => 'nullable|string',
+                'experience_level' => 'nullable|string',
+                'fitness_level' => 'nullable|string',
+                'activities_included' => 'nullable|string',
+                'group_language' => 'nullable|string',
+                'maps_and_routes' => 'nullable|array',
+                'locations' => 'nullable|string',
+                'listing_media' => 'nullable|array',
+                'promotional_video' => 'nullable|array',
+                'whats_included' => 'nullable|string',
+                'whats_not_included' => 'nullable|string',
+                'additional_notes' => 'nullable|string',
+                'providers_faq' => 'nullable|string',
+                'personal_policies' => 'nullable|string',
+                'personal_policies_text' => 'nullable|string',
+                'terms_accepted' => 'nullable|boolean',
+                'status' => 'nullable|string',
+                'auto_save_id' => 'nullable|integer|exists:auto_save_listings,id',
+            ]);
+
+            // Convert arrays to JSON
+            if (isset($validatedData['maps_and_routes'])) {
+                $validatedData['maps_and_routes'] = json_encode($validatedData['maps_and_routes']);
+            }
+            if (isset($validatedData['listing_media'])) {
+                $validatedData['listing_media'] = json_encode($validatedData['listing_media']);
+            }
+            if (isset($validatedData['promotional_video'])) {
+                $validatedData['promotional_video'] = json_encode($validatedData['promotional_video']);
+            }
+
+            $listing = Listing::create($validatedData);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Listing created successfully',
+                'data' => $listing->load(['user.individualUser', 'user.companyUser', 'itineraries', 'specialAddons'])
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error creating listing: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create listing',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

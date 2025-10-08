@@ -140,6 +140,7 @@ Route::middleware([ApiMiddleware::class])->group(function () {
         Route::delete('/users/{id}', [AdminController::class, 'deleteUser']);
         Route::post('/users/{id}/impersonate', [AdminController::class, 'impersonate']);
         Route::get('/listings', [AdminController::class, 'listings']);
+        Route::post('/listings', [AdminController::class, 'createListing']);
         Route::get('/listings/{id}', [AdminController::class, 'listing']);
         Route::put('/listings/{id}', [AdminController::class, 'updateListing']);
         Route::delete('/listings/{id}', [AdminController::class, 'deleteListing']);
