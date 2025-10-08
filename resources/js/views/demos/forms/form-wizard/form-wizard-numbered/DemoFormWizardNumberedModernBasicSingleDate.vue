@@ -255,7 +255,7 @@ async function createListing() {
     console.log("Creating listing for user ID:", userId);
 
     // فقط فیلدهای اولیه را ارسال کن
-    const res = await fetch("/api/admin/listings", {
+    const res = await fetch("/api/listings", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
