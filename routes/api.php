@@ -170,4 +170,10 @@ Route::middleware([ApiMiddleware::class])->group(function () {
 
     // Temporary test route for providers (without authentication)
     Route::get('/test/providers', [AdminController::class, 'providers']);
+
+    // Test route for listings POST (without authentication)
+    Route::post('/test/listings', [AdminController::class, 'createListing']);
+
+    // Alternative route for listings POST (without authentication)
+    Route::post('/listings', [AdminController::class, 'createListing']);
 });
