@@ -301,7 +301,7 @@ async function createListing() {
 
     console.log("Creating listing for user ID:", userId);
 
-    const res = await fetch("/api/listings", {
+    const res = await fetch("/admin/listings", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -375,7 +375,7 @@ async function updateListing() {
 
     console.log("Updating open-date listing with data:", updateData);
 
-    const res = await fetch(`/api/listings/${listingId.value}`, {
+    const res = await fetch(`/admin/listings/${listingId.value}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(updateData),
@@ -394,7 +394,7 @@ async function updateListing() {
     if (itineraries.value && itineraries.value.length > 0) {
       try {
         console.log("Saving itineraries data:", itineraries.value);
-        const itinerariesResponse = await fetch(`/api/listings/${listingId.value}/itineraries`, {
+        const itinerariesResponse = await fetch(`/admin/listings/${listingId.value}/itineraries`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ itineraries: itineraries.value }),
@@ -425,7 +425,7 @@ async function updateListing() {
         }));
         
         console.log("Saving special addons data:", addonsToSave);
-        const specialAddonsResponse = await fetch(`/api/listings/${listingId.value}/special-addons`, {
+        const specialAddonsResponse = await fetch(`/admin/listings/${listingId.value}/special-addons`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ special_addons: addonsToSave }),
@@ -450,7 +450,7 @@ async function updateListing() {
     if (periods.value && periods.value.length > 0) {
       try {
         console.log("Saving periods data:", periods.value);
-        const periodsResponse = await fetch(`/api/listings/${listingId.value}/periods`, {
+        const periodsResponse = await fetch(`/admin/listings/${listingId.value}/periods`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ periods: periods.value }),

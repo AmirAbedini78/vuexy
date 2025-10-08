@@ -778,7 +778,7 @@ const saveListing = async () => {
     };
 
     // Call API to update listing
-    const res = await $api(`/api/listings/${props.listing.id}`, {
+    const res = await $api(`/admin/listings/${props.listing.id}`, {
       method: "PUT",
       body: updateData,
     });
@@ -792,8 +792,8 @@ const saveListing = async () => {
       for (const itinerary of formatCollectionPayload(itineraries.value)) {
         const method = itinerary.id ? "PUT" : "POST";
         const endpoint = itinerary.id
-          ? `/api/listings/${props.listing.id}/itineraries/${itinerary.id}`
-          : `/api/listings/${props.listing.id}/itineraries`;
+          ? `/admin/listings/${props.listing.id}/itineraries/${itinerary.id}`
+          : `/admin/listings/${props.listing.id}/itineraries`;
         await $api(endpoint, {
           method,
           body: { itinerary },
@@ -805,8 +805,8 @@ const saveListing = async () => {
       for (const addon of formatCollectionPayload(specialAddons.value)) {
         const method = addon.id ? "PUT" : "POST";
         const endpoint = addon.id
-          ? `/api/listings/${props.listing.id}/special-addons/${addon.id}`
-          : `/api/listings/${props.listing.id}/special-addons`;
+          ? `/admin/listings/${props.listing.id}/special-addons/${addon.id}`
+          : `/admin/listings/${props.listing.id}/special-addons`;
         await $api(endpoint, {
           method,
           body: { special_addon: addon },
@@ -818,8 +818,8 @@ const saveListing = async () => {
       for (const period of formatCollectionPayload(periods.value)) {
         const method = period.id ? "PUT" : "POST";
         const endpoint = period.id
-          ? `/api/listings/${props.listing.id}/periods/${period.id}`
-          : `/api/listings/${props.listing.id}/periods`;
+          ? `/admin/listings/${props.listing.id}/periods/${period.id}`
+          : `/admin/listings/${props.listing.id}/periods`;
         await $api(endpoint, {
           method,
           body: { period },

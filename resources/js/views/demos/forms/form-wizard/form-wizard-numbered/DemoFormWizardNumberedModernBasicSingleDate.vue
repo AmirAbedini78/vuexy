@@ -92,7 +92,7 @@ async function fetchItineraries() {
   if (!listingId.value) return;
   loading.value = true;
   try {
-    const res = await fetch(`/api/listings/${listingId.value}/itineraries`);
+    const res = await fetch(`/admin/listings/${listingId.value}/itineraries`);
     const data = await res.json();
     itineraries.value = data.data || [];
   } catch (e) {
@@ -107,7 +107,7 @@ async function fetchSpecialAddons(listingIdParam = null) {
   if (!id) return;
   loading.value = true;
   try {
-    const res = await fetch(`/api/listings/${id}/special-addons`);
+    const res = await fetch(`/admin/listings/${id}/special-addons`);
     const data = await res.json();
     specialAddons.value = data.data || [];
   } catch (e) {
@@ -252,7 +252,7 @@ async function createListing() {
     console.log("Creating listing for user ID:", userId);
 
     // فقط فیلدهای اولیه را ارسال کن
-    const res = await fetch("/api/listings", {
+    const res = await fetch("/admin/listings", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -334,7 +334,7 @@ async function updateListing() {
 
     console.log("Updating listing with data:", updateData);
 
-    const res = await fetch(`/api/listings/${listingId.value}`, {
+    const res = await fetch(`/admin/listings/${listingId.value}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(updateData),
@@ -353,7 +353,7 @@ async function updateListing() {
     if (packages.value && packages.value.length > 0) {
       try {
         console.log("Saving packages data:", packages.value);
-        const packagesResponse = await fetch(`/api/listings/${listingId.value}/packages`, {
+        const packagesResponse = await fetch(`/admin/listings/${listingId.value}/packages`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ packages: packages.value }),
@@ -378,7 +378,7 @@ async function updateListing() {
     if (itineraries.value && itineraries.value.length > 0) {
       try {
         console.log("Saving itineraries data:", itineraries.value);
-        const itinerariesResponse = await fetch(`/api/listings/${listingId.value}/itineraries`, {
+        const itinerariesResponse = await fetch(`/admin/listings/${listingId.value}/itineraries`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ itineraries: itineraries.value }),
@@ -409,7 +409,7 @@ async function updateListing() {
         }));
         
         console.log("Saving special addons data:", addonsToSave);
-        const specialAddonsResponse = await fetch(`/api/listings/${listingId.value}/special-addons`, {
+        const specialAddonsResponse = await fetch(`/admin/listings/${listingId.value}/special-addons`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ special_addons: addonsToSave }),
@@ -446,7 +446,7 @@ async function addItinerary(newDay) {
   try {
     console.log("Adding itinerary:", newDay);
     const response = await fetch(
-      `/api/listings/${listingId.value}/itineraries`,
+      `/admin/listings/${listingId.value}/itineraries`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -473,7 +473,7 @@ async function editItinerary(dayId, updatedDay) {
   try {
     console.log("Editing itinerary:", dayId, updatedDay);
     const response = await fetch(
-      `/api/listings/${listingId.value}/itineraries/${dayId}`,
+      `/admin/listings/${listingId.value}/itineraries/${dayId}`,
       {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -500,7 +500,7 @@ async function deleteItinerary(dayId) {
   try {
     console.log("Deleting itinerary:", dayId);
     const response = await fetch(
-      `/api/listings/${listingId.value}/itineraries/${dayId}`,
+      `/admin/listings/${listingId.value}/itineraries/${dayId}`,
       {
         method: "DELETE",
       }
@@ -575,7 +575,7 @@ async function handleItineraryDone(itineraryData, editingIndex = -1) {
     if (listingId.value && itineraries.value.length > 0) {
       try {
         console.log("Saving itineraries to database:", itineraries.value);
-        const response = await fetch(`/api/listings/${listingId.value}/itineraries`, {
+        const response = await fetch(`/admin/listings/${listingId.value}/itineraries`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ itineraries: itineraries.value }),
@@ -682,7 +682,7 @@ async function handleSpecialAddonDone(addonsData, editingIndex = -1) {
         }));
         
         console.log("Saving special addons to database:", addonsToSave);
-        const response = await fetch(`/api/listings/${listingId.value}/special-addons`, {
+        const response = await fetch(`/admin/listings/${listingId.value}/special-addons`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ special_addons: addonsToSave }),
@@ -768,7 +768,7 @@ async function handlePackageDone(packagesData, editingIndex = -1) {
     if (listingId.value && packages.value.length > 0) {
       try {
         console.log("Saving packages to database:", packages.value);
-        const response = await fetch(`/api/listings/${listingId.value}/packages`, {
+        const response = await fetch(`/admin/listings/${listingId.value}/packages`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ packages: packages.value }),

@@ -993,19 +993,19 @@ const loadExistingData = async () => {
   try {
     // Load itineraries
     const itinerariesResponse = await $api(
-      `/api/listings/${props.listing.id}/itineraries`
+      `/admin/listings/${props.listing.id}/itineraries`
     );
     itineraries.value = itinerariesResponse.data || [];
 
     // Load special addons
     const addonsResponse = await $api(
-      `/api/listings/${props.listing.id}/special-addons`
+      `/admin/listings/${props.listing.id}/special-addons`
     );
     specialAddons.value = addonsResponse.data || [];
 
     // Load packages
     const packagesResponse = await $api(
-      `/api/listings/${props.listing.id}/packages`
+      `/admin/listings/${props.listing.id}/packages`
     );
     packages.value = packagesResponse.data || [];
   } catch (error) {
@@ -1125,28 +1125,28 @@ const saveListing = async () => {
     };
 
     // Update listing
-    await $api(`/api/listings/${props.listing.id}`, {
+    await $api(`/admin/listings/${props.listing.id}`, {
       method: "PUT",
       body: updateData,
     });
 
     // Update related data
     if (itineraries.value.length > 0) {
-      await $api(`/api/listings/${props.listing.id}/itineraries`, {
+      await $api(`/admin/listings/${props.listing.id}/itineraries`, {
         method: "PUT",
         body: { itineraries: itineraries.value },
       });
     }
 
     if (specialAddons.value.length > 0) {
-      await $api(`/api/listings/${props.listing.id}/special-addons`, {
+      await $api(`/admin/listings/${props.listing.id}/special-addons`, {
         method: "PUT",
         body: { special_addons: specialAddons.value },
       });
     }
 
     if (packages.value.length > 0) {
-      await $api(`/api/listings/${props.listing.id}/packages`, {
+      await $api(`/admin/listings/${props.listing.id}/packages`, {
         method: "PUT",
         body: { packages: packages.value },
       });

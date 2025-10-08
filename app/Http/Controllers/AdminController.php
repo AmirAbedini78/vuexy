@@ -48,7 +48,7 @@ class AdminController extends Controller
     public function providers(Request $request)
     {
         Log::info('AdminController::providers called');
-        
+
         $individualUsers = IndividualUser::select([
             'user_id',
             'id',
@@ -107,24 +107,24 @@ class AdminController extends Controller
             $search = $request->search;
             $individualUsers->where(function ($q) use ($search) {
                 $q->where('full_name', 'like', "%{$search}%")
-                  ->orWhere('activity_specialization', 'like', "%{$search}%")
-                  ->orWhere('country_of_operation', 'like', "%{$search}%");
+                    ->orWhere('activity_specialization', 'like', "%{$search}%")
+                    ->orWhere('country_of_operation', 'like', "%{$search}%");
             });
-            
+
             $companyUsers->where(function ($q) use ($search) {
                 $q->where('company_name', 'like', "%{$search}%")
-                  ->orWhere('activity_specialization', 'like', "%{$search}%")
-                  ->orWhere('country', 'like', "%{$search}%");
+                    ->orWhere('activity_specialization', 'like', "%{$search}%")
+                    ->orWhere('country', 'like', "%{$search}%");
             });
         }
 
         // Provider type filter
         $providers = collect();
-        
+
         if (!$request->filled('provider_type') || $request->provider_type === 'all' || $request->provider_type === 'individual') {
             $providers = $providers->concat($individualUsers->get());
         }
-        
+
         if (!$request->filled('provider_type') || $request->provider_type === 'all' || $request->provider_type === 'company') {
             $providers = $providers->concat($companyUsers->get());
         }
@@ -133,27 +133,27 @@ class AdminController extends Controller
         $providers = $providers->map(function ($provider) {
             // Map want_to_be_listed => status: yes->active, no->rejected, everything else->review
             $listed = isset($provider->want_to_be_listed) ? strtolower(trim($provider->want_to_be_listed)) : null;
-            
+
             // Only set to active if explicitly 'yes'
             if ($listed === 'yes') {
                 $provider->status = 'active';
-            } 
+            }
             // Only set to rejected if explicitly 'no'
             elseif ($listed === 'no') {
                 $provider->status = 'rejected';
-            } 
+            }
             // Default to review for everything else (null, empty, unsure, etc.)
             else {
                 $provider->status = 'review';
             }
-            
+
             // Log the status mapping for debugging
             Log::info("Provider status mapping", [
                 'provider_id' => $provider->id,
                 'want_to_be_listed' => $provider->want_to_be_listed,
                 'mapped_status' => $provider->status
             ]);
-            
+
             return $provider;
         });
 
@@ -164,9 +164,9 @@ class AdminController extends Controller
         $perPage = 20;
         $page = $request->get('page', 1);
         $offset = ($page - 1) * $perPage;
-        
+
         $paginatedProviders = $providers->slice($offset, $perPage);
-        
+
         $result = [
             'data' => $paginatedProviders->values(),
             'current_page' => $page,
@@ -206,10 +206,10 @@ class AdminController extends Controller
     {
         try {
             Log::info('Update provider request data:', $request->all());
-            
+
             if ($type === 'individual') {
                 $provider = IndividualUser::findOrFail($id);
-                
+
                 $validatedData = $request->validate([
                     'full_name' => 'nullable|string|max:255',
                     'nationality' => 'nullable|string|max:255',
@@ -229,21 +229,20 @@ class AdminController extends Controller
                     'emergency_contact_phone' => 'nullable|string|max:20',
                     'terms_accepted' => 'nullable|boolean',
                 ]);
-                
+
                 Log::info('Individual provider validated data:', $validatedData);
 
                 // Filter out null/empty values and update only provided fields
-                $updateData = array_filter($validatedData, function($value) {
+                $updateData = array_filter($validatedData, function ($value) {
                     return $value !== null && $value !== '';
                 });
-                
+
                 Log::info('Individual provider filtered update data:', $updateData);
-                
+
                 $provider->update($updateData);
-                
             } else {
                 $provider = CompanyUser::findOrFail($id);
-                
+
                 $validatedData = $request->validate([
                     'company_name' => 'nullable|string|max:255',
                     'vat_id' => 'nullable|string|max:255',
@@ -261,16 +260,16 @@ class AdminController extends Controller
                     'company_website' => 'nullable|string|max:255',
                     'terms_accepted' => 'nullable|boolean',
                 ]);
-                
+
                 Log::info('Company provider validated data:', $validatedData);
 
                 // Filter out null/empty values and update only provided fields
-                $updateData = array_filter($validatedData, function($value) {
+                $updateData = array_filter($validatedData, function ($value) {
                     return $value !== null && $value !== '';
                 });
-                
+
                 Log::info('Company provider filtered update data:', $updateData);
-                
+
                 $provider->update($updateData);
             }
 
@@ -279,10 +278,9 @@ class AdminController extends Controller
                 'message' => 'Provider updated successfully',
                 'data' => $provider
             ]);
-
         } catch (\Exception $e) {
             Log::error('Error updating provider: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to update provider',
@@ -309,10 +307,9 @@ class AdminController extends Controller
                 'success' => true,
                 'message' => 'Provider deleted successfully'
             ]);
-
         } catch (\Exception $e) {
             Log::error('Error deleting provider: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to delete provider',
@@ -369,7 +366,7 @@ class AdminController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('Error updating provider status: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to update provider status',
@@ -449,10 +446,9 @@ class AdminController extends Controller
                 'individual_want_to_be_listed' => $individualUser->want_to_be_listed ?? null,
                 'company_want_to_be_listed' => $companyUser->want_to_be_listed ?? null,
             ]);
-
         } catch (\Exception $e) {
             Log::error('Error getting provider status: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to get provider status',
@@ -473,7 +469,7 @@ class AdminController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
@@ -507,7 +503,7 @@ class AdminController extends Controller
     public function updateUserStatus(Request $request, $id)
     {
         $user = User::findOrFail($id);
-        
+
         $request->validate([
             'status' => 'required|in:active,inactive,suspended'
         ]);
@@ -587,7 +583,7 @@ class AdminController extends Controller
         try {
             $user->sendEmailVerificationNotification();
         } catch (\Throwable $e) {
-            \Log::error('Failed to send verification email to new user: '.$e->getMessage());
+            Log::error('Failed to send verification email to new user: ' . $e->getMessage());
         }
 
         // Optionally email credentials here (omitted)
@@ -639,7 +635,7 @@ class AdminController extends Controller
         try {
             $user->sendEmailVerificationNotification();
         } catch (\Throwable $e) {
-            \Log::error('Failed to send verification email to new provider user: '.$e->getMessage());
+            Log::error('Failed to send verification email to new provider user: ' . $e->getMessage());
         }
 
         // Normalize response similar to providers listing
@@ -688,9 +684,9 @@ class AdminController extends Controller
     public function listings(Request $request)
     {
         $query = Listing::with([
-            'user.individualUser', 
-            'user.companyUser', 
-            'itineraries', 
+            'user.individualUser',
+            'user.companyUser',
+            'itineraries',
             'specialAddons',
             'packages',
             'periods'
@@ -701,8 +697,8 @@ class AdminController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('listing_title', 'like', "%{$search}%")
-                  ->orWhere('listing_description', 'like', "%{$search}%")
-                  ->orWhere('listing_type', 'like', "%{$search}%");
+                    ->orWhere('listing_description', 'like', "%{$search}%")
+                    ->orWhere('listing_type', 'like', "%{$search}%");
             });
         }
 
@@ -727,9 +723,9 @@ class AdminController extends Controller
     public function listing($id)
     {
         $listing = Listing::with([
-            'user.individualUser', 
-            'user.companyUser', 
-            'itineraries', 
+            'user.individualUser',
+            'user.companyUser',
+            'itineraries',
             'specialAddons'
         ])->findOrFail($id);
         return response()->json($listing);
@@ -742,9 +738,9 @@ class AdminController extends Controller
     {
         try {
             Log::info('Update listing request data:', $request->all());
-            
+
             $listing = Listing::findOrFail($id);
-            
+
             $validatedData = $request->validate([
                 'listing_title' => 'nullable|string|max:255',
                 'listing_description' => 'nullable|string',
@@ -772,11 +768,11 @@ class AdminController extends Controller
                 'status' => 'nullable|string|in:submitted,approved,live,denied,edit_review,other_events,inactive,draft,published,archived',
                 'terms_accepted' => 'nullable|boolean',
             ]);
-            
+
             Log::info('Listing validated data:', $validatedData);
 
             // Filter out null/empty values and update only provided fields
-            $updateData = array_filter($validatedData, function($value) {
+            $updateData = array_filter($validatedData, function ($value) {
                 return $value !== null && $value !== '';
             });
 
@@ -786,9 +782,9 @@ class AdminController extends Controller
                     $updateData[$jsonField] = json_encode($updateData[$jsonField]);
                 }
             }
-            
+
             Log::info('Listing filtered update data:', $updateData);
-            
+
             // Track old status for notification decision
             $oldStatus = $listing->status;
             $listing->update($updateData);
@@ -798,24 +794,23 @@ class AdminController extends Controller
                 try {
                     // Notify the listing owner about status change
                     $newStatus = $listing->status;
-                    if ($newStatus !== $oldStatus && in_array($newStatus, ['submitted','approved','live','denied','edit_review','other_events','inactive'])) {
+                    if ($newStatus !== $oldStatus && in_array($newStatus, ['submitted', 'approved', 'live', 'denied', 'edit_review', 'other_events', 'inactive'])) {
                         // Send immediately so emails are delivered even if queue worker is down
                         $listing->user->notifyNow(new \App\Notifications\ListingStatusUpdated($newStatus, $listing->listing_title));
                     }
                 } catch (\Throwable $e) {
-                    Log::error('Failed sending listing status notification: '.$e->getMessage());
+                    Log::error('Failed sending listing status notification: ' . $e->getMessage());
                 }
             }
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Listing updated successfully',
                 'data' => $listing
             ]);
-
         } catch (\Exception $e) {
             Log::error('Error updating listing: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to update listing',
@@ -837,10 +832,9 @@ class AdminController extends Controller
                 'success' => true,
                 'message' => 'Listing deleted successfully'
             ]);
-
         } catch (\Exception $e) {
             Log::error('Error deleting listing: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to delete listing',
@@ -867,4 +861,168 @@ class AdminController extends Controller
 
         return response()->json($stats);
     }
-} 
+
+    /**
+     * Update listing itineraries
+     */
+    public function updateListingItineraries(Request $request, $id)
+    {
+        try {
+            $listing = Listing::findOrFail($id);
+
+            $validatedData = $request->validate([
+                'itineraries' => 'required|array',
+                'itineraries.*.day_title' => 'required|string|max:255',
+                'itineraries.*.day_date' => 'nullable|date',
+                'itineraries.*.day_duration' => 'nullable|string|max:255',
+                'itineraries.*.day_location' => 'nullable|string|max:255',
+                'itineraries.*.day_accommodation' => 'nullable|string|max:255',
+                'itineraries.*.day_description' => 'nullable|string',
+                'itineraries.*.day_activities' => 'nullable|string',
+            ]);
+
+            // Delete existing itineraries
+            $listing->itineraries()->delete();
+
+            // Create new itineraries
+            foreach ($validatedData['itineraries'] as $itineraryData) {
+                $listing->itineraries()->create($itineraryData);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Itineraries updated successfully',
+                'data' => $listing->load('itineraries')
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error updating listing itineraries: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update itineraries',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Update listing special addons
+     */
+    public function updateListingSpecialAddons(Request $request, $id)
+    {
+        try {
+            $listing = Listing::findOrFail($id);
+
+            $validatedData = $request->validate([
+                'special_addons' => 'required|array',
+                'special_addons.*.addon_name' => 'required|string|max:255',
+                'special_addons.*.addon_price' => 'nullable|numeric|min:0',
+                'special_addons.*.addon_type' => 'nullable|string|max:255',
+                'special_addons.*.addon_duration' => 'nullable|string|max:255',
+                'special_addons.*.addon_capacity' => 'nullable|integer|min:1',
+                'special_addons.*.addon_description' => 'nullable|string',
+            ]);
+
+            // Delete existing special addons
+            $listing->specialAddons()->delete();
+
+            // Create new special addons
+            foreach ($validatedData['special_addons'] as $addonData) {
+                $listing->specialAddons()->create($addonData);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Special addons updated successfully',
+                'data' => $listing->load('specialAddons')
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error updating listing special addons: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update special addons',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Update listing packages
+     */
+    public function updateListingPackages(Request $request, $id)
+    {
+        try {
+            $listing = Listing::findOrFail($id);
+
+            $validatedData = $request->validate([
+                'packages' => 'required|array',
+                'packages.*.title' => 'required|string|max:255',
+                'packages.*.price' => 'nullable|numeric|min:0',
+                'packages.*.duration' => 'nullable|string|max:255',
+                'packages.*.capacity' => 'nullable|integer|min:1',
+                'packages.*.description' => 'nullable|string',
+            ]);
+
+            // For now, we'll store packages as JSON in the listing table
+            // You can create a separate packages table if needed
+            $listing->update([
+                'packages' => json_encode($validatedData['packages'])
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Packages updated successfully',
+                'data' => $listing
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error updating listing packages: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update packages',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Update listing periods
+     */
+    public function updateListingPeriods(Request $request, $id)
+    {
+        try {
+            $listing = Listing::findOrFail($id);
+
+            $validatedData = $request->validate([
+                'periods' => 'required|array',
+                'periods.*.title' => 'required|string|max:255',
+                'periods.*.start_date' => 'nullable|date',
+                'periods.*.end_date' => 'nullable|date',
+                'periods.*.price' => 'nullable|numeric|min:0',
+                'periods.*.capacity' => 'nullable|integer|min:1',
+                'periods.*.description' => 'nullable|string',
+            ]);
+
+            // For now, we'll store periods as JSON in the listing table
+            // You can create a separate periods table if needed
+            $listing->update([
+                'periods' => json_encode($validatedData['periods'])
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Periods updated successfully',
+                'data' => $listing
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error updating listing periods: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update periods',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+}

@@ -29,7 +29,7 @@ use App\Http\Middleware\AdminMiddleware;
 
 // Apply API middleware to all routes
 Route::middleware([ApiMiddleware::class])->group(function () {
-    
+
     // Test route to verify API is working
     Route::get('/test', function () {
         return response()->json(['message' => 'API is working!']);
@@ -87,7 +87,7 @@ Route::middleware([ApiMiddleware::class])->group(function () {
         Route::get('/{userType}/{userId}/linkedin', [\App\Http\Controllers\Api\UserVerificationController::class, 'startLinkedinOAuth']);
         Route::post('/{userType}/{userId}/linkedin/verify', [\App\Http\Controllers\Api\UserVerificationController::class, 'verifyLinkedinCode']);
         Route::post('/{userType}/{userId}/profile', [\App\Http\Controllers\Api\UserVerificationController::class, 'completeProfile']);
-        
+
         // New routes for current user (without individual/company dependency)
         Route::get('/user/{userId}', [\App\Http\Controllers\Api\UserVerificationController::class, 'showForCurrentUser']);
         Route::post('/user/{userId}/email', [\App\Http\Controllers\Api\UserVerificationController::class, 'sendEmailVerificationForCurrentUser']);
@@ -143,6 +143,10 @@ Route::middleware([ApiMiddleware::class])->group(function () {
         Route::get('/listings/{id}', [AdminController::class, 'listing']);
         Route::put('/listings/{id}', [AdminController::class, 'updateListing']);
         Route::delete('/listings/{id}', [AdminController::class, 'deleteListing']);
+        Route::put('/listings/{id}/itineraries', [AdminController::class, 'updateListingItineraries']);
+        Route::put('/listings/{id}/special-addons', [AdminController::class, 'updateListingSpecialAddons']);
+        Route::put('/listings/{id}/packages', [AdminController::class, 'updateListingPackages']);
+        Route::put('/listings/{id}/periods', [AdminController::class, 'updateListingPeriods']);
         Route::get('/statistics', [AdminController::class, 'statistics']);
     });
 
